@@ -1,0 +1,32 @@
+program: opv_LR.py
+method: bayes
+metric:
+  name: val_loss
+  goal: minimize
+parameters:
+  learning_rate:
+    values:
+      - 0.00001
+      - 0.0001
+      - 0.001
+  optimizer:
+    values: ["adam", "sgd"]
+  n_embedding:
+    values:
+      - 32
+      - 64
+      - 128
+      - 256
+  n_hidden:
+    values:
+      - 32
+      - 64
+      - 128
+      - 256
+  max_epochs:
+    value: 25
+  drop_prob:
+    values:
+      - 0.1
+      - 0.2
+      - 0.3
