@@ -3,8 +3,8 @@ from rdkit import Chem
 from rdkit.Chem.rdmolops import ReplaceSubstructs
 import csv
 
-ACC_PATH = pkg_resources.resource_filename("opv_ml", "min_acceptors_smiles.txt")
-CSV_PATH = pkg_resources.resource_filename("opv_ml", "min_acceptors_smiles.csv")
+ACC_PATH = pkg_resources.resource_filename("ml_for_opvs", "min_acceptors_smiles.txt")
+CSV_PATH = pkg_resources.resource_filename("ml_for_opvs", "min_acceptors_smiles.csv")
 
 # NOTE: Need to access masters file and get corresponding SMILES and Label in a .csv file
 # Label | SMILES | SMILES (w/ substituted R) | BigSMILES | SELFIES | PCE

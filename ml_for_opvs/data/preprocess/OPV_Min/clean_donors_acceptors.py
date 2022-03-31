@@ -9,33 +9,35 @@ import pandas as pd
 pd.set_option("display.max_columns", 20)
 
 MASTER_DONOR_CSV = pkg_resources.resource_filename(
-    "opv_ml", "data/preprocess/OPV_Min/min_donors_smiles_master_EDITED.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/min_donors_smiles_master_EDITED.csv"
 )
 MASTER_ACCEPTOR_CSV = pkg_resources.resource_filename(
-    "opv_ml", "data/preprocess/OPV_Min/min_acceptors_smiles_master_EDITED.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/min_acceptors_smiles_master_EDITED.csv"
 )
 
 CLEAN_DONOR_CSV = pkg_resources.resource_filename(
-    "opv_ml", "data/preprocess/OPV_Min/clean_min_donors.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_donors.csv"
 )
 # _PBDTTz (optional) but is manually deleted
 CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
-    "opv_ml", "data/preprocess/OPV_Min/clean_min_acceptors.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_acceptors.csv"
 )
 
 # From OPV Google Drive
 OPV_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/Machine Learning OPV Parameters - data_from_min.csv"
+    "ml_for_opvs",
+    "data/process/OPV_Min/Machine Learning OPV Parameters - data_from_min.csv",
 )
 OPV_DONOR_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/Machine Learning OPV Parameters - Donors.csv"
+    "ml_for_opvs", "data/process/OPV_Min/Machine Learning OPV Parameters - Donors.csv"
 )
 OPV_ACCEPTOR_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/Machine Learning OPV Parameters - Acceptors.csv"
+    "ml_for_opvs",
+    "data/process/OPV_Min/Machine Learning OPV Parameters - Acceptors.csv",
 )
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/master_opv_ml_from_min.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 

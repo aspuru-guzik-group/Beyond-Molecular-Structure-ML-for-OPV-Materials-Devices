@@ -8,59 +8,59 @@ import pandas as pd
 import torch
 from sklearn.metrics import mean_squared_error
 
-from opv_ml.ML_models.pytorch.data.OPV_Min.tokenizer import Tokenizer
-from opv_ml.ML_models.pytorch.NN.OPV_Min.opv_NN import NNModel
-from opv_ml.ML_models.pytorch.LSTM.OPV_Min.opv_LSTM import LSTMModel
+from ml_for_opvs.ML_models.pytorch.data.OPV_Min.tokenizer import Tokenizer
+from ml_for_opvs.ML_models.pytorch.NN.OPV_Min.opv_NN import NNModel
+from ml_for_opvs.ML_models.pytorch.LSTM.OPV_Min.opv_LSTM import LSTMModel
 
-from opv_ml.ML_models.pytorch.data.OPV_Min.data import OPVDataModule
+from ml_for_opvs.ML_models.pytorch.data.OPV_Min.data import OPVDataModule
 
 import os
 
-from opv_ml.ML_models.pytorch.Transformer.opv_chembert import (
+from ml_for_opvs.ML_models.pytorch.Transformer.opv_chembert import (
     TransformerModel as TFModel,
 )
-from opv_ml.ML_models.pytorch.Transformer.opv_chembert_linear import (
+from ml_for_opvs.ML_models.pytorch.Transformer.opv_chembert_linear import (
     TransformerModel as TFModelLinear,
 )
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
 DATA_DIR = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/master_opv_ml_from_min.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
-PREDICTION_PATH = pkg_resources.resource_filename("opv_ml", "data/predictions/",)
+PREDICTION_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/predictions/",)
 
 MODEL_CHECKPOINT = pkg_resources.resource_filename(
-    "opv_ml", "model_checkpoints/OPV_Min"
+    "ml_for_opvs", "model_checkpoints/OPV_Min"
 )
 
 CHEMBERT_TOKENIZER = pkg_resources.resource_filename(
-    "opv_ml", "ML_models/pytorch/Transformer/tokenizer_chembert/"
+    "ml_for_opvs", "ML_models/pytorch/Transformer/tokenizer_chembert/"
 )
 
 CHEMBERT = pkg_resources.resource_filename(
-    "opv_ml", "ML_models/pytorch/Transformer/chembert/"
+    "ml_for_opvs", "ML_models/pytorch/Transformer/chembert/"
 )
 
 SEED_VAL = 4

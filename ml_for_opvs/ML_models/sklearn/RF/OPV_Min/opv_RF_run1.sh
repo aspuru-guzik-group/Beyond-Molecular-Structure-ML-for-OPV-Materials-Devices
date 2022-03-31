@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=00:30:00
-#SBATCH --output=/project/6025683/stanlo/opv_ml/opv_ml/ML_models/sklearn/RF/OPV_Min/slurm.out
-#SBATCH --error=/project/6025683/stanlo/opv_ml/opv_ml/ML_models/sklearn/RF/OPV_Min/slurm.err
+#SBATCH --output=/project/6025683/stanlo/ml_for_opvs/ml_for_opvs/ML_models/sklearn/RF/OPV_Min/slurm.out
+#SBATCH --error=/project/6025683/stanlo/ml_for_opvs/ml_for_opvs/ML_models/sklearn/RF/OPV_Min/slurm.err
 #SBATCH --account=def-aspuru
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=48

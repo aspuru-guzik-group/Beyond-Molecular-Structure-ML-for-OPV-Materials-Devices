@@ -3,15 +3,15 @@ import pkg_resources
 import pandas as pd
 
 CLEAN_DONOR_CSV = pkg_resources.resource_filename(
-    "opv_ml", "data/preprocess/OPV_Min/clean_min_donors.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_donors.csv"
 )
 
 CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
-    "opv_ml", "data/preprocess/OPV_Min/clean_min_acceptors.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_acceptors.csv"
 )
 
 CATALYSIS_MASTER = pkg_resources.resource_filename(
-    "opv_ml", "data/process/Catalysis_Hein/catalysis_master.csv"
+    "ml_for_opvs", "data/process/Catalysis_Hein/catalysis_master.csv"
 )
 
 

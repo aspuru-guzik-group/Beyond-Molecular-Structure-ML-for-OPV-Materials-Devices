@@ -16,21 +16,21 @@ import ast
 pd.set_option("display.max_colwidth", None)
 
 MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/master_opv_ml_from_min.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
-IMAGE_PATH = pkg_resources.resource_filename("opv_ml", "data/postprocess/OPV_Min/")
+IMAGE_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/postprocess/OPV_Min/")
 
 FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/frag_master_opv_ml_from_min.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/frag_master_ml_for_opvs_from_min.csv"
 )
 
 NUM_FRAG_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/num_of_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/num_of_frag.csv"
 )
 
 TRAIN_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/train_frag_master.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/train_frag_master.csv"
 )
 
 
@@ -153,7 +153,7 @@ class Fragger:
             data_aug_bool: boolean for augmenting donor polymers
         
         Returns:
-            frag_master_opv_ml.csv: New column with list of fragments, sorted into categories, and (optionally) augmented.
+            frag_master_ml_for_opvs.csv: New column with list of fragments, sorted into categories, and (optionally) augmented.
             Dictionary containing all unique fragments with number of occurrences in the dataset.
         """
         donor_dict = {}
@@ -487,7 +487,7 @@ class Fragger:
             num_of_frag_data: distribution of fragments per molecule
         
         Returns:
-            frag_master_opv_ml.csv: New column with list of fragments, sorted into categories.
+            frag_master_ml_for_opvs.csv: New column with list of fragments, sorted into categories.
             Dictionary containing all unique fragments with number of occurrences in the dataset.
         """
         acceptor_dict = {}  # tracks unique acceptor fragments

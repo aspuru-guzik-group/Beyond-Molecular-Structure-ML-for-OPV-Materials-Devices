@@ -5,14 +5,14 @@ import pkg_resources
 import random
 from rdkit import Chem
 
-from opv_ml.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
+from ml_for_opvs.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
 
 MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/master_opv_ml_from_min.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/augmentation/train_aug_master5.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 
@@ -183,9 +183,9 @@ class Augment:
         aug_smi_data.to_csv(train_aug_data, index=False)
 
 
-# augmenter = Augment(MASTER_DATA)
-# augmenter.aug_smi_doRandom(AUGMENT_SMILES_DATA, 4)
-# augmenter.aug_smi_tokenize(AUGMENT_SMILES_DATA)
+augmenter = Augment(MASTER_DATA)
+augmenter.aug_smi_doRandom(AUGMENT_SMILES_DATA, 4)
+augmenter.aug_smi_tokenize(AUGMENT_SMILES_DATA)
 
 # from rdkit.Chem import Descriptors
 
@@ -197,6 +197,6 @@ class Augment:
 #     )
 # )
 
-thiophene = Chem.MolFromSmiles("c1cccs1")
-for i in range(5):
-    print(Chem.MolToSmiles(thiophene, doRandom=True))
+# thiophene = Chem.MolFromSmiles("c1cccs1")
+# for i in range(5):
+#     print(Chem.MolToSmiles(thiophene, doRandom=True))

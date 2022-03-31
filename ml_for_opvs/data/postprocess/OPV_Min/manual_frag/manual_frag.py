@@ -9,38 +9,39 @@ from collections import deque
 from IPython.display import display
 
 DONOR_DIR = pkg_resources.resource_filename(
-    "opv_ml", "data/preprocess/OPV_Min/clean_min_donors_PBDTTz.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_donors_PBDTTz.csv"
 )
 
 ACCEPTOR_DIR = pkg_resources.resource_filename(
-    "opv_ml", "data/preprocess/OPV_Min/clean_min_acceptors.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_acceptors.csv"
 )
 
-IMG_PATH = pkg_resources.resource_filename("opv_ml", "data/OPV_Min/manual_frag/")
+IMG_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/OPV_Min/manual_frag/")
 
 FRAG_DONOR_DIR = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/OPV_Min/donor_frags.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/OPV_Min/donor_frags.csv"
 )
 
 FRAG_ACCEPTOR_DIR = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
 )
 
 # For Manual Fragments!
 MANUAL_DONOR_CSV = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
 )
 
 MANUAL_ACCEPTOR_CSV = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
 )
 
 MASTER_MANUAL_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 OPV_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/Machine Learning OPV Parameters - data_from_min.csv"
+    "ml_for_opvs",
+    "data/process/OPV_Min/Machine Learning OPV Parameters - data_from_min.csv",
 )
 
 

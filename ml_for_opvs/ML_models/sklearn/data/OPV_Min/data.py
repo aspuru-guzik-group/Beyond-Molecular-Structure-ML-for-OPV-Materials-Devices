@@ -10,26 +10,26 @@ import torch
 from torch.utils.data import random_split
 
 TRAIN_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
 )
 
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
-from opv_ml.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
+from ml_for_opvs.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
 
 
 class Dataset:

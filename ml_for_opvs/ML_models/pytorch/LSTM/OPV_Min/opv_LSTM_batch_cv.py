@@ -17,7 +17,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.core.saving import save_hparams_to_yaml
 from torch.utils import data
 
-from opv_ml.ML_models.pytorch.data.OPV_Min.data_cv import OPVDataModule
+from ml_for_opvs.ML_models.pytorch.data.OPV_Min.data_cv import OPVDataModule
 
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
@@ -25,38 +25,40 @@ from numpy import mean
 from numpy import std
 
 DATA_DIR = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/master_opv_ml_from_min.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/train_frag_master.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/train_frag_master.csv"
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 CHECKPOINT_DIR = pkg_resources.resource_filename(
-    "opv_ml", "model_checkpoints/OPV_Min/LSTM"
+    "ml_for_opvs", "model_checkpoints/OPV_Min/LSTM"
 )
 
 SUMMARY_DIR = pkg_resources.resource_filename(
-    "opv_ml", "ML_models/pytorch/LSTM/OPV_Min/opv_LSTM_batch_cv.csv"
+    "ml_for_opvs", "ML_models/pytorch/LSTM/OPV_Min/opv_LSTM_batch_cv.csv"
 )
 
-CHECKPOINT_DIR = pkg_resources.resource_filename("opv_ml", "model_checkpoints/LSTM")
+CHECKPOINT_DIR = pkg_resources.resource_filename(
+    "ml_for_opvs", "model_checkpoints/LSTM"
+)
 
 os.environ["WANDB_API_KEY"] = "95f67c3932649ca21ac76df3f88139dafacd965d"
 os.environ["WANDB_MODE"] = "offline"

@@ -6,15 +6,15 @@ import pandas as pd
 import numpy as np
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/master_opv_ml_from_min.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 FP_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 FP_DATA_PKL = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.pkl"
+    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.pkl"
 )
 
 np.set_printoptions(threshold=np.inf)

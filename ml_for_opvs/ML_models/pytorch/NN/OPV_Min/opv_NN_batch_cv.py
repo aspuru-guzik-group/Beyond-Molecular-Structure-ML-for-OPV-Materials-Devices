@@ -15,7 +15,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch import nn
 from torch.optim import SGD, Adam
-from opv_ml.ML_models.pytorch.data.OPV_Min.data_cv import OPVDataModule
+from ml_for_opvs.ML_models.pytorch.data.OPV_Min.data_cv import OPVDataModule
 from pytorch_lightning import callbacks
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.core.saving import save_hparams_to_yaml
@@ -36,35 +36,35 @@ os.environ["WANDB_MODE"] = "offline"
 
 
 DATA_DIR = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/master_opv_ml_from_min.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/train_frag_master.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/train_frag_master.csv"
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 CHECKPOINT_DIR = pkg_resources.resource_filename(
-    "opv_ml", "model_checkpoints/OPV_Min/NN"
+    "ml_for_opvs", "model_checkpoints/OPV_Min/NN"
 )
 
 SUMMARY_DIR = pkg_resources.resource_filename(
-    "opv_ml", "ML_models/pytorch/NN/OPV_Min/opv_NN_batch_cv_results.csv"
+    "ml_for_opvs", "ML_models/pytorch/NN/OPV_Min/opv_NN_batch_cv_results.csv"
 )
 
 SEED_VAL = 4

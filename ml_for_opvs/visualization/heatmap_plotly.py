@@ -3,10 +3,9 @@ import plotly.express as px
 import pkg_resources
 import pandas as pd
 import copy
-import plotly.io as pio
 
 OPV_ANALYSIS = pkg_resources.resource_filename(
-    "opv_ml", "visualization/opv_analysis_master.csv"
+    "ml_for_opvs", "visualization/opv_analysis_master.csv"
 )
 
 
@@ -26,7 +25,7 @@ for index, row in opv_results.iterrows():
         r_std = []
         rmse = []
         rmse_std = []
-        for i in range(len(results) - 1):
+        for i in range(len(results)):
             if result_idx == 0:
                 r.append(round(float(results[i]), 3))
             elif result_idx == 1:
@@ -43,28 +42,29 @@ for index, row in opv_results.iterrows():
         data_rmse_std.append(rmse_std)
     row_count += 1
 
+print(data_rmse)
+print(data_rmse_std)
+
 # create z_text which has the std error labels in ()
 outer_idx = 0
-z_text = copy.deepcopy(data_r)
-while outer_idx < len(data_r):
+z_text = copy.deepcopy(data_rmse)
+while outer_idx < len(data_rmse):
     inner_idx = 0
-    while inner_idx < len(data_r[outer_idx]):
+    while inner_idx < len(data_rmse[outer_idx]):
         z_text[outer_idx][inner_idx] = (
-            str(data_r[outer_idx][inner_idx])
+            str(data_rmse[outer_idx][inner_idx])
             + "<br>"
             + "("
-            + str(data_r_std[outer_idx][inner_idx])
+            + str(data_rmse_std[outer_idx][inner_idx])
             + ")"
         )
         inner_idx += 1
     outer_idx += 1
 
-print(data_r)
-
 fig = px.imshow(
-    data_r,
+    data_rmse,
     labels=dict(
-        x="Data Representation", y="ML/DL Model", color="Correlation Coefficient (R)"
+        x="Data Representation", y="ML/DL Model", color="Root Mean Squared Error (RMSE)"
     ),
     x=[
         "SMILES (n=386)",
@@ -86,7 +86,7 @@ fig = px.imshow(
         "Long-Short-Term Memory (LSTM, cv=5)",
     ],
     text_auto=True,
-    color_continuous_scale="RdYlGn",
+    color_continuous_scale="RdYlGn_r",
     aspect="auto",
 )
 fig.update_traces(

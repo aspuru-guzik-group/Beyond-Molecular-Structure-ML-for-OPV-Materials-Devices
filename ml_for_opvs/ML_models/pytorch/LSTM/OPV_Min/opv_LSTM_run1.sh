@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=00:60:00
-#SBATCH --output=/project/6025683/stanlo/opv_ml/opv_ml/ML_models/pytorch/LSTM/slurm.out
-#SBATCH --error=/project/6025683/stanlo/opv_ml/opv_ml/ML_models/pytorch/LSTM/slurm.err
+#SBATCH --output=/project/6025683/stanlo/ml_for_opvs/ml_for_opvs/ML_models/pytorch/LSTM/slurm.out
+#SBATCH --error=/project/6025683/stanlo/ml_for_opvs/ml_for_opvs/ML_models/pytorch/LSTM/slurm.err
 #SBATCH --account=def-aspuru
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:2

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 import pkg_resources
 import pytorch_lightning as pl
-from opv_ml.ML_models.pytorch.data.OPV_Min.tokenizer import Tokenizer
+from ml_for_opvs.ML_models.pytorch.data.OPV_Min.tokenizer import Tokenizer
 import torch
 from torch.utils.data import DataLoader, Dataset, random_split
 import selfies as sf
@@ -20,39 +20,31 @@ import selfies as sf
 from transformers import AutoTokenizer
 
 DATA_DIR = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/master_opv_ml_from_min.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
-)
-
-CHEMBERT_TOKENIZER = pkg_resources.resource_filename(
-    "opv_ml", "ML_models/pytorch/Transformer/tokenizer_chembert/"
-)
-
-CHEMBERT = pkg_resources.resource_filename(
-    "opv_ml", "ML_models/pytorch/Transformer/chembert/"
+    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 TROUBLESHOOT = pkg_resources.resource_filename(
-    "opv_ml", "ML_models/pytorch/Transformer/"
+    "ml_for_opvs", "ML_models/pytorch/Transformer/"
 )
 
 SEED_VAL = 4
@@ -598,44 +590,44 @@ def distribution_plot(data_dir):
 # chembert_model = CHEMBERT
 # chembert_tokenizer = CHEMBERT_TOKENIZER
 
-# unique_datatype = {
-#     "smiles": 0,
-#     "selfies": 0,
-#     "aug_smiles": 1,
-#     "hw_frag": 0,
-#     "aug_hw_frag": 0,
-#     "brics": 0,
-#     "manual": 0,
-#     "aug_manual": 0,
-#     "fingerprint": 0,
-# }
+unique_datatype = {
+    "smiles": 0,
+    "selfies": 0,
+    "aug_smiles": 0,
+    "hw_frag": 0,
+    "aug_hw_frag": 0,
+    "brics": 0,
+    "manual": 0,
+    "aug_manual": 1,
+    "fingerprint": 0,
+}
 
-# shuffled = False
+shuffled = False
 
-# data_module = OPVDataModule(
-#     train_batch_size=128,
-#     val_batch_size=32,
-#     test_batch_size=32,
-#     num_workers=4,
-#     smiles=unique_datatype["smiles"],
-#     selfies=unique_datatype["selfies"],
-#     aug_smiles=unique_datatype["aug_smiles"],
-#     hw_frag=unique_datatype["hw_frag"],
-#     aug_hw_frag=unique_datatype["aug_hw_frag"],
-#     brics=unique_datatype["brics"],
-#     manual=unique_datatype["manual"],
-#     aug_manual=unique_datatype["aug_manual"],
-#     fingerprint=unique_datatype["fingerprint"],
-#     fp_radius=3,
-#     fp_nbits=512,
-#     pt_model=None,
-#     pt_tokenizer=None,
-#     shuffled=shuffled,
-#     seed_val=SEED_VAL,
-# )
-# data_module.setup()
-# data_module.prepare_data()
-# print("TRAINING SIZE: ", len(data_module.pce_train.dataset))
+data_module = OPVDataModule(
+    train_batch_size=128,
+    val_batch_size=32,
+    test_batch_size=32,
+    num_workers=4,
+    smiles=unique_datatype["smiles"],
+    selfies=unique_datatype["selfies"],
+    aug_smiles=unique_datatype["aug_smiles"],
+    hw_frag=unique_datatype["hw_frag"],
+    aug_hw_frag=unique_datatype["aug_hw_frag"],
+    brics=unique_datatype["brics"],
+    manual=unique_datatype["manual"],
+    aug_manual=unique_datatype["aug_manual"],
+    fingerprint=unique_datatype["fingerprint"],
+    fp_radius=3,
+    fp_nbits=512,
+    pt_model=None,
+    pt_tokenizer=None,
+    shuffled=shuffled,
+    seed_val=SEED_VAL,
+)
+data_module.setup()
+data_module.prepare_data()
+print("TRAINING SIZE: ", len(data_module.pce_train.dataset))
 # test_idx = list(data_module.pce_test.indices)
 # print(test_idx)
 # print(data_module.pce_array[test_idx])

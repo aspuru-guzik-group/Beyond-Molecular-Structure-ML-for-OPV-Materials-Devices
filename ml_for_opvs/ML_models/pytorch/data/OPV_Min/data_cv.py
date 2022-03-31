@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 import pkg_resources
 import pytorch_lightning as pl
-from opv_ml.ML_models.pytorch.data.OPV_Min.tokenizer import Tokenizer
+from ml_for_opvs.ML_models.pytorch.data.OPV_Min.tokenizer import Tokenizer
 import torch
 from torch.utils.data import DataLoader, Dataset, Subset, random_split
 import selfies as sf
@@ -24,39 +24,39 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
 
 DATA_DIR = pkg_resources.resource_filename(
-    "opv_ml", "data/process/OPV_Min/master_opv_ml_from_min.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 CHEMBERT_TOKENIZER = pkg_resources.resource_filename(
-    "opv_ml", "ML_models/pytorch/Transformer/tokenizer_chembert/"
+    "ml_for_opvs", "ML_models/pytorch/Transformer/tokenizer_chembert/"
 )
 
 CHEMBERT = pkg_resources.resource_filename(
-    "opv_ml", "ML_models/pytorch/Transformer/chembert/"
+    "ml_for_opvs", "ML_models/pytorch/Transformer/chembert/"
 )
 
 TROUBLESHOOT = pkg_resources.resource_filename(
-    "opv_ml", "ML_models/pytorch/Transformer/"
+    "ml_for_opvs", "ML_models/pytorch/Transformer/"
 )
 
 SEED_VAL = 4

@@ -12,7 +12,7 @@ import pandas as pd
 from numpy import mean
 from numpy import std
 import matplotlib.pyplot as plt
-from opv_ml.ML_models.sklearn.data.OPV_Min.data import Dataset
+from ml_for_opvs.ML_models.sklearn.data.OPV_Min.data import Dataset
 
 # sklearn
 from scipy.sparse.construct import random
@@ -22,26 +22,26 @@ from sklearn.metrics import make_scorer
 from sklearn.svm import SVR
 from sklearn.metrics import mean_squared_error
 
-from opv_ml.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
+from ml_for_opvs.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
 
 TRAIN_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
 )
 
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 
