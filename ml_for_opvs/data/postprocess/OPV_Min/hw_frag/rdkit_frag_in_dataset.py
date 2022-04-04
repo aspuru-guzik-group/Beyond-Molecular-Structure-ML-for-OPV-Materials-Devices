@@ -811,6 +811,8 @@ class Fragger:
         print("VOCAB LENGTH: ", len(unique_token_dict.keys()))
         frag_df = pd.read_csv(frag_data)
 
+        print(unique_token_dict)
+
         # create new dataframe for training only
         column_names = [
             "Donor",

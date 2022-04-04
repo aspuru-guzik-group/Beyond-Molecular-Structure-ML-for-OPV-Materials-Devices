@@ -196,115 +196,115 @@ if shuffled:
     datatype += "_SHUFFLED"
 
 # outer cv gives different training and testing sets for inner cv
-cv_outer = KFold(n_splits=5, shuffle=True, random_state=0)
-outer_corr_coef = list()
-outer_rmse = list()
+# cv_outer = KFold(n_splits=5, shuffle=True, random_state=0)
+# outer_corr_coef = list()
+# outer_rmse = list()
 
-for train_ix, test_ix in cv_outer.split(x):
-    # split data
-    x_train, x_test = x[train_ix], x[test_ix]
-    y_train, y_test = y[train_ix], y[test_ix]
-    if unique_datatype["aug_manual"] == 1 or unique_datatype["aug_hw_frag"] == 1:
-        # concatenate augmented data to x_train and y_train
-        print("AUGMENTED")
-        aug_x_train = list(copy.copy(x_train))
-        aug_y_train = list(copy.copy(y_train))
-        for x_, y_ in zip(x_train, y_train):
-            x_aug, y_aug = augment_donor_frags_in_loop(x_, y_)
-            aug_x_train.extend(x_aug)
-            aug_y_train.extend(y_aug)
+# for train_ix, test_ix in cv_outer.split(x):
+#     # split data
+#     x_train, x_test = x[train_ix], x[test_ix]
+#     y_train, y_test = y[train_ix], y[test_ix]
+#     if unique_datatype["aug_manual"] == 1 or unique_datatype["aug_hw_frag"] == 1:
+#         # concatenate augmented data to x_train and y_train
+#         print("AUGMENTED")
+#         aug_x_train = list(copy.copy(x_train))
+#         aug_y_train = list(copy.copy(y_train))
+#         for x_, y_ in zip(x_train, y_train):
+#             x_aug, y_aug = augment_donor_frags_in_loop(x_, y_)
+#             aug_x_train.extend(x_aug)
+#             aug_y_train.extend(y_aug)
 
-        x_train = np.array(aug_x_train)
-        y_train = np.array(aug_y_train)
-    # augment smiles data
-    elif unique_datatype["aug_smiles"] == 1:
-        aug_x_train = list(copy.copy(x_train))
-        aug_y_train = list(copy.copy(y_train))
-        for x_, y_ in zip(x_train, y_train):
-            x_aug, y_aug = augment_smi_in_loop(x_, y_, 15, True)
-            aug_x_train.extend(x_aug)
-            aug_y_train.extend(y_aug)
-        # tokenize Augmented SMILES
-        (
-            tokenized_input,
-            max_seq_length,
-            vocab_length,
-            input_dict,  # returns dictionary of vocab
-        ) = Tokenizer().tokenize_data(aug_x_train)
-        tokenized_test = Tokenizer().tokenize_from_dict(
-            x_test, max_seq_length, input_dict
-        )
-        x_test = np.array(tokenized_test)
-        x_train = np.array(tokenized_input)
-        y_train = np.array(aug_y_train)
+#         x_train = np.array(aug_x_train)
+#         y_train = np.array(aug_y_train)
+#     # augment smiles data
+#     elif unique_datatype["aug_smiles"] == 1:
+#         aug_x_train = list(copy.copy(x_train))
+#         aug_y_train = list(copy.copy(y_train))
+#         for x_, y_ in zip(x_train, y_train):
+#             x_aug, y_aug = augment_smi_in_loop(x_, y_, 15, True)
+#             aug_x_train.extend(x_aug)
+#             aug_y_train.extend(y_aug)
+#         # tokenize Augmented SMILES
+#         (
+#             tokenized_input,
+#             max_seq_length,
+#             vocab_length,
+#             input_dict,  # returns dictionary of vocab
+#         ) = Tokenizer().tokenize_data(aug_x_train)
+#         tokenized_test = Tokenizer().tokenize_from_dict(
+#             x_test, max_seq_length, input_dict
+#         )
+#         x_test = np.array(tokenized_test)
+#         x_train = np.array(tokenized_input)
+#         y_train = np.array(aug_y_train)
 
-    # configure the cross-validation procedure
-    # inner cv allows for finding best model w/ best params
-    cv_inner = KFold(n_splits=5, shuffle=True, random_state=1)
-    # define the model
-    model = RandomForestRegressor(
-        criterion="squared_error",
-        max_features="auto",
-        random_state=0,
-        bootstrap=True,
-        n_jobs=-1,
-    )
-    # define search space
-    space = dict()
-    space["n_estimators"] = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
-    space["min_samples_leaf"] = [1, 2, 3, 4, 5, 6]
-    space["min_samples_split"] = [2, 3, 4]
-    space["max_depth"] = (12, 20)
+#     # configure the cross-validation procedure
+#     # inner cv allows for finding best model w/ best params
+#     cv_inner = KFold(n_splits=5, shuffle=True, random_state=1)
+#     # define the model
+#     model = RandomForestRegressor(
+#         criterion="squared_error",
+#         max_features="auto",
+#         random_state=0,
+#         bootstrap=True,
+#         n_jobs=-1,
+#     )
+#     # define search space
+#     space = dict()
+#     space["n_estimators"] = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+#     space["min_samples_leaf"] = [1, 2, 3, 4, 5, 6]
+#     space["min_samples_split"] = [2, 3, 4]
+#     space["max_depth"] = (12, 20)
 
-    # define search
-    search = BayesSearchCV(
-        estimator=model,
-        search_spaces=space,
-        scoring=r_score,
-        cv=cv_inner,
-        refit=True,
-        n_jobs=-1,
-        verbose=0,
-        n_iter=25,
-    )
-    # define search
-    # search = GridSearchCV(
-    #     model, space, scoring=r_score, cv=cv_inner, refit=True, n_jobs=-1, verbose=1
-    # )
-    # execute search
-    result = search.fit(x_train, y_train)
-    # get the best performing model fit on the whole training set
-    best_model = result.best_estimator_
-    # get permutation importances of best performing model (overcomes bias toward high-cardinality (very unique) features)
+#     # define search
+#     search = BayesSearchCV(
+#         estimator=model,
+#         search_spaces=space,
+#         scoring=r_score,
+#         cv=cv_inner,
+#         refit=True,
+#         n_jobs=-1,
+#         verbose=0,
+#         n_iter=25,
+#     )
+#     # define search
+#     # search = GridSearchCV(
+#     #     model, space, scoring=r_score, cv=cv_inner, refit=True, n_jobs=-1, verbose=1
+#     # )
+#     # execute search
+#     result = search.fit(x_train, y_train)
+#     # get the best performing model fit on the whole training set
+#     best_model = result.best_estimator_
+#     # get permutation importances of best performing model (overcomes bias toward high-cardinality (very unique) features)
 
-    # get feature importances of best performing model
-    # importances = best_model.feature_importances_
-    # std = np.std([tree.feature_importances_ for tree in best_model.estimators_], axis=0)
-    # forest_importances = pd.Series(importances)
-    # fig, ax = plt.subplots()
-    # forest_importances.plot.bar(yerr=std, ax=ax)
-    # ax.set_title("Feature importances using MDI")
-    # ax.set_ylabel("Mean decrease in impurity")
-    # fig.tight_layout()
-    # plt.show()
+#     # get feature importances of best performing model
+#     # importances = best_model.feature_importances_
+#     # std = np.std([tree.feature_importances_ for tree in best_model.estimators_], axis=0)
+#     # forest_importances = pd.Series(importances)
+#     # fig, ax = plt.subplots()
+#     # forest_importances.plot.bar(yerr=std, ax=ax)
+#     # ax.set_title("Feature importances using MDI")
+#     # ax.set_ylabel("Mean decrease in impurity")
+#     # fig.tight_layout()
+#     # plt.show()
 
-    # evaluate model on the hold out dataset
-    yhat = best_model.predict(x_test)
-    # evaluate the model
-    corr_coef = np.corrcoef(y_test, yhat)[0, 1]
-    rmse = np.sqrt(mean_squared_error(y_test, yhat))
-    # store the result
-    outer_corr_coef.append(corr_coef)
-    outer_rmse.append(rmse)
-    # report progress (best training score)
-    print(
-        ">corr_coef=%.3f, est=%.3f, cfg=%s"
-        % (corr_coef, result.best_score_, result.best_params_)
-    )
+#     # evaluate model on the hold out dataset
+#     yhat = best_model.predict(x_test)
+#     # evaluate the model
+#     corr_coef = np.corrcoef(y_test, yhat)[0, 1]
+#     rmse = np.sqrt(mean_squared_error(y_test, yhat))
+#     # store the result
+#     outer_corr_coef.append(corr_coef)
+#     outer_rmse.append(rmse)
+#     # report progress (best training score)
+#     print(
+#         ">corr_coef=%.3f, est=%.3f, cfg=%s"
+#         % (corr_coef, result.best_score_, result.best_params_)
+#     )
 
-# summarize the estimated performance of the model
-print("R: %.3f (%.3f)" % (mean(outer_corr_coef), std(outer_corr_coef)))
-print("RMSE: %.3f (%.3f)" % (mean(outer_rmse), std(outer_rmse)))
+# # summarize the estimated performance of the model
+# print("R: %.3f (%.3f)" % (mean(outer_corr_coef), std(outer_corr_coef)))
+# print("RMSE: %.3f (%.3f)" % (mean(outer_rmse), std(outer_rmse)))
 
 # add R score from cross-validation results
 # ablation_df = pd.read_csv(ABLATION_STUDY)
@@ -320,8 +320,10 @@ print("RMSE: %.3f (%.3f)" % (mean(outer_rmse), std(outer_rmse)))
 # ablation_df.to_csv(ABLATION_STUDY, index=False)
 
 
-def parity_plot(y_test, yhat):
+def parity_plot(y_test, yhat, y_max):
     """Creates a parity plot for two column data (predicted data and ground truth data)"""
+    y_test = y_test * y_max
+    yhat = yhat * y_max
     # find slope and y-int of linear line of best fit
     m, b = np.polyfit(y_test, yhat, 1,)
     print(m, b)
@@ -345,7 +347,7 @@ def parity_plot(y_test, yhat):
             "R: " + str(round(corr_coef, 3)) + "  " + "RMSE: " + str(round(rmse, 3))
         ],
     )
-    ax.plot([0, 1], [0, 1], "--", color="blue", label="Perfect Correlation")
+    ax.plot([0, 13.85], [0, 13.85], "--", color="blue", label="Perfect Correlation")
     ax.legend(loc="upper left", fontsize=14)
     ax.tick_params(axis="both", which="major", labelsize=14)
     # add text box with slope and y-int
@@ -354,4 +356,91 @@ def parity_plot(y_test, yhat):
     plt.show()
 
 
-parity_plot(y_test, yhat)
+y_test = np.array(
+    [
+        0.3783,
+        0.7162,
+        0.7473,
+        0.5949,
+        0.7726,
+        0.4318,
+        0.4282,
+        0.6628,
+        0.8686,
+        0.7292,
+        0.7249,
+        0.2816,
+        0.5343,
+        0.7870,
+        0.8895,
+        0.0874,
+        0.7993,
+        0.9567,
+        0.7386,
+        0.7148,
+        0.5162,
+        0.8375,
+        0.6166,
+        0.6679,
+        0.6014,
+        0.8736,
+        0.5350,
+        0.8289,
+        0.8325,
+        0.7921,
+        0.7668,
+        0.6361,
+        0.6108,
+        0.3249,
+        0.2989,
+        0.5170,
+        0.7531,
+        0.3321,
+        0.6116,
+    ]
+)
+yhat = np.array(
+    [
+        0.4946,
+        1.0699,
+        1.2675,
+        1.0457,
+        1.2402,
+        0.7227,
+        0.4763,
+        0.4844,
+        0.4643,
+        0.6378,
+        0.0832,
+        0.2877,
+        0.1747,
+        0.7111,
+        0.2765,
+        0.2378,
+        1.0556,
+        0.9426,
+        -0.0923,
+        0.5631,
+        0.2580,
+        0.9701,
+        0.3987,
+        1.1318,
+        0.7172,
+        0.3820,
+        0.2995,
+        0.6930,
+        0.4399,
+        0.5250,
+        0.7777,
+        0.5967,
+        0.6089,
+        0.8823,
+        0.2887,
+        0.2890,
+        0.5778,
+        0.2486,
+        0.8367,
+    ]
+)
+
+parity_plot(y_test, yhat, 13.85)

@@ -6,18 +6,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 OPV_ANALYSIS = pkg_resources.resource_filename(
-    "opv_ml", "visualization/opv_analysis_master.csv"
+    "ml_for_opvs", "visualization/opv_analysis_master.csv"
 )
 
 opv_results = pd.read_csv(OPV_ANALYSIS)
 
+
 results_df = pd.DataFrame(
-    columns=["Model", "Representation", "result_type", "Correlation Coefficient (R)"]
+    columns=["Model", "Representation", "result_type", "Root Mean Squared Error (RMSE)"]
 )
 results_df["Model"] = ""
 results_df["Representation"] = ""
 results_df["result_type"] = ""
-results_df["Correlation Coefficient (R)"] = ""
+results_df["Root Mean Squared Error (RMSE)"] = ""
 
 
 representations = ""
@@ -35,7 +36,9 @@ for index, row in opv_results.iterrows():
                 data = row[column_count]
                 results_df.at[results_idx, "Model"] = model
                 results_df.at[results_idx, "Representation"] = column_rep
-                results_df.at[results_idx, "Correlation Coefficient (R)"] = float(data)
+                results_df.at[results_idx, "Root Mean Squared Error (RMSE)"] = float(
+                    data
+                )
                 if result_type_count == 0:
                     results_df.at[results_idx, "result_type"] = "R"
                 elif result_type_count == 1:
@@ -56,34 +59,34 @@ smi_df = results_df[results_df.Representation == "SMILES"]
 aug_smi_df = results_df[results_df.Representation == "Augmented SMILES"]
 
 results_smi_df = pd.concat([smi_df, aug_smi_df])
-results_smi_R_df = results_smi_df[results_smi_df.result_type == "R"]
-results_smi_R_std_df = results_smi_df[results_smi_df.result_type == "R_std"]
+results_smi_R_df = results_smi_df[results_smi_df.result_type == "RMSE"]
+results_smi_R_std_df = results_smi_df[results_smi_df.result_type == "RMSE_std"]
 
 # create Manual Frag vs. Augmented Manual Frag dataframe
 man_df = results_df[results_df.Representation == "Manual Fragments"]
 aug_man_df = results_df[results_df.Representation == "Augmented Manual Fragments"]
 
 results_man_df = pd.concat([man_df, aug_man_df])
-results_man_R_df = results_man_df[results_man_df.result_type == "R"]
-results_man_R_std_df = results_man_df[results_man_df.result_type == "R_std"]
+results_man_R_df = results_man_df[results_man_df.result_type == "RMSE"]
+results_man_R_std_df = results_man_df[results_man_df.result_type == "RMSE_std"]
 results_man_R_std_df = results_man_R_std_df.rename(
-    columns={"Correlation Coefficient (R)": "R_std"}
+    columns={"Root Mean Squared Error (RMSE)": "RMSE_std"}
 )
 
 new_man_df = pd.DataFrame(
-    columns=["Model", "Representation", "Correlation Coefficient (R)"]
+    columns=["Model", "Representation", "Root Mean Squared Error (RMSE)"]
 )
 new_man_df["Model"] = results_man_R_df["Model"]
 new_man_df["Representation"] = results_man_R_df["Representation"]
-new_man_df["Correlation Coefficient (R)"] = results_man_R_df[
-    "Correlation Coefficient (R)"
+new_man_df["Root Mean Squared Error (RMSE)"] = results_man_R_df[
+    "Root Mean Squared Error (RMSE)"
 ]
 
 # reset index of both dataframes
 new_man_df = new_man_df.reset_index()
 results_man_R_std_df = results_man_R_std_df.reset_index()
 
-new_man_df = new_man_df.join(results_man_R_std_df["R_std"])
+new_man_df = new_man_df.join(results_man_R_std_df["RMSE_std"])
 
 
 def grouped_barplot(df, cat, subcat, val, err):
@@ -110,7 +113,7 @@ def grouped_barplot(df, cat, subcat, val, err):
         )
     plt.xlabel(cat, fontsize=18)
     plt.ylabel(val, fontsize=18)
-    plt.ylim(top=0.8)
+    plt.ylim(top=0.6)
     plt.xticks(x, u, fontsize=14)
     plt.yticks(fontsize=14)
     plt.legend(fontsize=14)
@@ -118,6 +121,6 @@ def grouped_barplot(df, cat, subcat, val, err):
 
 
 grouped_barplot(
-    new_man_df, "Model", "Representation", "Correlation Coefficient (R)", "R_std"
+    new_man_df, "Model", "Representation", "Root Mean Squared Error (RMSE)", "RMSE_std"
 )
 

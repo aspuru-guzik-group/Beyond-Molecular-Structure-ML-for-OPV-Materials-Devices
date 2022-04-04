@@ -14,7 +14,7 @@ TRAIN_MASTER_DATA = pkg_resources.resource_filename(
 )
 
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
@@ -349,11 +349,11 @@ class Dataset:
         return x, y
 
 
-# dataset = Dataset(MANUAL_MASTER_DATA, 1, False)
+# dataset = Dataset(AUG_SMI_MASTER_DATA, 0, False)
 # dataset.prepare_data()
 # x, y = dataset.setup()
 # x, y = dataset.setup_cv()
-# x, y = dataset.setup_aug_smi(AUG_SMI_MASTER_DATA)
+# x, y = dataset.setup_aug_smi()
 # x, y = dataset.setup_fp(2, 512)
 # print(x[1], y[1])
 

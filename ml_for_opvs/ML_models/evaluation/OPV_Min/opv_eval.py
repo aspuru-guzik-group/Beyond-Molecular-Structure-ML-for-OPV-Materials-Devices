@@ -16,13 +16,6 @@ from ml_for_opvs.ML_models.pytorch.data.OPV_Min.data import OPVDataModule
 
 import os
 
-from ml_for_opvs.ML_models.pytorch.Transformer.opv_chembert import (
-    TransformerModel as TFModel,
-)
-from ml_for_opvs.ML_models.pytorch.Transformer.opv_chembert_linear import (
-    TransformerModel as TFModelLinear,
-)
-
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
 DATA_DIR = pkg_resources.resource_filename(
@@ -122,14 +115,6 @@ class Evaluator:
             model = NNModel.load_from_checkpoint(final_model)
         elif self.model_type == "LSTM":
             model = LSTMModel.load_from_checkpoint(final_model)
-        elif self.model_type == "Transformer":
-            model = TFModel.load_from_checkpoint(
-                final_model, pt_model=CHEMBERT, pt_tokenizer=CHEMBERT_TOKENIZER
-            )
-        elif self.model_type == "Transformer_Linear":
-            model = TFModelLinear.load_from_checkpoint(
-                final_model, pt_model=CHEMBERT, pt_tokenizer=CHEMBERT_TOKENIZER
-            )
         # use model after training or load weights and drop into the production system
         model.eval()
 
@@ -137,13 +122,13 @@ class Evaluator:
         # data
         # ------------
         parser = ArgumentParser()
-        parser.add_argument("--train_batch_size", type=int, default=128)
-        parser.add_argument("--val_batch_size", type=int, default=32)
-        parser.add_argument("--test_batch_size", type=int, default=32)
+        parser.add_argument("--train_batch_size", type=int, default=256)
+        parser.add_argument("--val_batch_size", type=int, default=256)
+        parser.add_argument("--test_batch_size", type=int, default=128)
         # parser.add_argument("--data_dir", type=str, default=BRICS_MASTER_DATA)
         # parser.add_argument("--data_dir", type=str, default=FRAG_MASTER_DATA)
-        parser.add_argument("--data_dir", type=str, default=DATA_DIR)
-        # parser.add_argument("--data_dir", type=str, default=MANUAL_MASTER_DATA)
+        # parser.add_argument("--data_dir", type=str, default=DATA_DIR)
+        parser.add_argument("--data_dir", type=str, default=MANUAL_MASTER_DATA)
         # parser.add_argument("--data_dir", type=str, default=FP_MASTER_DATA)
 
         parser.add_argument("--dataloader_num_workers", type=int, default=12)
@@ -167,18 +152,18 @@ class Evaluator:
         # hw_frag = True
         aug_hw_frag = False
         # aug_hw_frag = True
-        # selfies = False
-        selfies = True
+        selfies = False
+        # selfies = True
         brics = False
         # brics = True
         manual = False
         # manual = True
-        aug_manual = False
-        # aug_manual = True
+        # aug_manual = False
+        aug_manual = True
         fingerprint = False
         # fingerprint = True
-        # shuffled = False
-        shuffled = True
+        shuffled = False
+        # shuffled = True
 
         fp_radius = 2
         fp_nbits = 512
@@ -267,7 +252,7 @@ class Evaluator:
             self.new_predictions["Experimental_PCE_(%)"],
             m * self.new_predictions["Experimental_PCE_(%)"] + b,
             color="black",
-            label=["R: " + str(corr_coef) + "_" + "RMSE: " + str(rmse)],
+            label=["R: " + str(corr_coef) + "  " + "RMSE: " + str(rmse)],
         )
         ax.plot([0, 1], [0, 1], "--", color="blue", label="Perfect Correlation")
         ax.legend(loc="upper left")
@@ -301,7 +286,7 @@ def cli_main():
             "LSTM",
             MODEL_CHECKPOINT,
             PREDICTION_PATH,
-            "smi_shuffled_LSTM-epoch=624-val_loss=0.052-n_hidden=256-n_embedding=256-drop_prob=0.3-lr=0.01-train_batch_size=256.ckpt",
+            "aug_manual_LSTM-epoch=31-val_loss=0.018-n_hidden=256-n_embedding=256-drop_prob=0.3-lr=0.01-train_batch_size=256-v1.ckpt",
             DATA_DIR,
         )
     elif model == "Transformer":
@@ -326,10 +311,10 @@ def cli_main():
             "NN",
             MODEL_CHECKPOINT,
             PREDICTION_PATH,
-            "selfies_shuffled_NN-epoch=218-val_loss=0.055-n_hidden=256-n_embedding=256-drop_prob=0.3-lr=0.001-train_batch_size=128.ckpt",
-            DATA_DIR,
+            "aug_manual_NN-epoch=488-val_loss=0.020-n_hidden=256-n_embedding=256-drop_prob=0.3-lr=0.001-train_batch_size=256.ckpt",
+            MANUAL_MASTER_DATA,
         )
-    working_eval.model_eval(2)  # 0 - SMILES, 2 - SELFIES
+    working_eval.model_eval(0)  # 0 - SMILES, 2 - SELFIES
     working_eval.MSE_predictions()
     working_eval.parity_plot()
 

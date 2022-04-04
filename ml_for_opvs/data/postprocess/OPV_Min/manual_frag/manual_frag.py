@@ -553,10 +553,11 @@ def cli_main():
     # prepare manual frag data
     manual = manual_frag(OPV_DATA, MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)
     frag_dict = manual.return_frag_dict()
+    print(frag_dict)
     # print(len(frag_dict))
     # manual.frag_visualization(frag_dict)
-    manual.bigsmiles_from_frag(MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)
-    manual.create_manual_csv(frag_dict, MASTER_MANUAL_DATA)
+    # manual.bigsmiles_from_frag(MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)
+    # manual.create_manual_csv(frag_dict, MASTER_MANUAL_DATA)
 
 
 if __name__ == "__main__":

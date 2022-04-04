@@ -36,7 +36,7 @@ TRAIN_MASTER_DATA = pkg_resources.resource_filename(
 )
 
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
@@ -153,8 +153,8 @@ def augment_donor_frags_in_loop(x, y: float):
 smiles = False
 # aug = True
 aug = False
-# aug_smiles = True
-aug_smiles = False
+aug_smiles = True
+# aug_smiles = False
 # brics = True
 brics = False
 # selfies = True
@@ -163,8 +163,8 @@ selfies = False
 manual = False
 # fingerprint = True
 fingerprint = False
-shuffled = True
-# shuffled = False
+# shuffled = True
+shuffled = False
 
 radius = 3
 nbits = 256

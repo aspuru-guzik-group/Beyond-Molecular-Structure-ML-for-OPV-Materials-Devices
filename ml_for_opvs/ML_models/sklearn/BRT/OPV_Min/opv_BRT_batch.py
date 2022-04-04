@@ -37,7 +37,7 @@ TRAIN_MASTER_DATA = pkg_resources.resource_filename(
 )
 
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
@@ -181,7 +181,7 @@ for i in range(len(unique_datatype)):
         "smiles": 0,
         "bigsmiles": 0,
         "selfies": 0,
-        "aug_smiles": 0,
+        "aug_smiles": 1,
         "hw_frag": 0,
         "aug_hw_frag": 0,
         "brics": 0,

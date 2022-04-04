@@ -47,24 +47,24 @@ print(data_rmse_std)
 
 # create z_text which has the std error labels in ()
 outer_idx = 0
-z_text = copy.deepcopy(data_rmse)
-while outer_idx < len(data_rmse):
+z_text = copy.deepcopy(data_r)
+while outer_idx < len(data_r):
     inner_idx = 0
-    while inner_idx < len(data_rmse[outer_idx]):
+    while inner_idx < len(data_r[outer_idx]):
         z_text[outer_idx][inner_idx] = (
-            str(data_rmse[outer_idx][inner_idx])
+            str(data_r[outer_idx][inner_idx])
             + "<br>"
             + "("
-            + str(data_rmse_std[outer_idx][inner_idx])
+            + str(data_r_std[outer_idx][inner_idx])
             + ")"
         )
         inner_idx += 1
     outer_idx += 1
 
 fig = px.imshow(
-    data_rmse,
+    data_r,
     labels=dict(
-        x="Data Representation", y="ML/DL Model", color="Root Mean Squared Error (RMSE)"
+        x="Data Representation", y="ML/DL Model", color="Correlation Coefficient (R)"
     ),
     x=[
         "SMILES (n=386)",
@@ -86,7 +86,7 @@ fig = px.imshow(
         "Long-Short-Term Memory (LSTM, cv=5)",
     ],
     text_auto=True,
-    color_continuous_scale="RdYlGn_r",
+    color_continuous_scale="RdYlGn",
     aspect="auto",
 )
 fig.update_traces(

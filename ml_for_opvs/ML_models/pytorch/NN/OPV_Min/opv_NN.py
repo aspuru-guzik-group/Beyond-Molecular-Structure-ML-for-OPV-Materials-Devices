@@ -16,7 +16,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch import nn
 from torch.optim import SGD, Adam
-from ml_for_opvs.ML_models.pytorch.OPV_Min.data.data import OPVDataModule
+from ml_for_opvs.ML_models.pytorch.data.OPV_Min.data import OPVDataModule
 from pytorch_lightning import callbacks
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.core.saving import save_hparams_to_yaml
@@ -38,7 +38,7 @@ FRAG_MASTER_DATA = pkg_resources.resource_filename(
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(

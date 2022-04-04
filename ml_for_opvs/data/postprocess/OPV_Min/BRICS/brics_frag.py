@@ -190,5 +190,5 @@ class BRIC_FRAGS:
 
 b_frag = BRIC_FRAGS(MASTER_DATA)
 frag_dict = b_frag.bric_frag()
-# print(frag_dict)
+print(frag_dict)
 # b_frag.frag_visualization(frag_dict)

@@ -22,6 +22,6 @@ fig.update_traces(
 )
 fig.update_layout(font_family="Roboto")
 fig.update_xaxes(side="bottom")
-fig.layout.height = 600
-fig.layout.width = 1100
+fig.layout.height = 500
+fig.layout.width = 550
 fig.show()

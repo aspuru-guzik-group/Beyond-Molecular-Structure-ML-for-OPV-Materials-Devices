@@ -97,10 +97,63 @@ class Tokenizer:
 
         return selfie_dict, max_selfie_length
 
+    def tokenize_given_dictionary(self, input, input_dict):
+        """
+        Function that returns the tokenized "one-hot" encoded version of the input given a dictionary
+        """
+        tokenized_input = []
+        for char in input:
+            one_hot_idx = input_dict[char]
+            tokenized_input.append(one_hot_idx)
+
+        return tokenized_input
+
 
 # for presentation (can be deleted)
-# tk = Tokenizer()
-# tokenized_smile = tk.tokenize_smiles(
-#     "[C][C][S][C][=C][Branch2_1][Ring1][Ring2][C][S][C][Branch1_1][O][C][C][Branch1_1][Ring1][C][C][C][C][C][C][=C][C][Expl=Ring1][=N][C][C][=C][Branch2_1][Branch1_2][Branch1_2][C][=C][C][=C][Branch2_1][Branch1_1][O][C][S][C][Branch1_1][Branch2_1][C][=C][C][=C][S][Ring1][Branch1_1][=C][C][Expl=Ring1][Branch2_3][C][Branch2_1][Ring2][Branch1_2][C][=C][Branch1_1][O][C][C][Branch1_1][Ring1][C][C][C][C][C][C][S][C][Branch1_1][O][C][C][Branch1_1][Ring1][C][C][C][C][C][C][=C][Ring2][Ring1][Branch1_1][C][Ring2][Ring1][Branch2_2][=O][=O][S][Ring2][Ring2][Branch2_1][S][C][Expl=Ring2][Ring2][=N][C][Branch2_1][Ring1][Ring2][C][S][C][Branch1_1][O][C][C][Branch1_1][Ring1][C][C][C][C][C][C][=C][C][Expl=Ring1][=N][=C][Ring2][Branch1_2][O][C][Expl=Ring2][Branch1_2][=C]"
+tk = Tokenizer()
+input_dict = {
+    "[nop]": 0,
+    ".": 1,
+    "[#C]": 2,
+    "[#N]": 3,
+    "[/C]": 4,
+    "[=C]": 5,
+    "[=N]": 6,
+    "[=O]": 7,
+    "[Branch1_1]": 8,
+    "[Branch1_2]": 9,
+    "[Branch1_3]": 10,
+    "[Branch2_1]": 11,
+    "[Branch2_2]": 12,
+    "[Branch2_3]": 13,
+    "[C]": 14,
+    "[Expl=Ring1]": 15,
+    "[Expl=Ring2]": 16,
+    "[N]": 17,
+    "[O]": 18,
+    "[P]": 19,
+    "[Ring1]": 20,
+    "[Ring2]": 21,
+    "[S]": 22,
+    "[\\C]": 23,
+    "[F]": 24,
+    "[Siexpl]": 25,
+    "[/S]": 26,
+    "[Cl]": 27,
+    "[=S]": 28,
+    "[\\S]": 29,
+    "[B]": 30,
+    "[I]": 31,
+    "[Seexpl]": 32,
+}
+# tokenized_smile = tk.tokenize_given_dictionary(
+#     "[C][C][C][C][C][C][C][Branch1_1][Branch1_1][C][C][C][C][C][S][O][C][Branch1_2][C][=O][C][C][=C][Branch2_1][Ring2][N][C][=C][C][Branch2_1][Ring1][Branch1_1][C][Branch1_2][C][=O][O][S][C][C][Branch1_1][Branch1_1][C][C][C][C][C][C][C][C][C][C][=C][Branch1_1][O][C][=C][C][=C][Branch1_1][C][C][S][Ring1][Branch1_2][S][Ring2][Ring1][O][S][C][Expl=Ring2][Ring1][S][C][=C][C][=C][Branch1_1][C][C][S][Ring1][Branch1_2]",
+#     input_dict,
 # )
-# print(tokenized_smile)
+tokenized_selfie = sf.selfies_to_encoding(
+    "[C][C][C][C][C][C][C][Branch1_1][Branch1_1][C][C][C][C][C][S][O][C][Branch1_2][C][=O][C][C][=C][Branch2_1][Ring2][N][C][=C][C][Branch2_1][Ring1][Branch1_1][C][Branch1_2][C][=O][O][S][C][C][Branch1_1][Branch1_1][C][C][C][C][C][C][C][C][C][C][=C][Branch1_1][O][C][=C][C][=C][Branch1_1][C][C][S][Ring1][Branch1_2][S][Ring2][Ring1][O][S][C][Expl=Ring2][Ring1][S][C][=C][C][=C][Branch1_1][C][C][S][Ring1][Branch1_2]",
+    input_dict,
+    pad_to_len=-1,
+    enc_type="label",
+)
+print(tokenized_selfie)

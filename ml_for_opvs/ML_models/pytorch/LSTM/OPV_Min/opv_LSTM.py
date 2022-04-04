@@ -196,7 +196,7 @@ def cli_main():
     parser.add_argument("--gpus", type=int, default=-1)
     parser.add_argument("--accelerator", type=str, default="dp")
     parser.add_argument("--dataloader_num_workers", type=int, default=3)
-    parser.add_argument("--max_epochs", type=int, default=1000)
+    parser.add_argument("--max_epochs", type=int, default=500)
     parser.add_argument("--log_every_n_steps", type=int, default=1)
     # parser.add_argument("--logger", type=str, default=wandb_logger)
     args = parser.parse_args()
@@ -208,14 +208,14 @@ def cli_main():
     smiles = False
     # aug_smiles = True
     aug_smiles = False  # change to aug_smi (in suffix)
-    aug_max = False  # change to aug_frag (in suffix)
+    aug_max = True  # change to aug_frag (in suffix)
     aug_pairs = False  # change to aug_pair_frag (in suffix)
     brics = False
     data_aug = False  # change to aug (in suffix)
-    manual = False
-    # manual = True
-    fingerprint = True
-    # fingerprint = False
+    # manual = False
+    manual = True
+    # fingerprint = True
+    fingerprint = False
     # shuffled = True
     shuffled = False
 

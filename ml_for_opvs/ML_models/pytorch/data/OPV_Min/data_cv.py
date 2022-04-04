@@ -32,7 +32,7 @@ FRAG_MASTER_DATA = pkg_resources.resource_filename(
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(

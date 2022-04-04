@@ -158,6 +158,7 @@ class OPVDataModule(pl.LightningDataModule):
         test_batch_size: int,
         num_workers: int,
         smiles: int,  # True - string representation, False - Fragments
+        bigsmiles: int,
         selfies: int,
         aug_smiles: int,  # number of data augmented SMILES
         hw_frag: int,
@@ -180,6 +181,7 @@ class OPVDataModule(pl.LightningDataModule):
         self.num_workers = num_workers
         self.transform = None
         self.smiles = smiles
+        self.bigsmiles = bigsmiles
         self.selfies = selfies
         self.aug_smiles = aug_smiles
         self.hw_frag = hw_frag
@@ -201,6 +203,15 @@ class OPVDataModule(pl.LightningDataModule):
         # concatenate Donor and Acceptor Inputs
         if self.smiles == 1 or self.aug_smiles == 1:
             representation = "SMILES"
+            for index, row in self.data.iterrows():
+                self.data.at[index, "DA_pair"] = (
+                    row["Donor_{}".format(representation)]
+                    + "."
+                    + row["Acceptor_{}".format(representation)]
+                )
+        elif self.bigsmiles == 1:
+            self.data = pd.read_csv(MANUAL_MASTER_DATA)
+            representation = "BigSMILES"
             for index, row in self.data.iterrows():
                 self.data.at[index, "DA_pair"] = (
                     row["Donor_{}".format(representation)]
@@ -229,6 +240,8 @@ class OPVDataModule(pl.LightningDataModule):
         # minimize range of pce between 0-1
         # find max of pce_array
         self.max_pce = pce_array.max()
+        print(self.max_pce)
+
         pce_array = pce_array / self.max_pce
 
         self.pce_array = pce_array
@@ -238,7 +251,7 @@ class OPVDataModule(pl.LightningDataModule):
         if self.pt_model != None:
             self.prepare_transformer()
         else:
-            if self.smiles == 1:
+            if self.smiles == 1 or self.bigsmiles == 1:
                 # tokenize data
                 (
                     tokenized_input,
@@ -592,13 +605,14 @@ def distribution_plot(data_dir):
 
 unique_datatype = {
     "smiles": 0,
-    "selfies": 0,
+    "bigsmiles": 0,
+    "selfies": 1,
     "aug_smiles": 0,
     "hw_frag": 0,
     "aug_hw_frag": 0,
     "brics": 0,
     "manual": 0,
-    "aug_manual": 1,
+    "aug_manual": 0,
     "fingerprint": 0,
 }
 
@@ -610,6 +624,7 @@ data_module = OPVDataModule(
     test_batch_size=32,
     num_workers=4,
     smiles=unique_datatype["smiles"],
+    bigsmiles=unique_datatype["bigsmiles"],
     selfies=unique_datatype["selfies"],
     aug_smiles=unique_datatype["aug_smiles"],
     hw_frag=unique_datatype["hw_frag"],
