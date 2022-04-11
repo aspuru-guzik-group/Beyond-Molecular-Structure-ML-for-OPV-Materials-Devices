@@ -21,6 +21,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer
 from sklearn.svm import SVR
 from sklearn.metrics import mean_squared_error
+from skopt import BayesSearchCV
 
 from ml_for_opvs.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
 
@@ -133,11 +134,11 @@ r_score = make_scorer(custom_scorer, greater_is_better=True)
 
 unique_datatype = {
     "smiles": 0,
-    "bigsmiles": 1,
+    "bigsmiles": 0,
     "selfies": 0,
     "aug_smiles": 0,
     "hw_frag": 0,
-    "aug_hw_frag": 0,
+    "aug_hw_frag": 1,
     "brics": 0,
     "manual": 0,
     "aug_manual": 0,
@@ -207,11 +208,23 @@ for train_ix, test_ix in cv_outer.split(x):
     # split data
     x_train, x_test = x[train_ix], x[test_ix]
     y_train, y_test = y[train_ix], y[test_ix]
-    if unique_datatype["aug_smiles"] == 1:
+    if unique_datatype["aug_manual"] == 1 or unique_datatype["aug_hw_frag"] == 1:
+        # concatenate augmented data to x_train and y_train
+        print("AUGMENTED")
         aug_x_train = list(copy.copy(x_train))
         aug_y_train = list(copy.copy(y_train))
         for x_, y_ in zip(x_train, y_train):
-            x_aug, y_aug = augment_smi_in_loop(x_, y_, 15, True)
+            x_aug, y_aug = augment_donor_frags_in_loop(x_, y_)
+            aug_x_train.extend(x_aug)
+            aug_y_train.extend(y_aug)
+
+        x_train = np.array(aug_x_train)
+        y_train = np.array(aug_y_train)
+    elif unique_datatype["aug_smiles"] == 1:
+        aug_x_train = list(copy.copy(x_train))
+        aug_y_train = list(copy.copy(y_train))
+        for x_, y_ in zip(x_train, y_train):
+            x_aug, y_aug = augment_smi_in_loop(x_, y_, 4, True)
             aug_x_train.extend(x_aug)
             aug_y_train.extend(y_aug)
         # tokenize Augmented SMILES
@@ -236,17 +249,17 @@ for train_ix, test_ix in cv_outer.split(x):
 
     # define search space
     space = dict()
-    space["kernel"] = ["poly", "rbf"]
-    space["degree"] = range(3, 6)
+    space["kernel"] = ["linear", "poly", "rbf"]
+    space["degree"] = (1, 10)
     # define search
-    search = GridSearchCV(
-        model,
-        space,
+    search = BayesSearchCV(
+        estimator=model,
+        search_spaces=space,
         scoring="neg_mean_squared_error",
+        n_iter=25,
         cv=cv_inner,
-        refit=True,
         n_jobs=-1,
-        verbose=1,
+        verbose=0,
     )
     # execute search
     result = search.fit(x_train, y_train)
@@ -254,6 +267,8 @@ for train_ix, test_ix in cv_outer.split(x):
     best_model = result.best_estimator_
     # evaluate model on the hold out dataset
     yhat = best_model.predict(x_test)
+    print("Y_TEST: ", list(y_test))
+    print("Y_HAT: ", list(yhat))
     # evaluate the model
     corr_coef = np.corrcoef(y_test, yhat)[0, 1]
     rmse = np.sqrt(mean_squared_error(y_test, yhat))
@@ -265,6 +280,7 @@ for train_ix, test_ix in cv_outer.split(x):
         ">corr_coef=%.3f, est=%.3f, cfg=%s"
         % (corr_coef, result.best_score_, result.best_params_)
     )
+    print("RMSE: ", rmse)
 
 # summarize the estimated performance of the model
 print("R: %.3f (%.3f)" % (mean(outer_corr_coef), std(outer_corr_coef)))

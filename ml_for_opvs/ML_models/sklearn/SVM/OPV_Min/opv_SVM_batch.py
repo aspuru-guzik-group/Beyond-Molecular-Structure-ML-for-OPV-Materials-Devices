@@ -302,6 +302,8 @@ for i in range(len(unique_datatype)):
         best_model = result.best_estimator_
         # evaluate model on the hold out dataset
         yhat = best_model.predict(x_test)
+        print("Y_TEST: ", y_test)
+        print("Y_HAT: ", yhat)
         # evaluate the model
         corr_coef = np.corrcoef(y_test, yhat)[0, 1]
         rmse = np.sqrt(mean_squared_error(y_test, yhat))
