@@ -603,7 +603,7 @@ class DAPairs:
 # donors.replace_r(CLEAN_DONOR_CSV)
 
 # # # Step 1c - do not include for fragmentation
-# # donors.remove_methyl(CLEAN_DONOR_CSV)
+# donors.remove_methyl(CLEAN_DONOR_CSV)
 
 # # Step 1d - canonSMILES to remove %10-%100
 # donors.canon_smi(CLEAN_DONOR_CSV)
