@@ -18,7 +18,7 @@ MASTER_ACCEPTOR_CSV = pkg_resources.resource_filename(
 CLEAN_DONOR_CSV = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_donors.csv"
 )
-# _PBDTTz (optional) but is manually deleted
+
 CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_acceptors.csv"
 )
