@@ -1,4 +1,4 @@
- ,ref number from paper,reference link,DOI,Donor,HOMO_D (eV),LUMO_D (eV),Acceptor,HOMO_A (eV),LUMO_A (eV),D:A ratio (m/m),solvent,total solids conc. (mg/mL),solvent additive,solvent additive conc. (% v/v),active layer thickness (nm),temperature of thermal annealing (leave gap if not annealed),hole contact layer,electron contact layer,hole mobility blend (cm^2 V^-1 s^-1),electron mobility blend,effective mobility,Langevin prefactor,Voc vs ln(I) slope,Voc (V),Jsc (mA cm^-2),FF (%),PCE (%)
+ ,ref number from paper,reference link,DOI,Donor Molecule,HOMO_D (eV),LUMO_D (eV),Acceptor Molecule,HOMO_A (eV),LUMO_A (eV),D:A ratio (m/m),solvent,total solids conc. (mg/mL),solvent additive,solvent additive conc. (% v/v),active layer thickness (nm),temperature of thermal annealing (leave gap if not annealed),hole contact layer,electron contact layer,hole mobility blend (cm^2 V^-1 s^-1),electron mobility blend,effective mobility,Langevin prefactor,Voc vs ln(I) slope,Voc (V),Jsc (mA cm^-2),FF (%),PCE (%)
 1,5,link,10.1002/aenm.201801214,PBDT-TT,-5.23,-3.34,6TIC,-5.45,-3.94,1:1.5,,,,,,,,,,,,,,0.812,19.1,61,9.46
 52,5,link,10.1002/aenm.201801214,PBDT-TT,-5.23,-3.34,ITIC,-5.6,-3.86,1:1.5,DCB,25,,,100,,PEDOT:PSS,C60-bissalt,9.28E-05,4.21E-05,,,,0.849,15.8,65,8.72
 63,5,link,10.1002/aenm.201801214,PBDT-TT,-5.23,-3.34,IT-M,-5.58,-3.82,1:1.5,DCB,25,,,100,,PEDOT:PSS,C60-bissalt,4.48E-04,2.60E-04,,,,0.904,16.5,67,9.99
@@ -55,8 +55,8 @@
 44,25,link,10.1002/adfm.201706404,PBDTF-FBT,-5.34,-3.53,ITIC,-5.48,-3.83,1:1,CB,20,"1,8-diiodooctane",0.5,107,,MoO3,ZnO,2.29E-04,1.09E-04,,,,0.9,15.38,66.3,9.17
 48,25,link,10.1002/adfm.201706404,PBDTS-FBT,-5.2,-3.4,ITIC,-5.48,-3.83,1:1,CB,20,"1,8-diiodooctane",0.5,104,,MoO3,ZnO,1.08E-04,3.65E-05,,,,0.89,14.63,65.9,8.58
 49,25,link,10.1002/adfm.201706404,PBDTSF-FBT,-5.41,-3.6,ITIC,-5.48,-3.83,1:1,CB,20,"1,8-diiodooctane",0.5,109,,MoO3,ZnO,4.70E-04,2.76E-04,,,,1.03,17.09,66.3,11.66
-45,26,link,10.1002/adfm.201701491,PBDT–NQx,-5.24,-3.42,ITIC,-5.48,-3.83,1:0.8,CB,20,DIO,2,110,,MoO3,ZnO,1.80E-04,5.60E-05,,,,0.87,16.21,64.6,9.11
-46,26,link,10.1002/adfm.201701491,PBDTS–NQx,-5.31,-3.46,ITIC,-5.48,-3.83,1:0.8,CB,20,DIO,2,109,,MoO3,ZnO,2.50E-04,1.30E-04,,,,0.92,17.86,69.8,11.47
+45,26,link,10.1002/adfm.201701491,PBDT-NQx,-5.24,-3.42,ITIC,-5.48,-3.83,1:0.8,CB,20,DIO,2,110,,MoO3,ZnO,1.80E-04,5.60E-05,,,,0.87,16.21,64.6,9.11
+46,26,link,10.1002/adfm.201701491,PBDTS-NQx,-5.31,-3.46,ITIC,-5.48,-3.83,1:0.8,CB,20,DIO,2,109,,MoO3,ZnO,2.50E-04,1.30E-04,,,,0.92,17.86,69.8,11.47
 50,27,link,10.1002/adma.201703973,PBDTS-TDZ,-5.39,-2.8,ITIC,-5.48,-3.83,1:1,o-xylene,20,,,100,,PEDOT:PSS,MoO3,1.20E-03,7.20E-04,,,,1.1,17.78,65.4,12.80
 51,27,link,10.1002/adma.201703973,PBDT-TDZ,-5.35,-2.78,ITIC,-5.48,-3.83,1:1,o-xylene,20,,,,,PEDOT:PSS,MoO3,4.10E-04,2.30E-04,,,,1.02,15.91,58.1,9.43
 53,28,link,10.1039/C7TA06476D,PBFZ-OP,-5.33,-3.01,ITIC,-5.6,-3.85,1:1,CF,16,,,,160,ZnO,MoO3,3.25E-04,2.62E-04,,,,0.91,18.7,61.8,10.50
@@ -126,7 +126,7 @@
 111,56,link,10.1002/adma.201604964,PBDB-T,-5.33,-2.92,DICTF,-5.67,-3.79,1:1.2,CB,10,DIO,0.3,,,PEDOT:PSS,PDIN,1.56E-05,1.49E-05,,,,0.93,10.3,59,5.93
 112,56,link,10.1002/adma.201604964,PBDB-T,-5.33,-2.92,FDICTF,-5.43,-3.71,1:1.2,CB,10,DIO,0.3,,,PEDOT:PSS,PDIN,3.37E-05,2.40E-05,,,,0.94,15.81,66,10.06
 113,57,link,10.1021/acsami.6b15717,P3HT,-5.08,-2.96,MPU1,-5.81,-3.99,1:1,CF,16,,,40,,,PFN,2.58E-05,8.15E-05,,,,0.64,4.22,42,1.14
-114,57,link,10.1021/acsami.6b15717,P0,-5.31,-3.33,MPU1,-5.81,-3.99,1:1,CF,16,,,40,,,PFN,5.11E-05,8.83E-05,,,,1.04,8.36,48,4.17
+114,57,link,10.1021/acsami.6b15717,P,-5.31,-3.33,MPU1,-5.81,-3.99,1:1,CF,16,,,40,,,PFN,5.11E-05,8.83E-05,,,,1.04,8.36,48,4.17
 115,58,link,10.1021/jacs.7b00566,PBDB-T,-5.33,-2.92,IDT-BC6,-5.55,-3.83,1:1,o-DCB,4,,,100,,MoO3,ZnO,2.89E-06,1.38E-06,,,,0.92,5.63,44,2.30
 116,58,link,10.1021/jacs.7b00566,PBDB-T,-5.33,-2.92,IDT-BOC6,-5.51,-3.78,1:1,o-DCB,4,DIO,1,100,,MoO3,ZnO,1.68E-04,1.98E-04,,,,1.01,17.52,54,9.60
 117,59,link,10.1002/adma.201705969,PTB7-Th,-5.2,-3.59,ITIC3,-5.54,-3.9,1:1.5,CF,10,,,,,MoO3,ZnO,6.80E-04,2.70E-04,,,,0.763,16.8,63.1,8.09
@@ -218,8 +218,8 @@
 203,103,link,,PTB7-Th,-5.2,-3.56,DTCC-IC,-5.5,-3.87,1:1,CF,,CN,1,,100,PEDOT:PSS,Ca,6.76E-04,1.52E-03,,,,0.95,11.23,56.2,6.00
 204,104,link,,P3HT,-5.1,-3.1,DNIT-TT2T,-5.94,-3.75,1:1,o-DCB,,,,80,130,PEDOT:PSS,Ca,,,,,,0.88,3.28,43.47,1.25
 205,105,link,,PTB7-Th,-4.9,-3.32,DICTF,-5.67,-3.79,1:1.4,CF,,,,,100,PEDOT:PSS,PDIN,3.82E-04,1.93E-04,,,,0.85,16.33,55,7.63
-206,106,link,,P1o,-5.1,-3.48,PY1,-5.27,-4,1:2,CF,18,DIO,3,,,PEDOT:PSS,PFN-Br,2.17E-04,1.06E-04,,,,0.83,10.53,56,4.89
-207,106,link,,P1o,-5.1,-3.48,DCI-2,-5.24,-4.05,1:2,CF,18,DIO,3,,,PEDOT:PSS,PFN-Br,1.14E-04,2.21E-04,,,,0.8,13.77,63,6.94
+206,106,link,,P1,-5.1,-3.48,PY1,-5.27,-4,1:2,CF,18,DIO,3,,,PEDOT:PSS,PFN-Br,2.17E-04,1.06E-04,,,,0.83,10.53,56,4.89
+207,106,link,,P1,-5.1,-3.48,DCI-2,-5.24,-4.05,1:2,CF,18,DIO,3,,,PEDOT:PSS,PFN-Br,1.14E-04,2.21E-04,,,,0.8,13.77,63,6.94
 208,107,link,,PBDTTT-C-T,,,DC-IDT2F,-5.44,-3.88,2:1,o-DCB,20,,,,,MoO3,PEIE,1.20E-04,4.10E-04,,,,0.96,6.32,50.8,3.08
 209,108,link,,PTB7-Th,-5.22,-3.64,IM-IDT,-5.44,-4,1:1,o-DCB,,DPE,1,,100,PEDOT:PSS,Ca,3.48E-07,1.85E-07,,,,0.58,4.96,49.16,1.60
 210,108,link,,PTB7-Th,-5.22,-3.64,TIM-IDT,-5.36,-4.01,1:1,o-DCB,,,,,,PEDOT:PSS,Ca,1.52E-06,3.42E-07,,,,0.6,5.26,45.53,1.63

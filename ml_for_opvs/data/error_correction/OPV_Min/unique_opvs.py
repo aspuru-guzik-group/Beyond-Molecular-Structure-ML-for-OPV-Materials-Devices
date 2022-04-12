@@ -164,4 +164,4 @@ missing_smi_acceptors = unique_opvs.filter_SMILES(missing_acceptors, "A")
 # print("NUM_missing_smi_donors: ", len(missing_smi_donors))
 # print("NUM_missing_smi_acceptors: ", len(missing_smi_acceptors))
 
-unique_opvs.create_missing_csv(missing_smi_acceptors, "A")
+unique_opvs.create_missing_csv(missing_smi_donors, "D")
