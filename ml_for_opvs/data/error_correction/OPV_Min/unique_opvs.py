@@ -149,32 +149,56 @@ class UniqueOPVs:
         missing_df["SMILES"] = ""
         missing_df.to_csv(path, index=False)
 
-    def clean_up_missing(self):
+    def clean_up_missing(
+        self,
+        missing_smi_donor=MISSING_SMI_DONOR,
+        missing_smi_acceptor=MISSING_SMI_ACCEPTOR,
+    ):
         """
         Updates missing donor and acceptor with canonical SMILES and replaced R
 
         Args:
-            None
+            missing_smi_donor: path to data for missing SMILES donor
+            missing_smi_acceptor: path to data for missing SMILES acceptor
 
         Returns:
             .csv file with clean missing data
         """
-        donor_clean = DonorClean(OPV_MIN, MISSING_SMI_DONOR)
-        acceptor_clean = AcceptorClean(OPV_MIN, MISSING_SMI_ACCEPTOR)
+        donor_clean = DonorClean(
+            OPV_MIN, MISSING_SMI_DONOR
+        )  # placeholders, useless values
+        acceptor_clean = AcceptorClean(
+            OPV_MIN, MISSING_SMI_ACCEPTOR
+        )  # placeholders, useless values
 
-        donor_clean.replace_r(MISSING_SMI_DONOR)
-        acceptor_clean.replace_r(MISSING_SMI_ACCEPTOR)
+        donor_clean.replace_r(missing_smi_donor)
+        acceptor_clean.replace_r(missing_smi_acceptor)
 
-    def concat_missing_and_clean(self, missing_data, clean_data):
+    def concat_missing_and_clean(self, missing_data, clean_data, mol_type):
         """
-        Updates missing donor and acceptor with canonical SMILES and replaced R
+        Concatenate missing and clean data.
 
         Args:
-            None
+            missing_data: path to missing SMILES data (filled-in)
+            clean_data: path to clean SMILES data
+            mol_type: choose between donor or acceptor molecules
+            NOTE: must be both donor or both acceptor
 
         Returns:
-            .csv file with clean missing data
+            .csv file with clean data and missing data combined together
         """
+        missing_df = pd.read_csv(missing_data)
+        clean_df = pd.read_csv(clean_data)
+
+        # assuming missing and clean data have no overlaps, we can just concatenate
+        if mol_type == "D":
+            label = "Donor"
+        elif mol_type == "A":
+            label = "Acceptor"
+
+        new_clean_df = pd.concat([missing_df, clean_df])
+
+        new_clean_df.to_csv(clean_data, index=False)
 
 
 # run functions
@@ -200,4 +224,10 @@ unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_MIN)
 
 # unique_opvs.create_missing_csv(missing_smi_donors, "D")
 
-unique_opvs.clean_up_missing()
+# unique_opvs.clean_up_missing()
+
+# concatenate for donors
+unique_opvs.concat_missing_and_clean(MISSING_SMI_DONOR, CLEAN_DONOR, "D")
+
+# concatenate for acceptors
+unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")

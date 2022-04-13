@@ -113,5 +113,5 @@ def cata_smile_to_bigsmile(catalysis_data):
     cata_df.to_csv(catalysis_data, index=False)
 
 
-# smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-cata_smile_to_bigsmile(CATALYSIS_MASTER)
+smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# cata_smile_to_bigsmile(CATALYSIS_MASTER)

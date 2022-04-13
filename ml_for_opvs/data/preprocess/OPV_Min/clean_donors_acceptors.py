@@ -26,7 +26,7 @@ CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
 # From OPV Google Drive
 OPV_DATA = pkg_resources.resource_filename(
     "ml_for_opvs",
-    "data/process/OPV_Min/Machine Learning OPV Parameters - data_from_min.csv",
+    "data/process/OPV_Min/Machine Learning OPV Parameters - device_params.csv",
 )
 OPV_DONOR_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/Machine Learning OPV Parameters - Donors.csv"
@@ -68,10 +68,10 @@ class DonorClean:
             clean_donor: path to processed donors
 
         Returns:
-            .csv with columns: | Label | SMILES | SMILES (w/ substituted R) | Big_SMILES | SELFIES
+            .csv with columns: | Donor | SMILES | SMILES (w/ substituted R) | Big_SMILES | SELFIES
         """
         headers = [
-            "Label",
+            "Donor",
             "SMILES",
             "SMILES w/o R_group replacement",
             "SMILES w/o R_group",
@@ -97,7 +97,7 @@ class DonorClean:
                 # NOTE: add BigSMILES, SELFIES here
                 clean_df = clean_df.append(
                     {
-                        "Label": row["Name"],
+                        "Donor": row["Name"],
                         "SMILES": row["R_grp_SMILES"],
                         "SMILES w/o R_group replacement": row["R_grp_SMILES"],
                         "SMILES w/o R_group": " ",
@@ -121,7 +121,7 @@ class DonorClean:
             "total: ",
             total_donors,
         )
-        clean_df.to_csv(clean_donor)
+        clean_df.to_csv(clean_donor, index=False)
 
     def replace_r(self, clean_donor):
         """Replace R group in the clean_min_donors.csv
@@ -312,10 +312,10 @@ class AcceptorClean:
             clean_acceptor: path to processed acceptor
 
         Returns:
-            .csv with columns: | Label | SMILES | SMILES (w/ substituted R) | Big_SMILES | SELFIES
+            .csv with columns: | Acceptor | SMILES | SMILES (w/ substituted R) | Big_SMILES | SELFIES
         """
         headers = [
-            "Label",
+            "Acceptor",
             "SMILES",
             "SMILES w/o R_group replacement",
             "SMILES w/o R_group",
@@ -337,7 +337,7 @@ class AcceptorClean:
             if row["Comments (Stanley)"] not in error_list:
                 clean_df = clean_df.append(
                     {
-                        "Label": row["Name"],
+                        "Acceptor": row["Name"],
                         "SMILES": row["SMILE"],
                         "SMILES w/o R_group replacement": row["R group Smiles"],
                         "SMILES w/o R_group": " ",
@@ -361,7 +361,7 @@ class AcceptorClean:
             "total: ",
             total_acceptors,
         )
-        clean_df.to_csv(clean_acceptor)
+        clean_df.to_csv(clean_acceptor, index=False)
 
     def replace_r(self, clean_acceptor):
         """
@@ -520,24 +520,35 @@ class DAPairs:
         headers = [
             "Donor",
             "Donor_SMILES",
-            "Donor_SMILES_w/o_Rgrp_replacement",
-            "Donor_SMILES_w/o_Rgrp",
             "Donor_Big_SMILES",
             "Donor_SELFIES",
             "Acceptor",
             "Acceptor_SMILES",
-            "Acceptor_SMILES_w/o_Rgrp_replacement",
-            "Acceptor_SMILES_w/o_Rgrp",
             "Acceptor_Big_SMILES",
             "Acceptor_SELFIES",
-            "PCE(%)",
-            "Voc(V)",
-            "Jsc(mA cm^-2)",
-            "FF(%)",
+            "HOMO_D (eV)",
+            "LUMO_D (eV)",
+            "HOMO_A (eV)",
+            "LUMO_A (eV)",
+            "D:A ratio (m/m)",
+            "solvent",
+            "total solids conc. (mg/mL)",
+            "solvent additive",
+            "solvent additive conc. (%v/v)",
+            "active layer thickness (nm)",
+            "annealing temperature",
+            "hole contact layer",
+            "electron contact layer",
+            "hole mobility blend (cm^2 V^-1 s^-1)",
+            "electron mobility blend (cm^2 V^-1 s^-1)",
+            "PCE (%)",
+            "Voc (V)",
+            "Jsc (mA cm^-2)",
+            "FF (%)",
         ]
         master_df = pd.DataFrame(columns=headers)
-        donor_avail = list(self.donors["Label"])
-        acceptor_avail = list(self.acceptors["Label"])
+        donor_avail = list(self.donors["Donor"])
+        acceptor_avail = list(self.acceptors["Acceptor"])
         # iterate through data_from_min.csv for donor-acceptor pairs
         for index, row in self.opv_data.iterrows():
             # only keep the rows with available donor and acceptor molecules from clean donors and acceptors
@@ -546,25 +557,25 @@ class DAPairs:
             ):
                 # get SMILES of donor and acceptor
                 donor_row = self.donors.loc[
-                    self.donors["Label"] == row["Donor Molecule"]
+                    self.donors["Donor"] == row["Donor Molecule"]
                 ]
                 donor_smile = donor_row["SMILES"].values[0]
                 acceptor_row = self.acceptors.loc[
-                    self.acceptors["Label"] == row["Acceptor Molecule"]
+                    self.acceptors["Acceptor"] == row["Acceptor Molecule"]
                 ]
                 acceptor_smile = acceptor_row["SMILES"].values[0]
 
                 # get SMILES w/o Rgrp replacement of donor and acceptor
-                donor_smile_wo_rgrp_replace = donor_row[
-                    "SMILES w/o R_group replacement"
-                ].values[0]
-                acceptor_smile_wo_rgrp_replace = acceptor_row[
-                    "SMILES w/o R_group replacement"
-                ].values[0]
+                # donor_smile_wo_rgrp_replace = donor_row[
+                #     "SMILES w/o R_group replacement"
+                # ].values[0]
+                # acceptor_smile_wo_rgrp_replace = acceptor_row[
+                #     "SMILES w/o R_group replacement"
+                # ].values[0]
 
                 # get SMILES w/o Rgrp of donor and acceptor
-                donor_smile_wo_rgrp = donor_row["SMILES w/o R_group"].values[0]
-                acceptor_smile_wo_rgrp = acceptor_row["SMILES w/o R_group"].values[0]
+                # donor_smile_wo_rgrp = donor_row["SMILES w/o R_group"].values[0]
+                # acceptor_smile_wo_rgrp = acceptor_row["SMILES w/o R_group"].values[0]
 
                 # get SELFIES of donor and acceptor
                 donor_selfies = donor_row["SELFIES"].values[0]
@@ -579,14 +590,10 @@ class DAPairs:
                     {
                         "Donor": row["Donor Molecule"],
                         "Donor_SMILES": donor_smile,
-                        "Donor_SMILES_w/o_Rgrp_replacement": donor_smile_wo_rgrp_replace,
-                        "Donor_SMILES_w/o_Rgrp": donor_smile_wo_rgrp,
                         "Donor_Big_SMILES": donor_bigsmile,
                         "Donor_SELFIES": donor_selfies,
                         "Acceptor": row["Acceptor Molecule"],
                         "Acceptor_SMILES": acceptor_smile,
-                        "Acceptor_SMILES_w/o_Rgrp_replacement": acceptor_smile_wo_rgrp_replace,
-                        "Acceptor_SMILES_w/o_Rgrp": acceptor_smile_wo_rgrp,
                         "Acceptor_Big_SMILES": acceptor_bigsmile,
                         "Acceptor_SELFIES": acceptor_selfies,
                         "PCE(%)": row["PCE (%)"],
@@ -626,13 +633,14 @@ class DAPairs:
 # donors.delete_r(CLEAN_DONOR_CSV)
 # acceptors.delete_r(CLEAN_ACCEPTOR_CSV)
 
+# Step 2 - ERROR CORRECTION (fill in missing D/A)
 
-# Step 2 - smiles_to_bigsmiles.py & smiles_to_selfies.py
+# Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 
-# Step 3
+# Step 4
 # NOTE: without PBDTTz, we lose 3 D.A pairs, 3 donors
 # pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 # pairings.create_master_csv(MASTER_ML_DATA)
 
-# Step 4
+# Step 5
 # Go to rdkit_frag.py (if needed)
