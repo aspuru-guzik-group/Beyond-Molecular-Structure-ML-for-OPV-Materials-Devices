@@ -166,6 +166,7 @@ class DonorClean:
         for smi in donor_smi_list:
             for r in patts:
                 smi = smi.replace(r, patts[r])
+            smi = Chem.CanonSmiles(smi)
             clean_df.at[index, "SMILES"] = smi
             index += 1
         clean_df.to_csv(clean_donor, index=False)
@@ -217,6 +218,7 @@ class DonorClean:
             # check if SMILES is valid
             mol = Chem.MolFromSmiles(smi)
             smi = Chem.MolToSmiles(mol)
+            smi = Chem.CanonSmiles(smi)
             clean_df.at[index, "SMILES w/o R_group"] = smi
             index += 1
         clean_df.to_csv(clean_donor, index=False)
@@ -405,6 +407,7 @@ class AcceptorClean:
         for smi in acceptor_smi_list:
             for r in patts:
                 smi = smi.replace(r, patts[r])
+            smi = Chem.CanonSmiles(smi)
             clean_df.at[index, "SMILES"] = smi
             index += 1
         clean_df.to_csv(clean_acceptor, index=False)
@@ -456,6 +459,7 @@ class AcceptorClean:
             # check if SMILES is valid
             mol = Chem.MolFromSmiles(smi)
             smi = Chem.MolToSmiles(mol)
+            smi = Chem.CanonSmiles(smi)
             clean_df.at[index, "SMILES w/o R_group"] = smi
             index += 1
         clean_df.to_csv(clean_acceptor, index=False)

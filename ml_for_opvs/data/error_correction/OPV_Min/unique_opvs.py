@@ -1,6 +1,13 @@
+from dataclasses import MISSING
+from enum import unique
 from typing import List
 import pkg_resources
 import pandas as pd
+
+from ml_for_opvs.data.preprocess.OPV_Min.clean_donors_acceptors import (
+    DonorClean,
+    AcceptorClean,
+)
 
 OPV_MIN = pkg_resources.resource_filename(
     "ml_for_opvs",
@@ -142,21 +149,48 @@ class UniqueOPVs:
         missing_df["SMILES"] = ""
         missing_df.to_csv(path, index=False)
 
+    def clean_up_missing(self):
+        """
+        Updates missing donor and acceptor with canonical SMILES and replaced R
+
+        Args:
+            None
+
+        Returns:
+            .csv file with clean missing data
+        """
+        donor_clean = DonorClean(OPV_MIN, MISSING_SMI_DONOR)
+        acceptor_clean = AcceptorClean(OPV_MIN, MISSING_SMI_ACCEPTOR)
+
+        donor_clean.replace_r(MISSING_SMI_DONOR)
+        acceptor_clean.replace_r(MISSING_SMI_ACCEPTOR)
+
+    def concat_missing_and_clean(self, missing_data, clean_data):
+        """
+        Updates missing donor and acceptor with canonical SMILES and replaced R
+
+        Args:
+            None
+
+        Returns:
+            .csv file with clean missing data
+        """
+
 
 # run functions
-unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_CLEAN)
+unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_MIN)
 
-min_unique_donors = unique_opvs.unique_list("D", "min")
-min_unique_acceptors = unique_opvs.unique_list("A", "min")
+# min_unique_donors = unique_opvs.unique_list("D", "min")
+# min_unique_acceptors = unique_opvs.unique_list("A", "min")
 
-clean_unique_donors = unique_opvs.unique_list("D", "clean")
-clean_unique_acceptors = unique_opvs.unique_list("A", "clean")
+# clean_unique_donors = unique_opvs.unique_list("D", "clean")
+# clean_unique_acceptors = unique_opvs.unique_list("A", "clean")
 
-missing_donors = unique_opvs.filter(min_unique_donors, clean_unique_donors)
-missing_acceptors = unique_opvs.filter(min_unique_acceptors, clean_unique_acceptors)
+# missing_donors = unique_opvs.filter(min_unique_donors, clean_unique_donors)
+# missing_acceptors = unique_opvs.filter(min_unique_acceptors, clean_unique_acceptors)
 
-missing_smi_donors = unique_opvs.filter_SMILES(missing_donors, "D")
-missing_smi_acceptors = unique_opvs.filter_SMILES(missing_acceptors, "A")
+# missing_smi_donors = unique_opvs.filter_SMILES(missing_donors, "D")
+# missing_smi_acceptors = unique_opvs.filter_SMILES(missing_acceptors, "A")
 
 # print("NUM_missing_donors: ", len(missing_donors))
 # print("NUM_missing_acceptors: ", len(missing_acceptors))
@@ -164,4 +198,6 @@ missing_smi_acceptors = unique_opvs.filter_SMILES(missing_acceptors, "A")
 # print("NUM_missing_smi_donors: ", len(missing_smi_donors))
 # print("NUM_missing_smi_acceptors: ", len(missing_smi_acceptors))
 
-unique_opvs.create_missing_csv(missing_smi_donors, "D")
+# unique_opvs.create_missing_csv(missing_smi_donors, "D")
+
+unique_opvs.clean_up_missing()
