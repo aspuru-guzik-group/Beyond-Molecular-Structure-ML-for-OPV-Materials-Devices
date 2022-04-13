@@ -14,7 +14,7 @@ OPV_MIN = pkg_resources.resource_filename(
     "data/process/OPV_Min/Machine Learning OPV Parameters - device_params.csv",
 )
 
-# OPV data after pre-processing which loss some of the OPVs from the Min. paper
+# OPV data after pre-processing
 OPV_CLEAN = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
@@ -32,6 +32,18 @@ MISSING_SMI_DONOR = pkg_resources.resource_filename(
 )
 MISSING_SMI_ACCEPTOR = pkg_resources.resource_filename(
     "ml_for_opvs", "data/error_correction/OPV_Min/missing_smi_acceptors.csv"
+)
+
+CHEMDRAW_DONOR = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/preprocess/OPV_Min/min_donors_smiles_master_EDITED.csv"
+)
+
+CHEMDRAW_ACCEPTOR = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/preprocess/OPV_Min/min_acceptors_smiles_master_EDITED.csv"
+)
+
+COMPARE_PATH = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/compare_sheets_chemdraw.csv"
 )
 
 
@@ -74,16 +86,25 @@ class UniqueOPVs:
         """
         if data_option == "min":  # take data from min
             data = self.opv_min
+            label = "Molecule"
         elif data_option == "clean":  # take data from pre-processed data
             data = self.opv_clean
 
         unique_mols = []
         if mol_type == "D":  # unique list of donors
-            for mol in data["Donor"]:
+            if data_option == "min":
+                label = "Donor " + label
+            else:
+                label = "Donor"
+            for mol in data[label]:
                 if mol not in unique_mols:
                     unique_mols.append(mol)
         elif mol_type == "A":  # unique list of acceptors
-            for mol in data["Acceptor"]:
+            if data_option == "min":
+                label = "Acceptor " + label
+            else:
+                label = "Acceptor"
+            for mol in data[label]:
                 if mol not in unique_mols:
                     unique_mols.append(mol)
 
@@ -200,6 +221,90 @@ class UniqueOPVs:
 
         new_clean_df.to_csv(clean_data, index=False)
 
+    def compare(self, compare_path, chemdraw_d, chemdraw_a):
+        """
+        Compares D-A pairs from Google Sheets and ChemDraw file.
+        Produces new .csv with overlap D-A pairs
+
+        Args:
+            compare_path: path to .csv for storing comparison of Google Sheets and ChemDraw donors/acceptors
+            chemdraw_d: path to excel sheet with all donors from ChemDraw file
+            chemdraw_a: path to excel sheet with all acceptors from ChemDraw file
+
+        Returns:
+            .csv file with missing data from Google Sheets and ChemDraw
+            columns = ["Label", "Type", "Missing_From", "ChemDraw_Comments"]
+            Label: Label for donor/acceptor molecule
+            Type: indicates whether donor or acceptor
+            Missing_From: Is missing from the Google Sheets or ChemDraw
+            ChemDraw_Comments: If there are conflicts or error msgs in the ChemDraw, it will be shown.
+        """
+        compare_df = pd.DataFrame(
+            columns=["Label", "Type", "Missing_From", "ChemDraw_Comments"]
+        )
+        compare_df["Label"] = ""
+        compare_df["Type"] = ""
+        compare_df["Missing_From"] = ""
+        compare_df["ChemDraw_Comments"] = ""
+
+        chemdraw_donor_df = pd.read_csv(chemdraw_d)
+        chemdraw_acceptor_df = pd.read_csv(chemdraw_a)
+        chemdraw_donors = list(chemdraw_donor_df["Name"])
+        chemdraw_acceptors_aaron = chemdraw_acceptor_df["Name_Aaron"]
+
+        sheets_donors = self.unique_list("D", "min")
+        sheets_acceptors = self.unique_list("A", "min")
+
+        donors_missing_from_sheets = list(set(chemdraw_donors) - set(sheets_donors))
+        donors_missing_from_chemdraw = list(set(sheets_donors) - set(chemdraw_donors))
+
+        acceptors_missing_from_sheets = list(
+            set(chemdraw_acceptors_aaron) - set(sheets_acceptors)
+        )
+        acceptors_missing_from_chemdraw = list(
+            set(sheets_acceptors) - set(chemdraw_acceptors_aaron)
+        )
+
+        df_index = 0
+        index = 0
+        while index < len(donors_missing_from_sheets):
+            compare_df.at[df_index, "Label"] = donors_missing_from_sheets[index]
+            compare_df.at[df_index, "Type"] = "donor"
+            compare_df.at[df_index, "Missing_From"] = "Google Sheets"
+            index += 1
+            df_index += 1
+
+        index = 0
+        while index < len(donors_missing_from_chemdraw):
+            compare_df.at[df_index, "Label"] = donors_missing_from_chemdraw[index]
+            compare_df.at[df_index, "Type"] = "donor"
+            compare_df.at[df_index, "Missing_From"] = "ChemDraw"
+            index += 1
+            df_index += 1
+
+        index = 0
+        while index < len(acceptors_missing_from_sheets):
+            compare_df.at[df_index, "Label"] = acceptors_missing_from_sheets[index]
+            compare_df.at[df_index, "Type"] = "acceptor"
+            compare_df.at[df_index, "Missing_From"] = "Google Sheets"
+            index += 1
+            df_index += 1
+
+        index = 0
+        while index < len(acceptors_missing_from_chemdraw):
+            compare_df.at[df_index, "Label"] = acceptors_missing_from_chemdraw[index]
+            compare_df.at[df_index, "Type"] = "acceptor"
+            compare_df.at[df_index, "Missing_From"] = "ChemDraw"
+            index += 1
+            df_index += 1
+
+        print("DONORS_MISSING_FROM_SHEETS: ", len(donors_missing_from_sheets))
+        print("DONORS_MISSING_FROM_CHEMDRAW: ", len(donors_missing_from_chemdraw))
+        print("ACCEPTORS_MISSING_FROM_SHEETS: ", len(acceptors_missing_from_sheets))
+        print("ACCEPTORS_MISSING_FROM_CHEMDRAW: ", len(acceptors_missing_from_chemdraw))
+
+        compare_df.to_csv(compare_path, index=False)
+
 
 # run functions
 unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_MIN)
@@ -227,7 +332,11 @@ unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_MIN)
 # unique_opvs.clean_up_missing()
 
 # concatenate for donors
-unique_opvs.concat_missing_and_clean(MISSING_SMI_DONOR, CLEAN_DONOR, "D")
+# unique_opvs.concat_missing_and_clean(MISSING_SMI_DONOR, CLEAN_DONOR, "D")
 
 # concatenate for acceptors
-unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
+# unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
+
+# compare Google Sheets and ChemDraw file
+unique_opvs.compare(COMPARE_PATH, CHEMDRAW_DONOR, CHEMDRAW_ACCEPTOR)
+

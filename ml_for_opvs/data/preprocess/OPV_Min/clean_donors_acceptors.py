@@ -596,10 +596,35 @@ class DAPairs:
                         "Acceptor_SMILES": acceptor_smile,
                         "Acceptor_Big_SMILES": acceptor_bigsmile,
                         "Acceptor_SELFIES": acceptor_selfies,
-                        "PCE(%)": row["PCE (%)"],
-                        "Voc(V)": row["Voc (V)"],
-                        "Jsc(mA cm^-2)": row["Jsc (mA cm^-2)"],
-                        "FF(%)": row["FF (%)"],
+                        "HOMO_D (eV)": row["HOMO_D (eV)"],
+                        "LUMO_D (eV)": row["LUMO_D (eV)"],
+                        "HOMO_A (eV)": row["HOMO_A (eV)"],
+                        "LUMO_A (eV)": row["LUMO_A (eV)"],
+                        "D:A ratio (m/m)": "D:A ratio (m/m)",
+                        "solvent": row["solvent"],
+                        "total solids conc. (mg/mL)": row["total solids conc. (mg/mL)"],
+                        "solvent additive": row["solvent additive"],
+                        "solvent additive conc. (%v/v)": row[
+                            "solvent additive conc. (% v/v)"
+                        ],
+                        "active layer thickness (nm)": row[
+                            "active layer thickness (nm)"
+                        ],
+                        "annealing temperature": row[
+                            "temperature of thermal annealing (leave gap if not annealed)"
+                        ],
+                        "hole contact layer": row["hole contact layer"],
+                        "electron contact layer": row["electron contact layer"],
+                        "hole mobility blend (cm^2 V^-1 s^-1)": row[
+                            "hole mobility blend (cm^2 V^-1 s^-1)"
+                        ],
+                        "electron mobility blend (cm^2 V^-1 s^-1)": row[
+                            "electron mobility blend"
+                        ],
+                        "PCE (%)": row["PCE (%)"],
+                        "Voc (V)": row["Voc (V)"],
+                        "Jsc (mA cm^-2)": row["Jsc (mA cm^-2)"],
+                        "FF (%)": row["FF (%)"],
                     },
                     ignore_index=True,
                 )
@@ -639,8 +664,8 @@ class DAPairs:
 
 # Step 4
 # NOTE: without PBDTTz, we lose 3 D.A pairs, 3 donors
-# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-# pairings.create_master_csv(MASTER_ML_DATA)
+pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+pairings.create_master_csv(MASTER_ML_DATA)
 
 # Step 5
 # Go to rdkit_frag.py (if needed)
