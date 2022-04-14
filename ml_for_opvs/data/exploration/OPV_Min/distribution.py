@@ -4,11 +4,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.offsetbox import AnchoredText
 
-from ml_for_opvs.data.preprocess.OPV_Min.clean_donors_acceptors import OPV_DATA
-
 # OPV data after pre-processing
 OPV_CLEAN = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
+)
+
+DISTRIBUTION_PLOT = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/exploration/OPV_Min/distribution_plot.png"
 )
 
 
@@ -54,8 +56,7 @@ class Distribution:
             y_rows = x_columns
         print(x_columns, y_rows)
 
-        fig, axs = plt.subplots(y_rows, x_columns)
-        fig.tight_layout()
+        fig, axs = plt.subplots(y_rows, x_columns, figsize=(y_rows * 3, x_columns * 4))
         column_range = range(column_idx_first, column_idx_last)
 
         x_idx = 0
@@ -66,25 +67,36 @@ class Distribution:
             current_val_list = [
                 item for item in current_val_list if not (pd.isnull(item)) == True
             ]
-
             axs[y_idx, x_idx].set_title(current_column)
-            axs[y_idx, x_idx].hist(current_val_list)
-            stepsize = round(len(current_val_list) / 5)
-            start, end = axs[y_idx, x_idx].get_ylim()
-            axs[y_idx, x_idx].yaxis.set_ticks(np.arange(start, end, stepsize))
+            if isinstance(current_val_list[0], str):
+                n, bins, patches = axs[y_idx, x_idx].hist(current_val_list, bins="auto")
+            elif isinstance(current_val_list[0], float):
+                n, bins, patches = axs[y_idx, x_idx].hist(current_val_list, bins=30)
+            start = 0
+            end = n.max()
+            stepsize = end / 5
+            y_ticks = list(np.arange(start, end, stepsize))
+            y_ticks.append(end)
+            axs[y_idx, x_idx].yaxis.set_ticks(y_ticks)
             total = "Total: " + str(len(current_val_list))
-
             anchored_text = AnchoredText(total, loc="lower right")
             axs[y_idx, x_idx].add_artist(anchored_text)
             if isinstance(current_val_list[0], str):
-                axs[y_idx, x_idx].tick_params(rotation=45)
+                axs[y_idx, x_idx].tick_params(axis="x", labelrotation=90)
                 axs[y_idx, x_idx].tick_params(axis="x", labelsize=6)
             y_idx += 1
             if y_idx == y_rows:
                 y_idx = 0
                 x_idx += 1
 
-        plt.show()
+        left = 0.125  # the left side of the subplots of the figure
+        right = 0.9  # the right side of the subplots of the figure
+        bottom = 0.1  # the bottom of the subplots of the figure
+        top = 0.9  # the top of the subplots of the figure
+        wspace = 0.3  # the amount of width reserved for blank space between subplots
+        hspace = 0.6  # the amount of height reserved for white space between subplots
+        plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
+        plt.savefig(DISTRIBUTION_PLOT)
 
 
 dist = Distribution(OPV_CLEAN)

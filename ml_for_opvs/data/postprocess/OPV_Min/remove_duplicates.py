@@ -10,7 +10,7 @@ TRAIN_MASTER_DATA = pkg_resources.resource_filename(
 )
 
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
-    "opv_ml", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "opv_ml", "data/postprocess/OPV_Min/augmentation/train_aug_master5.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
