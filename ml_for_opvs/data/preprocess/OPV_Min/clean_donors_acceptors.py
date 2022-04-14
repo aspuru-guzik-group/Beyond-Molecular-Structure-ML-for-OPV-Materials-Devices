@@ -600,7 +600,7 @@ class DAPairs:
                         "LUMO_D (eV)": row["LUMO_D (eV)"],
                         "HOMO_A (eV)": row["HOMO_A (eV)"],
                         "LUMO_A (eV)": row["LUMO_A (eV)"],
-                        "D:A ratio (m/m)": "D:A ratio (m/m)",
+                        "D:A ratio (m/m)": row["D:A ratio (m/m)"],
                         "solvent": row["solvent"],
                         "total solids conc. (mg/mL)": row["total solids conc. (mg/mL)"],
                         "solvent additive": row["solvent additive"],
