@@ -795,6 +795,15 @@ pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 # all_config = range(1, 28)
 # pairings.filter_master_csv(MASTER_ML_DATA, ALL_MASTER_ML_DATA, all_config)
 
+impt_no_active_config = [1, 2, 3, 4, 5, 6, 7, 8, 13, 14, 15, 16, 17, 19, 24, 25, 26, 27]
+IMPORTANT_DEV_NO_ACTIVE_MASTER_ML_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs",
+    "data/process/OPV_Min/important_device_no_active_master_ml_for_opvs_from_min.csv",
+)
+pairings.filter_master_csv(
+    MASTER_ML_DATA, IMPORTANT_DEV_NO_ACTIVE_MASTER_ML_DATA, impt_no_active_config
+)
+
 
 # Step 5
 # Go to rdkit_frag.py (if needed)
