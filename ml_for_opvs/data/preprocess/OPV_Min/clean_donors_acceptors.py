@@ -630,6 +630,91 @@ class DAPairs:
                 )
         master_df.to_csv(master_csv_path)
 
+    def fill_empty_values(self, master_csv_path):
+        """
+        Function that fills in NaN values because it is reasonable.
+        Ex. Solvent additive does not have to be present. Therefore, "N/A" should replace NaN        
+        
+        Args:
+            master_csv_path: path to the processed master file for future data representation modifications
+
+        Returns:
+            .csv file with filled reasonable values
+        """
+        master_data = pd.read_csv(master_csv_path)
+        column_names = master_data.columns
+
+        # columns that can have NaN values
+        idx_solvent_additive = 16
+        idx_solvent_additive_conc = 17
+        idx_annealing_temp = 19
+        null_master_data = master_data.isna()
+
+        # placeholders
+        # N/A for string values, -1 for int,float values
+        for index, row in master_data.iterrows():
+            if null_master_data.at[index, column_names[idx_solvent_additive]] == True:
+                master_data.at[index, column_names[idx_solvent_additive]] = "N/A"
+            if (
+                null_master_data.at[index, column_names[idx_solvent_additive_conc]]
+                == True
+            ):
+                master_data.at[index, column_names[idx_solvent_additive_conc]] = -1
+            if null_master_data.at[index, column_names[idx_annealing_temp]] == True:
+                master_data.at[index, column_names[idx_annealing_temp]] = -1
+
+        master_data.to_csv(master_csv_path, index=False)
+
+    def filter_master_csv(
+        self, master_csv_path, filtered_master_csv_path, column_idx_list
+    ):
+        """
+        Function that filters the .csv file for rows that contain ONLY present values in the important columns:
+        
+        
+        Args:
+            master_csv_path: path to the processed master file for future data representation modifications
+            filtered_master_csv_path: path to the filtered master file for future data representation modifications
+
+        Returns:
+            .csv file with values that contain all of the parameters
+        """
+        master_data = pd.read_csv(master_csv_path)
+        column_names = master_data.columns
+        columns_dict = {}
+        index = 0
+        while index < len(column_names):
+            columns_dict[column_names[index]] = index
+            index += 1
+
+        print(columns_dict)
+
+        important_columns = []
+        for idx in column_idx_list:
+            important_columns.append(column_names[idx])
+
+        # select important columns
+        filter_master_data = master_data[important_columns]
+
+        # drop rows if there are any NaN values
+        filter_master_data = filter_master_data.dropna(axis=0, how="any")
+
+        filter_master_data.to_csv(filtered_master_csv_path, index=False)
+
+    def filter_most_important(self, master_csv_path, filtered_important_csv_path):
+        """
+        Function that filters the .csv file for rows that contain ONLY present values for rows:
+
+        
+        Args:
+            master_csv_path: path to the processed master file for future data representation modifications
+            filtered_important_csv_path: path to the filtered master file for future data representation modifications
+
+        Returns:
+            .csv file with values that contain all of the parameters
+        """
+        pass
+
 
 # Step 1
 # donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
@@ -665,7 +750,51 @@ class DAPairs:
 # Step 4
 # NOTE: without PBDTTz, we lose 3 D.A pairs, 3 donors
 pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-pairings.create_master_csv(MASTER_ML_DATA)
+# pairings.create_master_csv(MASTER_ML_DATA)
+# pairings.fill_empty_values(MASTER_ML_DATA)
+
+# created filtered master data
+# ELECTRONIC_MASTER_ML_DATA = pkg_resources.resource_filename(
+#     "ml_for_opvs", "data/process/OPV_Min/electronic_master_ml_for_opvs_from_min.csv"
+# )
+
+# IMPORTANT_DEVICE_MASTER_ML_DATA = pkg_resources.resource_filename(
+#     "ml_for_opvs",
+#     "data/process/OPV_Min/important_device_master_ml_for_opvs_from_min.csv",
+# )
+# electronic_config = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 25, 26, 27]
+# pairings.filter_master_csv(MASTER_ML_DATA, ELECTRONIC_MASTER_ML_DATA, electronic_config)
+# impt_device_config = [
+#     1,
+#     2,
+#     3,
+#     4,
+#     5,
+#     6,
+#     7,
+#     8,
+#     13,
+#     14,
+#     15,
+#     16,
+#     17,
+#     18,
+#     19,
+#     24,
+#     25,
+#     26,
+#     27,
+# ]
+# pairings.filter_master_csv(
+#     MASTER_ML_DATA, IMPORTANT_DEVICE_MASTER_ML_DATA, impt_device_config
+# )
+
+# ALL_MASTER_ML_DATA = pkg_resources.resource_filename(
+#     "ml_for_opvs", "data/process/OPV_Min/filtered_master_ml_for_opvs_from_min.csv",
+# )
+# all_config = range(1, 28)
+# pairings.filter_master_csv(MASTER_ML_DATA, ALL_MASTER_ML_DATA, all_config)
+
 
 # Step 5
 # Go to rdkit_frag.py (if needed)

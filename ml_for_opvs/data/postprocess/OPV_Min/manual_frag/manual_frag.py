@@ -9,7 +9,7 @@ from collections import deque
 from IPython.display import display
 
 DONOR_DIR = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_donors_PBDTTz.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_donors.csv"
 )
 
 ACCEPTOR_DIR = pkg_resources.resource_filename(
