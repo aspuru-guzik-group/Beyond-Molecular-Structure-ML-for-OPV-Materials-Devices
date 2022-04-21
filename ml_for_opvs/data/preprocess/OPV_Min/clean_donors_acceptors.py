@@ -585,6 +585,11 @@ class DAPairs:
                 donor_bigsmile = donor_row["Big_SMILES"].values[0]
                 acceptor_bigsmile = acceptor_row["Big_SMILES"].values[0]
 
+                # strip whitespace of hole contact layer
+                hole_contact_layer = row["hole contact layer"]
+                if isinstance(row["hole contact layer"], str):
+                    hole_contact_layer = hole_contact_layer.strip()
+
                 # append new donor-acceptor pair to masters dataframe
                 master_df = master_df.append(
                     {
@@ -613,7 +618,7 @@ class DAPairs:
                         "annealing temperature": row[
                             "temperature of thermal annealing (leave gap if not annealed)"
                         ],
-                        "hole contact layer": row["hole contact layer"],
+                        "hole contact layer": hole_contact_layer,
                         "electron contact layer": row["electron contact layer"],
                         "hole mobility blend (cm^2 V^-1 s^-1)": row[
                             "hole mobility blend (cm^2 V^-1 s^-1)"
