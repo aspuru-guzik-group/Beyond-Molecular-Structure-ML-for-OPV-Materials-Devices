@@ -337,7 +337,7 @@ class AcceptorClean:
             if row["Comments (Stanley)"] not in error_list:
                 clean_df = clean_df.append(
                     {
-                        "Acceptor": row["Name"],
+                        "Acceptor": row["Name_Aaron"],
                         "SMILES": row["SMILE"],
                         "SMILES w/o R_group replacement": row["R group Smiles"],
                         "SMILES w/o R_group": " ",
@@ -348,7 +348,7 @@ class AcceptorClean:
                 )
             else:
                 error_acceptors += 1
-            if row["Name"] not in opv_labels:
+            if row["Name_Aaron"] not in opv_labels:
                 missing_acceptors += 1
             total_acceptors += 1
         print(clean_df.head())
@@ -701,19 +701,30 @@ class DAPairs:
 
         filter_master_data.to_csv(filtered_master_csv_path, index=False)
 
-    def filter_most_important(self, master_csv_path, filtered_important_csv_path):
+    def convert_str_to_float(self, master_csv_path):
         """
-        Function that filters the .csv file for rows that contain ONLY present values for rows:
-
-        
-        Args:
-            master_csv_path: path to the processed master file for future data representation modifications
-            filtered_important_csv_path: path to the filtered master file for future data representation modifications
-
-        Returns:
-            .csv file with values that contain all of the parameters
+        Converts D:A ratio and solvent additive conc. string representation to float
         """
-        pass
+        master_data = pd.read_csv(master_csv_path)
+        for index, row in master_data.iterrows():
+            ratio_data = master_data.at[index, "D:A ratio (m/m)"]
+            solvent_add_conc_data = master_data.at[
+                index, "solvent additive conc. (%v/v)"
+            ]
+            # ratio data
+            if isinstance(ratio_data, str):
+                ratio_list = ratio_data.split(":")
+                donor_ratio = float(ratio_list[0])
+                acceptor_ratio = float(ratio_list[1])
+                float_ratio_data = donor_ratio / acceptor_ratio
+                master_data.at[index, "D:A ratio (m/m)"] = round(float_ratio_data, 3)
+
+            # solvent additive conc. data
+            master_data.at[index, "solvent additive conc. (%v/v)"] = float(
+                solvent_add_conc_data
+            )
+
+        master_data.to_csv(master_csv_path, index=False)
 
 
 # Step 1
@@ -749,21 +760,26 @@ class DAPairs:
 
 # Step 4
 # NOTE: without PBDTTz, we lose 3 D.A pairs, 3 donors
-pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 # pairings.create_master_csv(MASTER_ML_DATA)
 # pairings.fill_empty_values(MASTER_ML_DATA)
 
+# Step 4b - Convert STR -> FLOAT
+# pairings.convert_str_to_float(MASTER_ML_DATA)
+
+# Step 4c - FILTER!
 # created filtered master data
 # ELECTRONIC_MASTER_ML_DATA = pkg_resources.resource_filename(
 #     "ml_for_opvs", "data/process/OPV_Min/electronic_master_ml_for_opvs_from_min.csv"
 # )
 
+# electronic_config = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 25, 26, 27]
+# pairings.filter_master_csv(MASTER_ML_DATA, ELECTRONIC_MASTER_ML_DATA, electronic_config)
+
 # IMPORTANT_DEVICE_MASTER_ML_DATA = pkg_resources.resource_filename(
 #     "ml_for_opvs",
 #     "data/process/OPV_Min/important_device_master_ml_for_opvs_from_min.csv",
 # )
-# electronic_config = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 25, 26, 27]
-# pairings.filter_master_csv(MASTER_ML_DATA, ELECTRONIC_MASTER_ML_DATA, electronic_config)
 # impt_device_config = [
 #     1,
 #     2,
@@ -795,15 +811,14 @@ pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 # all_config = range(1, 28)
 # pairings.filter_master_csv(MASTER_ML_DATA, ALL_MASTER_ML_DATA, all_config)
 
-impt_no_active_config = [1, 2, 3, 4, 5, 6, 7, 8, 13, 14, 15, 16, 17, 19, 24, 25, 26, 27]
-IMPORTANT_DEV_NO_ACTIVE_MASTER_ML_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs",
-    "data/process/OPV_Min/important_device_no_active_master_ml_for_opvs_from_min.csv",
-)
-pairings.filter_master_csv(
-    MASTER_ML_DATA, IMPORTANT_DEV_NO_ACTIVE_MASTER_ML_DATA, impt_no_active_config
-)
-
+# impt_no_active_config = [1, 2, 3, 4, 5, 6, 7, 8, 13, 14, 15, 16, 17, 19, 24, 25, 26, 27]
+# IMPORTANT_DEV_NO_ACTIVE_MASTER_ML_DATA = pkg_resources.resource_filename(
+#     "ml_for_opvs",
+#     "data/process/OPV_Min/important_device_no_active_master_ml_for_opvs_from_min.csv",
+# )
+# pairings.filter_master_csv(
+#     MASTER_ML_DATA, IMPORTANT_DEV_NO_ACTIVE_MASTER_ML_DATA, impt_no_active_config
+# )
 
 # Step 5
 # Go to rdkit_frag.py (if needed)

@@ -331,6 +331,7 @@ unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_MIN)
 
 # unique_opvs.clean_up_missing()
 
+# STEP 2 - takes place here
 # concatenate for donors
 # unique_opvs.concat_missing_and_clean(MISSING_SMI_DONOR, CLEAN_DONOR, "D")
 
@@ -338,5 +339,5 @@ unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_MIN)
 # unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
 
 # compare Google Sheets and ChemDraw file
-unique_opvs.compare(COMPARE_PATH, CHEMDRAW_DONOR, CHEMDRAW_ACCEPTOR)
+# unique_opvs.compare(COMPARE_PATH, CHEMDRAW_DONOR, CHEMDRAW_ACCEPTOR)
 
