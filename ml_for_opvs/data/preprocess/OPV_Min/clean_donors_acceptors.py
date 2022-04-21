@@ -337,7 +337,7 @@ class AcceptorClean:
             if row["Comments (Stanley)"] not in error_list:
                 clean_df = clean_df.append(
                     {
-                        "Acceptor": row["Name_Aaron"],
+                        "Acceptor": row["Name_Stanley"],
                         "SMILES": row["SMILE"],
                         "SMILES w/o R_group replacement": row["R group Smiles"],
                         "SMILES w/o R_group": " ",
@@ -348,7 +348,7 @@ class AcceptorClean:
                 )
             else:
                 error_acceptors += 1
-            if row["Name_Aaron"] not in opv_labels:
+            if row["Name_Stanley"] not in opv_labels:
                 missing_acceptors += 1
             total_acceptors += 1
         print(clean_df.head())
@@ -731,13 +731,13 @@ class DAPairs:
 # donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
 # donors.clean_donor(CLEAN_DONOR_CSV)
 
-# # # Step 1b
+# # # # Step 1b
 # donors.replace_r(CLEAN_DONOR_CSV)
 
-# # # # Step 1c - do not include for fragmentation
-# # donors.remove_methyl(CLEAN_DONOR_CSV)
+# # # # # Step 1c - do not include for fragmentation
+# # # donors.remove_methyl(CLEAN_DONOR_CSV)
 
-# # # Step 1d - canonSMILES to remove %10-%100
+# # # # Step 1d - canonSMILES to remove %10-%100
 # donors.canon_smi(CLEAN_DONOR_CSV)
 
 # # # # Step 1
@@ -759,13 +759,14 @@ class DAPairs:
 # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 
 # Step 4
-# NOTE: without PBDTTz, we lose 3 D.A pairs, 3 donors
 pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 pairings.create_master_csv(MASTER_ML_DATA)
-# pairings.fill_empty_values(MASTER_ML_DATA)
 
 # Step 4b - Convert STR -> FLOAT
-# pairings.convert_str_to_float(MASTER_ML_DATA)
+pairings.convert_str_to_float(MASTER_ML_DATA)
+
+# WARNING: DO NOT FILL BEFORE CREATING DISTRIBUTION AND CORRELATION PLOTS
+pairings.fill_empty_values(MASTER_ML_DATA)
 
 # Step 4c - FILTER!
 # created filtered master data
