@@ -138,10 +138,10 @@ class UniqueOPVs:
         """
         if mol_type == "D":  # clean donors
             clean_data = pd.read_csv(CLEAN_DONOR)
+            clean_list = list(clean_data["Donor"])
         elif mol_type == "A":  # clean acceptors
             clean_data = pd.read_csv(CLEAN_ACCEPTOR)
-
-        clean_list = list(clean_data["Label"])
+            clean_list = list(clean_data["Acceptor"])
 
         missing_smi_list = list(set(missing_list) - set(clean_list))
         return missing_smi_list
@@ -306,8 +306,10 @@ class UniqueOPVs:
         compare_df.to_csv(compare_path, index=False)
 
 
-# run functions
-unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_MIN)
+# run functions to create missing DONOR/ACCEPTORS.
+# WARNING: Do not run these unless you want to restart.
+# WARNING: The correct structures have been manually input for the missing DONORS/ACCEPTORS.
+unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_CLEAN)
 
 # min_unique_donors = unique_opvs.unique_list("D", "min")
 # min_unique_acceptors = unique_opvs.unique_list("A", "min")
@@ -333,10 +335,10 @@ unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_MIN)
 
 # STEP 2 - takes place here
 # concatenate for donors
-# unique_opvs.concat_missing_and_clean(MISSING_SMI_DONOR, CLEAN_DONOR, "D")
+unique_opvs.concat_missing_and_clean(MISSING_SMI_DONOR, CLEAN_DONOR, "D")
 
 # concatenate for acceptors
-# unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
+unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
 
 # compare Google Sheets and ChemDraw file
 # unique_opvs.compare(COMPARE_PATH, CHEMDRAW_DONOR, CHEMDRAW_ACCEPTOR)

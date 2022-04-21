@@ -731,23 +731,23 @@ class DAPairs:
 # donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
 # donors.clean_donor(CLEAN_DONOR_CSV)
 
-# # Step 1b
+# # # Step 1b
 # donors.replace_r(CLEAN_DONOR_CSV)
 
-# # # Step 1c - do not include for fragmentation
-# donors.remove_methyl(CLEAN_DONOR_CSV)
+# # # # Step 1c - do not include for fragmentation
+# # donors.remove_methyl(CLEAN_DONOR_CSV)
 
-# # Step 1d - canonSMILES to remove %10-%100
+# # # Step 1d - canonSMILES to remove %10-%100
 # donors.canon_smi(CLEAN_DONOR_CSV)
 
-# # # Step 1
+# # # # Step 1
 # acceptors = AcceptorClean(MASTER_ACCEPTOR_CSV, OPV_ACCEPTOR_DATA)
 # acceptors.clean_acceptor(CLEAN_ACCEPTOR_CSV)
 
-# Step 1b
+# # Step 1b
 # acceptors.replace_r(CLEAN_ACCEPTOR_CSV)
 
-# # Step 1d - canonSMILES to remove %10-%100
+# # # Step 1d - canonSMILES to remove %10-%100
 # acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
 
 # Step 1e - Fragmentation
@@ -760,8 +760,8 @@ class DAPairs:
 
 # Step 4
 # NOTE: without PBDTTz, we lose 3 D.A pairs, 3 donors
-# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-# pairings.create_master_csv(MASTER_ML_DATA)
+pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+pairings.create_master_csv(MASTER_ML_DATA)
 # pairings.fill_empty_values(MASTER_ML_DATA)
 
 # Step 4b - Convert STR -> FLOAT
