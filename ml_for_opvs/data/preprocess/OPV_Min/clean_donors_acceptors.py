@@ -542,6 +542,7 @@ class DAPairs:
             "hole mobility blend (cm^2 V^-1 s^-1)",
             "electron mobility blend (cm^2 V^-1 s^-1)",
             "PCE (%)",
+            "calc_PCE (%)",
             "Voc (V)",
             "Jsc (mA cm^-2)",
             "FF (%)",
@@ -627,6 +628,7 @@ class DAPairs:
                             "electron mobility blend"
                         ],
                         "PCE (%)": row["PCE (%)"],
+                        "calc_PCE (%)": row["calc_PCE"],
                         "Voc (V)": row["Voc (V)"],
                         "Jsc (mA cm^-2)": row["Jsc (mA cm^-2)"],
                         "FF (%)": row["FF (%)"],
@@ -764,17 +766,17 @@ class DAPairs:
 # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 
 # Step 4
-pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-pairings.create_master_csv(MASTER_ML_DATA)
+# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# pairings.create_master_csv(MASTER_ML_DATA)
 
-# Step 4b - Convert STR -> FLOAT
-pairings.convert_str_to_float(MASTER_ML_DATA)
+# # Step 4b - Convert STR -> FLOAT
+# pairings.convert_str_to_float(MASTER_ML_DATA)
 
-# WARNING: DO NOT FILL BEFORE CREATING DISTRIBUTION AND CORRELATION PLOTS
-pairings.fill_empty_values(MASTER_ML_DATA)
+# # WARNING: DO NOT FILL BEFORE CREATING DISTRIBUTION AND CORRELATION PLOTS
+# pairings.fill_empty_values(MASTER_ML_DATA)
 
-# Step 4c - FILTER!
-# created filtered master data
+# # Step 4c - FILTER!
+# # created filtered master data
 # ELECTRONIC_MASTER_ML_DATA = pkg_resources.resource_filename(
 #     "ml_for_opvs", "data/process/OPV_Min/electronic_master_ml_for_opvs_from_min.csv"
 # )

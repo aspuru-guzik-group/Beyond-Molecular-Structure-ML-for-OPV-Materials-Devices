@@ -52,7 +52,7 @@ class Correlation:
         print(columns_dict)
         # select which columns you want to plot
         column_idx_first = 9
-        column_idx_last = 27 + 1
+        column_idx_last = 28 + 1
 
         x_columns = column_idx_last - column_idx_first
         y_rows = column_idx_last - column_idx_first
