@@ -16,10 +16,10 @@ ACCEPTOR_DIR = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_acceptors.csv"
 )
 
-IMG_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/OPV_Min/manual_frag/")
+IMG_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/")
 
 FRAG_DONOR_DIR = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/OPV_Min/donor_frags.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
 )
 
 FRAG_ACCEPTOR_DIR = pkg_resources.resource_filename(
@@ -41,7 +41,7 @@ MASTER_MANUAL_DATA = pkg_resources.resource_filename(
 
 OPV_DATA = pkg_resources.resource_filename(
     "ml_for_opvs",
-    "data/process/OPV_Min/Machine Learning OPV Parameters - data_from_min.csv",
+    "data/process/OPV_Min/Machine Learning OPV Parameters - device_params.csv",
 )
 
 
@@ -527,7 +527,7 @@ class manual_frag:
 
 
 def cli_main():
-    # manual = manual_frag(OPV_DATA, DONOR_DIR, ACCEPTOR_DIR)
+    manual = manual_frag(OPV_DATA, DONOR_DIR, ACCEPTOR_DIR)
 
     # NOTE: DO NOT USE IF FRAGMENTED
     # manual.new_frag_files(
@@ -535,20 +535,20 @@ def cli_main():
     # )  # do it only the first time
 
     # iterate through donor and acceptor files
-    # donor_df = pd.read_csv(FRAG_DONOR_DIR)
-    # for i in range(45, 46):  # len(donor_df["SMILES"])
-    #     smi = manual.lookup("donor", i)
-    #     frag_list = manual.fragmenter(smi, "donor")
-    #     donor_df.at[i, "Fragments"] = frag_list
-    #     donor_df.to_csv(FRAG_DONOR_DIR, index=False)
+    donor_df = pd.read_csv(FRAG_DONOR_DIR)
+    for i in range(0, 26):  # len(donor_df["SMILES"])
+        smi = manual.lookup("donor", i)
+        frag_list = manual.fragmenter(smi, "donor")
+        donor_df.at[i, "Fragments"] = frag_list
+        donor_df.to_csv(FRAG_DONOR_DIR, index=False)
 
-    # acceptor_df = pd.read_csv(FRAG_ACCEPTOR_DIR)
+    acceptor_df = pd.read_csv(FRAG_ACCEPTOR_DIR)
 
-    # for i in range(268, len(acceptor_df["SMILES"])):
-    #     smi = manual.lookup("acceptor", i)
-    #     frag_list = manual.fragmenter(smi, "acceptor")
-    #     acceptor_df.at[i, "Fragments"] = frag_list
-    #     acceptor_df.to_csv(FRAG_ACCEPTOR_DIR, index=False)
+    for i in range(0, 43):
+        smi = manual.lookup("acceptor", i)
+        frag_list = manual.fragmenter(smi, "acceptor")
+        acceptor_df.at[i, "Fragments"] = frag_list
+        acceptor_df.to_csv(FRAG_ACCEPTOR_DIR, index=False)
 
     # prepare manual frag data
     manual = manual_frag(OPV_DATA, MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)

@@ -1,5 +1,5 @@
 Name,Parameter_Type,IUPAC,SMILES
-CF,"['Solvent', 'Solvent_Additive']",,
+CF,"['Solvent', 'Solvent_Additive']",chloroform,C(Cl)(Cl)Cl
 PEDOT:PSS,['Hole_Contact_Layer'],,
 Ca,['Electron_Contact_Layer'],,
 CN,['Solvent_Additive'],,
