@@ -40,6 +40,10 @@ MASTER_ML_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
+MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
+)
+
 
 class DonorClean:
     """
@@ -768,9 +772,11 @@ class DAPairs:
 # Step 4
 # pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 # pairings.create_master_csv(MASTER_ML_DATA)
+# pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 
 # # Step 4b - Convert STR -> FLOAT
 # pairings.convert_str_to_float(MASTER_ML_DATA)
+# pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
 
 # # WARNING: DO NOT FILL BEFORE CREATING DISTRIBUTION AND CORRELATION PLOTS
 # pairings.fill_empty_values(MASTER_ML_DATA)

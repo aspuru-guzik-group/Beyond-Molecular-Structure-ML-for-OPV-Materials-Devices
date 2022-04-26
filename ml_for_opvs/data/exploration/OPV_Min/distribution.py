@@ -5,8 +5,8 @@ import numpy as np
 from matplotlib.offsetbox import AnchoredText
 
 # OPV data after pre-processing
-OPV_CLEAN = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
+MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
 )
 
 DISTRIBUTION_PLOT = pkg_resources.resource_filename(
@@ -99,6 +99,6 @@ class Distribution:
         plt.savefig(DISTRIBUTION_PLOT)
 
 
-dist = Distribution(OPV_CLEAN)
+dist = Distribution(MASTER_ML_DATA_PLOT)
 
 dist.histogram()
