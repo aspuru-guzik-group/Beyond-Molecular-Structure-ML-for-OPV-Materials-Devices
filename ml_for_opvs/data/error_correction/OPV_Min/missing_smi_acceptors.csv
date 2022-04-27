@@ -8,8 +8,8 @@ IDTT-T,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc4c(cc3-c3sc5cc(C=C6C(=O)N(CC)C(=S)N(C
 IDT-BT-R2,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc4c(cc3-c3sc(-c5ccc(/C=C6\SC(=S)N(CC)C6=O)c6nsnc56)cc32)C(c2ccc(CCCCCC)cc2)(c2ccc(CCCCCC)cc2)c2cc(-c3ccc(/C=C5\SC(=S)N(CC)C5=O)c5nsnc35)sc2-4)cc1
 IHIC2,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc(/C=C4\C(=O)c5cc(F)c(F)cc5C4=C(C#N)C#N)sc3-c3c2ccc2c4c(ccc32)C(c2ccc(CCCCCC)cc2)(c2ccc(CCCCCC)cc2)c2cc(/C=C3\C(=O)c5cc(F)c(F)cc5C3=C(C#N)C#N)sc2-4)cc1
 ITIC-F,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc4c(cc3-c3sc5cc(/C=C6\C(=O)c7cc(F)c(F)cc7C6=C(C#N)C#N)sc5c32)C(c2ccc(CCCCCC)cc2)(c2ccc(CCCCCC)cc2)c2c-4sc3cc(/C=C4\C(=O)c5cc(F)c(F)cc5C4=C(C#N)C#N)sc23)cc1
-ATT-3,CCCCCCCCOC(=O)c1cc2c(-c3cc4c(s3)-c3cc5c(cc3C4(c3ccc(CCCCCC)cc3)c3ccc(CCCCCC)cc3)C3=C(C=C(c4sc(/C=C6\SC(=S)CN(CC)C6=O)c6sc(C(=O)OCCCCCCCC)cc46)C3)C5(c3ccc(CCCCCC)cc3)c3ccc(CCCCCC)cc3)sc(C=C3SC(=S)N(CC)C3=O)c2s1
-IDTO-Se-4F,CCCCCCCCOc1c(-c2ccc(C=C3C(=O)c4cc(F)c(F)cc4C3=C(C#N)C#N)[se]2)sc2c1C(C1=CCC(CCCCCC)C=C1)(c1ccc(CCCCCC)cc1)c1cc3c(cc1-2)C(c1ccc(CCCCCC)cc1)(c1ccc(CCCCCC)cc1)c1c-3sc(-c2ccc(C=C3C(=O)c4cc(F)c(F)cc4C3=C(C#N)C#N)[se]2)c1OCCCCCCCC
+ATT-3,CCCCCCCCOC(=O)c1cc2c(-c3cc4c(s3)-c3cc5c(cc3C4(c3ccc(CCCCCC)cc3)c3ccc(CCCCCC)cc3)-c3sc(-c4sc(C=C6SC(=S)N(CC)C6=O)c6sc(C(=O)OCCCCCCCC)cc46)cc3C5(c3ccc(CCCCCC)cc3)c3ccc(CCCCCC)cc3)sc(C=C3SC(=S)N(CC)C3=O)c2s1
+IDTO-Se-4F,CCCCCCCCOc1c(-c2ccc(C=C3C(=O)c4cc(F)c(F)cc4C3=C(C#N)C#N)[se]2)sc2c1C(c1ccc(CCCCCC)cc1)(c1ccc(CCCCCC)cc1)c1cc3c(cc1-2)C(c1ccc(CCCCCC)cc1)(c1ccc(CCCCCC)cc1)c1c-3sc(-c2ccc(C=C3C(=O)c4cc(F)c(F)cc4C3=C(C#N)C#N)[se]2)c1OCCCCCCCC
 IDT-BC6,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc4c(cc3-c3sc(-c5cc(CCCCCC)c(C=C6C(=O)c7ccccc7C6=C(C#N)C#N)cc5CCCCCC)cc32)C(c2ccc(CCCCCC)cc2)(c2ccc(CCCCCC)cc2)c2cc(-c3cc(CCCCCC)c(C=C5C(=O)c6ccccc6C5=C(C#N)C#N)cc3CCCCCC)sc2-4)cc1
 4TIC-4F,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc(/C=C4\C(=O)c5cc(F)c(F)cc5C4=C(C#N)C#N)sc3-c3sc4c5c(sc4c32)-c2sc(/C=C3\C(=O)c4cc(F)c(F)cc4C3=C(C#N)C#N)cc2C5(c2ccc(CCCCCC)cc2)c2ccc(CCCCCC)cc2)cc1
 N3,CCCCCCCCN1C(=O)c2cc(-c3ccc(C=C4SC(=S)N(CC)C4=O)s3)c3c4c(cc(-c5ccc(C=C6SC(=S)N(CC)C6=O)s5)c(c24)C1=O)C(=O)N(CCCCCCCC)C3=O
@@ -26,7 +26,7 @@ IT-OM-2,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc4c(cc3-c3sc5cc(C=C6C(=O)c7ccc(OC)cc7
 IDT-FBTR,CCCCCCCCn1c(=C(C#N)C#N)sc(=Cc2ccc(-c3c(F)cc(-c4cc5c(s4)-c4cc6c(cc4C5(c4ccc(CCCCCC)cc4)c4ccc(CCCCCC)cc4)-c4sc(-c5cc(F)c(-c7ccc(C=c8sc(=C(C#N)C#N)n(CCCCCCCC)c8=O)s7)c7nsnc57)cc4C6(c4ccc(CCCCCC)cc4)c4ccc(CCCCCC)cc4)c4nsnc34)s2)c1=O
 F9IC,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc4c(cc3-c3sc5c(sc6cc(C=C7C(=O)c8cc(F)c(F)cc8C7=C(C#N)C#N)sc65)c32)C(c2ccc(CCCCCC)cc2)(c2ccc(CCCCCC)cc2)c2c-4sc3c2sc2cc(C=C4C(=O)c5cc(F)c(F)cc5C4=C(C#N)C#N)sc23)cc1
 IT-4Cl,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc4c(cc3-c3sc5cc(/C=C6\C(=O)c7cc(Cl)c(Cl)cc7C6=C(C#N)C#N)sc5c32)C(c2ccc(CCCCCC)cc2)(c2ccc(CCCCCC)cc2)c2c-4sc3cc(/C=C4\C(=O)c5cc(Cl)c(Cl)cc5C4=C(C#N)C#N)sc23)cc1
-IDTO-T-4F,CCCCCCCCOc1c(-c2ccc(C=C3C(=O)c4cc(F)c(F)cc4C3=C(C#N)C#N)s2)sc2c1C(C1=CCC(CCCCCC)C=C1)(c1ccc(CCCCCC)cc1)c1cc3c(cc1-2)C(c1ccc(CCCCCC)cc1)(c1ccc(CCCCCC)cc1)c1c-3sc(-c2ccc(C=C3C(=O)c4cc(F)c(F)cc4C3=C(C#N)C#N)s2)c1OCCCCCCCC
+IDTO-T-4F,CCCCCCCCOc1c(-c2ccc(C=C3C(=O)c4cc(F)c(F)cc4C3=C(C#N)C#N)s2)sc2c1C(c1ccc(CCCCCC)cc1)(c1ccc(CCCCCC)cc1)c1cc3c(cc1-2)C(c1ccc(CCCCCC)cc1)(c1ccc(CCCCCC)cc1)c1c-3sc(-c2ccc(C=C3C(=O)c4cc(F)c(F)cc4C3=C(C#N)C#N)s2)c1OCCCCCCCC
 IDT-BOC6,CCCCCCOc1cc(-c2cc3c(s2)-c2cc4c(cc2C3(c2ccc(CCCCCC)cc2)c2ccc(CCCCCC)cc2)-c2sc(-c3cc(OCCCCCC)c(C=C5C(=O)c6ccccc6C5=C(C#N)C#N)cc3OCCCCCC)cc2C4(c2ccc(CCCCCC)cc2)c2ccc(CCCCCC)cc2)c(OCCCCCC)cc1C=C1C(=O)c2ccccc2C1=C(C#N)C#N
 H-ITIC,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc4c(cc3-c3sc5cc(C=C6C(=O)c7ccccc7C6=C(C#N)C#N)sc5c32)C(c2ccc(CCCCCC)cc2)(c2ccc(CCCCCC)cc2)c2c-4sc3cc(C=C4C(=O)c5ccccc5C4=C(C#N)C#N)sc23)cc1
 F-ITIC,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc4c(cc3-c3sc5cc(C=C6C(=O)c7cc(F)ccc7C6=C(C#N)C#N)sc5c32)C(c2ccc(CCCCCC)cc2)(c2ccc(CCCCCC)cc2)c2c-4sc3cc(C=C4C(=O)c5cc(F)ccc5C4=C(C#N)C#N)sc23)cc1
@@ -35,7 +35,7 @@ IT-OM-3,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc4c(cc3-c3sc5cc(C=C6C(=O)c7cc(OC)ccc7
 ITDM,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)C3=C(SC4C=C(C=C5C(=O)c6cc(C)c(C)cc6C5=C(C#N)C#N)SC34)c3cc4c(cc32)-c2sc3cc(C=C5C(=O)c6cc(C)c(C)cc6C5=C(C#N)C#N)sc3c2C4(c2ccc(CCCCCC)cc2)c2ccc(CCCCCC)cc2)cc1
 NFBDT-Me,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc(C=C4C(=O)c5cc(C)ccc5C4=C(C#N)C#N)sc3-c3sc4cc5c6c(sc5cc4c32)-c2sc(C=C3C(=O)c4cc(C)ccc4C3=C(C#N)C#N)cc2C6(c2ccc(CCCCCC)cc2)c2ccc(CCCCCC)cc2)cc1
 IDTO-TT-4F,CCCCCCCCOc1c(-c2cc3sc(C=C4C(=O)c5cc(F)c(F)cc5C4=C(C#N)C#N)cc3s2)sc2c1C(c1ccc(CCCCCC)cc1)(c1ccc(CCCCCC)cc1)c1cc3c(cc1-2)C(c1ccc(CCCCCC)cc1)(c1ccc(CCCCCC)cc1)c1c-3sc(-c2cc3sc(C=C4C(=O)c5cc(F)c(F)cc5C4=C(C#N)C#N)cc3s2)c1OCCCCCCCC
-N6,C/C=C(/C=C1C(=O)N(CCCCCCCC)C(=O)C(C#N)=C1C)SCc1cc2c3c(c(-c4ccc(C=C5C(=O)N(CCCCCCCC)C(=O)C(C#N)=C5C)s4)cc4c3c1C(=O)N(CCCCCCCC)C4=O)C(=O)N(CCCCCCCC)C2=O.C=C
+N6,CCCCCCCCN1C(=O)C(=Cc2ccc(-c3cc4c5c(c(-c6ccc(C=C7C(=O)N(CCCCCCCC)C(=O)C(C#N)=C7C)s6)cc6c5c3C(=O)N(CCCCCCCC)C6=O)C(=O)N(CCCCCCCC)C4=O)s2)C(C)=C(C#N)C1=O
 DICTF-C10,CCCCCCCCCCC1(CCCCCCCCCC)c2cc(-c3ccc(C=C4C(=O)c5ccccc5C4=C(C#N)C#N)s3)ccc2-c2ccc(-c3ccc(C=C4C(=O)c5ccccc5C4=C(C#N)C#N)s3)cc21
 BT-SFIC,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc(C=C4C(=O)c5cc(F)ccc5C4=C(C#N)C#N)sc3-c3sc4c(OCC(CC)CCCC)c5c6c(sc5c(OCC(CC)CCCC)c4c32)-c2sc(C=C3C(=O)c4cc(F)ccc4C3=C(C#N)C#N)cc2C6(c2ccc(CCCCCC)cc2)c2ccc(CCCCCC)cc2)cc1
 Cl-ITIC,CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3cc4c(cc3-c3sc5cc(C=C6C(=O)c7cc(Cl)ccc7C6=C(C#N)C#N)sc5c32)C(c2ccc(CCCCCC)cc2)(c2ccc(CCCCCC)cc2)c2c-4sc3cc(C=C4C(=O)c5cc(Cl)ccc5C4=C(C#N)C#N)sc23)cc1

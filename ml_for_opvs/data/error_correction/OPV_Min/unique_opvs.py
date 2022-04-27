@@ -331,7 +331,7 @@ unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_CLEAN)
 
 # unique_opvs.create_missing_csv(missing_smi_donors, "D")
 
-# unique_opvs.clean_up_missing()
+unique_opvs.clean_up_missing()
 
 # STEP 2 - takes place here
 # concatenate for donors

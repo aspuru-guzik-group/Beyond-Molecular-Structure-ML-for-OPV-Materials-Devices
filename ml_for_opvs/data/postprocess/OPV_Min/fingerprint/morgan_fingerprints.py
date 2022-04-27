@@ -51,12 +51,8 @@ class fp_data:
         # Only used when first creating dataframe from master data before
         fp_df.drop(
             [
-                "Donor_SMILES_w/o_Rgrp_replacement",
-                "Donor_SMILES_w/o_Rgrp",
                 "Donor_Big_SMILES",
                 "Donor_SELFIES",
-                "Acceptor_SMILES_w/o_Rgrp_replacement",
-                "Acceptor_SMILES_w/o_Rgrp",
                 "Acceptor_Big_SMILES",
                 "Acceptor_SELFIES",
             ],
@@ -85,5 +81,6 @@ class fp_data:
         # fp_df.to_pickle(fp_path)
 
 
+# put master_ml_data first, and then when you create more fingerprints, use fp_data
 fp_main = fp_data(FP_DATA)
-fp_main.create_master_fp(FP_DATA, 3, 256)
+fp_main.create_master_fp(FP_DATA, 3, 512)

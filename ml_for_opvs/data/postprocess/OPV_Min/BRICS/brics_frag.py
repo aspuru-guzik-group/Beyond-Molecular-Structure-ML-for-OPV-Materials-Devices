@@ -110,19 +110,65 @@ class BRIC_FRAGS:
                 "Donor_SMILES",
                 "Acceptor",
                 "Acceptor_SMILES",
-                "PCE(%)",
                 "Donor_BRICS",
                 "Acceptor_BRICS",
                 "DA_pair_BRICS",
                 "DA_tokenized_BRICS",
                 "AD_tokenized_BRICS",
+                "HOMO_D (eV)",
+                "LUMO_D (eV)",
+                "HOMO_A (eV)",
+                "LUMO_A (eV)",
+                "D:A ratio (m/m)",
+                "solvent",
+                "total solids conc. (mg/mL)",
+                "solvent additive",
+                "solvent additive conc. (%v/v)",
+                "active layer thickness (nm)",
+                "annealing temperature",
+                "hole contact layer",
+                "electron contact layer",
+                "hole mobility blend (cm^2 V^-1 s^-1)",
+                "electron mobility blend (cm^2 V^-1 s^-1)",
+                "PCE (%)",
+                "calc_PCE (%)",
+                "Voc (V)",
+                "Jsc (mA cm^-2)",
+                "FF (%)",
             ]
         )
         brics_df["Donor"] = self.data["Donor"]
         brics_df["Donor_SMILES"] = self.data["Donor_SMILES"]
         brics_df["Acceptor"] = self.data["Acceptor"]
         brics_df["Acceptor_SMILES"] = self.data["Acceptor_SMILES"]
-        brics_df["PCE(%)"] = self.data["PCE(%)"]
+        brics_df["HOMO_D (eV)"] = self.data["HOMO_D (eV)"]
+        brics_df["LUMO_D (eV)"] = self.data["LUMO_D (eV)"]
+        brics_df["HOMO_A (eV)"] = self.data["HOMO_A (eV)"]
+        brics_df["LUMO_A (eV)"] = self.data["LUMO_A (eV)"]
+        brics_df["D:A ratio (m/m)"] = self.data["D:A ratio (m/m)"]
+        brics_df["solvent"] = self.data["solvent"]
+        brics_df["total solids conc. (mg/mL)"] = self.data["total solids conc. (mg/mL)"]
+        brics_df["solvent additive"] = self.data["solvent additive"]
+        brics_df["solvent additive conc. (%v/v)"] = self.data[
+            "solvent additive conc. (%v/v)"
+        ]
+        brics_df["active layer thickness (nm)"] = self.data[
+            "active layer thickness (nm)"
+        ]
+        brics_df["annealing temperature"] = self.data["annealing temperature"]
+        brics_df["hole contact layer"] = self.data["hole contact layer"]
+        brics_df["electron contact layer"] = self.data["electron contact layer"]
+        brics_df["hole mobility blend (cm^2 V^-1 s^-1)"] = self.data[
+            "hole mobility blend (cm^2 V^-1 s^-1)"
+        ]
+        brics_df["electron mobility blend (cm^2 V^-1 s^-1)"] = self.data[
+            "electron mobility blend (cm^2 V^-1 s^-1)"
+        ]
+        brics_df["PCE (%)"] = self.data["PCE (%)"]
+        brics_df["calc_PCE (%)"] = self.data["calc_PCE (%)"]
+        brics_df["Voc (V)"] = self.data["Voc (V)"]
+        brics_df["Jsc (mA cm^-2)"] = self.data["Jsc (mA cm^-2)"]
+        brics_df["FF (%)"] = self.data["FF (%)"]
 
         # Iterate through row and fragment using BRICS
         # to get Donor_BRICS, Acceptor_BRICS, and DA_pair_BRICS
