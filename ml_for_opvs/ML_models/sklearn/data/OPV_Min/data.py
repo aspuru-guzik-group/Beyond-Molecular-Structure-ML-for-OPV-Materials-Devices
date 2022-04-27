@@ -1,4 +1,5 @@
 # data.py for classical ML
+from lib2to3.pgen2.tokenize import tokenize
 import pandas as pd
 import numpy as np
 import pkg_resources
@@ -10,7 +11,7 @@ import torch
 from torch.utils.data import random_split
 
 TRAIN_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
@@ -63,10 +64,16 @@ class Dataset:
                 + row["Acceptor_{}".format(representation)]
             )
 
-    def setup(self):
+    def setup(self, parameter):
         """
         NOTE: for SMILES
         Function that sets up data ready for training 
+
+        Args:
+        parameter: type of parameters to include:
+            - electronic: HOMO, LUMO
+            - device: all device parameters
+            - impt_device: all the important device parameters (D:A ratio - Annealing Temp.)
         """
         if self.input == 0:
             # tokenize data
@@ -102,16 +109,48 @@ class Dataset:
             # tokenized_input = np.asarray(tokenized_input)
             tokenized_input = Tokenizer().pad_input(tokenized_input, max_selfie_length)
         if self.shuffled:
-            pce_array = self.data["PCE(%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE(%)"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
 
         # minimize range of pce between 0-1
         # find max of pce_array
         self.max_pce = pce_array.max()
         pce_array = pce_array / self.max_pce
 
+        # add device parameters to the end of input
+        index = 0
+        while index < len(tokenized_input):
+            if parameter == "electronic":
+                homo_d = self.data["HOMO_D (eV)"].to_numpy().astype("float32")
+                lumo_d = self.data["LUMO_D (eV)"].to_numpy().astype("float32")
+                homo_a = self.data["HOMO_A (eV)"].to_numpy().astype("float32")
+                lumo_a = self.data["LUMO_A (eV)"].to_numpy().astype("float32")
+                tokenized_input[index].append(homo_d[index])
+                tokenized_input[index].append(lumo_d[index])
+                tokenized_input[index].append(homo_a[index])
+                tokenized_input[index].append(lumo_a[index])
+            elif parameter == "device":
+                pass
+            elif parameter == "impt_device":
+                pass
+            index += 1
+
+        # filter out "nan" values
+        nan_array = np.isnan(tokenized_input)
+        filtered_tokenized_input = []
+        filtered_pce_array = []
+        nan_idx = 0
+        while nan_idx < len(nan_array):
+            if True not in nan_array[nan_idx]:
+                filtered_tokenized_input.append(tokenized_input[nan_idx])
+                filtered_pce_array.append(pce_array[nan_idx])
+            nan_idx += 1
+
+        print(filtered_tokenized_input)
+
         # split data into cv
+        # print(tokenized_input)
         return np.asarray(tokenized_input), pce_array
 
     def setup_aug_smi(self):
@@ -120,9 +159,9 @@ class Dataset:
         Function that sets up data ready for training 
         """
         if self.shuffled:
-            pce_array = self.data["PCE(%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE(%)"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
 
         # minimize range of pce between 0-1
         # find max of pce_array
@@ -141,9 +180,9 @@ class Dataset:
         self.test_df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
 
         if self.shuffled:
-            pce_array = self.data["PCE(%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE(%)"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
         # minimize range of pce between 0-1 (applies to NN but not for ML)
         # find max of pce_array
         self.max_pce = pce_array.max()
@@ -190,9 +229,9 @@ class Dataset:
         self.test_df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
 
         if self.shuffled:
-            pce_array = self.data["PCE(%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE(%)"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
         # minimize range of pce between 0-1 (applies to NN but not for ML)
         # find max of pce_array
         self.max_pce = pce_array.max()
@@ -237,9 +276,9 @@ class Dataset:
     def setup_cv(self):
         self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
         if self.shuffled:
-            pce_array = self.data["PCE(%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE(%)"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
 
         self.max_pce = pce_array.max()
         pce_array = pce_array / self.max_pce
@@ -259,9 +298,9 @@ class Dataset:
     def setup_cv_aug(self):
         self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
         if self.shuffled:
-            pce_array = self.data["PCE(%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE(%)"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
 
         self.max_pce = pce_array.max()
         pce_array = pce_array / self.max_pce
@@ -286,9 +325,9 @@ class Dataset:
     def setup_frag_BRICS(self):
         self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
         if self.shuffled:
-            pce_array = self.data["PCE(%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE(%)"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
 
         self.max_pce = pce_array.max()
         pce_array = pce_array / self.max_pce
@@ -307,9 +346,9 @@ class Dataset:
     def setup_manual_frag(self):
         self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
         if self.shuffled:
-            pce_array = self.data["PCE(%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE(%)"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
 
         self.max_pce = pce_array.max()
         pce_array = pce_array / self.max_pce
@@ -328,9 +367,9 @@ class Dataset:
     def setup_fp(self, radius: int, nbits: int):
         self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
         if self.shuffled:
-            pce_array = self.data["PCE(%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE(%)"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
 
         self.max_pce = pce_array.max()
         pce_array = pce_array / self.max_pce
@@ -349,9 +388,9 @@ class Dataset:
         return x, y
 
 
-# dataset = Dataset(AUG_SMI_MASTER_DATA, 0, False)
-# dataset.prepare_data()
-# x, y = dataset.setup()
+dataset = Dataset(TRAIN_MASTER_DATA, 0, False)
+dataset.prepare_data()
+x, y = dataset.setup("electronic")
 # x, y = dataset.setup_cv()
 # x, y = dataset.setup_aug_smi()
 # x, y = dataset.setup_fp(2, 512)

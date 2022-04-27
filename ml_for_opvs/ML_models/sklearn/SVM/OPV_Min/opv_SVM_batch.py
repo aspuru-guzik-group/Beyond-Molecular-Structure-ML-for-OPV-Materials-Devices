@@ -26,7 +26,7 @@ from skopt import BayesSearchCV
 from ml_for_opvs.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
 
 TRAIN_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
@@ -150,8 +150,6 @@ unique_datatype = {
     "bigsmiles": 0,
     "selfies": 0,
     "aug_smiles": 0,
-    "hw_frag": 0,
-    "aug_hw_frag": 0,
     "brics": 0,
     "manual": 0,
     "aug_manual": 0,
@@ -164,8 +162,6 @@ for i in range(len(unique_datatype)):
         "bigsmiles": 0,
         "selfies": 0,
         "aug_smiles": 0,
-        "hw_frag": 0,
-        "aug_hw_frag": 0,
         "brics": 0,
         "manual": 0,
         "aug_manual": 0,
@@ -205,14 +201,6 @@ for i in range(len(unique_datatype)):
         dataset.prepare_data()
         x, y = dataset.setup_aug_smi()
         datatype = "AUG_SMILES"
-    elif unique_datatype["hw_frag"] == 1:
-        dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-        x, y = dataset.setup_cv()
-        datatype = "HW_FRAG"
-    elif unique_datatype["aug_hw_frag"] == 1:
-        dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-        x, y = dataset.setup_cv()
-        datatype = "AUG_HW_FRAG"
     elif unique_datatype["brics"] == 1:
         dataset = Dataset(BRICS_MASTER_DATA, 0, shuffled)
         x, y = dataset.setup_frag_BRICS()
@@ -243,7 +231,7 @@ for i in range(len(unique_datatype)):
         # split data
         x_train, x_test = x[train_ix], x[test_ix]
         y_train, y_test = y[train_ix], y[test_ix]
-        if unique_datatype["aug_manual"] == 1 or unique_datatype["aug_hw_frag"] == 1:
+        if unique_datatype["aug_manual"] == 1:
             # concatenate augmented data to x_train and y_train
             print("AUGMENTED")
             aug_x_train = list(copy.copy(x_train))
