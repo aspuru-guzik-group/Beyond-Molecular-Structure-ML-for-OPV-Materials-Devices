@@ -190,8 +190,6 @@ elif fingerprint:
     dataset = Dataset(FP_MASTER_DATA, 0, shuffled)
     x, y = dataset.setup_fp(radius, nbits)
     print("RADIUS: " + str(radius) + " NBITS: " + str(nbits))
-else:
-    x, y = dataset.setup_cv()
 
 brt_method = "xgboost"
 # brt_method = "sklearn"

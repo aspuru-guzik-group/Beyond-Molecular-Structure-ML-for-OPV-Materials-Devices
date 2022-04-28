@@ -223,14 +223,6 @@ for i in range(len(unique_datatype)):
         dataset.prepare_data()
         x, y = dataset.setup_aug_smi()
         datatype = "AUG_SMILES"
-    elif unique_datatype["hw_frag"] == 1:
-        dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-        x, y = dataset.setup_cv()
-        datatype = "HW_FRAG"
-    elif unique_datatype["aug_hw_frag"] == 1:
-        dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-        x, y = dataset.setup_cv()
-        datatype = "AUG_HW_FRAG"
     elif unique_datatype["brics"] == 1:
         dataset = Dataset(BRICS_MASTER_DATA, 0, shuffled)
         x, y = dataset.setup_frag_BRICS()
