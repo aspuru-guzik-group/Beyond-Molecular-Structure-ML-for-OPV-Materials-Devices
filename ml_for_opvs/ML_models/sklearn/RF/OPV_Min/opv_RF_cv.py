@@ -133,8 +133,6 @@ unique_datatype = {
     "bigsmiles": 0,
     "selfies": 0,
     "aug_smiles": 0,
-    "hw_frag": 0,
-    "aug_hw_frag": 0,
     "brics": 0,
     "manual": 0,
     "aug_manual": 0,
@@ -149,17 +147,17 @@ shuffled = False
 if unique_datatype["smiles"] == 1:
     dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
     dataset.prepare_data()
-    x, y = dataset.setup()
+    x, y = dataset.setup("none")
     datatype = "SMILES"
 elif unique_datatype["bigsmiles"] == 1:
     dataset = Dataset(MANUAL_MASTER_DATA, 1, shuffled)
     dataset.prepare_data()
-    x, y = dataset.setup()
+    x, y = dataset.setup("none")
     datatype = "BigSMILES"
 elif unique_datatype["selfies"] == 1:
     dataset = Dataset(TRAIN_MASTER_DATA, 2, shuffled)
     dataset.prepare_data()
-    x, y = dataset.setup()
+    x, y = dataset.setup("none")
     datatype = "SELFIES"
 elif unique_datatype["aug_smiles"] == 1:
     dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
@@ -168,7 +166,7 @@ elif unique_datatype["aug_smiles"] == 1:
     datatype = "AUG_SMILES"
 elif unique_datatype["brics"] == 1:
     dataset = Dataset(BRICS_MASTER_DATA, 0, shuffled)
-    x, y = dataset.setup_frag_BRICS()
+    x, y = dataset.setup_frag_BRICS("none")
     datatype = "BRICS"
 elif unique_datatype["manual"] == 1:
     dataset = Dataset(MANUAL_MASTER_DATA, 0, shuffled)
@@ -346,93 +344,3 @@ def parity_plot(y_test, yhat, y_max):
     # textstr = "slope: " + str(m) + "\n" + "y-int: " + str(b)
     # ax.text(0.5, 0.5, textstr, wrap=True, verticalalignment="top")
     plt.show()
-
-
-y_test = np.array(
-    [
-        0.3783,
-        0.7162,
-        0.7473,
-        0.5949,
-        0.7726,
-        0.4318,
-        0.4282,
-        0.6628,
-        0.8686,
-        0.7292,
-        0.7249,
-        0.2816,
-        0.5343,
-        0.7870,
-        0.8895,
-        0.0874,
-        0.7993,
-        0.9567,
-        0.7386,
-        0.7148,
-        0.5162,
-        0.8375,
-        0.6166,
-        0.6679,
-        0.6014,
-        0.8736,
-        0.5350,
-        0.8289,
-        0.8325,
-        0.7921,
-        0.7668,
-        0.6361,
-        0.6108,
-        0.3249,
-        0.2989,
-        0.5170,
-        0.7531,
-        0.3321,
-        0.6116,
-    ]
-)
-yhat = np.array(
-    [
-        0.4946,
-        1.0699,
-        1.2675,
-        1.0457,
-        1.2402,
-        0.7227,
-        0.4763,
-        0.4844,
-        0.4643,
-        0.6378,
-        0.0832,
-        0.2877,
-        0.1747,
-        0.7111,
-        0.2765,
-        0.2378,
-        1.0556,
-        0.9426,
-        -0.0923,
-        0.5631,
-        0.2580,
-        0.9701,
-        0.3987,
-        1.1318,
-        0.7172,
-        0.3820,
-        0.2995,
-        0.6930,
-        0.4399,
-        0.5250,
-        0.7777,
-        0.5967,
-        0.6089,
-        0.8823,
-        0.2887,
-        0.2890,
-        0.5778,
-        0.2486,
-        0.8367,
-    ]
-)
-
-parity_plot(y_test, yhat, 13.85)
