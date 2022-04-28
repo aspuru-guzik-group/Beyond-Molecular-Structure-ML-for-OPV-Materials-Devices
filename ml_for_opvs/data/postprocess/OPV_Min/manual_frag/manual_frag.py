@@ -401,17 +401,15 @@ class manual_frag:
         # iterate through data_from_min.csv for donor-acceptor pairs
         for index, row in self.opv_data.iterrows():
             # only keep the rows with available donor and acceptor molecules from clean donors and acceptors
-            if (row["Donor Molecule"] in donor_avail) and (
-                row["Acceptor Molecule"] in acceptor_avail
-            ):
+            if (row["Donor"] in donor_avail) and (row["Acceptor"] in acceptor_avail):
                 # get SMILES of donor and acceptor
                 donor_row = self.donor_data.loc[
-                    self.donor_data["Label"] == row["Donor Molecule"]
+                    self.donor_data["Label"] == row["Donor"]
                 ]
                 donor_smile = donor_row["SMILES"].values[0]
                 donor_big_smi = donor_row["Donor_BigSMILES"].values[0]
                 acceptor_row = self.acceptor_data.loc[
-                    self.acceptor_data["Label"] == row["Acceptor Molecule"]
+                    self.acceptor_data["Label"] == row["Acceptor"]
                 ]
                 acceptor_smile = acceptor_row["SMILES"].values[0]
                 acceptor_big_smi = acceptor_row["Acceptor_BigSMILES"].values[0]
@@ -424,10 +422,10 @@ class manual_frag:
                 # append new donor-acceptor pair to masters dataframe
                 manual_df = manual_df.append(
                     {
-                        "Donor": row["Donor Molecule"],
+                        "Donor": row["Donor"],
                         "Donor_SMILES": donor_smile,
                         "Donor_BigSMILES": donor_big_smi,
-                        "Acceptor": row["Acceptor Molecule"],
+                        "Acceptor": row["Acceptor"],
                         "Acceptor_SMILES": acceptor_smile,
                         "Acceptor_BigSMILES": acceptor_big_smi,
                         "HOMO_D (eV)": row["HOMO_D (eV)"],
@@ -439,24 +437,22 @@ class manual_frag:
                         "total solids conc. (mg/mL)": row["total solids conc. (mg/mL)"],
                         "solvent additive": row["solvent additive"],
                         "solvent additive conc. (%v/v)": row[
-                            "solvent additive conc. (% v/v)"
+                            "solvent additive conc. (%v/v)"
                         ],
                         "active layer thickness (nm)": row[
                             "active layer thickness (nm)"
                         ],
-                        "annealing temperature": row[
-                            "temperature of thermal annealing (leave gap if not annealed)"
-                        ],
+                        "annealing temperature": row["annealing temperature"],
                         "hole contact layer": hole_contact_layer,
                         "electron contact layer": row["electron contact layer"],
                         "hole mobility blend (cm^2 V^-1 s^-1)": row[
                             "hole mobility blend (cm^2 V^-1 s^-1)"
                         ],
                         "electron mobility blend (cm^2 V^-1 s^-1)": row[
-                            "electron mobility blend"
+                            "electron mobility blend (cm^2 V^-1 s^-1)"
                         ],
                         "PCE (%)": row["PCE (%)"],
-                        "calc_PCE (%)": row["calc_PCE"],
+                        "calc_PCE (%)": row["calc_PCE (%)"],
                         "Voc (V)": row["Voc (V)"],
                         "Jsc (mA cm^-2)": row["Jsc (mA cm^-2)"],
                         "FF (%)": row["FF (%)"],
@@ -631,7 +627,7 @@ class manual_frag:
 
 
 def cli_main():
-    manual = manual_frag(OPV_DATA, DONOR_DIR, ACCEPTOR_DIR)
+    manual = manual_frag(MASTER_ML_DATA, DONOR_DIR, ACCEPTOR_DIR)
 
     # NOTE: DO NOT USE IF FRAGMENTED
     # manual.new_frag_files(
@@ -658,9 +654,9 @@ def cli_main():
     # manual.fragment_new(FRAG_ACCEPTOR_DIR, MASTER_ML_DATA, "acceptor")
 
     # prepare manual frag data
-    manual = manual_frag(OPV_DATA, MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)
+    manual = manual_frag(MASTER_ML_DATA, MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)
     frag_dict = manual.return_frag_dict()
-    # print(frag_dict)
+    print(frag_dict)
     # print(len(frag_dict))
     # manual.frag_visualization(frag_dict)
     manual.bigsmiles_from_frag(MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)

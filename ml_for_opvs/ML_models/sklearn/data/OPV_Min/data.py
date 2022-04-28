@@ -1,4 +1,5 @@
 # data.py for classical ML
+from cmath import nan
 from lib2to3.pgen2.tokenize import tokenize
 import pandas as pd
 import numpy as np
@@ -9,6 +10,7 @@ import selfies as sf
 
 import torch
 from torch.utils.data import random_split
+import yaspin
 
 TRAIN_MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
@@ -26,11 +28,22 @@ MANUAL_MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
+# For Manual Fragments!
+MANUAL_DONOR_CSV = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
+)
+
+MANUAL_ACCEPTOR_CSV = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
+)
+
 FP_MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 from ml_for_opvs.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
+from ml_for_opvs.data.postprocess.OPV_Min.BRICS.brics_frag import BRIC_FRAGS
+from ml_for_opvs.data.postprocess.OPV_Min.manual_frag.manual_frag import manual_frag
 
 
 class Dataset:
@@ -93,14 +106,13 @@ class Dataset:
         elif self.input == 2:
             # tokenize data using selfies
             tokenized_input = []
-            selfie_dict, max_selfie_length = Tokenizer().tokenize_selfies(
+            token_dict, max_selfie_length = Tokenizer().tokenize_selfies(
                 self.data["DA_pair"]
             )
-            print(selfie_dict)
             for index, row in self.data.iterrows():
                 tokenized_selfie = sf.selfies_to_encoding(
                     self.data.at[index, "DA_pair"],
-                    selfie_dict,
+                    token_dict,
                     pad_to_len=-1,
                     enc_type="label",
                 )
@@ -200,7 +212,47 @@ class Dataset:
                 tokenized_input[index].append(electron_contact_layer[index])
 
             elif parameter == "impt_device":
-                pass
+                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                total_solids_conc = (
+                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                )
+                solvent_add_conc = (
+                    self.data["solvent additive conc. (%v/v)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                active_layer_thickness = (
+                    self.data["active layer thickness (nm)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                annealing_temp = (
+                    self.data["annealing temperature"].to_numpy().astype("float32")
+                )
+
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent = self.data["solvent"]
+                for input in solvent:
+                    # unique solvents
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                tokenized_input[index].append(d_a_ratio[index])
+                tokenized_input[index].append(total_solids_conc[index])
+                tokenized_input[index].append(solvent[index])
+                tokenized_input[index].append(solvent_add[index])
+                tokenized_input[index].append(solvent_add_conc[index])
+                tokenized_input[index].append(active_layer_thickness[index])
+                tokenized_input[index].append(annealing_temp[index])
             else:
                 return np.asarray(tokenized_input), pce_array
             index += 1
@@ -210,8 +262,10 @@ class Dataset:
         while data_pt_idx < len(tokenized_input):
             token_idx = 0
             while token_idx < len(tokenized_input[data_pt_idx]):
-                if isinstance(tokenized_input[data_pt_idx][token_idx], str):
-                    token = tokenized_input[data_pt_idx][token_idx]
+                token = tokenized_input[data_pt_idx][token_idx]
+                if token == "nan":
+                    tokenized_input[data_pt_idx][token_idx] = nan
+                elif isinstance(token, str):
                     tokenized_input[data_pt_idx][token_idx] = token_dict[token]
                 token_idx += 1
             data_pt_idx += 1
@@ -228,7 +282,8 @@ class Dataset:
             nan_idx += 1
 
         # split data into cv
-        print(filtered_tokenized_input)
+        print(token_dict)
+        # print(filtered_tokenized_input)
         print(len(filtered_tokenized_input), len(filtered_pce_array))
         return np.asarray(filtered_tokenized_input), filtered_pce_array
 
@@ -248,160 +303,7 @@ class Dataset:
         pce_array = pce_array / self.max_pce
         return np.asarray(self.data["DA_pair"]), pce_array
 
-    def setup_frag(self):
-        """
-        Function that sets up data ready for training 
-        (Tokenization, Normalizing, Splitting Data)
-        """
-        # create new training and testing dataframe
-        self.train_df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
-        self.val_df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
-        self.test_df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
-
-        if self.shuffled:
-            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
-        else:
-            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
-        # minimize range of pce between 0-1 (applies to NN but not for ML)
-        # find max of pce_array
-        self.max_pce = pce_array.max()
-        pce_array = pce_array / self.max_pce
-
-        # split data
-        # train = 80%, test = 10%, val = 10%
-        total_size = len(pce_array)
-        test = round(total_size * 0.10)
-        val = round(total_size * 0.10)
-        train = total_size - test - val
-
-        pce_train, pce_val, pce_test = random_split(
-            self.data, [train, val, test], generator=torch.Generator().manual_seed(1)
-        )
-        row_index = 0
-        for i in pce_train.indices:
-            # convert string to list (because csv cannot store list type)
-            da_pair_list = json.loads(self.data["DA_pair_tokenized"][i])
-            self.train_df.at[row_index, "tokenized_input"] = da_pair_list
-            self.train_df.at[row_index, "PCE"] = pce_array[i]
-            row_index += 1
-
-        row_index = 0
-        for i in pce_val.indices:
-            # convert string to list (because csv cannot store list type)
-            da_pair_list = json.loads(self.data["DA_pair_tokenized"][i])
-            self.val_df.at[row_index, "tokenized_input"] = da_pair_list
-            self.val_df.at[row_index, "PCE"] = pce_array[i]
-            row_index += 1
-
-        row_index = 0
-        for i in pce_test.indices:
-            # convert string to list (because csv cannot store list type)
-            da_pair_list = json.loads(self.data["DA_pair_tokenized"][i])
-            self.test_df.at[row_index, "tokenized_input"] = da_pair_list
-            self.test_df.at[row_index, "PCE"] = pce_array[i]
-            row_index += 1
-
-    def setup_frag_aug(self):
-        # create new training and testing dataframe
-        self.train_df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
-        self.val_df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
-        self.test_df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
-
-        if self.shuffled:
-            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
-        else:
-            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
-        # minimize range of pce between 0-1 (applies to NN but not for ML)
-        # find max of pce_array
-        self.max_pce = pce_array.max()
-        pce_array = pce_array / self.max_pce
-
-        # split data
-        # train = 80%, test = 10%, val = 10%
-        total_size = len(pce_array)
-        test = round(total_size * 0.10)
-        val = round(total_size * 0.10)
-        train = total_size - test - val
-
-        pce_train, pce_val, pce_test = random_split(
-            self.data, [train, val, test], generator=torch.Generator().manual_seed(1)
-        )
-        row_index = 0
-        for i in pce_train.indices:
-            # convert string to list (because csv cannot store list type)
-            da_pair_list = json.loads(self.data["DA_pair_tokenized"][i])
-            self.train_df.at[row_index, "tokenized_input"] = da_pair_list
-            self.train_df.at[row_index, "PCE"] = pce_array[i]
-            # add augmented data (ad_pair and duplicate PCEs)
-            ad_pair_list = json.loads(self.data["AD_pair_tokenized"][i])
-            self.train_df.at[row_index + 1, "tokenized_input"] = ad_pair_list
-            self.train_df.at[row_index + 1, "PCE"] = pce_array[i]
-            row_index += 2
-        row_index = 0
-        for i in pce_val.indices:
-            # convert string to list (because csv cannot store list type)
-            da_pair_list = json.loads(self.data["DA_pair_tokenized"][i])
-            self.val_df.at[row_index, "tokenized_input"] = da_pair_list
-            self.val_df.at[row_index, "PCE"] = pce_array[i]
-            row_index += 1
-        row_index = 0
-        for i in pce_test.indices:
-            # convert string to list (because csv cannot store list type)
-            da_pair_list = json.loads(self.data["DA_pair_tokenized"][i])
-            self.test_df.at[row_index, "tokenized_input"] = da_pair_list
-            self.test_df.at[row_index, "PCE"] = pce_array[i]
-            row_index += 1
-
-    def setup_cv(self):
-        self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
-        if self.shuffled:
-            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
-        else:
-            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
-
-        self.max_pce = pce_array.max()
-        pce_array = pce_array / self.max_pce
-
-        x = []
-        y = []
-        for i in range(len(self.data["DA_pair_tokenized_aug"])):
-            # convert string to list (because csv cannot store list type)
-            da_pair_list = json.loads(self.data["DA_pair_tokenized_aug"][i])
-            # only add the first da_pair
-            x.append(da_pair_list[0])
-            y.append(pce_array[i])
-        x = np.asarray(x)
-        y = np.asarray(y)
-        return x, y
-
-    def setup_cv_aug(self):
-        self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
-        if self.shuffled:
-            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
-        else:
-            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
-
-        self.max_pce = pce_array.max()
-        pce_array = pce_array / self.max_pce
-
-        x = []
-        y = []
-        for i in range(len(self.data["DA_pair_tokenized_aug"])):
-            # convert string to list (because csv cannot store list type)
-            da_pair_list = json.loads(self.data["DA_pair_tokenized_aug"][i])
-            for da_pair in da_pair_list:
-                x.append(da_pair)
-                y.append(pce_array[i])
-            ad_pair_list = json.loads(self.data["AD_pair_tokenized_aug"][i])
-            for ad_pair in ad_pair_list:
-                x.append(ad_pair)
-                y.append(pce_array[i])
-
-        x = np.asarray(x)
-        y = np.asarray(y)
-        return x, y
-
-    def setup_frag_BRICS(self):
+    def setup_frag_BRICS(self, parameter):
         self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
         if self.shuffled:
             pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
@@ -418,11 +320,171 @@ class Dataset:
             da_pair_list = json.loads(self.data["DA_tokenized_BRICS"][i])
             x.append(da_pair_list)
             y.append(pce_array[i])
-        x = np.asarray(x)
-        y = np.asarray(y)
-        return x, y
 
-    def setup_manual_frag(self):
+        # add device parameters to the end of input
+        b_frag = BRIC_FRAGS(TRAIN_MASTER_DATA)
+        token_dict = b_frag.bric_frag()
+
+        index = 0
+        while index < len(x):
+            if parameter == "electronic":
+                homo_d = self.data["HOMO_D (eV)"].to_numpy().astype("float32")
+                lumo_d = self.data["LUMO_D (eV)"].to_numpy().astype("float32")
+                homo_a = self.data["HOMO_A (eV)"].to_numpy().astype("float32")
+                lumo_a = self.data["LUMO_A (eV)"].to_numpy().astype("float32")
+                x[index].append(homo_d[index])
+                x[index].append(lumo_d[index])
+                x[index].append(homo_a[index])
+                x[index].append(lumo_a[index])
+            elif parameter == "device":
+                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                total_solids_conc = (
+                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                )
+                solvent_add_conc = (
+                    self.data["solvent additive conc. (%v/v)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                active_layer_thickness = (
+                    self.data["active layer thickness (nm)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                annealing_temp = (
+                    self.data["annealing temperature"].to_numpy().astype("float32")
+                )
+                hole_mobility_blend = (
+                    self.data["hole mobility blend (cm^2 V^-1 s^-1)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                electron_mobility_blend = (
+                    self.data["electron mobility blend (cm^2 V^-1 s^-1)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent = self.data["solvent"]
+                for input in solvent:
+                    # unique solvents
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                hole_contact_layer = self.data["hole contact layer"]
+                for input in hole_contact_layer:
+                    # unique hole contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                electron_contact_layer = self.data["electron contact layer"]
+                for input in electron_contact_layer:
+                    # unique electron contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                x[index].append(d_a_ratio[index])
+                x[index].append(total_solids_conc[index])
+                x[index].append(solvent[index])
+                x[index].append(solvent_add[index])
+                x[index].append(solvent_add_conc[index])
+                x[index].append(active_layer_thickness[index])
+                x[index].append(annealing_temp[index])
+                x[index].append(hole_mobility_blend[index])
+                x[index].append(electron_mobility_blend[index])
+                x[index].append(hole_contact_layer[index])
+                x[index].append(electron_contact_layer[index])
+
+            elif parameter == "impt_device":
+                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                total_solids_conc = (
+                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                )
+                solvent_add_conc = (
+                    self.data["solvent additive conc. (%v/v)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                active_layer_thickness = (
+                    self.data["active layer thickness (nm)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                annealing_temp = (
+                    self.data["annealing temperature"].to_numpy().astype("float32")
+                )
+
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent = self.data["solvent"]
+                for input in solvent:
+                    # unique solvents
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                x[index].append(d_a_ratio[index])
+                x[index].append(total_solids_conc[index])
+                x[index].append(solvent[index])
+                x[index].append(solvent_add[index])
+                x[index].append(solvent_add_conc[index])
+                x[index].append(active_layer_thickness[index])
+                x[index].append(annealing_temp[index])
+            else:
+                return np.asarray(x), np.asarray(y)
+            index += 1
+
+        # tokenize data
+        data_pt_idx = 0
+        while data_pt_idx < len(x):
+            token_idx = 0
+            while token_idx < len(x[data_pt_idx]):
+                token = x[data_pt_idx][token_idx]
+                if token == "nan":
+                    x[data_pt_idx][token_idx] = nan
+                elif isinstance(token, str):
+                    x[data_pt_idx][token_idx] = token_dict[token]
+                token_idx += 1
+            data_pt_idx += 1
+
+        # filter out "nan" values
+        nan_array = np.isnan(x)
+        filtered_x = []
+        filtered_y = []
+        nan_idx = 0
+        while nan_idx < len(nan_array):
+            if True not in nan_array[nan_idx]:
+                filtered_x.append(x[nan_idx])
+                filtered_y.append(y[nan_idx])
+            nan_idx += 1
+
+        # split data into cv
+        print(token_dict)
+        # print(filtered_x)
+        print(len(filtered_x), len(filtered_y))
+
+        filtered_x = np.asarray(filtered_x)
+        filtered_y = np.asarray(filtered_y)
+        return filtered_x, filtered_y
+
+    def setup_manual_frag(self, parameter):
         self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
         if self.shuffled:
             pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
@@ -439,11 +501,171 @@ class Dataset:
             da_pair_list = json.loads(self.data["DA_manual_tokenized"][i])
             x.append(da_pair_list)
             y.append(pce_array[i])
-        x = np.asarray(x)
-        y = np.asarray(y)
-        return x, y
 
-    def setup_fp(self, radius: int, nbits: int):
+        # add device parameters to the end of input
+        manual = manual_frag(TRAIN_MASTER_DATA, MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)
+        token_dict = manual.return_frag_dict()
+
+        index = 0
+        while index < len(x):
+            if parameter == "electronic":
+                homo_d = self.data["HOMO_D (eV)"].to_numpy().astype("float32")
+                lumo_d = self.data["LUMO_D (eV)"].to_numpy().astype("float32")
+                homo_a = self.data["HOMO_A (eV)"].to_numpy().astype("float32")
+                lumo_a = self.data["LUMO_A (eV)"].to_numpy().astype("float32")
+                x[index].append(homo_d[index])
+                x[index].append(lumo_d[index])
+                x[index].append(homo_a[index])
+                x[index].append(lumo_a[index])
+            elif parameter == "device":
+                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                total_solids_conc = (
+                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                )
+                solvent_add_conc = (
+                    self.data["solvent additive conc. (%v/v)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                active_layer_thickness = (
+                    self.data["active layer thickness (nm)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                annealing_temp = (
+                    self.data["annealing temperature"].to_numpy().astype("float32")
+                )
+                hole_mobility_blend = (
+                    self.data["hole mobility blend (cm^2 V^-1 s^-1)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                electron_mobility_blend = (
+                    self.data["electron mobility blend (cm^2 V^-1 s^-1)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent = self.data["solvent"]
+                for input in solvent:
+                    # unique solvents
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                hole_contact_layer = self.data["hole contact layer"]
+                for input in hole_contact_layer:
+                    # unique hole contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                electron_contact_layer = self.data["electron contact layer"]
+                for input in electron_contact_layer:
+                    # unique electron contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                x[index].append(d_a_ratio[index])
+                x[index].append(total_solids_conc[index])
+                x[index].append(solvent[index])
+                x[index].append(solvent_add[index])
+                x[index].append(solvent_add_conc[index])
+                x[index].append(active_layer_thickness[index])
+                x[index].append(annealing_temp[index])
+                x[index].append(hole_mobility_blend[index])
+                x[index].append(electron_mobility_blend[index])
+                x[index].append(hole_contact_layer[index])
+                x[index].append(electron_contact_layer[index])
+
+            elif parameter == "impt_device":
+                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                total_solids_conc = (
+                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                )
+                solvent_add_conc = (
+                    self.data["solvent additive conc. (%v/v)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                active_layer_thickness = (
+                    self.data["active layer thickness (nm)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                annealing_temp = (
+                    self.data["annealing temperature"].to_numpy().astype("float32")
+                )
+
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent = self.data["solvent"]
+                for input in solvent:
+                    # unique solvents
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                x[index].append(d_a_ratio[index])
+                x[index].append(total_solids_conc[index])
+                x[index].append(solvent[index])
+                x[index].append(solvent_add[index])
+                x[index].append(solvent_add_conc[index])
+                x[index].append(active_layer_thickness[index])
+                x[index].append(annealing_temp[index])
+            else:
+                return np.asarray(x), np.asarray(y)
+            index += 1
+
+        # tokenize data
+        data_pt_idx = 0
+        while data_pt_idx < len(x):
+            token_idx = 0
+            while token_idx < len(x[data_pt_idx]):
+                token = x[data_pt_idx][token_idx]
+                if token == "nan":
+                    x[data_pt_idx][token_idx] = nan
+                elif isinstance(token, str):
+                    x[data_pt_idx][token_idx] = token_dict[token]
+                token_idx += 1
+            data_pt_idx += 1
+
+        # filter out "nan" values
+        nan_array = np.isnan(x)
+        filtered_x = []
+        filtered_y = []
+        nan_idx = 0
+        while nan_idx < len(nan_array):
+            if True not in nan_array[nan_idx]:
+                filtered_x.append(x[nan_idx])
+                filtered_y.append(y[nan_idx])
+            nan_idx += 1
+
+        # split data into cv
+        print(token_dict)
+        # print(filtered_x)
+        print(len(filtered_x), len(filtered_y))
+
+        filtered_x = np.asarray(filtered_x)
+        filtered_y = np.asarray(filtered_y)
+        return filtered_x, filtered_y
+
+    def setup_fp(self, radius: int, nbits: int, parameter: str):
         self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
         if self.shuffled:
             pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
@@ -462,16 +684,178 @@ class Dataset:
             da_pair_list = json.loads(self.data[column_da_pair][i])
             x.append(da_pair_list)
             y.append(pce_array[i])
-        x = np.asarray(x)
-        y = np.asarray(y)
-        return x, y
+
+        # add device parameters to the end of input
+        token_dict = {0: 0, 1: 1}
+        index = 0
+        while index < len(x):
+            if parameter == "electronic":
+                homo_d = self.data["HOMO_D (eV)"].to_numpy().astype("float32")
+                lumo_d = self.data["LUMO_D (eV)"].to_numpy().astype("float32")
+                homo_a = self.data["HOMO_A (eV)"].to_numpy().astype("float32")
+                lumo_a = self.data["LUMO_A (eV)"].to_numpy().astype("float32")
+                x[index].append(homo_d[index])
+                x[index].append(lumo_d[index])
+                x[index].append(homo_a[index])
+                x[index].append(lumo_a[index])
+            elif parameter == "device":
+                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                total_solids_conc = (
+                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                )
+                solvent_add_conc = (
+                    self.data["solvent additive conc. (%v/v)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                active_layer_thickness = (
+                    self.data["active layer thickness (nm)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                annealing_temp = (
+                    self.data["annealing temperature"].to_numpy().astype("float32")
+                )
+                hole_mobility_blend = (
+                    self.data["hole mobility blend (cm^2 V^-1 s^-1)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                electron_mobility_blend = (
+                    self.data["electron mobility blend (cm^2 V^-1 s^-1)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent = self.data["solvent"]
+                for input in solvent:
+                    # unique solvents
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                hole_contact_layer = self.data["hole contact layer"]
+                for input in hole_contact_layer:
+                    # unique hole contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                electron_contact_layer = self.data["electron contact layer"]
+                for input in electron_contact_layer:
+                    # unique electron contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                x[index].append(d_a_ratio[index])
+                x[index].append(total_solids_conc[index])
+                x[index].append(solvent[index])
+                x[index].append(solvent_add[index])
+                x[index].append(solvent_add_conc[index])
+                x[index].append(active_layer_thickness[index])
+                x[index].append(annealing_temp[index])
+                x[index].append(hole_mobility_blend[index])
+                x[index].append(electron_mobility_blend[index])
+                x[index].append(hole_contact_layer[index])
+                x[index].append(electron_contact_layer[index])
+
+            elif parameter == "impt_device":
+                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                total_solids_conc = (
+                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                )
+                solvent_add_conc = (
+                    self.data["solvent additive conc. (%v/v)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                active_layer_thickness = (
+                    self.data["active layer thickness (nm)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                annealing_temp = (
+                    self.data["annealing temperature"].to_numpy().astype("float32")
+                )
+
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent = self.data["solvent"]
+                for input in solvent:
+                    # unique solvents
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                x[index].append(d_a_ratio[index])
+                x[index].append(total_solids_conc[index])
+                x[index].append(solvent[index])
+                x[index].append(solvent_add[index])
+                x[index].append(solvent_add_conc[index])
+                x[index].append(active_layer_thickness[index])
+                x[index].append(annealing_temp[index])
+            else:
+                return np.asarray(x), np.asarray(y)
+            index += 1
+
+        # tokenize data
+        data_pt_idx = 0
+        while data_pt_idx < len(x):
+            token_idx = 0
+            while token_idx < len(x[data_pt_idx]):
+                token = x[data_pt_idx][token_idx]
+                if token == "nan":
+                    x[data_pt_idx][token_idx] = nan
+                elif isinstance(token, str):
+                    x[data_pt_idx][token_idx] = token_dict[token]
+                token_idx += 1
+            data_pt_idx += 1
+
+        # filter out "nan" values
+        nan_array = np.isnan(x)
+        filtered_x = []
+        filtered_y = []
+        nan_idx = 0
+        while nan_idx < len(nan_array):
+            if True not in nan_array[nan_idx]:
+                filtered_x.append(x[nan_idx])
+                filtered_y.append(y[nan_idx])
+            nan_idx += 1
+
+        # split data into cv
+        print(token_dict)
+        # print(filtered_x)
+        print(len(filtered_x), len(filtered_y))
+
+        filtered_x = np.asarray(filtered_x)
+        filtered_y = np.asarray(filtered_y)
+        return filtered_x, filtered_y
 
 
 # dataset = Dataset(TRAIN_MASTER_DATA, 0, False)
-# dataset.prepare_data()
-# x, y = dataset.setup("")
-# x, y = dataset.setup_cv()
+# dataset = Dataset(BRICS_MASTER_DATA, 0, False)
+# dataset = Dataset(MANUAL_MASTER_DATA, 0, False)
+dataset = Dataset(FP_MASTER_DATA, 0, False)
+dataset.prepare_data()
+# x, y = dataset.setup("impt_device")
 # x, y = dataset.setup_aug_smi()
-# x, y = dataset.setup_fp(2, 512)
+# x, y = dataset.setup_frag_BRICS("device")
+# x, y = dataset.setup_manual_frag("device")
+x, y = dataset.setup_fp(3, 512, "device")
 # print(x[1], y[1])
 

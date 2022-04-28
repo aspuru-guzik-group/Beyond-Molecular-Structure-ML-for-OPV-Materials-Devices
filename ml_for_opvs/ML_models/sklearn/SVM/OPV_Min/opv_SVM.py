@@ -170,14 +170,6 @@ elif unique_datatype["aug_smiles"] == 1:
     dataset.prepare_data()
     x, y = dataset.setup_aug_smi()
     print("AUG_SMILES")
-elif unique_datatype["hw_frag"] == 1:
-    dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-    x, y = dataset.setup_cv()
-    print("HW-FRAG")
-elif unique_datatype["aug_hw_frag"] == 1:
-    dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-    x, y = dataset.setup_cv()
-    print("AUG_HW_FRAG")
 elif unique_datatype["brics"] == 1:
     dataset = Dataset(BRICS_MASTER_DATA, 0, shuffled)
     x, y = dataset.setup_frag_BRICS()

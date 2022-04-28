@@ -189,7 +189,7 @@ class BRIC_FRAGS:
                 acceptor_brics_smi.append(frag_smi)
 
             brics_df.at[index, "Donor_BRICS"] = donor_brics_smi
-            print(donor_smi, donor_brics_smi)
+            # print(donor_smi, donor_brics_smi)
             brics_df.at[index, "Acceptor_BRICS"] = acceptor_brics_smi
             # da_pair fragments
             da_pair = donor_brics_smi
@@ -234,7 +234,7 @@ class BRIC_FRAGS:
         display(img)
 
 
-b_frag = BRIC_FRAGS(MASTER_DATA)
-frag_dict = b_frag.bric_frag()
-print(frag_dict)
+# b_frag = BRIC_FRAGS(MASTER_DATA)
+# frag_dict = b_frag.bric_frag()
+# print(frag_dict)
 # b_frag.frag_visualization(frag_dict)

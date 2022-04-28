@@ -184,17 +184,17 @@ for i in range(len(unique_datatype)):
     if unique_datatype["smiles"] == 1:
         dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
         dataset.prepare_data()
-        x, y = dataset.setup()
+        x, y = dataset.setup("none")
         datatype = "SMILES"
     elif unique_datatype["bigsmiles"] == 1:
         dataset = Dataset(MANUAL_MASTER_DATA, 1, shuffled)
         dataset.prepare_data()
-        x, y = dataset.setup()
+        x, y = dataset.setup("none")
         datatype = "BigSMILES"
     elif unique_datatype["selfies"] == 1:
         dataset = Dataset(TRAIN_MASTER_DATA, 2, shuffled)
         dataset.prepare_data()
-        x, y = dataset.setup()
+        x, y = dataset.setup("none")
         datatype = "SELFIES"
     elif unique_datatype["aug_smiles"] == 1:
         dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
