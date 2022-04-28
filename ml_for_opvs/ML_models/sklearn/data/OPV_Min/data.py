@@ -81,14 +81,14 @@ class Dataset:
                 tokenized_input,
                 max_seq_length,
                 vocab_length,
-                input_dict,
+                token_dict,
             ) = Tokenizer().tokenize_data(self.data["DA_pair"])
         elif self.input == 1:
             (
                 tokenized_input,
                 max_seq_length,
                 vocab_length,
-                input_dict,
+                token_dict,
             ) = Tokenizer().tokenize_data(self.data["DA_pair"])
         elif self.input == 2:
             # tokenize data using selfies
@@ -131,10 +131,90 @@ class Dataset:
                 tokenized_input[index].append(homo_a[index])
                 tokenized_input[index].append(lumo_a[index])
             elif parameter == "device":
-                pass
+                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                total_solids_conc = (
+                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                )
+                solvent_add_conc = (
+                    self.data["solvent additive conc. (%v/v)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                active_layer_thickness = (
+                    self.data["active layer thickness (nm)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                annealing_temp = (
+                    self.data["annealing temperature"].to_numpy().astype("float32")
+                )
+                hole_mobility_blend = (
+                    self.data["hole mobility blend (cm^2 V^-1 s^-1)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                electron_mobility_blend = (
+                    self.data["electron mobility blend (cm^2 V^-1 s^-1)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent = self.data["solvent"]
+                for input in solvent:
+                    # unique solvents
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                hole_contact_layer = self.data["hole contact layer"]
+                for input in hole_contact_layer:
+                    # unique hole contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                electron_contact_layer = self.data["electron contact layer"]
+                for input in electron_contact_layer:
+                    # unique electron contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                tokenized_input[index].append(d_a_ratio[index])
+                tokenized_input[index].append(total_solids_conc[index])
+                tokenized_input[index].append(solvent[index])
+                tokenized_input[index].append(solvent_add[index])
+                tokenized_input[index].append(solvent_add_conc[index])
+                tokenized_input[index].append(active_layer_thickness[index])
+                tokenized_input[index].append(annealing_temp[index])
+                tokenized_input[index].append(hole_mobility_blend[index])
+                tokenized_input[index].append(electron_mobility_blend[index])
+                tokenized_input[index].append(hole_contact_layer[index])
+                tokenized_input[index].append(electron_contact_layer[index])
+
             elif parameter == "impt_device":
                 pass
+            else:
+                return np.asarray(tokenized_input), pce_array
             index += 1
+
+        # tokenize data
+        data_pt_idx = 0
+        while data_pt_idx < len(tokenized_input):
+            token_idx = 0
+            while token_idx < len(tokenized_input[data_pt_idx]):
+                if isinstance(tokenized_input[data_pt_idx][token_idx], str):
+                    token = tokenized_input[data_pt_idx][token_idx]
+                    tokenized_input[data_pt_idx][token_idx] = token_dict[token]
+                token_idx += 1
+            data_pt_idx += 1
 
         # filter out "nan" values
         nan_array = np.isnan(tokenized_input)
@@ -147,11 +227,10 @@ class Dataset:
                 filtered_pce_array.append(pce_array[nan_idx])
             nan_idx += 1
 
-        print(filtered_tokenized_input)
-
         # split data into cv
-        # print(tokenized_input)
-        return np.asarray(tokenized_input), pce_array
+        print(filtered_tokenized_input)
+        print(len(filtered_tokenized_input), len(filtered_pce_array))
+        return np.asarray(filtered_tokenized_input), filtered_pce_array
 
     def setup_aug_smi(self):
         """
@@ -388,9 +467,9 @@ class Dataset:
         return x, y
 
 
-dataset = Dataset(TRAIN_MASTER_DATA, 0, False)
-dataset.prepare_data()
-x, y = dataset.setup("electronic")
+# dataset = Dataset(TRAIN_MASTER_DATA, 0, False)
+# dataset.prepare_data()
+# x, y = dataset.setup("")
 # x, y = dataset.setup_cv()
 # x, y = dataset.setup_aug_smi()
 # x, y = dataset.setup_fp(2, 512)
