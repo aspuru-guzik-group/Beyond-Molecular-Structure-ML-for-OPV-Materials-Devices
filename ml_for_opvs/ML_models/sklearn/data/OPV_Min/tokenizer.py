@@ -78,7 +78,7 @@ class Tokenizer:
         tokenized_array = self.pad_input(tokenized_array, max_length)
         vocab_length = len(input_dict)
 
-        return tokenized_array, max_length, vocab_length, input_dict
+        return tokenized_array, max_length, vocab_length, token2idx
 
     def tokenize_selfies(self, da_pair):
         """
