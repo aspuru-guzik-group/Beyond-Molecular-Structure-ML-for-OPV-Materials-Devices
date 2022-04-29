@@ -16,7 +16,7 @@ MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
 )
 
 CORRELATION_PLOT = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/exploration/OPV_Min/correlation_plot.png"
+    "ml_for_opvs", "data/exploration/OPV_Min/correlation_parity_plot.png"
 )
 
 CORRELATION_HEATMAP_PLOT = pkg_resources.resource_filename(
@@ -248,6 +248,6 @@ class Correlation:
 
 
 corr_plot = Correlation(MASTER_ML_DATA_PLOT)
-# corr_plot.parity_plot()
-corr_plot.heatmap_plot("rmse")
+corr_plot.parity_plot()
+# corr_plot.heatmap_plot("r")
 

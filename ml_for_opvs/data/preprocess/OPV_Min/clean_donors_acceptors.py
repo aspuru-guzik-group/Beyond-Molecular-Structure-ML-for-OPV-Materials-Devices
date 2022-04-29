@@ -590,6 +590,11 @@ class DAPairs:
                 donor_bigsmile = donor_row["Big_SMILES"].values[0]
                 acceptor_bigsmile = acceptor_row["Big_SMILES"].values[0]
 
+                # strip whitespace of solvent
+                solvent = row["solvent"]
+                if isinstance(row["solvent"], str):
+                    solvent = solvent.strip()
+
                 # strip whitespace of hole contact layer
                 hole_contact_layer = row["hole contact layer"]
                 if isinstance(row["hole contact layer"], str):
@@ -611,7 +616,7 @@ class DAPairs:
                         "HOMO_A (eV)": row["HOMO_A (eV)"],
                         "LUMO_A (eV)": row["LUMO_A (eV)"],
                         "D:A ratio (m/m)": row["D:A ratio (m/m)"],
-                        "solvent": row["solvent"],
+                        "solvent": solvent,
                         "total solids conc. (mg/mL)": row["total solids conc. (mg/mL)"],
                         "solvent additive": row["solvent additive"],
                         "solvent additive conc. (%v/v)": row[
