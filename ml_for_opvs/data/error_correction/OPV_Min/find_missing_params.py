@@ -3,10 +3,26 @@ import pkg_resources
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from sqlalchemy import column
+from matplotlib.offsetbox import AnchoredText
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
+)
+
+HOMO_D_DISTRIBUTION = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/homo_donor_distribution_plot.png"
+)
+
+LUMO_D_DISTRIBUTION = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/lumo_donor_distribution_plot.png"
+)
+
+HOMO_A_DISTRIBUTION = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/homo_acceptor_distribution_plot.png"
+)
+
+LUMO_A_DISTRIBUTION = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/lumo_acceptor_distribution_plot.png"
 )
 
 
@@ -75,12 +91,14 @@ class MissingParameters:
 
         return missing_df
 
-    def plot_all(self, plot_df):
+    def plot_all(self, plot_df, homo_path, lumo_path):
         """
         For each unique D or A, the different values for HOMO/LUMO are plotted as a histogram.
 
         Args:
             plot_df: dataframe with Donor or Acceptor | Column Names (w/ values)
+            homo_path: path to distribution plot of HOMO values
+            lumo_path: path to distribution plot of LUMO values
 
         Returns:
             .png plot of all the HOMO and LUMO distributions
@@ -111,18 +129,66 @@ class MissingParameters:
         x_idx = 0
         y_idx = 0
         for homo in unique_homo_dict:
+            if x_idx == x_homo_columns:
+                x_idx = 0
+                y_idx += 1
             homo_array = unique_homo_dict[homo]
             num_homo = len(homo_array)
             num_of_nan = 0
             for boolean in np.isnan(homo_array):
                 if boolean:
                     num_of_nan += 1
+            filtered_homo_array = [item for item in homo_array if not np.isnan(item)]
+            axs[y_idx, x_idx].set_title(homo)
+            n, bins, patches = axs[y_idx, x_idx].hist(filtered_homo_array, bins=30)
+            total = "Total: " + str(num_homo) + "\n" + "Total nan: " + str(num_of_nan)
+            anchored_text = AnchoredText(total, loc="lower right")
+            axs[y_idx, x_idx].add_artist(anchored_text)
+            x_idx += 1
+        left = 0.125  # the left side of the subplots of the figure
+        right = 0.9  # the right side of the subplots of the figure
+        bottom = 0.1  # the bottom of the subplots of the figure
+        top = 0.9  # the top of the subplots of the figure
+        wspace = 0.3  # the amount of width reserved for blank space between subplots
+        hspace = 0.6  # the amount of height reserved for white space between subplots
+        plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
+        plt.savefig(homo_path)
 
         # plot LUMO
+        fig, axs = plt.subplots(
+            y_lumo_rows, x_lumo_columns, figsize=(y_lumo_rows * 3, x_lumo_columns * 4)
+        )
+        x_idx = 0
+        y_idx = 0
+        for lumo in unique_lumo_dict:
+            if x_idx == x_lumo_columns:
+                x_idx = 0
+                y_idx += 1
+            lumo_array = unique_lumo_dict[lumo]
+            num_lumo = len(lumo_array)
+            num_of_nan = 0
+            for boolean in np.isnan(lumo_array):
+                if boolean:
+                    num_of_nan += 1
+            filtered_lumo_array = [item for item in lumo_array if not np.isnan(item)]
+            axs[y_idx, x_idx].set_title(lumo)
+            n, bins, patches = axs[y_idx, x_idx].hist(filtered_lumo_array, bins=30)
+            total = "Total: " + str(num_lumo) + "\n" + "Total nan: " + str(num_of_nan)
+            anchored_text = AnchoredText(total, loc="lower right")
+            axs[y_idx, x_idx].add_artist(anchored_text)
+            x_idx += 1
+        left = 0.125  # the left side of the subplots of the figure
+        right = 0.9  # the right side of the subplots of the figure
+        bottom = 0.1  # the bottom of the subplots of the figure
+        top = 0.9  # the top of the subplots of the figure
+        wspace = 0.3  # the amount of width reserved for blank space between subplots
+        hspace = 0.6  # the amount of height reserved for white space between subplots
+        plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
+        plt.savefig(lumo_path)
 
 
 missing = MissingParameters(MASTER_ML_DATA)
 donor_dup = missing.search_duplicate("D")
-missing.plot_all(donor_dup)
-# acceptor_dup = missing.search_duplicate("A")
-# missing.plot_all(acceptor_dup)
+missing.plot_all(donor_dup, HOMO_D_DISTRIBUTION, LUMO_D_DISTRIBUTION)
+acceptor_dup = missing.search_duplicate("A")
+missing.plot_all(acceptor_dup, HOMO_A_DISTRIBUTION, LUMO_A_DISTRIBUTION)
