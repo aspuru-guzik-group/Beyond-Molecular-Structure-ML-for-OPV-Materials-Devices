@@ -10,10 +10,6 @@ CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_acceptors.csv"
 )
 
-CATALYSIS_MASTER = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/Catalysis_Hein/catalysis_master.csv"
-)
-
 
 def smile_to_bigsmile(donor_data, acceptor_data):
 

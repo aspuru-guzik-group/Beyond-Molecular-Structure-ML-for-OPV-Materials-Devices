@@ -10,10 +10,6 @@ CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/OPV_Min/clean_min_acceptors.csv"
 )
 
-CATALYSIS_MASTER = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/Catalysis_Hein/catalysis_master.csv"
-)
-
 
 def opv_smiles_to_selfies(donor_data, acceptor_data):
     """
@@ -41,24 +37,6 @@ def opv_smiles_to_selfies(donor_data, acceptor_data):
 
     # print(acceptor_df.head())
     acceptor_df.to_csv(acceptor_data, index=False)
-
-
-def catalysis_smiles_to_selfies(catalysis_data):
-    """
-    Function that updates clean donors/acceptors .csv with SELFIES using the corresponding SMILES
-    Args:
-        catalysis_data: path to the catalysis.csv
-
-    Returns:
-        Updates catalysis data with a new column of SELFIES representation
-    """
-    catalysis_df = pd.read_csv(catalysis_data)
-
-    for index, row in catalysis_df.iterrows():
-        catalysis_selfies = sf.encoder(row["Ligand_SMILES"])
-        catalysis_df.at[index, "Ligand_SELFIES"] = catalysis_selfies
-
-    catalysis_df.to_csv(catalysis_data, index=False)
 
 
 opv_smiles_to_selfies(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
