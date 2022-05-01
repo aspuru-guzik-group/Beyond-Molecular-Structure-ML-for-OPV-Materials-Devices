@@ -83,9 +83,12 @@ def augment_smi_in_loop(x, y, num_of_augment, swap: bool):
     """
     Function that creates augmented DA with X number of augmented SMILES
     Uses doRandom=True for augmentation
+    Ex. num_of_augment = 4 --> 5x amount of data, if swap = True --> 2x amount of data
+    Result of both --> 10x amount of data.
     
     Arguments
     ----------
+    num_of_augment: number of new random SMILES
     swap: whether to augmented frags by swapping D.A -> A.D
 
     Returns
