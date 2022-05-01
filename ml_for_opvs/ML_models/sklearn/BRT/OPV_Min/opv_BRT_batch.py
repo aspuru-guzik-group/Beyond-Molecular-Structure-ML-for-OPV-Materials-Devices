@@ -70,7 +70,8 @@ MANUAL_ACCEPTOR_CSV = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
 )
 
-from ml_for_opvs.data.postprocess.OPV_Min.manual_frag.manual_frag import manual_frag
+np.set_printoptions(precision=3)
+SEED_VAL = 4
 
 
 def custom_scorer(y, yhat):
@@ -139,14 +140,6 @@ def augment_smi_in_loop(x, y, num_of_augment, swap: bool):
     return aug_smi_list, aug_pce_array
 
 
-# create scoring function
-r_score = make_scorer(custom_scorer, greater_is_better=True)
-
-# log results
-summary_df = pd.DataFrame(
-    columns=["Datatype", "R_mean", "R_std", "RMSE_mean", "RMSE_std"]
-)
-
 # evaluate a given model using cross-validation
 def evaluate_model(model, X, y):
     # define the evaluation procedure
@@ -214,11 +207,17 @@ def augment_donor_frags_in_loop(x, y: float, device_idx, swap: bool):
         if swap:
             aug_donor_list.append(swap_aug_donor_frags)
             aug_pce_list.append(y)
-        print("AUG", aug_donor_frags, swap_aug_donor_frags)
-    print("PCE", aug_pce_list)
 
     return aug_donor_list, aug_pce_list
 
+
+# create scoring function
+r_score = make_scorer(custom_scorer, greater_is_better=True)
+
+# log results
+summary_df = pd.DataFrame(
+    columns=["Datatype", "R_mean", "R_std", "RMSE_mean", "RMSE_std"]
+)
 
 # run batch of conditions
 unique_datatype = {
@@ -226,8 +225,6 @@ unique_datatype = {
     "bigsmiles": 0,
     "selfies": 0,
     "aug_smiles": 0,
-    "hw_frag": 0,
-    "aug_hw_frag": 0,
     "brics": 0,
     "manual": 0,
     "aug_manual": 0,
@@ -236,10 +233,10 @@ unique_datatype = {
 for i in range(len(unique_datatype)):
     # reset conditions
     unique_datatype = {
-        # "smiles": 0,
-        # "bigsmiles": 0,
-        # "selfies": 0,
-        "aug_smiles": 1,
+        "smiles": 0,
+        "bigsmiles": 0,
+        "selfies": 0,
+        "aug_smiles": 0,
         "brics": 0,
         "manual": 0,
         "aug_manual": 0,
@@ -269,25 +266,26 @@ for i in range(len(unique_datatype)):
         nbits = 512
 
     shuffled = False
-    # if unique_datatype["smiles"] == 1:
-    #     dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-    #     dataset.prepare_data()
-    #     x, y = dataset.setup(dev_param)
-    #     datatype = "SMILES"
-    # elif unique_datatype["bigsmiles"] == 1:
-    #     dataset = Dataset(MANUAL_MASTER_DATA, 1, shuffled)
-    #     dataset.prepare_data()
-    #     x, y = dataset.setup(dev_param)
-    #     datatype = "BigSMILES"
-    # elif unique_datatype["selfies"] == 1:
-    #     dataset = Dataset(TRAIN_MASTER_DATA, 2, shuffled)
-    #     dataset.prepare_data()
-    #     x, y = dataset.setup(dev_param)
-    #     datatype = "SELFIES"
+    if unique_datatype["smiles"] == 1:
+        dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
+        dataset.prepare_data()
+        x, y = dataset.setup(dev_param)
+        datatype = "SMILES"
+    elif unique_datatype["bigsmiles"] == 1:
+        dataset = Dataset(MANUAL_MASTER_DATA, 1, shuffled)
+        dataset.prepare_data()
+        x, y = dataset.setup(dev_param)
+        datatype = "BigSMILES"
+    elif unique_datatype["selfies"] == 1:
+        dataset = Dataset(TRAIN_MASTER_DATA, 2, shuffled)
+        dataset.prepare_data()
+        x, y = dataset.setup(dev_param)
+        datatype = "SELFIES"
     if unique_datatype["aug_smiles"] == 1:
         dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
         dataset.prepare_data()
         x, y, token_dict = dataset.setup_aug_smi(dev_param)
+        num_of_augment = 4  # 1+4x amount of data
         datatype = "AUG_SMILES"
     elif unique_datatype["brics"] == 1:
         dataset = Dataset(BRICS_MASTER_DATA, 0, shuffled)
@@ -333,10 +331,12 @@ for i in range(len(unique_datatype)):
         elif unique_datatype["aug_smiles"] == 1:
             aug_x_train = []
             aug_y_train = []
+            x_aug_dev_list = []
             for x_, y_ in zip(x_train, y_train):
                 x_list = list(x_)
-                x_aug, y_aug = augment_smi_in_loop(str(x_list[0]), y_, 4, True)
-                x_aug_dev_list = []
+                x_aug, y_aug = augment_smi_in_loop(
+                    str(x_list[0]), y_, num_of_augment, True
+                )
                 for x in x_aug:
                     x_aug_dev = x_list[1:]
                     x_aug_dev_list.append(x_aug_dev)
@@ -390,8 +390,6 @@ for i in range(len(unique_datatype)):
                 tokenized_dev_test_list.append(tokenized_dev_test)
 
             # add device parameters to data
-            print(len(tokenized_dev_input_list), len(tokenized_input))
-            print(len(tokenized_dev_test_list), len(tokenized_test))
             input_idx = 0
             while input_idx < len(tokenized_input):
                 tokenized_input[input_idx].extend(tokenized_dev_input_list[input_idx])
@@ -399,9 +397,10 @@ for i in range(len(unique_datatype)):
 
             test_input_idx = 0
             while test_input_idx < len(tokenized_test):
-                tokenized_test[input_idx].extend(tokenized_dev_test_list[input_idx])
+                tokenized_test[test_input_idx].extend(
+                    tokenized_dev_test_list[test_input_idx]
+                )
                 test_input_idx += 1
-            print(tokenized_input)
             x_test = np.array(tokenized_test)
             x_train = np.array(tokenized_input)
             y_train = np.array(aug_y_train)

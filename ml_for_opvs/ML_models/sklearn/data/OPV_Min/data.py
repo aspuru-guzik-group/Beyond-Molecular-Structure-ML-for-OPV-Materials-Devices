@@ -255,7 +255,7 @@ class Dataset:
                 tokenized_input[index].append(active_layer_thickness[index])
                 tokenized_input[index].append(annealing_temp[index])
             else:
-                return np.asarray(tokenized_input), pce_array
+                return np.asarray(tokenized_input), np.asarray(pce_array)
             index += 1
 
         # tokenize data
@@ -286,7 +286,7 @@ class Dataset:
         print(token_dict)
         # print(filtered_tokenized_input)
         print(len(filtered_tokenized_input), len(filtered_pce_array))
-        return np.asarray(filtered_tokenized_input), filtered_pce_array
+        return np.asarray(filtered_tokenized_input), np.asarray(filtered_pce_array)
 
     def setup_aug_smi(self, parameter):
         """
