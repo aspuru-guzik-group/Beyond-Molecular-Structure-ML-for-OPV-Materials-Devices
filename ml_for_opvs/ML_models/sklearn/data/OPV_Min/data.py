@@ -314,6 +314,7 @@ class Dataset:
         index = 0
         while index < len(x):
             if parameter == "electronic":
+                token_dict = []
                 homo_d = self.data["HOMO_D (eV)"].to_numpy().astype("float32")
                 lumo_d = self.data["LUMO_D (eV)"].to_numpy().astype("float32")
                 homo_a = self.data["HOMO_A (eV)"].to_numpy().astype("float32")
@@ -1000,15 +1001,14 @@ class Dataset:
         return filtered_x, filtered_y
 
 
-dataset = Dataset(TRAIN_MASTER_DATA, 0, False)
+# dataset = Dataset(TRAIN_MASTER_DATA, 0, False)
 # dataset = Dataset(BRICS_MASTER_DATA, 0, False)
 # dataset = Dataset(MANUAL_MASTER_DATA, 0, False)
 # dataset = Dataset(FP_MASTER_DATA, 0, False)
-dataset.prepare_data()
+# dataset.prepare_data()
 # x, y = dataset.setup("impt_device")
-x, y, token_dict = dataset.setup_aug_smi("device")
+# x, y, token_dict = dataset.setup_aug_smi("device")
 # x, y = dataset.setup_frag_BRICS("device")
 # x, y = dataset.setup_manual_frag("device")
 # x, y = dataset.setup_fp(3, 512, "device")
-# print(x[1], y[1])
 

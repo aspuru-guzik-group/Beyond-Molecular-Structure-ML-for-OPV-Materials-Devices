@@ -1,4 +1,3 @@
-from scipy.sparse.construct import random
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import KFold
 from sklearn.model_selection import GridSearchCV
@@ -44,7 +43,7 @@ DATA_EVAL = pkg_resources.resource_filename(
 )
 
 SUMMARY_DIR = pkg_resources.resource_filename(
-    "ml_for_opvs", "ML_models/sklearn/BRT/OPV_Min/opv_brt_results.csv"
+    "ml_for_opvs", "ML_models/sklearn/RF/OPV_Min/"
 )
 
 # For Manual Fragments!
@@ -192,7 +191,7 @@ r_score = make_scorer(custom_scorer, greater_is_better=True)
 
 # log results
 summary_df = pd.DataFrame(
-    columns=["Datatype", "R_mean", "R_std", "RMSE_mean", "RMSE_std"]
+    columns=["Datatype", "R_mean", "R_std", "RMSE_mean", "RMSE_std", "num_of_data"]
 )
 
 # run batch of conditions
@@ -221,12 +220,20 @@ for i in range(len(unique_datatype)):
     parameter_type = {
         "none": 0,
         "electronic": 0,
-        "device": 1,
-        "impt_device": 0,
+        "device": 0,
+        "impt_device": 1,
     }
     for param in parameter_type:
         if parameter_type[param] == 1:
             dev_param = param
+            if dev_param == "none":
+                SUMMARY_DIR = SUMMARY_DIR + "none_opv_rf_results.csv"
+            elif dev_param == "electronic":
+                SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_rf_results.csv"
+            elif dev_param == "device":
+                SUMMARY_DIR = SUMMARY_DIR + "device_opv_rf_results.csv"
+            elif dev_param == "impt_device":
+                SUMMARY_DIR = SUMMARY_DIR + "impt_device_opv_rf_results.csv"
 
     index_list = list(np.zeros(len(unique_datatype) - 1))
     index_list.insert(i, 1)
@@ -257,7 +264,7 @@ for i in range(len(unique_datatype)):
         dataset.prepare_data()
         x, y = dataset.setup(dev_param)
         datatype = "SELFIES"
-    if unique_datatype["aug_smiles"] == 1:
+    elif unique_datatype["aug_smiles"] == 1:
         dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
         dataset.prepare_data()
         x, y, token_dict = dataset.setup_aug_smi(dev_param)
@@ -314,7 +321,7 @@ for i in range(len(unique_datatype)):
                 x_aug, y_aug = augment_smi_in_loop(
                     str(x_list[0]), y_, num_of_augment, True
                 )
-                for x in x_aug:
+                for x_a in x_aug:
                     x_aug_dev = x_list[1:]
                     x_aug_dev_list.append(x_aug_dev)
                 aug_x_train.extend(x_aug)
@@ -447,17 +454,18 @@ for i in range(len(unique_datatype)):
     # summarize the estimated performance of the model
     print("R: %.3f (%.3f)" % (mean(outer_corr_coef), std(outer_corr_coef)))
     print("RMSE: %.3f (%.3f)" % (mean(outer_rmse), std(outer_rmse)))
-    summary_series = pd.Series(
-        [
-            datatype,
-            mean(outer_corr_coef),
-            std(outer_corr_coef),
-            mean(outer_rmse),
-            std(outer_rmse),
-        ],
-        index=summary_df.columns,
+    summary_series = pd.DataFrame(
+        {
+            "Datatype": datatype,
+            "R_mean": mean(outer_corr_coef),
+            "R_std": std(outer_corr_coef),
+            "RMSE_mean": mean(outer_rmse),
+            "RMSE_std": std(outer_rmse),
+            "num_of_data": len(x),
+        },
+        index=[0],
     )
-    summary_df = pd.concat([summary_df, summary_series], ignore_index=True)
+    summary_df = pd.concat([summary_df, summary_series], ignore_index=True,)
 summary_df.to_csv(SUMMARY_DIR, index=False)
 
 # add R score from cross-validation results

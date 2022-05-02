@@ -173,8 +173,6 @@ def cli_main():
         "bigsmiles": 0,
         "selfies": 0,
         "aug_smiles": 0,
-        "hw_frag": 0,
-        "aug_hw_frag": 0,
         "brics": 0,
         "manual": 0,
         "aug_manual": 0,
@@ -215,8 +213,6 @@ def cli_main():
             "bigsmiles": 0,
             "selfies": 0,
             "aug_smiles": 0,
-            "hw_frag": 0,
-            "aug_hw_frag": 0,
             "brics": 0,
             "manual": 0,
             "aug_manual": 0,
@@ -249,12 +245,6 @@ def cli_main():
         elif unique_datatype["aug_smiles"] == 1:
             suffix = "/aug_smi"
             print("AUG_SMILES")
-        elif unique_datatype["hw_frag"] == 1:
-            suffix = "/hw_frag"
-            print("HW_FRAG")
-        elif unique_datatype["aug_hw_frag"] == 1:
-            suffix = "/aug_hw_frag"
-            print("AUG_HW_FRAG")
         elif unique_datatype["brics"] == 1:
             suffix = "/brics"
             print("BRICS")
@@ -319,8 +309,6 @@ def cli_main():
                 bigsmiles=unique_datatype["bigsmiles"],
                 selfies=unique_datatype["selfies"],
                 aug_smiles=unique_datatype["aug_smiles"],
-                hw_frag=unique_datatype["hw_frag"],
-                aug_hw_frag=unique_datatype["aug_hw_frag"],
                 brics=unique_datatype["brics"],
                 manual=unique_datatype["manual"],
                 aug_manual=unique_datatype["aug_manual"],

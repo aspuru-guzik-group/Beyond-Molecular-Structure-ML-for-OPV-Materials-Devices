@@ -8,4 +8,4 @@
 #SBATCH --mem=12G
 module load python
 source /project/6025683/stanlo/opv_project/bin/activate
-python opv_RF_cv_batch.py
+python opv_RF_batch.py

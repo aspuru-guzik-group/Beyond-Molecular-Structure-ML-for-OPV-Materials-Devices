@@ -47,18 +47,6 @@ FP_MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
-CHEMBERT_TOKENIZER = pkg_resources.resource_filename(
-    "ml_for_opvs", "ML_models/pytorch/Transformer/tokenizer_chembert/"
-)
-
-CHEMBERT = pkg_resources.resource_filename(
-    "ml_for_opvs", "ML_models/pytorch/Transformer/chembert/"
-)
-
-TROUBLESHOOT = pkg_resources.resource_filename(
-    "ml_for_opvs", "ML_models/pytorch/Transformer/"
-)
-
 SEED_VAL = 4
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -226,8 +214,6 @@ class OPVDataModule(pl.LightningDataModule):
         bigsmiles: int,
         selfies: int,
         aug_smiles: int,  # number of data augmented SMILES
-        hw_frag: int,
-        aug_hw_frag: int,
         brics: int,
         manual: int,
         aug_manual: int,
@@ -250,8 +236,6 @@ class OPVDataModule(pl.LightningDataModule):
         self.bigsmiles = bigsmiles
         self.selfies = selfies
         self.aug_smiles = aug_smiles
-        self.hw_frag = hw_frag
-        self.aug_hw_frag = aug_hw_frag
         self.brics = brics
         self.manual = manual
         self.aug_manual = aug_manual
@@ -294,9 +278,14 @@ class OPVDataModule(pl.LightningDataModule):
                     + row["Acceptor_{}".format(representation)]
                 )
 
-    def prepare_data(self):
+    def prepare_data(self, parameter):
         """
         Setup dataset with fragments that have been tokenized and augmented already in rdkit_frag_in_dataset.py
+        Args:
+            parameter: type of parameters to include:
+                - electronic: HOMO, LUMO
+                - device: all device parameters
+                - impt_device: all the important device parameters (D:A ratio - Annealing Temp.)
         """
         # convert other columns into numpy arrays
         if self.shuffled:
@@ -313,326 +302,211 @@ class OPVDataModule(pl.LightningDataModule):
 
         self.data_size = len(pce_array)
 
-        if self.pt_model != None:
-            self.prepare_transformer()
-        else:
-            if self.smiles == 1 or self.bigsmiles == 1:
-                # tokenize data
-                (
-                    tokenized_input,
-                    max_seq_length,
-                    vocab_length,
-                ) = Tokenizer().tokenize_data(self.data["DA_pair"])
-                self.max_seq_length = max_seq_length
-                self.vocab_length = vocab_length
-                da_pair_list = tokenized_input
+        if self.smiles == 1 or self.bigsmiles == 1:
+            # tokenize data
+            (
+                tokenized_input,
+                max_seq_length,
+                vocab_length,
+            ) = Tokenizer().tokenize_data(self.data["DA_pair"])
+            self.max_seq_length = max_seq_length
+            self.vocab_length = vocab_length
+            da_pair_list = tokenized_input
 
-            elif self.selfies == 1:
-                # tokenize data using selfies
-                tokenized_input = []
-                selfie_dict, max_selfie_length = Tokenizer().tokenize_selfies(
-                    self.data["DA_pair"]
-                )
-                self.max_seq_length = max_selfie_length
-                self.vocab_length = len(selfie_dict)
-                print(selfie_dict)
-                for index, row in self.data.iterrows():
-                    print(self.data.at[index, "DA_pair"])
-                    tokenized_selfie = sf.selfies_to_encoding(
-                        self.data.at[index, "DA_pair"],
-                        selfie_dict,
-                        pad_to_len=-1,
-                        enc_type="label",
-                    )
-                    tokenized_input.append(tokenized_selfie)
-
-                tokenized_input = np.asarray(tokenized_input)
-                tokenized_input = Tokenizer().pad_input(
-                    tokenized_input, max_selfie_length
-                )
-                da_pair_list = tokenized_input
-
-            # convert str to list for DA_pairs
-            elif self.aug_smiles == 1:
-                self.data_aug_smi = pd.read_csv(AUGMENT_SMILES_DATA)
-
-                da_aug_list = []
-                for i in range(len(self.data_aug_smi["DA_pair_tokenized_aug"])):
-                    da_aug_list.append(
-                        ast.literal_eval(self.data_aug_smi["DA_pair_tokenized_aug"][i])
-                    )
-
-                ad_aug_list = []
-                for i in range(len(self.data_aug_smi["AD_pair_tokenized_aug"])):
-                    ad_aug_list.append(
-                        ast.literal_eval(self.data_aug_smi["AD_pair_tokenized_aug"][i])
-                    )
-                # original data comes from first augmented d-a / a-d pair from each pair
-                da_pair_list = []
-                for i in range(len(da_aug_list)):
-                    da_pair_list.append(
-                        da_aug_list[i][0]
-                    )  # PROBLEM: different lengths, therefore cannot np.array nicely
-
-                # extra code for vocab length
-                # tokenize data
-                (
-                    tokenized_input,
-                    max_seq_length,
-                    vocab_length,
-                ) = Tokenizer().tokenize_data(self.data["DA_pair"])
-                self.max_seq_length = len(da_aug_list[0][0])
-                print("max_length_aug_smi: ", self.max_seq_length)
-                self.vocab_length = vocab_length
-                print("LEN: ", len(da_pair_list))
-
-            elif self.hw_frag == 1:
-                self.data = pd.read_csv(FRAG_MASTER_DATA)
-                da_pair_list = []
-                for i in range(len(self.data["DA_pair_tokenized"])):
-                    da_pair_list.append(
-                        ast.literal_eval(self.data["DA_pair_tokenized"][i])
-                    )
-                self.vocab_length = 239
-                # max_seq_length
-                self.max_seq_length = len(da_pair_list[0])
-                print(self.max_seq_length)
-
-            elif self.aug_hw_frag == 1:
-                self.data = pd.read_csv(FRAG_MASTER_DATA)
-                da_aug_list = []
-                for i in range(len(self.data["DA_pair_tokenized_aug"])):
-                    da_aug_list.append(
-                        ast.literal_eval(self.data["DA_pair_tokenized_aug"][i])
-                    )
-                ad_aug_list = []
-                for i in range(len(self.data["AD_pair_tokenized_aug"])):
-                    ad_aug_list.append(
-                        ast.literal_eval(self.data["AD_pair_tokenized_aug"][i])
-                    )
-                self.vocab_length = 239
-                # original data comes from first augmented d-a / a-d pair from each pair
-                da_pair_list = []
-                for i in range(len(da_aug_list)):
-                    da_pair_list.append(da_aug_list[i][0])
-                self.max_seq_length = len(da_pair_list[0])
-
-            elif self.brics == 1:
-                self.data = pd.read_csv(BRICS_MASTER_DATA)
-                da_pair_list = []
-                print("BRICS: ", len(self.data["DA_tokenized_BRICS"]))
-                for i in range(len(self.data["DA_tokenized_BRICS"])):
-                    da_pair_list.append(
-                        ast.literal_eval(self.data["DA_tokenized_BRICS"][i])
-                    )
-                self.vocab_length = 191
-                self.max_seq_length = len(da_pair_list[0])
-
-            elif self.manual == 1:
-                self.data = pd.read_csv(MANUAL_MASTER_DATA)
-                da_pair_list = []
-                print("MANUAL: ", len(self.data["DA_manual_tokenized"]))
-                for i in range(len(self.data["DA_manual_tokenized"])):
-                    da_pair_list.append(
-                        ast.literal_eval(self.data["DA_manual_tokenized"][i])
-                    )
-                self.vocab_length = 337
-                self.max_seq_length = len(da_pair_list[0])
-
-            elif self.aug_manual == 1:
-                self.data = pd.read_csv(MANUAL_MASTER_DATA)
-                da_aug_list = []
-                for i in range(len(self.data["DA_manual_tokenized_aug"])):
-                    da_aug_list.append(
-                        ast.literal_eval(self.data["DA_manual_tokenized_aug"][i])
-                    )
-                ad_aug_list = []
-                for i in range(len(self.data["AD_manual_tokenized_aug"])):
-                    ad_aug_list.append(
-                        ast.literal_eval(self.data["AD_manual_tokenized_aug"][i])
-                    )
-                self.vocab_length = 337
-                # original data comes from first augmented d-a / a-d pair from each pair
-                da_pair_list = []
-                for i in range(len(da_aug_list)):
-                    da_pair_list.append(da_aug_list[i][0])
-                self.max_seq_length = len(da_pair_list[0])
-
-            elif self.fingerprint == 1:
-                self.data = pd.read_csv(FP_MASTER_DATA)
-                da_pair_list = []
-                column_da_pair = (
-                    "DA_FP"
-                    + "_radius_"
-                    + str(self.fp_radius)
-                    + "_nbits_"
-                    + str(self.fp_nbits)
-                )
-                print("Fingerprint: ", len(self.data[column_da_pair]))
-                for i in range(len(self.data[column_da_pair])):
-                    da_pair_list.append(ast.literal_eval(self.data[column_da_pair][i]))
-                self.vocab_length = self.fp_nbits
-                self.max_seq_length = len(da_pair_list[0])
-
-                # Double-check the amount of augmented training data
-                # total_aug_data = 0
-                # for aug_list in da_aug_list:
-                #     for aug in aug_list:
-                #         total_aug_data += 1
-
-                # for aug_list in ad_aug_list:
-                #     for aug in aug_list:
-                #         total_aug_data += 1
-
-                # print("TOTAL NUM: ", total_aug_data)
-
-                # for creating OPVDataset, must use first element of each augment array
-                # replace da_pair_array
-                # because we don't want to augment test set nor include any augmented test set in training set,
-                # but also have the original dataset have the correct order (for polymers)
-                # expected number of total training set: 2055 = (444*0.75) + (333*(number_of_augmented_frags)=1722)
-                # expected number can change due to different d-a pairs having different number of augmentation frags
-            da_pair_array = np.array(da_pair_list)
-            pce_dataset = OPVDataset(da_pair_array, pce_array)
-            if self.aug_hw_frag == 1 or self.aug_manual == 1 or self.aug_smiles == 1:
-                if self.cv != None:
-                    (
-                        self.pce_train,
-                        self.pce_val,
-                        self.pce_test,
-                    ) = pce_dataset.get_splits_aug_cv(
-                        da_aug_list, ad_aug_list, pce_array, kth_fold=self.cv
-                    )
-                else:
-                    (
-                        self.pce_train,
-                        self.pce_val,
-                        self.pce_test,
-                    ) = pce_dataset.get_splits_aug(
-                        da_aug_list, ad_aug_list, pce_array, seed_val=self.seed_val
-                    )
-            else:
-                if self.cv != None:
-                    (
-                        self.pce_train,
-                        self.pce_val,
-                        self.pce_test,
-                    ) = pce_dataset.get_splits_cv(kth_fold=self.cv)
-                else:
-                    (
-                        self.pce_train,
-                        self.pce_val,
-                        self.pce_test,
-                    ) = pce_dataset.get_splits(seed_val=self.seed_val)
-            print("LEN: ", len(da_pair_list))
-        print("test_idx: ", self.pce_test.indices)
-
-    def prepare_transformer(self):
-        """Function that cleans raw data for prep by transformers"""
-        # tokenize data with transformer
-        tokenizer = AutoTokenizer.from_pretrained(self.pt_tokenizer)
-        tokenizer.padding_side = "right"
-        self.data = self.data.drop_duplicates()
-        self.data = self.data.reset_index(drop=True)
-        # convert other columns into numpy arrays
-        if self.shuffled:
-            pce_array = self.data["PCE(%)_shuffled"].to_numpy().astype("float32")
-        else:
-            pce_array = self.data["PCE(%)"].to_numpy().astype("float32")
-        # minimize range of pce between 0-1
-        # find max of pce_array
-        self.max_pce = pce_array.max()
-        pce_array = pce_array / self.max_pce
-
-        # tokenize data
-        tokenized_input = tokenizer(
-            list(self.data["DA_pair"]), padding="longest", return_tensors="pt"
-        )
-        input_ids = tokenized_input["input_ids"]
-        input_masks = tokenized_input["attention_mask"]
-        max_length = len(input_ids[0])
-        self.max_length = max_length
-        if self.smiles and self.input == 0:
-            pce_dataset = OPVDataset(input_ids, pce_array)
-            self.pce_train, self.pce_val, self.pce_test = pce_dataset.get_splits(
-                seed_val=self.seed_val
+        elif self.selfies == 1:
+            # tokenize data using selfies
+            tokenized_input = []
+            selfie_dict, max_selfie_length = Tokenizer().tokenize_selfies(
+                self.data["DA_pair"]
             )
-            # train_df = pd.DataFrame(self.pce_train.dataset.x.numpy())
-            # val_df = pd.DataFrame(self.pce_val.dataset.x.numpy())
-            # test_df = pd.DataFrame(self.pce_test.dataset.x.numpy())
-            # train_df.to_csv(TROUBLESHOOT + "train_data_x.csv", index=False)
-            # val_df.to_csv(TROUBLESHOOT + "val_data_x.csv", index=False)
-            # test_df.to_csv(TROUBLESHOOT + "test_data_x.csv", index=False)
-        elif self.input == 2:
-            pce_dataset = OPVDataset(input_ids, pce_array)
-            self.pce_train, self.pce_val, self.pce_test = pce_dataset.get_splits(
-                seed_val=self.seed_val
-            )
-        elif self.aug_smiles:
-            data = pd.read_csv(AUGMENT_SMILES_DATA)
-            pce_array = data["PCE(%)"].to_numpy().astype("float32")
+            self.max_seq_length = max_selfie_length
+            self.vocab_length = len(selfie_dict)
+            print(selfie_dict)
+            for index, row in self.data.iterrows():
+                print(self.data.at[index, "DA_pair"])
+                tokenized_selfie = sf.selfies_to_encoding(
+                    self.data.at[index, "DA_pair"],
+                    selfie_dict,
+                    pad_to_len=-1,
+                    enc_type="label",
+                )
+                tokenized_input.append(tokenized_selfie)
 
-            # minimize range of pce between 0-1
-            # find max of pce_array
-            self.max_pce = pce_array.max()
-            pce_array = pce_array / self.max_pce
+            tokenized_input = np.asarray(tokenized_input)
+            tokenized_input = Tokenizer().pad_input(tokenized_input, max_selfie_length)
+            da_pair_list = tokenized_input
 
-            self.data_size = len(pce_array)
-            # print("num_of_pairs: ", self.data_size)
+        # convert str to list for DA_pairs
+        elif self.aug_smiles == 1:
+            self.data_aug_smi = pd.read_csv(AUGMENT_SMILES_DATA)
 
-            # tokenize augmented SMILES
-            # print(len(ast.literal_eval(data["DA_pair_aug"][0])))
             da_aug_list = []
-            for i in range(len(data["DA_pair_aug"])):
-                da_aug_list.extend(ast.literal_eval(data["DA_pair_aug"][i]))
+            for i in range(len(self.data_aug_smi["DA_pair_tokenized_aug"])):
+                da_aug_list.append(
+                    ast.literal_eval(self.data_aug_smi["DA_pair_tokenized_aug"][i])
+                )
 
             ad_aug_list = []
-            for i in range(len(data["AD_pair_aug"])):
-                ad_aug_list.extend(ast.literal_eval(data["AD_pair_aug"][i]))
-
-            # tokenize together
-            tokenized_input_da = tokenizer(
-                list(da_aug_list), padding="longest", return_tensors="pt"
-            )
-
-            tokenized_input_ad = tokenizer(
-                list(ad_aug_list), padding="longest", return_tensors="pt"
-            )
-
-            # put tokenized data back into its corresponding indexed list ([[16 SMILES], [16], ...])
-            da_aug_tokenized = []
-            aug_cap = 0
-            inner_list = []
-            for input in tokenized_input_da["input_ids"]:
-                inner_list.append(input.tolist())
-                aug_cap += 1
-                if aug_cap == 16:
-                    da_aug_tokenized.append(inner_list)
-                    inner_list = []
-                    aug_cap = 0
-
-            ad_aug_tokenized = []
-            aug_cap = 0
-            inner_list = []
-            for input in tokenized_input_ad["input_ids"]:
-                inner_list.append(input.tolist())
-                aug_cap += 1
-                if aug_cap == 16:
-                    ad_aug_tokenized.append(inner_list)
-                    inner_list = []
-                    aug_cap = 0
-
+            for i in range(len(self.data_aug_smi["AD_pair_tokenized_aug"])):
+                ad_aug_list.append(
+                    ast.literal_eval(self.data_aug_smi["AD_pair_tokenized_aug"][i])
+                )
             # original data comes from first augmented d-a / a-d pair from each pair
             da_pair_list = []
-            for i in range(len(da_aug_tokenized)):
+            for i in range(len(da_aug_list)):
                 da_pair_list.append(
-                    da_aug_tokenized[i][0]
+                    da_aug_list[i][0]
                 )  # PROBLEM: different lengths, therefore cannot np.array nicely
-            da_pair_array = np.array(da_pair_list)
-            pce_dataset = OPVDataset(da_pair_array, pce_array)
-            (self.pce_train, self.pce_val, self.pce_test,) = pce_dataset.get_splits_aug(
-                da_aug_tokenized, ad_aug_tokenized, pce_array, seed_val=self.seed_val
+
+            # extra code for vocab length
+            # tokenize data
+            (
+                tokenized_input,
+                max_seq_length,
+                vocab_length,
+            ) = Tokenizer().tokenize_data(self.data["DA_pair"])
+            self.max_seq_length = len(da_aug_list[0][0])
+            print("max_length_aug_smi: ", self.max_seq_length)
+            self.vocab_length = vocab_length
+            print("LEN: ", len(da_pair_list))
+
+        elif self.hw_frag == 1:
+            self.data = pd.read_csv(FRAG_MASTER_DATA)
+            da_pair_list = []
+            for i in range(len(self.data["DA_pair_tokenized"])):
+                da_pair_list.append(ast.literal_eval(self.data["DA_pair_tokenized"][i]))
+            self.vocab_length = 239
+            # max_seq_length
+            self.max_seq_length = len(da_pair_list[0])
+            print(self.max_seq_length)
+
+        elif self.aug_hw_frag == 1:
+            self.data = pd.read_csv(FRAG_MASTER_DATA)
+            da_aug_list = []
+            for i in range(len(self.data["DA_pair_tokenized_aug"])):
+                da_aug_list.append(
+                    ast.literal_eval(self.data["DA_pair_tokenized_aug"][i])
+                )
+            ad_aug_list = []
+            for i in range(len(self.data["AD_pair_tokenized_aug"])):
+                ad_aug_list.append(
+                    ast.literal_eval(self.data["AD_pair_tokenized_aug"][i])
+                )
+            self.vocab_length = 239
+            # original data comes from first augmented d-a / a-d pair from each pair
+            da_pair_list = []
+            for i in range(len(da_aug_list)):
+                da_pair_list.append(da_aug_list[i][0])
+            self.max_seq_length = len(da_pair_list[0])
+
+        elif self.brics == 1:
+            self.data = pd.read_csv(BRICS_MASTER_DATA)
+            da_pair_list = []
+            print("BRICS: ", len(self.data["DA_tokenized_BRICS"]))
+            for i in range(len(self.data["DA_tokenized_BRICS"])):
+                da_pair_list.append(
+                    ast.literal_eval(self.data["DA_tokenized_BRICS"][i])
+                )
+            self.vocab_length = 191
+            self.max_seq_length = len(da_pair_list[0])
+
+        elif self.manual == 1:
+            self.data = pd.read_csv(MANUAL_MASTER_DATA)
+            da_pair_list = []
+            print("MANUAL: ", len(self.data["DA_manual_tokenized"]))
+            for i in range(len(self.data["DA_manual_tokenized"])):
+                da_pair_list.append(
+                    ast.literal_eval(self.data["DA_manual_tokenized"][i])
+                )
+            self.vocab_length = 337
+            self.max_seq_length = len(da_pair_list[0])
+
+        elif self.aug_manual == 1:
+            self.data = pd.read_csv(MANUAL_MASTER_DATA)
+            da_aug_list = []
+            for i in range(len(self.data["DA_manual_tokenized_aug"])):
+                da_aug_list.append(
+                    ast.literal_eval(self.data["DA_manual_tokenized_aug"][i])
+                )
+            ad_aug_list = []
+            for i in range(len(self.data["AD_manual_tokenized_aug"])):
+                ad_aug_list.append(
+                    ast.literal_eval(self.data["AD_manual_tokenized_aug"][i])
+                )
+            self.vocab_length = 337
+            # original data comes from first augmented d-a / a-d pair from each pair
+            da_pair_list = []
+            for i in range(len(da_aug_list)):
+                da_pair_list.append(da_aug_list[i][0])
+            self.max_seq_length = len(da_pair_list[0])
+
+        elif self.fingerprint == 1:
+            self.data = pd.read_csv(FP_MASTER_DATA)
+            da_pair_list = []
+            column_da_pair = (
+                "DA_FP"
+                + "_radius_"
+                + str(self.fp_radius)
+                + "_nbits_"
+                + str(self.fp_nbits)
             )
+            print("Fingerprint: ", len(self.data[column_da_pair]))
+            for i in range(len(self.data[column_da_pair])):
+                da_pair_list.append(ast.literal_eval(self.data[column_da_pair][i]))
+            self.vocab_length = self.fp_nbits
+            self.max_seq_length = len(da_pair_list[0])
+
+            # Double-check the amount of augmented training data
+            # total_aug_data = 0
+            # for aug_list in da_aug_list:
+            #     for aug in aug_list:
+            #         total_aug_data += 1
+
+            # for aug_list in ad_aug_list:
+            #     for aug in aug_list:
+            #         total_aug_data += 1
+
+            # print("TOTAL NUM: ", total_aug_data)
+
+            # for creating OPVDataset, must use first element of each augment array
+            # replace da_pair_array
+            # because we don't want to augment test set nor include any augmented test set in training set,
+            # but also have the original dataset have the correct order (for polymers)
+            # expected number of total training set: 2055 = (444*0.75) + (333*(number_of_augmented_frags)=1722)
+            # expected number can change due to different d-a pairs having different number of augmentation frags
+        da_pair_array = np.array(da_pair_list)
+        pce_dataset = OPVDataset(da_pair_array, pce_array)
+        if self.aug_hw_frag == 1 or self.aug_manual == 1 or self.aug_smiles == 1:
+            if self.cv != None:
+                (
+                    self.pce_train,
+                    self.pce_val,
+                    self.pce_test,
+                ) = pce_dataset.get_splits_aug_cv(
+                    da_aug_list, ad_aug_list, pce_array, kth_fold=self.cv
+                )
+            else:
+                (
+                    self.pce_train,
+                    self.pce_val,
+                    self.pce_test,
+                ) = pce_dataset.get_splits_aug(
+                    da_aug_list, ad_aug_list, pce_array, seed_val=self.seed_val
+                )
+        else:
+            if self.cv != None:
+                (
+                    self.pce_train,
+                    self.pce_val,
+                    self.pce_test,
+                ) = pce_dataset.get_splits_cv(kth_fold=self.cv)
+            else:
+                (self.pce_train, self.pce_val, self.pce_test,) = pce_dataset.get_splits(
+                    seed_val=self.seed_val
+                )
+        print("LEN: ", len(da_pair_list))
+
+        print("test_idx: ", self.pce_test.indices)
 
     def train_dataloader(
         self,
