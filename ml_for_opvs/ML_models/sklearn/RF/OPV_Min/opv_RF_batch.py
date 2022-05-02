@@ -208,9 +208,9 @@ unique_datatype = {
 for i in range(len(unique_datatype)):
     # reset conditions
     unique_datatype = {
-        "smiles": 0,
-        "bigsmiles": 0,
-        "selfies": 0,
+        # "smiles": 0,
+        # "bigsmiles": 0,
+        # "selfies": 0,
         "aug_smiles": 0,
         "brics": 0,
         "manual": 0,
@@ -291,6 +291,8 @@ for i in range(len(unique_datatype)):
     if shuffled:
         datatype += "_SHUFFLED"
 
+    print(datatype)  # Ensures we know which model is running
+
     # outer cv gives different training and testing sets for inner cv
     cv_outer = KFold(n_splits=5, shuffle=True, random_state=0)
     outer_corr_coef = list()
@@ -342,9 +344,16 @@ for i in range(len(unique_datatype)):
                 x_test_array.append(x_t_list[0])
                 x_test_dev_list.append(x_t_list[1:])
 
-            tokenized_test = Tokenizer().tokenize_from_dict(
+            tokenized_test, test_max_seq_length = Tokenizer().tokenize_from_dict(
                 x_test_array, max_seq_length, input_dict
             )
+
+            # make sure test set max_seq_length is same as train set max_seq_length
+            # NOTE: test set could have longer sequence because we separated the tokenization
+            if test_max_seq_length > max_seq_length:
+                tokenized_input, max_seq_length = Tokenizer().tokenize_from_dict(
+                    aug_x_train, test_max_seq_length, input_dict
+                )
 
             # add device parameters to token2idx
             token_idx = len(input_dict)

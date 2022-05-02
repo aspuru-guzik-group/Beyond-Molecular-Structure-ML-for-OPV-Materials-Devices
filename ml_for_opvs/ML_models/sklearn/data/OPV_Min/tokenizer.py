@@ -123,7 +123,7 @@ class Tokenizer:
                 max_length = len(input_array)
         tokenized_array = self.pad_input(tokenized_array, max_length)
         print("Max sequence length: ", max_length)
-        return tokenized_array
+        return tokenized_array, max_length
 
     def build_token2idx(self, input_list):
         """Function that arranges list of SMILES/BigSMILES/SELFIES and builds dictionary.

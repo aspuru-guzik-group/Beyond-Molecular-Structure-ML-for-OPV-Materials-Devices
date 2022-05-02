@@ -16,9 +16,6 @@ import torch
 from torch.utils.data import DataLoader, Dataset, Subset, random_split
 import selfies as sf
 
-# for transformer
-from transformers import AutoTokenizer
-
 # for cross-validation
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
@@ -48,8 +45,6 @@ FP_MASTER_DATA = pkg_resources.resource_filename(
 )
 
 SEED_VAL = 4
-
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # dataset definition
 class OPVDataset(Dataset):
