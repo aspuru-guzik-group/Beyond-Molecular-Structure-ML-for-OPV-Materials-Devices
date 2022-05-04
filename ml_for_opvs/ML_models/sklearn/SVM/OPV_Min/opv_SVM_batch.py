@@ -212,6 +212,23 @@ unique_datatype = {
     "aug_manual": 0,
     "fingerprint": 0,
 }
+parameter_type = {
+    "none": 0,
+    "electronic": 1,
+    "device": 0,
+    "impt_device": 0,
+}
+for param in parameter_type:
+    if parameter_type[param] == 1:
+        dev_param = param
+        if dev_param == "none":
+            SUMMARY_DIR = SUMMARY_DIR + "none_opv_svm_results.csv"
+        elif dev_param == "electronic":
+            SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_svm_results.csv"
+        elif dev_param == "device":
+            SUMMARY_DIR = SUMMARY_DIR + "device_opv_svm_results.csv"
+        elif dev_param == "impt_device":
+            SUMMARY_DIR = SUMMARY_DIR + "impt_device_opv_svm_results.csv"
 for i in range(len(unique_datatype)):
     # reset conditions
     unique_datatype = {
@@ -224,23 +241,6 @@ for i in range(len(unique_datatype)):
         "aug_manual": 0,
         "fingerprint": 0,
     }
-    parameter_type = {
-        "none": 0,
-        "electronic": 0,
-        "device": 0,
-        "impt_device": 1,
-    }
-    for param in parameter_type:
-        if parameter_type[param] == 1:
-            dev_param = param
-            if dev_param == "none":
-                SUMMARY_DIR = SUMMARY_DIR + "none_opv_svm_results.csv"
-            elif dev_param == "electronic":
-                SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_svm_results.csv"
-            elif dev_param == "device":
-                SUMMARY_DIR = SUMMARY_DIR + "device_opv_svm_results.csv"
-            elif dev_param == "impt_device":
-                SUMMARY_DIR = SUMMARY_DIR + "impt_device_opv_svm_results.csv"
 
     index_list = list(np.zeros(len(unique_datatype) - 1))
     index_list.insert(i, 1)

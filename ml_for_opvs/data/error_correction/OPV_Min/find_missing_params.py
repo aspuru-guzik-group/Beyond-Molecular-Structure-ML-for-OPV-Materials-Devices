@@ -4,6 +4,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.offsetbox import AnchoredText
+import math
+
+from torch import unique
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
@@ -23,6 +26,22 @@ HOMO_A_DISTRIBUTION = pkg_resources.resource_filename(
 
 LUMO_A_DISTRIBUTION = pkg_resources.resource_filename(
     "ml_for_opvs", "data/error_correction/OPV_Min/lumo_acceptor_distribution_plot.png"
+)
+
+STATS_D_HOMO = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/stats_homo_donor.csv"
+)
+
+STATS_D_LUMO = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/stats_lumo_donor.csv"
+)
+
+STATS_A_HOMO = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/stats_homo_acceptor.csv"
+)
+
+STATS_A_LUMO = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/stats_lumo_acceptor.csv"
 )
 
 
@@ -121,6 +140,14 @@ class MissingParameters:
         x_lumo_columns = round(np.sqrt(len(unique_lumo_dict)))
         y_lumo_rows = round(np.sqrt(len(unique_lumo_dict))) + 1
 
+        # find min and max value of HOMO and LUMO
+        column_names = plot_df.columns
+        homo_min = math.floor(min(plot_df[column_names[1]]))
+        homo_max = math.ceil(max(plot_df[column_names[1]]))
+        lumo_min = math.floor(min(plot_df[column_names[2]]))
+        lumo_max = math.ceil(max(plot_df[column_names[2]]))
+        print(homo_min, homo_max, lumo_min, lumo_max)
+
         # plot HOMO
         # NOTE: count number of values and number of nan values
         fig, axs = plt.subplots(
@@ -140,9 +167,11 @@ class MissingParameters:
                     num_of_nan += 1
             filtered_homo_array = [item for item in homo_array if not np.isnan(item)]
             axs[y_idx, x_idx].set_title(homo)
-            n, bins, patches = axs[y_idx, x_idx].hist(filtered_homo_array, bins=30)
+            w = float((homo_max - homo_min) / 40)
+            bins = np.arange(homo_min, homo_max + w, w)
+            n, bins, patches = axs[y_idx, x_idx].hist(filtered_homo_array, bins=bins)
             total = "Total: " + str(num_homo) + "\n" + "Total nan: " + str(num_of_nan)
-            anchored_text = AnchoredText(total, loc="lower right")
+            anchored_text = AnchoredText(total, loc="upper left")
             axs[y_idx, x_idx].add_artist(anchored_text)
             x_idx += 1
         left = 0.125  # the left side of the subplots of the figure
@@ -172,9 +201,11 @@ class MissingParameters:
                     num_of_nan += 1
             filtered_lumo_array = [item for item in lumo_array if not np.isnan(item)]
             axs[y_idx, x_idx].set_title(lumo)
-            n, bins, patches = axs[y_idx, x_idx].hist(filtered_lumo_array, bins=30)
+            w = float((lumo_max - lumo_min) / 40)
+            bins = np.arange(lumo_min, lumo_max + w, w)
+            n, bins, patches = axs[y_idx, x_idx].hist(filtered_lumo_array, bins=bins)
             total = "Total: " + str(num_lumo) + "\n" + "Total nan: " + str(num_of_nan)
-            anchored_text = AnchoredText(total, loc="lower right")
+            anchored_text = AnchoredText(total, loc="upper left")
             axs[y_idx, x_idx].add_artist(anchored_text)
             x_idx += 1
         left = 0.125  # the left side of the subplots of the figure
@@ -186,9 +217,79 @@ class MissingParameters:
         plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
         plt.savefig(lumo_path)
 
+    def avg_stdev_for_homolumo(self, duplicate_df, stats_homo_path, stats_lumo_path):
+        """
+        Calculates the average and standard deviation for each distinct donor/acceptor with duplicates
+
+        Args:
+            duplicate_df: dataframe with Donor or Acceptor | Column Names (w/ values)
+            stats_homo_path: path to .csv file with average and standard deviation of HOMO for each distinct donor or acceptor
+            stats_lumo_path: path to .csv file with average and standard deviation of LUMO for each distinct donor or acceptor
+
+        Returns:
+            .csv file
+        """
+        column_names = duplicate_df.columns
+        stats_homo_df = pd.DataFrame(columns=[column_names[0]])
+        stats_homo_df["HOMO_avg"] = ""
+        stats_homo_df["HOMO_std"] = ""
+        stats_lumo_df = pd.DataFrame(columns=[column_names[0]])
+        stats_lumo_df["LUMO_avg"] = ""
+        stats_lumo_df["LUMO_std"] = ""
+        # curate dictionary with unique donor/acceptors and their corresponding HOMO/LUMO values
+        unique_homo_dict = {}
+        unique_lumo_dict = {}
+        for index, row in duplicate_df.iterrows():
+            if row[0] not in unique_homo_dict:
+                unique_homo_dict[row[0]] = [row[1]]
+            else:
+                unique_homo_dict[row[0]].append(row[1])
+            if row[0] not in unique_lumo_dict:
+                unique_lumo_dict[row[0]] = [row[2]]
+            else:
+                unique_lumo_dict[row[0]].append(row[2])
+
+        idx = 0
+        for homo_mol in unique_homo_dict:
+            homo_list = unique_homo_dict[homo_mol]
+            filtered_homo_array = [item for item in homo_list if not np.isnan(item)]
+            print(filtered_homo_array)
+            try:
+                homo_avg = np.mean(filtered_homo_array)
+                homo_std = np.std(filtered_homo_array)
+            except:
+                print("NO VALUES")
+            else:
+                stats_homo_df.at[idx, column_names[0]] = homo_mol
+                stats_homo_df.at[idx, "HOMO_avg"] = homo_avg
+                stats_homo_df.at[idx, "HOMO_std"] = homo_std
+                idx += 1
+
+        idx = 0
+        for lumo_mol in unique_lumo_dict:
+            lumo_list = unique_lumo_dict[lumo_mol]
+            filtered_lumo_array = [item for item in lumo_list if not np.isnan(item)]
+            try:
+                lumo_avg = np.mean(filtered_lumo_array)
+                lumo_std = np.std(filtered_lumo_array)
+            except:
+                print("NO VALUES")
+            else:
+                stats_lumo_df.at[idx, column_names[0]] = lumo_mol
+                stats_lumo_df.at[idx, "LUMO_avg"] = lumo_avg
+                stats_lumo_df.at[idx, "LUMO_std"] = lumo_std
+                idx += 1
+
+        stats_homo_df.to_csv(stats_homo_path, index=False)
+        stats_lumo_df.to_csv(stats_lumo_path, index=False)
+
 
 missing = MissingParameters(MASTER_ML_DATA)
+
 donor_dup = missing.search_duplicate("D")
-missing.plot_all(donor_dup, HOMO_D_DISTRIBUTION, LUMO_D_DISTRIBUTION)
+# missing.plot_all(donor_dup, HOMO_D_DISTRIBUTION, LUMO_D_DISTRIBUTION)
 acceptor_dup = missing.search_duplicate("A")
-missing.plot_all(acceptor_dup, HOMO_A_DISTRIBUTION, LUMO_A_DISTRIBUTION)
+# missing.plot_all(acceptor_dup, HOMO_A_DISTRIBUTION, LUMO_A_DISTRIBUTION)
+
+missing.avg_stdev_for_homolumo(donor_dup, STATS_D_HOMO, STATS_D_LUMO)
+missing.avg_stdev_for_homolumo(acceptor_dup, STATS_A_HOMO, STATS_A_LUMO)
