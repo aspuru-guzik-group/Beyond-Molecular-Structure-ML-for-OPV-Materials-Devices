@@ -64,7 +64,7 @@ CHECKPOINT_DIR = pkg_resources.resource_filename(
 )
 
 SUMMARY_DIR = pkg_resources.resource_filename(
-    "ml_for_opvs", "ML_models/pytorch/NN/OPV_Min/opv_NN_batch_cv_results.csv"
+    "ml_for_opvs", "ML_models/pytorch/NN/OPV_Min/"
 )
 
 SEED_VAL = 4
@@ -108,6 +108,7 @@ class NNModel(pl.LightningModule):
         )
 
     def forward(self, x):
+        print(type(x))
         embeds = self.embeds(x)
         out = self.dropout(embeds)
         out = self.linear1(out)
@@ -154,6 +155,9 @@ class NNModel(pl.LightningModule):
 
 
 def cli_main():
+    SUMMARY_DIR = pkg_resources.resource_filename(
+        "ml_for_opvs", "ML_models/pytorch/NN/OPV_Min/"
+    )
     pl.seed_everything(SEED_VAL)
     # ------------
     # wandb + sweep
@@ -164,7 +168,7 @@ def cli_main():
 
     # log results
     summary_df = pd.DataFrame(
-        columns=["Datatype", "R_mean", "R_std", "RMSE_mean", "RMSE_std"]
+        columns=["Datatype", "R_mean", "R_std", "RMSE_mean", "RMSE_std", "num_of_data"]
     )
 
     # run batch of conditions
@@ -178,6 +182,27 @@ def cli_main():
         "aug_manual": 0,
         "fingerprint": 0,
     }
+
+    parameter_type = {
+        "none": 0,
+        "electronic": 1,
+        "device": 0,
+        "impt_device": 0,
+    }
+
+    for param in parameter_type:
+        if parameter_type[param] == 1:
+            dev_param = param
+            if dev_param == "none":
+                SUMMARY_DIR = SUMMARY_DIR + "none_opv_NN_results.csv"
+            elif dev_param == "electronic":
+                SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_NN_results.csv"
+            elif dev_param == "device":
+                SUMMARY_DIR = SUMMARY_DIR + "device_opv_NN_results.csv"
+            elif dev_param == "impt_device":
+                SUMMARY_DIR = SUMMARY_DIR + "impt_device_opv_NN_results.csv"
+    print(dev_param)
+
     for i in range(len(unique_datatype)):
         # ---------------
         # Data Conditions
@@ -200,7 +225,7 @@ def cli_main():
         parser.add_argument("--val_batch_size", type=int, default=64)
         parser.add_argument("--test_batch_size", type=int, default=64)
         parser.add_argument("--dataloader_num_workers", type=int, default=3)
-        parser.add_argument("--max_epochs", type=int, default=50)
+        parser.add_argument("--max_epochs", type=int, default=500)
         parser.add_argument("--log_every_n_steps", type=int, default=100)
         parser.add_argument("--enable_progress_bar", type=bool, default=False)
         # parser.add_argument("--logger", type=str, default=wandb_logger)
@@ -322,7 +347,7 @@ def cli_main():
                 seed_val=SEED_VAL,
             )
             data_module.setup()
-            data_module.prepare_data()
+            data_module.prepare_data(dev_param)
 
             # ------------
             # model
@@ -356,19 +381,24 @@ def cli_main():
         # summarize KFold results
         print("R: %.3f (%.3f)" % (mean(outer_corr_coef), std(outer_corr_coef)))
         print("RMSE: %.3f (%.3f)" % (mean(outer_rmse), std(outer_rmse)))
-        summary_series = pd.Series(
-            [
-                suffix,
-                mean(outer_corr_coef),
-                std(outer_corr_coef),
-                mean(outer_rmse),
-                std(outer_rmse),
-            ],
-            index=summary_df.columns,
+        summary_series = pd.DataFrame(
+            {
+                "Datatype": suffix,
+                "R_mean": mean(outer_corr_coef),
+                "R_std": std(outer_corr_coef),
+                "RMSE_mean": mean(outer_rmse),
+                "RMSE_std": std(outer_rmse),
+                "num_of_data": len(data_module.pce_train.dataset),
+            },
+            index=[0],
         )
-        summary_df = summary_df.append(summary_series, ignore_index=True)
+        summary_df = pd.concat([summary_df, summary_series], ignore_index=True,)
     summary_df.to_csv(SUMMARY_DIR, index=False)
 
 
 if __name__ == "__main__":
-    cli_main()
+    # cli_main()
+    cuda0 = torch.device("cuda:0")
+    input = torch.ones([2, 4], dtype=torch.float64, device=cuda0)
+    embedding = nn.Embedding(10, 3)
+    print(embedding(input))

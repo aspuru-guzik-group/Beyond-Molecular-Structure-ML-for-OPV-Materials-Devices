@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import ast  # for str -> list conversion
 import copy
+from cmath import nan
 
 # for plotting
 import matplotlib.pyplot as plt
@@ -20,7 +21,11 @@ import selfies as sf
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
 
-DATA_DIR = pkg_resources.resource_filename(
+# for token2idx dictionary
+from ml_for_opvs.data.postprocess.OPV_Min.BRICS.brics_frag import BRIC_FRAGS
+from ml_for_opvs.data.postprocess.OPV_Min.manual_frag.manual_frag import manual_frag
+
+TRAIN_MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
@@ -42,6 +47,15 @@ MANUAL_MASTER_DATA = pkg_resources.resource_filename(
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+)
+
+# For Manual Fragments!
+MANUAL_DONOR_CSV = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
+)
+
+MANUAL_ACCEPTOR_CSV = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
 )
 
 SEED_VAL = 4
@@ -245,7 +259,7 @@ class OPVDataModule(pl.LightningDataModule):
         self.seed_val = seed_val
 
     def setup(self) -> None:
-        self.data = pd.read_csv(DATA_DIR)
+        self.data = pd.read_csv(TRAIN_MASTER_DATA)
         # concatenate Donor and Acceptor Inputs
         if self.smiles == 1 or self.aug_smiles == 1:
             representation = "SMILES"
@@ -284,9 +298,9 @@ class OPVDataModule(pl.LightningDataModule):
         """
         # convert other columns into numpy arrays
         if self.shuffled:
-            pce_array = self.data["PCE(%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE(%)"].to_numpy().astype("float32")
+            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
 
         # minimize range of pce between 0-1
         # find max of pce_array
@@ -303,10 +317,11 @@ class OPVDataModule(pl.LightningDataModule):
                 tokenized_input,
                 max_seq_length,
                 vocab_length,
+                token_dict,
             ) = Tokenizer().tokenize_data(self.data["DA_pair"])
             self.max_seq_length = max_seq_length
             self.vocab_length = vocab_length
-            da_pair_list = tokenized_input
+            da_pair_list = tokenized_input.tolist()
 
         elif self.selfies == 1:
             # tokenize data using selfies
@@ -318,7 +333,6 @@ class OPVDataModule(pl.LightningDataModule):
             self.vocab_length = len(selfie_dict)
             print(selfie_dict)
             for index, row in self.data.iterrows():
-                print(self.data.at[index, "DA_pair"])
                 tokenized_selfie = sf.selfies_to_encoding(
                     self.data.at[index, "DA_pair"],
                     selfie_dict,
@@ -329,7 +343,8 @@ class OPVDataModule(pl.LightningDataModule):
 
             tokenized_input = np.asarray(tokenized_input)
             tokenized_input = Tokenizer().pad_input(tokenized_input, max_selfie_length)
-            da_pair_list = tokenized_input
+            da_pair_list = tokenized_input.tolist()
+            token_dict = selfie_dict
 
         # convert str to list for DA_pairs
         elif self.aug_smiles == 1:
@@ -359,40 +374,12 @@ class OPVDataModule(pl.LightningDataModule):
                 tokenized_input,
                 max_seq_length,
                 vocab_length,
+                token_dict,
             ) = Tokenizer().tokenize_data(self.data["DA_pair"])
             self.max_seq_length = len(da_aug_list[0][0])
             print("max_length_aug_smi: ", self.max_seq_length)
             self.vocab_length = vocab_length
             print("LEN: ", len(da_pair_list))
-
-        elif self.hw_frag == 1:
-            self.data = pd.read_csv(FRAG_MASTER_DATA)
-            da_pair_list = []
-            for i in range(len(self.data["DA_pair_tokenized"])):
-                da_pair_list.append(ast.literal_eval(self.data["DA_pair_tokenized"][i]))
-            self.vocab_length = 239
-            # max_seq_length
-            self.max_seq_length = len(da_pair_list[0])
-            print(self.max_seq_length)
-
-        elif self.aug_hw_frag == 1:
-            self.data = pd.read_csv(FRAG_MASTER_DATA)
-            da_aug_list = []
-            for i in range(len(self.data["DA_pair_tokenized_aug"])):
-                da_aug_list.append(
-                    ast.literal_eval(self.data["DA_pair_tokenized_aug"][i])
-                )
-            ad_aug_list = []
-            for i in range(len(self.data["AD_pair_tokenized_aug"])):
-                ad_aug_list.append(
-                    ast.literal_eval(self.data["AD_pair_tokenized_aug"][i])
-                )
-            self.vocab_length = 239
-            # original data comes from first augmented d-a / a-d pair from each pair
-            da_pair_list = []
-            for i in range(len(da_aug_list)):
-                da_pair_list.append(da_aug_list[i][0])
-            self.max_seq_length = len(da_pair_list[0])
 
         elif self.brics == 1:
             self.data = pd.read_csv(BRICS_MASTER_DATA)
@@ -405,6 +392,10 @@ class OPVDataModule(pl.LightningDataModule):
             self.vocab_length = 191
             self.max_seq_length = len(da_pair_list[0])
 
+            # token2idx dictionary for BRICS fragments
+            b_frag = BRIC_FRAGS(TRAIN_MASTER_DATA)
+            token_dict = b_frag.bric_frag()
+
         elif self.manual == 1:
             self.data = pd.read_csv(MANUAL_MASTER_DATA)
             da_pair_list = []
@@ -415,6 +406,12 @@ class OPVDataModule(pl.LightningDataModule):
                 )
             self.vocab_length = 337
             self.max_seq_length = len(da_pair_list[0])
+
+            # token2idx dictionary for manual fragments
+            manual = manual_frag(
+                TRAIN_MASTER_DATA, MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV
+            )
+            token_dict = manual.return_frag_dict()
 
         elif self.aug_manual == 1:
             self.data = pd.read_csv(MANUAL_MASTER_DATA)
@@ -435,7 +432,14 @@ class OPVDataModule(pl.LightningDataModule):
                 da_pair_list.append(da_aug_list[i][0])
             self.max_seq_length = len(da_pair_list[0])
 
+            # token2idx dictionary for manual fragments
+            manual = manual_frag(
+                TRAIN_MASTER_DATA, MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV
+            )
+            token_dict = manual.return_frag_dict()
+
         elif self.fingerprint == 1:
+            token_dict = {0: 0, 1: 1}
             self.data = pd.read_csv(FP_MASTER_DATA)
             da_pair_list = []
             column_da_pair = (
@@ -469,9 +473,159 @@ class OPVDataModule(pl.LightningDataModule):
             # but also have the original dataset have the correct order (for polymers)
             # expected number of total training set: 2055 = (444*0.75) + (333*(number_of_augmented_frags)=1722)
             # expected number can change due to different d-a pairs having different number of augmentation frags
-        da_pair_array = np.array(da_pair_list)
+
+        # add device parameters to the end of input
+        index = 0
+        while index < len(da_pair_list):
+            if parameter == "electronic":
+                homo_d = self.data["HOMO_D (eV)"].to_numpy().astype("float32")
+                lumo_d = self.data["LUMO_D (eV)"].to_numpy().astype("float32")
+                homo_a = self.data["HOMO_A (eV)"].to_numpy().astype("float32")
+                lumo_a = self.data["LUMO_A (eV)"].to_numpy().astype("float32")
+                da_pair_list[index].append(homo_d[index])
+                da_pair_list[index].append(lumo_d[index])
+                da_pair_list[index].append(homo_a[index])
+                da_pair_list[index].append(lumo_a[index])
+            elif parameter == "device":
+                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                total_solids_conc = (
+                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                )
+                solvent_add_conc = (
+                    self.data["solvent additive conc. (%v/v)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                active_layer_thickness = (
+                    self.data["active layer thickness (nm)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                annealing_temp = (
+                    self.data["annealing temperature"].to_numpy().astype("float32")
+                )
+                hole_mobility_blend = (
+                    self.data["hole mobility blend (cm^2 V^-1 s^-1)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                electron_mobility_blend = (
+                    self.data["electron mobility blend (cm^2 V^-1 s^-1)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent = self.data["solvent"]
+                for input in solvent:
+                    # unique solvents
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                hole_contact_layer = self.data["hole contact layer"]
+                for input in hole_contact_layer:
+                    # unique hole contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                electron_contact_layer = self.data["electron contact layer"]
+                for input in electron_contact_layer:
+                    # unique electron contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                da_pair_list[index].append(d_a_ratio[index])
+                da_pair_list[index].append(total_solids_conc[index])
+                da_pair_list[index].append(solvent[index])
+                da_pair_list[index].append(solvent_add[index])
+                da_pair_list[index].append(solvent_add_conc[index])
+                da_pair_list[index].append(active_layer_thickness[index])
+                da_pair_list[index].append(annealing_temp[index])
+                da_pair_list[index].append(hole_mobility_blend[index])
+                da_pair_list[index].append(electron_mobility_blend[index])
+                da_pair_list[index].append(hole_contact_layer[index])
+                da_pair_list[index].append(electron_contact_layer[index])
+
+            elif parameter == "impt_device":
+                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                total_solids_conc = (
+                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                )
+                solvent_add_conc = (
+                    self.data["solvent additive conc. (%v/v)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                active_layer_thickness = (
+                    self.data["active layer thickness (nm)"]
+                    .to_numpy()
+                    .astype("float32")
+                )
+                annealing_temp = (
+                    self.data["annealing temperature"].to_numpy().astype("float32")
+                )
+
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent = self.data["solvent"]
+                for input in solvent:
+                    # unique solvents
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                da_pair_list[index].append(d_a_ratio[index])
+                da_pair_list[index].append(total_solids_conc[index])
+                da_pair_list[index].append(solvent[index])
+                da_pair_list[index].append(solvent_add[index])
+                da_pair_list[index].append(solvent_add_conc[index])
+                da_pair_list[index].append(active_layer_thickness[index])
+                da_pair_list[index].append(annealing_temp[index])
+            index += 1
+
+        # tokenize data
+        data_pt_idx = 0
+        while data_pt_idx < len(da_pair_list):
+            token_idx = 0
+            while token_idx < len(da_pair_list[data_pt_idx]):
+                token = da_pair_list[data_pt_idx][token_idx]
+                if token == "nan":
+                    da_pair_list[data_pt_idx][token_idx] = nan
+                elif isinstance(token, str):
+                    da_pair_list[data_pt_idx][token_idx] = token_dict[token]
+                token_idx += 1
+            data_pt_idx += 1
+
+        # filter out "nan" values
+        nan_array = np.isnan(da_pair_list)
+        filtered_da_pair_list = []
+        filtered_pce_array = []
+        nan_idx = 0
+        while nan_idx < len(nan_array):
+            if True not in nan_array[nan_idx]:
+                filtered_da_pair_list.append(da_pair_list[nan_idx])
+                filtered_pce_array.append(pce_array[nan_idx])
+            nan_idx += 1
+
+        da_pair_array = np.array(filtered_da_pair_list)
         pce_dataset = OPVDataset(da_pair_array, pce_array)
-        if self.aug_hw_frag == 1 or self.aug_manual == 1 or self.aug_smiles == 1:
+        if self.aug_manual == 1 or self.aug_smiles == 1:
             if self.cv != None:
                 (
                     self.pce_train,
@@ -535,7 +689,7 @@ class OPVDataModule(pl.LightningDataModule):
 
 def distribution_plot(data_dir):
     df = pd.read_csv(data_dir)
-    pce_array = df["PCE(%)"].to_numpy().astype("float32")
+    pce_array = df["PCE (%)"].to_numpy().astype("float32")
     # minimize range of pce between 0-1
     # find max of pce_array
     max_pce = pce_array.max()
@@ -552,22 +706,27 @@ def distribution_plot(data_dir):
     # distribution_plotly(PREDICTION_DIR)
 
 
-# for transformer
-# chembert_model = CHEMBERT
-# chembert_tokenizer = CHEMBERT_TOKENIZER
-
 # unique_datatype = {
-#     "smiles": 0,
+#     "smiles": 1,
 #     "bigsmiles": 0,
-#     "selfies": 1,
+#     "selfies": 0,
 #     "aug_smiles": 0,
-#     "hw_frag": 0,
-#     "aug_hw_frag": 0,
 #     "brics": 0,
 #     "manual": 0,
 #     "aug_manual": 0,
 #     "fingerprint": 0,
 # }
+
+# parameter_type = {
+#     "none": 0,
+#     "electronic": 0,
+#     "device": 1,
+#     "impt_device": 0,
+# }
+
+# for param in parameter_type:
+#     if parameter_type[param] == 1:
+#         dev_param = param
 
 # shuffled = False
 
@@ -580,8 +739,6 @@ def distribution_plot(data_dir):
 #     bigsmiles=unique_datatype["bigsmiles"],
 #     selfies=unique_datatype["selfies"],
 #     aug_smiles=unique_datatype["aug_smiles"],
-#     hw_frag=unique_datatype["hw_frag"],
-#     aug_hw_frag=unique_datatype["aug_hw_frag"],
 #     brics=unique_datatype["brics"],
 #     manual=unique_datatype["manual"],
 #     aug_manual=unique_datatype["aug_manual"],
@@ -595,11 +752,12 @@ def distribution_plot(data_dir):
 #     seed_val=SEED_VAL,
 # )
 # data_module.setup()
-# data_module.prepare_data()
+# data_module.prepare_data(dev_param)
 # print("TRAINING SIZE: ", len(data_module.pce_train.dataset))
 # test_idx = list(data_module.pce_test.indices)
 # print(test_idx)
 # print(data_module.pce_array[test_idx])
+# print(data_module.pce_train.dataset[0])
 
 # distribution_plot(DATA_DIR)
 

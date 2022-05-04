@@ -33,7 +33,7 @@ FRAG_MASTER_DATA = pkg_resources.resource_filename(
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
@@ -53,7 +53,7 @@ CHECKPOINT_DIR = pkg_resources.resource_filename(
 )
 
 SUMMARY_DIR = pkg_resources.resource_filename(
-    "ml_for_opvs", "ML_models/pytorch/LSTM/OPV_Min/opv_LSTM_batch_cv.csv"
+    "ml_for_opvs", "ML_models/pytorch/LSTM/OPV_Min/"
 )
 
 CHECKPOINT_DIR = pkg_resources.resource_filename(
@@ -191,6 +191,9 @@ class LSTMModel(pl.LightningModule):
 
 
 def cli_main():
+    SUMMARY_DIR = pkg_resources.resource_filename(
+        "ml_for_opvs", "ML_models/pytorch/LSTM/OPV_Min/"
+    )
     pl.seed_everything(SEED_VAL)
 
     # ------------
@@ -202,7 +205,7 @@ def cli_main():
 
     # log results
     summary_df = pd.DataFrame(
-        columns=["Datatype", "R_mean", "R_std", "RMSE_mean", "RMSE_std"]
+        columns=["Datatype", "R_mean", "R_std", "RMSE_mean", "RMSE_std", "num_of_data"]
     )
 
     # run batch of conditions
@@ -211,13 +214,31 @@ def cli_main():
         "bigsmiles": 0,
         "selfies": 0,
         "aug_smiles": 0,
-        "hw_frag": 0,
-        "aug_hw_frag": 0,
         "brics": 0,
         "manual": 0,
         "aug_manual": 0,
         "fingerprint": 0,
     }
+    parameter_type = {
+        "none": 0,
+        "electronic": 0,
+        "device": 0,
+        "impt_device": 1,
+    }
+
+    for param in parameter_type:
+        if parameter_type[param] == 1:
+            dev_param = param
+            if dev_param == "none":
+                SUMMARY_DIR = SUMMARY_DIR + "none_opv_LSTM_results.csv"
+            elif dev_param == "electronic":
+                SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_LSTM_results.csv"
+            elif dev_param == "device":
+                SUMMARY_DIR = SUMMARY_DIR + "device_opv_LSTM_results.csv"
+            elif dev_param == "impt_device":
+                SUMMARY_DIR = SUMMARY_DIR + "impt_device_opv_LSTM_results.csv"
+    print(dev_param)
+
     for i in range(len(unique_datatype)):
         # ---------------
         # Data Conditions
@@ -245,8 +266,6 @@ def cli_main():
             "bigsmiles": 0,
             "selfies": 0,
             "aug_smiles": 0,
-            "hw_frag": 0,
-            "aug_hw_frag": 0,
             "brics": 0,
             "manual": 0,
             "aug_manual": 0,
@@ -269,33 +288,32 @@ def cli_main():
 
         if unique_datatype["smiles"] == 1:
             suffix = "/smi"
+            print("SMILES")
         elif unique_datatype["bigsmiles"] == 1:
             suffix = "/bigsmi"
-            break
+            print("BigSMILES")
         elif unique_datatype["selfies"] == 1:
             suffix = "/selfies"
-            break
+            print("SELFIES")
         elif unique_datatype["aug_smiles"] == 1:
             suffix = "/aug_smi"
-        elif unique_datatype["hw_frag"] == 1:
-            suffix = "/hw_frag"
-            break
-        elif unique_datatype["aug_hw_frag"] == 1:
-            suffix = "/aug_hw_frag"
-            break
+            print("AUG_SMILES")
         elif unique_datatype["brics"] == 1:
             suffix = "/brics"
-            break
+            print("BRICS")
         elif unique_datatype["manual"] == 1:
             suffix = "/manual"
+            print("MANUAL")
         elif unique_datatype["aug_manual"] == 1:
             suffix = "/aug_manual"
+            print("AUG_MANUAL")
         elif unique_datatype["fingerprint"] == 1:
             suffix = "/fp"
-            break
+            print("FINGERPRINT: ", fp_radius, fp_nbits)
 
         if shuffled:
             suffix += "_shuffled"
+            print("SHUFFLED")
 
         # parse arguments using the terminal shell (for ComputeCanada purposes)
         # suffix = suffix + (
@@ -342,8 +360,6 @@ def cli_main():
                 bigsmiles=unique_datatype["bigsmiles"],
                 selfies=unique_datatype["selfies"],
                 aug_smiles=unique_datatype["aug_smiles"],
-                hw_frag=unique_datatype["hw_frag"],
-                aug_hw_frag=unique_datatype["aug_hw_frag"],
                 brics=unique_datatype["brics"],
                 manual=unique_datatype["manual"],
                 aug_manual=unique_datatype["aug_manual"],
@@ -357,7 +373,7 @@ def cli_main():
                 seed_val=SEED_VAL,
             )
             data_module.setup()
-            data_module.prepare_data()
+            data_module.prepare_data(dev_param)
 
             # ------------
             # model
@@ -392,17 +408,18 @@ def cli_main():
         # summarize KFold results
         print("R: %.3f (%.3f)" % (mean(outer_corr_coef), std(outer_corr_coef)))
         print("RMSE: %.3f (%.3f)" % (mean(outer_rmse), std(outer_rmse)))
-        summary_series = pd.Series(
-            [
-                suffix,
-                mean(outer_corr_coef),
-                std(outer_corr_coef),
-                mean(outer_rmse),
-                std(outer_rmse),
-            ],
-            index=summary_df.columns,
+        summary_series = pd.DataFrame(
+            {
+                "Datatype": suffix,
+                "R_mean": mean(outer_corr_coef),
+                "R_std": std(outer_corr_coef),
+                "RMSE_mean": mean(outer_rmse),
+                "RMSE_std": std(outer_rmse),
+                "num_of_data": len(data_module.pce_train.dataset),
+            },
+            index=[0],
         )
-        summary_df = summary_df.append(summary_series, ignore_index=True)
+        summary_df = pd.concat([summary_df, summary_series], ignore_index=True,)
     summary_df.to_csv(SUMMARY_DIR, index=False)
 
 

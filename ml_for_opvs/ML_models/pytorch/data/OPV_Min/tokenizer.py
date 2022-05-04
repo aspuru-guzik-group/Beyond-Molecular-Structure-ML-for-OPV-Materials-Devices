@@ -78,7 +78,7 @@ class Tokenizer:
         tokenized_array = self.pad_input(tokenized_array, max_length)
         vocab_length = len(input_dict)
 
-        return tokenized_array, max_length, vocab_length
+        return tokenized_array, max_length, vocab_length, token2idx
 
     def tokenize_selfies(self, da_pair):
         """
@@ -110,50 +110,50 @@ class Tokenizer:
 
 
 # for presentation (can be deleted)
-tk = Tokenizer()
-input_dict = {
-    "[nop]": 0,
-    ".": 1,
-    "[#C]": 2,
-    "[#N]": 3,
-    "[/C]": 4,
-    "[=C]": 5,
-    "[=N]": 6,
-    "[=O]": 7,
-    "[Branch1_1]": 8,
-    "[Branch1_2]": 9,
-    "[Branch1_3]": 10,
-    "[Branch2_1]": 11,
-    "[Branch2_2]": 12,
-    "[Branch2_3]": 13,
-    "[C]": 14,
-    "[Expl=Ring1]": 15,
-    "[Expl=Ring2]": 16,
-    "[N]": 17,
-    "[O]": 18,
-    "[P]": 19,
-    "[Ring1]": 20,
-    "[Ring2]": 21,
-    "[S]": 22,
-    "[\\C]": 23,
-    "[F]": 24,
-    "[Siexpl]": 25,
-    "[/S]": 26,
-    "[Cl]": 27,
-    "[=S]": 28,
-    "[\\S]": 29,
-    "[B]": 30,
-    "[I]": 31,
-    "[Seexpl]": 32,
-}
-# tokenized_smile = tk.tokenize_given_dictionary(
+# tk = Tokenizer()
+# input_dict = {
+#     "[nop]": 0,
+#     ".": 1,
+#     "[#C]": 2,
+#     "[#N]": 3,
+#     "[/C]": 4,
+#     "[=C]": 5,
+#     "[=N]": 6,
+#     "[=O]": 7,
+#     "[Branch1_1]": 8,
+#     "[Branch1_2]": 9,
+#     "[Branch1_3]": 10,
+#     "[Branch2_1]": 11,
+#     "[Branch2_2]": 12,
+#     "[Branch2_3]": 13,
+#     "[C]": 14,
+#     "[Expl=Ring1]": 15,
+#     "[Expl=Ring2]": 16,
+#     "[N]": 17,
+#     "[O]": 18,
+#     "[P]": 19,
+#     "[Ring1]": 20,
+#     "[Ring2]": 21,
+#     "[S]": 22,
+#     "[\\C]": 23,
+#     "[F]": 24,
+#     "[Siexpl]": 25,
+#     "[/S]": 26,
+#     "[Cl]": 27,
+#     "[=S]": 28,
+#     "[\\S]": 29,
+#     "[B]": 30,
+#     "[I]": 31,
+#     "[Seexpl]": 32,
+# }
+# # tokenized_smile = tk.tokenize_given_dictionary(
+# #     "[C][C][C][C][C][C][C][Branch1_1][Branch1_1][C][C][C][C][C][S][O][C][Branch1_2][C][=O][C][C][=C][Branch2_1][Ring2][N][C][=C][C][Branch2_1][Ring1][Branch1_1][C][Branch1_2][C][=O][O][S][C][C][Branch1_1][Branch1_1][C][C][C][C][C][C][C][C][C][C][=C][Branch1_1][O][C][=C][C][=C][Branch1_1][C][C][S][Ring1][Branch1_2][S][Ring2][Ring1][O][S][C][Expl=Ring2][Ring1][S][C][=C][C][=C][Branch1_1][C][C][S][Ring1][Branch1_2]",
+# #     input_dict,
+# # )
+# tokenized_selfie = sf.selfies_to_encoding(
 #     "[C][C][C][C][C][C][C][Branch1_1][Branch1_1][C][C][C][C][C][S][O][C][Branch1_2][C][=O][C][C][=C][Branch2_1][Ring2][N][C][=C][C][Branch2_1][Ring1][Branch1_1][C][Branch1_2][C][=O][O][S][C][C][Branch1_1][Branch1_1][C][C][C][C][C][C][C][C][C][C][=C][Branch1_1][O][C][=C][C][=C][Branch1_1][C][C][S][Ring1][Branch1_2][S][Ring2][Ring1][O][S][C][Expl=Ring2][Ring1][S][C][=C][C][=C][Branch1_1][C][C][S][Ring1][Branch1_2]",
 #     input_dict,
+#     pad_to_len=-1,
+#     enc_type="label",
 # )
-tokenized_selfie = sf.selfies_to_encoding(
-    "[C][C][C][C][C][C][C][Branch1_1][Branch1_1][C][C][C][C][C][S][O][C][Branch1_2][C][=O][C][C][=C][Branch2_1][Ring2][N][C][=C][C][Branch2_1][Ring1][Branch1_1][C][Branch1_2][C][=O][O][S][C][C][Branch1_1][Branch1_1][C][C][C][C][C][C][C][C][C][C][=C][Branch1_1][O][C][=C][C][=C][Branch1_1][C][C][S][Ring1][Branch1_2][S][Ring2][Ring1][O][S][C][Expl=Ring2][Ring1][S][C][=C][C][=C][Branch1_1][C][C][S][Ring1][Branch1_2]",
-    input_dict,
-    pad_to_len=-1,
-    enc_type="label",
-)
-print(tokenized_selfie)
+# print(tokenized_selfie)
