@@ -246,6 +246,12 @@ class Correlation:
             fig.tight_layout()
             plt.savefig(RMSE_HEATMAP_PLOT)
 
+    def solvent_correlation(self, solvent_inventory, solvent_pce_path):
+        """
+        Function that plots the correlation between solvent properties and PCE (at least the ones that are present)
+        """
+        pass
+
 
 corr_plot = Correlation(MASTER_ML_DATA_PLOT)
 corr_plot.parity_plot()

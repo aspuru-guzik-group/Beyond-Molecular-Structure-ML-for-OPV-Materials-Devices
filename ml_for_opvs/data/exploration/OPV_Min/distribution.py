@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.offsetbox import AnchoredText
+from cmath import nan
 
 # OPV data after pre-processing
 MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
@@ -11,6 +12,14 @@ MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
 
 DISTRIBUTION_PLOT = pkg_resources.resource_filename(
     "ml_for_opvs", "data/exploration/OPV_Min/distribution_plot.png"
+)
+
+DONOR_SOLVENT_PATH = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/exploration/OPV_Min/donor_solvent_heatmap.png"
+)
+
+ACCEPTOR_SOLVENT_PATH = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/exploration/OPV_Min/acceptor_solvent_heatmap.png"
 )
 
 
@@ -67,9 +76,12 @@ class Distribution:
             current_val_list = [
                 item for item in current_val_list if not (pd.isnull(item)) == True
             ]
+            unique_val_list = list(set(current_val_list))
             axs[y_idx, x_idx].set_title(current_column)
             if isinstance(current_val_list[0], str):
-                n, bins, patches = axs[y_idx, x_idx].hist(current_val_list, bins="auto")
+                n, bins, patches = axs[y_idx, x_idx].hist(
+                    current_val_list, bins=len(unique_val_list) * 2
+                )
             elif isinstance(current_val_list[0], float):
                 n, bins, patches = axs[y_idx, x_idx].hist(current_val_list, bins=30)
             start = 0
@@ -98,7 +110,92 @@ class Distribution:
         plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
         plt.savefig(DISTRIBUTION_PLOT)
 
+    def solvent_heatmap(self, opv_solvent_path, mol_type):
+        """
+        Function that creates heatmap of Top_X_axis: donor/acceptor, Left_Y_Axis: solvent, color = frequency
+        Args:
+            opv_solvent_path: path to .png heatmap for opv-solvent
+            mol_type: donor or acceptor?
+        
+        Returns:
+            .png of heatmap
+        """
+        if mol_type == "D":
+            label = "Donor"
+        elif mol_type == "A":
+            label = "Acceptor"
+        unique_opv_solvent_dict = {}
+        for index, row in self.data.iterrows():
+            if str(self.data.at[index, "solvent"]) != "nan":
+                if (
+                    self.data.at[index, label],
+                    self.data.at[index, "solvent"],
+                ) not in unique_opv_solvent_dict:
+                    unique_opv_solvent_dict[
+                        (self.data.at[index, label], self.data.at[index, "solvent"])
+                    ] = 1
+                elif (
+                    self.data.at[index, label],
+                    self.data.at[index, "solvent"],
+                ) in unique_opv_solvent_dict:
+                    unique_opv_solvent_dict[
+                        (self.data.at[index, label], self.data.at[index, "solvent"])
+                    ] += 1
+
+        unique_opv = []
+        unique_solvent = []
+        for opv_solvent in unique_opv_solvent_dict:
+            if opv_solvent[0] not in unique_opv:
+                unique_opv.append(opv_solvent[0])
+            if opv_solvent[1] not in unique_solvent:
+                unique_solvent.append(opv_solvent[1])
+
+        heatmap_array = np.zeros((len(unique_solvent), len(unique_opv)))
+        for opv_solvent in unique_opv_solvent_dict:
+            x_idx = unique_opv.index(opv_solvent[0])
+            y_idx = unique_solvent.index(opv_solvent[1])
+            freq = unique_opv_solvent_dict[opv_solvent]
+            heatmap_array[y_idx, x_idx] = freq
+
+        fig, ax = plt.subplots(figsize=(150, 20))
+        heatmap_array_masked = np.ma.masked_where(heatmap_array == 0, heatmap_array)
+        im = ax.imshow(heatmap_array_masked)
+        # Show all ticks and label them with the respective list entries
+        ax.set_xticks(np.arange(len(unique_opv)))
+        ax.set_yticks(np.arange(len(unique_solvent)))
+        ax.set_xticklabels(unique_opv)
+        ax.set_yticklabels(unique_solvent)
+
+        # Rotate the tick labels and set their alignment.
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+
+        # Loop over data dimensions and create text annotations.
+        for i in range(len(unique_opv)):
+            for j in range(len(unique_solvent)):
+                text_r = ax.text(
+                    i,
+                    j,
+                    heatmap_array_masked[j, i],
+                    ha="center",
+                    va="center",
+                    color="w",
+                )
+        # Create colorbar
+        cbar = ax.figure.colorbar(im, ax=ax, shrink=0.7)
+        cbar.ax.set_ylabel("Frequency", rotation=-90, va="bottom")
+
+        if mol_type == "D":
+            label = "Donor"
+            ax.set_title("Heatmap of Frequency between Donor and Solvent")
+        elif mol_type == "A":
+            label = "Acceptor"
+            ax.set_title("Heatmap of Frequency between Acceptor and Solvent")
+        fig.tight_layout()
+        plt.savefig(opv_solvent_path)
+
 
 dist = Distribution(MASTER_ML_DATA_PLOT)
 
-dist.histogram()
+# dist.histogram()
+
+dist.solvent_heatmap(DONOR_SOLVENT_PATH, "D")
