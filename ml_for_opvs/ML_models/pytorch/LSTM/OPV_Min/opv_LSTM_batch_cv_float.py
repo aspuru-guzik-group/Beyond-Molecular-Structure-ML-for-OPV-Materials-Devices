@@ -89,9 +89,9 @@ class LSTMModel(pl.LightningModule):
         self.n_hidden = n_hidden
         self.direction_bool = direction_bool
         self.learning_rate = learning_rate
-        self.embeds = nn.Embedding(dataset_size, n_embedding)
+        # self.embeds = nn.Embedding(dataset_size, n_embedding)
         self.lstm = nn.LSTM(
-            n_embedding,
+            1,  # (input_size=1)
             n_hidden,
             n_layers,
             dropout=drop_prob,
@@ -127,13 +127,13 @@ class LSTMModel(pl.LightningModule):
         # initialize hidden and cell states with normal, orthogonal, and xavier
         torch.nn.init.normal_(h_0, 0, 1)
         torch.nn.init.normal_(c_0, 0, 1)
-
         x = x.view(x.size(0), -1)
-        x = x.long()
+        x = x.float()
+        # Add 3rd Dimension (input_size=1)
+        x = torch.unsqueeze(x, dim=-1)
         h_0, c_0 = h_0.to(self.device), c_0.to(self.device)
         # h_0, c_0 = h_0.type_as(x), c_0.type_as(x)
-        embeds = self.embeds(x)
-        lstm_out, (h_0, c_0) = self.lstm(embeds, (h_0, c_0))
+        lstm_out, (h_0, c_0) = self.lstm(x, (h_0, c_0))
         if self.direction_bool:
             h_0 = h_0.contiguous().view(-1, 2 * self.n_hidden)
         else:

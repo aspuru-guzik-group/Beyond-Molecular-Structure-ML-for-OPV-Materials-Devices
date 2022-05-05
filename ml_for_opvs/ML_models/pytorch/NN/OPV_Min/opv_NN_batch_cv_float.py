@@ -1,28 +1,39 @@
+import copy
+import math
 import os
 from argparse import ArgumentParser
+from typing import Dict, List, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pkg_resources
 import pytorch_lightning as pl
+from pytorch_lightning.utilities import seed
 import torch
 import torch.nn.functional as F
-import wandb
-from pytorch_lightning.loggers import WandbLogger
+import torch.optim as optim
 from torch import nn
 from torch.optim import SGD, Adam
+from ml_for_opvs.ML_models.pytorch.data.OPV_Min.data_cv import OPVDataModule
 from pytorch_lightning import callbacks
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.core.saving import save_hparams_to_yaml
 from torch.utils import data
-
-from ml_for_opvs.ML_models.pytorch.data.OPV_Min.data_cv import OPVDataModule
+import wandb
+from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.plugins import TrainingTypePlugin
+from pytorch_lightning.accelerators import GPUAccelerator
+from pytorch_lightning.plugins.precision import PrecisionPlugin
 
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
 from numpy import mean
 from numpy import std
+
+os.environ["WANDB_API_KEY"] = "95f67c3932649ca21ac76df3f88139dafacd965d"
+os.environ["WANDB_MODE"] = "offline"
+
 
 DATA_DIR = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
@@ -49,19 +60,12 @@ FP_MASTER_DATA = pkg_resources.resource_filename(
 )
 
 CHECKPOINT_DIR = pkg_resources.resource_filename(
-    "ml_for_opvs", "model_checkpoints/OPV_Min/LSTM"
+    "ml_for_opvs", "model_checkpoints/OPV_Min/NN"
 )
 
 SUMMARY_DIR = pkg_resources.resource_filename(
-    "ml_for_opvs", "ML_models/pytorch/LSTM/OPV_Min/"
+    "ml_for_opvs", "ML_models/pytorch/NN/OPV_Min/"
 )
-
-CHECKPOINT_DIR = pkg_resources.resource_filename(
-    "ml_for_opvs", "model_checkpoints/LSTM"
-)
-
-os.environ["WANDB_API_KEY"] = "95f67c3932649ca21ac76df3f88139dafacd965d"
-os.environ["WANDB_MODE"] = "offline"
 
 SEED_VAL = 4
 
@@ -72,39 +76,31 @@ def initialize_weights(model):
         nn.init.constant_(model.bias.data, 0)
 
 
-class LSTMModel(pl.LightningModule):
+class NNModel(pl.LightningModule):
     def __init__(
         self,
-        dataset_size,
-        output_size,
+        max_length,
+        vocab_length,
         n_embedding,
         n_hidden,
-        n_layers,
-        learning_rate,
+        n_output,
         drop_prob,
-        direction_bool=False,
+        learning_rate,
     ):
         super().__init__()
-        self.n_layers = n_layers
+        self.max_length = max_length
+        self.vocab_length = vocab_length
+        self.n_embedding = n_embedding
         self.n_hidden = n_hidden
-        self.direction_bool = direction_bool
+        self.n_output = n_output
+        self.drop_prob = drop_prob
         self.learning_rate = learning_rate
-        self.embeds = nn.Embedding(dataset_size, n_embedding)
-        self.lstm = nn.LSTM(
-            n_embedding,
-            n_hidden,
-            n_layers,
-            dropout=drop_prob,
-            batch_first=True,
-            bidirectional=direction_bool,
-        )
-        self.dropout = nn.Dropout(drop_prob)
+        self.embeds = nn.Linear(
+            vocab_length, n_embedding
+        )  # REMOVED EMBEDDINGS DUE TO FLOAT!
+        self.linear1 = nn.Linear(max_length, n_output)
         self.loss = nn.MSELoss()
-        if direction_bool:
-            self.linear = nn.Linear(n_hidden * 2, output_size)
-        else:
-            self.linear = nn.Linear(n_hidden, output_size)
-
+        self.dropout = nn.Dropout(drop_prob)
         self.save_hyperparameters()
 
     def configure_optimizers(self):
@@ -113,62 +109,30 @@ class LSTMModel(pl.LightningModule):
         )
 
     def forward(self, x):
-        # initialize hidden and cell state
-        if self.direction_bool:
-            h_0 = torch.zeros(
-                2 * self.n_layers, x.size(0), self.n_hidden
-            ).requires_grad_()
-            c_0 = torch.zeros(
-                2 * self.n_layers, x.size(0), self.n_hidden
-            ).requires_grad_()
-        else:
-            h_0 = torch.zeros(self.n_layers, x.size(0), self.n_hidden).requires_grad_()
-            c_0 = torch.zeros(self.n_layers, x.size(0), self.n_hidden).requires_grad_()
-        # initialize hidden and cell states with normal, orthogonal, and xavier
-        torch.nn.init.normal_(h_0, 0, 1)
-        torch.nn.init.normal_(c_0, 0, 1)
-
-        x = x.view(x.size(0), -1)
-        x = x.long()
-        h_0, c_0 = h_0.to(self.device), c_0.to(self.device)
-        # h_0, c_0 = h_0.type_as(x), c_0.type_as(x)
-        embeds = self.embeds(x)
-        lstm_out, (h_0, c_0) = self.lstm(embeds, (h_0, c_0))
-        if self.direction_bool:
-            h_0 = h_0.contiguous().view(-1, 2 * self.n_hidden)
-        else:
-            h_0 = h_0.contiguous().view(-1, self.n_hidden)
-        out = self.dropout(h_0)
-        # TODO: add layer normalization, look at weights if theyre big or not - weight decay,
-        out = self.linear(out)
+        x = x.float()
+        out = self.dropout(x)
+        out = self.linear1(out)
+        out = out.squeeze()
         return out
 
     def training_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
-        y_hat = y_hat.reshape(-1)
-        # print(y_hat, y_hat.size(), y)
         loss = self.loss(y_hat, y)
-        # logs metrics for each training_step,
-        # and the average across the epoch, to the progress bar and logger
         self.log("train_loss", loss, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
-        y_hat = y_hat.reshape(-1)
+        print(y_hat.shape, y.shape)
         loss = self.loss(y_hat, y)
         self.log("val_loss", loss, on_epoch=True, sync_dist=True)
-        # corr_coef = np.corrcoef(y_hat.cpu(), y.cpu())[0, 1]
-        # coef_determination = corr_coef ** 2
-        # self.log("val_loss_r2", coef_determination, on_epoch=True)
 
     def test_step(self, batch, batch_idx):
         batch = self.all_gather(batch)
         x, y = batch
         y_hat = self(x)
-        y_hat = y_hat.reshape(-1)
         loss = self.loss(y_hat, y)
         y = y.cpu()
         y_hat = y_hat.cpu()
@@ -180,28 +144,25 @@ class LSTMModel(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--n_hidden", type=int, default=128)
+        parser.add_argument("--n_hidden", type=int, default=256)
         parser.add_argument("--n_embedding", type=int, default=128)
         parser.add_argument("--n_output", type=int, default=1)
-        parser.add_argument("--n_layers", type=int, default=1)
         parser.add_argument("--drop_prob", type=float, default=0.3)
-        parser.add_argument("--learning_rate", type=float, default=0.001)
-        parser.add_argument("--direction_bool", type=bool, default=False)
+        parser.add_argument("--learning_rate", type=float, default=1e-3)
         return parser
 
 
 def cli_main():
     SUMMARY_DIR = pkg_resources.resource_filename(
-        "ml_for_opvs", "ML_models/pytorch/LSTM/OPV_Min/"
+        "ml_for_opvs", "ML_models/pytorch/NN/OPV_Min/"
     )
     pl.seed_everything(SEED_VAL)
-
     # ------------
     # wandb + sweep
     # ------------
-    # wandb_logger = WandbLogger(project="OPV_LSTM", log_model=False, offline=False)
+    # wandb_logger = WandbLogger(project="OPV_NN", offline=True, log_model=False)
     # online
-    # wandb_logger = WandbLogger(project="OPV_LSTM")
+    # wandb_logger = WandbLogger(project="OPV_NN")
 
     # log results
     summary_df = pd.DataFrame(
@@ -219,6 +180,7 @@ def cli_main():
         "aug_manual": 0,
         "fingerprint": 0,
     }
+
     parameter_type = {
         "none": 1,
         "electronic": 0,
@@ -230,13 +192,13 @@ def cli_main():
         if parameter_type[param] == 1:
             dev_param = param
             if dev_param == "none":
-                SUMMARY_DIR = SUMMARY_DIR + "none_opv_LSTM_results.csv"
+                SUMMARY_DIR = SUMMARY_DIR + "none_opv_NN_results.csv"
             elif dev_param == "electronic":
-                SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_LSTM_results.csv"
+                SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_NN_results.csv"
             elif dev_param == "device":
-                SUMMARY_DIR = SUMMARY_DIR + "device_opv_LSTM_results.csv"
+                SUMMARY_DIR = SUMMARY_DIR + "device_opv_NN_results.csv"
             elif dev_param == "impt_device":
-                SUMMARY_DIR = SUMMARY_DIR + "impt_device_opv_LSTM_results.csv"
+                SUMMARY_DIR = SUMMARY_DIR + "impt_device_opv_NN_results.csv"
     print(dev_param)
 
     for i in range(len(unique_datatype)):
@@ -244,10 +206,18 @@ def cli_main():
         # Data Conditions
         # ---------------
         parser = ArgumentParser()
+
+        # ---------------
+        # Custom accelerator and plugins
+        # ---------------
+        accelerator = GPUAccelerator(
+            precision_plugin=PrecisionPlugin, training_type_plugin=TrainingTypePlugin
+        )
+
         # ------------
         # args
         # ------------
-        parser.add_argument("--gpus", type=int, default=1)
+        parser.add_argument("--gpus", type=int, default=-1)
         parser.add_argument("--accelerator", type=str, default="dp")
         parser.add_argument("--train_batch_size", type=int, default=128)
         parser.add_argument("--val_batch_size", type=int, default=64)
@@ -258,7 +228,7 @@ def cli_main():
         parser.add_argument("--enable_progress_bar", type=bool, default=False)
         # parser.add_argument("--logger", type=str, default=wandb_logger)
         parser.add_argument("--logger", type=str, default=False)
-        parser = LSTMModel.add_model_specific_args(parser)
+        parser = NNModel.add_model_specific_args(parser)
         args = parser.parse_args()
         # reset conditions
         unique_datatype = {
@@ -317,7 +287,7 @@ def cli_main():
 
         # parse arguments using the terminal shell (for ComputeCanada purposes)
         # suffix = suffix + (
-        #     "_LSTM-{epoch:02d}-{val_loss:.3f}"
+        #     "_NN-{epoch:02d}-{val_loss:.3f}"
         #     + "-n_hidden={}-n_embedding={}-drop_prob={}-lr={}-train_batch_size={}".format(
         #         args.n_hidden,
         #         args.n_embedding,
@@ -334,9 +304,11 @@ def cli_main():
         # )
         # parser.add_argument("--callbacks", type=str, default=[checkpoint_callback])
         # args = parser.parse_args()
+        parser.add_argument("--callbacks", type=str, default=False)
+        args = parser.parse_args()
 
         # pass args to wandb
-        # wandb.init(project="OPV_LSTM", config=args)
+        # wandb.init(project="OPV_NN", config=args)
         # config = wandb.config
 
         # ------------
@@ -378,29 +350,29 @@ def cli_main():
             # ------------
             # model
             # ------------
-            lstm_model = LSTMModel(
-                dataset_size=data_module.data_size,
-                output_size=1,
+            print("LENGTHS: ", data_module.max_seq_length, data_module.vocab_length)
+            NN_model = NNModel(
+                max_length=data_module.max_seq_length,
+                vocab_length=data_module.vocab_length,
                 n_embedding=args.n_embedding,
                 n_hidden=args.n_hidden,
-                n_layers=args.n_layers,
-                learning_rate=args.learning_rate,
+                n_output=args.n_output,
                 drop_prob=args.drop_prob,
-                direction_bool=args.direction_bool,
+                learning_rate=args.learning_rate,
             )
-            lstm_model.apply(initialize_weights)
+            NN_model.apply(initialize_weights)
 
             # ------------
             # training
             # ------------
             trainer = pl.Trainer().from_argparse_args(args)
-            trainer.fit(lstm_model, data_module)
+            trainer.fit(NN_model, data_module)
 
             # ------------
             # testing
             # ------------
             test_output = trainer.test(
-                lstm_model, data_module, ckpt_path=None, verbose=True
+                NN_model, data_module, ckpt_path=None, verbose=True
             )
             outer_corr_coef.append(test_output[0]["test_corr_coef"])
             outer_rmse.append(test_output[0]["test_loss"])

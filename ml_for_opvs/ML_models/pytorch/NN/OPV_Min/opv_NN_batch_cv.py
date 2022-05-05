@@ -108,7 +108,6 @@ class NNModel(pl.LightningModule):
         )
 
     def forward(self, x):
-        print(type(x))
         embeds = self.embeds(x)
         out = self.dropout(embeds)
         out = self.linear1(out)
@@ -184,8 +183,8 @@ def cli_main():
     }
 
     parameter_type = {
-        "none": 0,
-        "electronic": 1,
+        "none": 1,
+        "electronic": 0,
         "device": 0,
         "impt_device": 0,
     }
@@ -261,15 +260,19 @@ def cli_main():
         if unique_datatype["smiles"] == 1:
             suffix = "/smi"
             print("SMILES")
+            break
         elif unique_datatype["bigsmiles"] == 1:
             suffix = "/bigsmi"
             print("BigSMILES")
+            break
         elif unique_datatype["selfies"] == 1:
             suffix = "/selfies"
             print("SELFIES")
+            break
         elif unique_datatype["aug_smiles"] == 1:
             suffix = "/aug_smi"
             print("AUG_SMILES")
+            break
         elif unique_datatype["brics"] == 1:
             suffix = "/brics"
             print("BRICS")
@@ -397,8 +400,8 @@ def cli_main():
 
 
 if __name__ == "__main__":
-    # cli_main()
-    cuda0 = torch.device("cuda:0")
-    input = torch.ones([2, 4], dtype=torch.float64, device=cuda0)
-    embedding = nn.Embedding(10, 3)
-    print(embedding(input))
+    cli_main()
+    # input = torch.rand([2, 4], dtype=torch.float64)
+    # print(input)
+    # embedding = nn.Dropout()
+    # print(embedding(input))

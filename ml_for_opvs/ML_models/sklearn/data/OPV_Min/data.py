@@ -8,6 +8,7 @@ import pkg_resources
 import json
 import ast  # for str -> list conversion
 import selfies as sf
+from sklearn import preprocessing
 
 import torch
 from torch.utils.data import random_split
@@ -1007,6 +1008,9 @@ class Dataset:
 # dataset = Dataset(FP_MASTER_DATA, 0, False)
 # dataset.prepare_data()
 # x, y = dataset.setup("impt_device")
+# scaler = preprocessing.MinMaxScaler().fit(x)
+# x_scaled = scaler.transform(x)
+# print(x_scaled[0])
 # x, y, token_dict = dataset.setup_aug_smi("device")
 # x, y = dataset.setup_frag_BRICS("device")
 # x, y = dataset.setup_manual_frag("device")

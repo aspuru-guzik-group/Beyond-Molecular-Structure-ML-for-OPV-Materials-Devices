@@ -475,6 +475,13 @@ class OPVDataModule(pl.LightningDataModule):
             # expected number can change due to different d-a pairs having different number of augmentation frags
 
         # add device parameters to the end of input
+        if parameter == "electronic":
+            self.max_seq_length += 4
+        elif parameter == "device":
+            self.max_seq_length += 11
+        elif parameter == "impt_device":
+            self.max_seq_length += 7
+        
         index = 0
         while index < len(da_pair_list):
             if parameter == "electronic":
@@ -597,6 +604,7 @@ class OPVDataModule(pl.LightningDataModule):
                 da_pair_list[index].append(solvent_add_conc[index])
                 da_pair_list[index].append(active_layer_thickness[index])
                 da_pair_list[index].append(annealing_temp[index])
+
             index += 1
 
         # tokenize data

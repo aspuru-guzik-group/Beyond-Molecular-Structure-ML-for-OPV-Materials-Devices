@@ -15,6 +15,7 @@ from collections import deque
 from sklearn.metrics import mean_squared_error
 from sklearn.inspection import permutation_importance
 from skopt import BayesSearchCV
+from sklearn import preprocessing
 
 from ml_for_opvs.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
 
@@ -206,10 +207,10 @@ unique_datatype = {
     "fingerprint": 0,
 }
 parameter_type = {
-    "none": 0,
+    "none": 1,
     "electronic": 0,
     "device": 0,
-    "impt_device": 1,
+    "impt_device": 0,
 }
 for param in parameter_type:
     if parameter_type[param] == 1:
@@ -297,6 +298,10 @@ for i in range(len(unique_datatype)):
     cv_outer = KFold(n_splits=5, shuffle=True, random_state=0)
     outer_corr_coef = list()
     outer_rmse = list()
+
+    # feature scaling
+    # scaler = preprocessing.MinMaxScaler().fit(x)
+    # x = scaler.transform(x)
 
     for train_ix, test_ix in cv_outer.split(x):
         # split data
@@ -435,9 +440,11 @@ for i in range(len(unique_datatype)):
 
         # get feature importances of best performing model
         # importances = best_model.feature_importances_
+        # importances = importances[len(importances) - 7 : len(importances)]
         # std = np.std(
         #     [tree.feature_importances_ for tree in best_model.estimators_], axis=0
         # )
+        # std = std[len(importances) - 7 : len(importances)]
         # forest_importances = pd.Series(importances)
         # fig, ax = plt.subplots()
         # forest_importances.plot.bar(yerr=std, ax=ax)
@@ -446,19 +453,19 @@ for i in range(len(unique_datatype)):
         # fig.tight_layout()
         # plt.show()
 
-        # evaluate model on the hold out dataset
-        yhat = best_model.predict(x_test)
-        # evaluate the model
-        corr_coef = np.corrcoef(y_test, yhat)[0, 1]
-        rmse = np.sqrt(mean_squared_error(y_test, yhat))
-        # store the result
-        outer_corr_coef.append(corr_coef)
-        outer_rmse.append(rmse)
-        # report progress (best training score)
-        print(
-            ">corr_coef=%.3f, est=%.3f, cfg=%s"
-            % (corr_coef, result.best_score_, result.best_params_)
-        )
+        # # evaluate model on the hold out dataset
+        # yhat = best_model.predict(x_test)
+        # # evaluate the model
+        # corr_coef = np.corrcoef(y_test, yhat)[0, 1]
+        # rmse = np.sqrt(mean_squared_error(y_test, yhat))
+        # # store the result
+        # outer_corr_coef.append(corr_coef)
+        # outer_rmse.append(rmse)
+        # # report progress (best training score)
+        # print(
+        #     ">corr_coef=%.3f, est=%.3f, cfg=%s"
+        #     % (corr_coef, result.best_score_, result.best_params_)
+        # )
 
     # summarize the estimated performance of the model
     print("R: %.3f (%.3f)" % (mean(outer_corr_coef), std(outer_corr_coef)))
