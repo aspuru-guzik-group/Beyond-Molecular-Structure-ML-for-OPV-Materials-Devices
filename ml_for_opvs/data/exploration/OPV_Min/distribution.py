@@ -193,9 +193,15 @@ class Distribution:
         fig.tight_layout()
         plt.savefig(opv_solvent_path)
 
+    def donor_acceptor_heatmap(self):
+        """
+        
+        """
+
 
 dist = Distribution(MASTER_ML_DATA_PLOT)
 
 # dist.histogram()
 
 dist.solvent_heatmap(DONOR_SOLVENT_PATH, "D")
+dist.solvent_heatmap(ACCEPTOR_SOLVENT_PATH, "A")

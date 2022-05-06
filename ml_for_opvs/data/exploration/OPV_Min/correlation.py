@@ -263,12 +263,13 @@ class Correlation:
         self.data["Hansen Polar"] = ""
         self.data["Hildebrand"] = ""
         solvent_df = pd.read_csv(solvent_inventory)
-        options = ["['Solvent']"]
+        options = ["['Solvent']", "['Solvent', 'Solvent_Additive']"]
 
         # 1. sort for solvents
         sort_solvent_df = solvent_df[solvent_df["Parameter_Type"].isin(options)]
         # 2. filter out solvents without at least BP
         filtered_solvent_df = sort_solvent_df[sort_solvent_df["BP"] > 0]
+        print(filtered_solvent_df)
 
         # 3. Add solvent properties to master file
         for index, row in self.data.iterrows():
@@ -296,7 +297,7 @@ class Correlation:
 
 
 corr_plot = Correlation(MASTER_ML_DATA_PLOT)
-# corr_plot.parity_plot()
+corr_plot.parity_plot()
 corr_plot.heatmap_plot("r")
 
 # corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA_PLOT)
