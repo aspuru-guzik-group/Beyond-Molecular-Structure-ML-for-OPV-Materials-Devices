@@ -123,9 +123,9 @@ class Dataset:
             # tokenized_input = np.asarray(tokenized_input)
             tokenized_input = Tokenizer().pad_input(tokenized_input, max_selfie_length)
         if self.shuffled:
-            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["calc_PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
+            pce_array = self.data["calc_PCE (%)"].to_numpy().astype("float32")
 
         # minimize range of pce between 0-1
         # find max of pce_array
@@ -295,9 +295,9 @@ class Dataset:
         Function that sets up data ready for training 
         """
         if self.shuffled:
-            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["calc_PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
+            pce_array = self.data["calc_PCE (%)"].to_numpy().astype("float32")
 
         # minimize range of pce between 0-1
         # find max of pce_array
@@ -429,6 +429,12 @@ class Dataset:
                 x[index].append(active_layer_thickness[index])
                 x[index].append(annealing_temp[index])
             else:
+                (
+                    tokenized_input,
+                    max_seq_length,
+                    vocab_length,
+                    token_dict,
+                ) = Tokenizer().tokenize_data(self.data["DA_pair"])
                 return (
                     np.asarray(self.data["DA_pair"]),
                     pce_array,
@@ -458,9 +464,9 @@ class Dataset:
     def setup_frag_BRICS(self, parameter):
         self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
         if self.shuffled:
-            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["calc_PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
+            pce_array = self.data["calc_PCE (%)"].to_numpy().astype("float32")
 
         self.max_pce = pce_array.max()
         pce_array = pce_array / self.max_pce
@@ -639,9 +645,9 @@ class Dataset:
     def setup_manual_frag(self, parameter):
         self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
         if self.shuffled:
-            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["calc_PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
+            pce_array = self.data["calc_PCE (%)"].to_numpy().astype("float32")
 
         self.max_pce = pce_array.max()
         pce_array = pce_array / self.max_pce
@@ -823,9 +829,9 @@ class Dataset:
     def setup_fp(self, radius: int, nbits: int, parameter: str):
         self.df = pd.DataFrame(columns=["tokenized_input", "PCE"], index=[0])
         if self.shuffled:
-            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["calc_PCE (%)_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
+            pce_array = self.data["calc_PCE (%)"].to_numpy().astype("float32")
 
         self.max_pce = pce_array.max()
         pce_array = pce_array / self.max_pce

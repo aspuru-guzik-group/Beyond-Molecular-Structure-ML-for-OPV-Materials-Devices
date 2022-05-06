@@ -1,4 +1,5 @@
-from cmath import nan
+import ast
+from doctest import master
 import math
 import pkg_resources
 import pandas as pd
@@ -25,6 +26,10 @@ CORRELATION_HEATMAP_PLOT = pkg_resources.resource_filename(
 
 RMSE_HEATMAP_PLOT = pkg_resources.resource_filename(
     "ml_for_opvs", "data/exploration/OPV_Min/rmse_heatmap_plot.png"
+)
+
+PARAMETER_INVENTORY = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/process/OPV_Min/device_parameter_inventory.csv"
 )
 
 
@@ -62,7 +67,7 @@ class Correlation:
         print(columns_dict)
         # select which columns you want to plot
         column_idx_first = 9
-        column_idx_last = 28 + 1
+        column_idx_last = 35 + 1
 
         x_columns = column_idx_last - column_idx_first
         y_rows = column_idx_last - column_idx_first
@@ -70,7 +75,7 @@ class Correlation:
         column_range = range(column_idx_first, column_idx_last)
         permutations = list(itertools.permutations(column_range, 2))
 
-        fig, axs = plt.subplots(y_rows, x_columns, figsize=(100, 100))
+        fig, axs = plt.subplots(y_rows, x_columns, figsize=(120, 120))
 
         for pair in permutations:
             column_idx_0 = pair[0]
@@ -158,7 +163,7 @@ class Correlation:
         print(columns_dict)
         # select which columns you want to plot
         column_idx_first = 9
-        column_idx_last = 28 + 1
+        column_idx_last = 35 + 1
 
         x_columns = column_idx_last - column_idx_first
         y_rows = column_idx_last - column_idx_first
@@ -246,14 +251,52 @@ class Correlation:
             fig.tight_layout()
             plt.savefig(RMSE_HEATMAP_PLOT)
 
-    def solvent_correlation(self, solvent_inventory, solvent_pce_path):
+    def solvent_correlation(self, solvent_inventory, master_ml_data_path):
         """
         Function that plots the correlation between solvent properties and PCE (at least the ones that are present)
         """
-        pass
+        self.data["BP"] = ""
+        self.data["MP"] = ""
+        self.data["log Pow"] = ""
+        self.data["Hansen Disp"] = ""
+        self.data["Hansen H-Bond"] = ""
+        self.data["Hansen Polar"] = ""
+        self.data["Hildebrand"] = ""
+        solvent_df = pd.read_csv(solvent_inventory)
+        options = ["['Solvent']"]
+
+        # 1. sort for solvents
+        sort_solvent_df = solvent_df[solvent_df["Parameter_Type"].isin(options)]
+        # 2. filter out solvents without at least BP
+        filtered_solvent_df = sort_solvent_df[sort_solvent_df["BP"] > 0]
+
+        # 3. Add solvent properties to master file
+        for index, row in self.data.iterrows():
+            solvent = self.data.at[index, "solvent"]
+            if solvent in list(filtered_solvent_df["Name"]):
+                curr_solvent_df = filtered_solvent_df[
+                    filtered_solvent_df["Name"] == solvent
+                ]
+                self.data.at[index, "BP"] = curr_solvent_df["BP"].values[0]
+                self.data.at[index, "MP"] = curr_solvent_df["MP"].values[0]
+                self.data.at[index, "log Pow"] = curr_solvent_df["log Pow"].values[0]
+                self.data.at[index, "Hansen Disp"] = curr_solvent_df[
+                    "Hansen Disp"
+                ].values[0]
+                self.data.at[index, "Hansen H-Bond"] = curr_solvent_df[
+                    "Hansen H-Bond"
+                ].values[0]
+                self.data.at[index, "Hansen Polar"] = curr_solvent_df[
+                    "Hansen Polar"
+                ].values[0]
+                self.data.at[index, "Hildebrand"] = curr_solvent_df[
+                    "Hildebrand"
+                ].values[0]
+        self.data.to_csv(master_ml_data_path, index=False)
 
 
 corr_plot = Correlation(MASTER_ML_DATA_PLOT)
-corr_plot.parity_plot()
-# corr_plot.heatmap_plot("r")
+# corr_plot.parity_plot()
+corr_plot.heatmap_plot("r")
 
+# corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA_PLOT)
