@@ -223,7 +223,7 @@ def cli_main():
         "none": 1,
         "electronic": 0,
         "device": 0,
-        "impt_device": 0,
+        "fabrication": 0,
     }
 
     for param in parameter_type:
@@ -235,8 +235,8 @@ def cli_main():
                 SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_LSTM_results.csv"
             elif dev_param == "device":
                 SUMMARY_DIR = SUMMARY_DIR + "device_opv_LSTM_results.csv"
-            elif dev_param == "impt_device":
-                SUMMARY_DIR = SUMMARY_DIR + "impt_device_opv_LSTM_results.csv"
+            elif dev_param == "fabrication":
+                SUMMARY_DIR = SUMMARY_DIR + "fabrication_opv_LSTM_results.csv"
     print(dev_param)
 
     for i in range(len(unique_datatype)):

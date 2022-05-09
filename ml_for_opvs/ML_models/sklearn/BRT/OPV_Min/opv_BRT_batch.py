@@ -223,7 +223,7 @@ unique_datatype = {
     "smiles": 0,
     "bigsmiles": 0,
     "selfies": 0,
-    # "aug_smiles": 0,
+    "aug_smiles": 0,
     "brics": 0,
     "manual": 0,
     "aug_manual": 0,
@@ -233,7 +233,7 @@ parameter_type = {
     "none": 1,
     "electronic": 0,
     "device": 0,
-    "impt_device": 0,
+    "fabrication": 0,
 }
 for param in parameter_type:
     if parameter_type[param] == 1:
@@ -244,8 +244,8 @@ for param in parameter_type:
             SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_brt_results.csv"
         elif dev_param == "device":
             SUMMARY_DIR = SUMMARY_DIR + "device_opv_brt_results.csv"
-        elif dev_param == "impt_device":
-            SUMMARY_DIR = SUMMARY_DIR + "impt_device_opv_brt_results.csv"
+        elif dev_param == "fabrication":
+            SUMMARY_DIR = SUMMARY_DIR + "fabrication_opv_brt_results.csv"
 
 for i in range(len(unique_datatype)):
     # reset conditions
@@ -253,7 +253,7 @@ for i in range(len(unique_datatype)):
         "smiles": 0,
         "bigsmiles": 0,
         "selfies": 0,
-        # "aug_smiles": 0,
+        "aug_smiles": 0,
         "brics": 0,
         "manual": 0,
         "aug_manual": 0,
@@ -289,12 +289,12 @@ for i in range(len(unique_datatype)):
         dataset.prepare_data()
         x, y = dataset.setup(dev_param)
         datatype = "SELFIES"
-    # elif unique_datatype["aug_smiles"] == 1:
-    #     dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-    #     dataset.prepare_data()
-    #     x, y, token_dict = dataset.setup_aug_smi(dev_param)
-    #     num_of_augment = 4  # 1+4x amount of data
-    #     datatype = "AUG_SMILES"
+    elif unique_datatype["aug_smiles"] == 1:
+        dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
+        dataset.prepare_data()
+        x, y, token_dict = dataset.setup_aug_smi(dev_param)
+        num_of_augment = 4  # 1+4x amount of data
+        datatype = "AUG_SMILES"
     elif unique_datatype["brics"] == 1:
         dataset = Dataset(BRICS_MASTER_DATA, 0, shuffled)
         x, y = dataset.setup_frag_BRICS(dev_param)
@@ -338,89 +338,104 @@ for i in range(len(unique_datatype)):
 
             x_train = np.array(aug_x_train)
             y_train = np.array(aug_y_train)
-        # elif unique_datatype["aug_smiles"] == 1:
-        #     aug_x_train = []
-        #     aug_y_train = []
-        #     x_aug_dev_list = []
-        #     for x_, y_ in zip(x_train, y_train):
-        #         x_list = list(x_)
-        #         x_aug, y_aug = augment_smi_in_loop(
-        #             str(x_list[0]), y_, num_of_augment, True
-        #         )
-        #         for x_a in x_aug:
-        #             x_aug_dev = x_list[1:]
-        #             x_aug_dev_list.append(x_aug_dev)
-        #         aug_x_train.extend(x_aug)
-        #         aug_y_train.extend(y_aug)
-        #     # tokenize Augmented SMILES
-        #     (
-        #         tokenized_input,
-        #         max_seq_length,
-        #         vocab_length,
-        #         input_dict,  # dictionary of vocab
-        #     ) = Tokenizer().tokenize_data(aug_x_train)
+        elif unique_datatype["aug_smiles"] == 1:
+            aug_x_train = []
+            aug_y_train = []
+            x_aug_dev_list = []
+            for x_, y_ in zip(x_train, y_train):
 
-        #     # preprocess x_test_array
-        #     x_test_array = []
-        #     x_test_dev_list = []
-        #     for x_t in x_test:
-        #         x_t_list = list(x_t)
-        #         x_test_array.append(x_t_list[0])
-        #         x_test_dev_list.append(x_t_list[1:])
+                if dev_param == "none":
+                    x_aug, y_aug = augment_smi_in_loop(x_, y_, num_of_augment, True)
+                else:
+                    x_list = list(x_)
+                    x_aug, y_aug = augment_smi_in_loop(
+                        str(x_list[0]), y_, num_of_augment, True
+                    )
+                    for x_a in x_aug:
+                        x_aug_dev = x_list[1:]
+                        x_aug_dev_list.append(x_aug_dev)
 
-        #     tokenized_test, test_max_seq_length = Tokenizer().tokenize_from_dict(
-        #         x_test_array, max_seq_length, input_dict
-        #     )
+                aug_x_train.extend(x_aug)
+                aug_y_train.extend(y_aug)
+            # tokenize Augmented SMILES
+            (
+                tokenized_input,
+                max_seq_length,
+                vocab_length,
+                input_dict,  # dictionary of vocab
+            ) = Tokenizer().tokenize_data(aug_x_train)
 
-        #     # make sure test set max_seq_length is same as train set max_seq_length
-        #     # NOTE: test set could have longer sequence because we separated the tokenization
-        #     if test_max_seq_length > max_seq_length:
-        #         tokenized_input, max_seq_length = Tokenizer().tokenize_from_dict(
-        #             aug_x_train, test_max_seq_length, input_dict
-        #         )
+            if dev_param == "none":
+                print("YES NONE")
+                tokenized_test, max_test_seq_length = Tokenizer().tokenize_from_dict(
+                    x_test, max_seq_length, input_dict
+                )
 
-        #     # add device parameters to token2idx
-        #     token_idx = len(input_dict)
-        #     for token in token_dict:
-        #         input_dict[token] = token_idx
-        #         token_idx += 1
+            else:
+                # preprocess x_test_array
+                x_test_array = []
+                x_test_dev_list = []
+                for x_t in x_test:
+                    x_t_list = list(x_t)
+                    x_test_array.append(x_t_list[0])
+                    x_test_dev_list.append(x_t_list[1:])
 
-        #     # tokenize device parameters
-        #     tokenized_dev_input_list = []
-        #     for dev in x_aug_dev_list:
-        #         tokenized_dev_input = []
-        #         for _d in dev:
-        #             if isinstance(_d, str):
-        #                 tokenized_dev_input.append(input_dict[_d])
-        #             else:
-        #                 tokenized_dev_input.append(_d)
-        #         tokenized_dev_input_list.append(tokenized_dev_input)
+                tokenized_test, test_max_seq_length = Tokenizer().tokenize_from_dict(
+                    x_test_array, max_seq_length, input_dict
+                )
 
-        #     tokenized_dev_test_list = []
-        #     for dev in x_test_dev_list:
-        #         tokenized_dev_test = []
-        #         for _d in dev:
-        #             if isinstance(_d, str):
-        #                 tokenized_dev_test.append(input_dict[_d])
-        #             else:
-        #                 tokenized_dev_test.append(_d)
-        #         tokenized_dev_test_list.append(tokenized_dev_test)
+                # make sure test set max_seq_length is same as train set max_seq_length
+                # NOTE: test set could have longer sequence because we separated the tokenization
+                if test_max_seq_length > max_seq_length:
+                    tokenized_input, max_seq_length = Tokenizer().tokenize_from_dict(
+                        aug_x_train, test_max_seq_length, input_dict
+                    )
 
-        #     # add device parameters to data
-        #     input_idx = 0
-        #     while input_idx < len(tokenized_input):
-        #         tokenized_input[input_idx].extend(tokenized_dev_input_list[input_idx])
-        #         input_idx += 1
+                # add device parameters to token2idx
+                token_idx = len(input_dict)
+                for token in token_dict:
+                    input_dict[token] = token_idx
+                    token_idx += 1
 
-        #     test_input_idx = 0
-        #     while test_input_idx < len(tokenized_test):
-        #         tokenized_test[test_input_idx].extend(
-        #             tokenized_dev_test_list[test_input_idx]
-        #         )
-        #         test_input_idx += 1
-        #     x_test = np.array(tokenized_test)
-        #     x_train = np.array(tokenized_input)
-        #     y_train = np.array(aug_y_train)
+                # tokenize device parameters
+                tokenized_dev_input_list = []
+                for dev in x_aug_dev_list:
+                    tokenized_dev_input = []
+                    for _d in dev:
+                        if isinstance(_d, str):
+                            tokenized_dev_input.append(input_dict[_d])
+                        else:
+                            tokenized_dev_input.append(_d)
+                    tokenized_dev_input_list.append(tokenized_dev_input)
+
+                tokenized_dev_test_list = []
+                for dev in x_test_dev_list:
+                    tokenized_dev_test = []
+                    for _d in dev:
+                        if isinstance(_d, str):
+                            tokenized_dev_test.append(input_dict[_d])
+                        else:
+                            tokenized_dev_test.append(_d)
+                    tokenized_dev_test_list.append(tokenized_dev_test)
+
+                # add device parameters to data
+                input_idx = 0
+                while input_idx < len(tokenized_input):
+                    tokenized_input[input_idx].extend(
+                        tokenized_dev_input_list[input_idx]
+                    )
+                    input_idx += 1
+
+                test_input_idx = 0
+                while test_input_idx < len(tokenized_test):
+                    tokenized_test[test_input_idx].extend(
+                        tokenized_dev_test_list[test_input_idx]
+                    )
+                    test_input_idx += 1
+
+            x_test = np.array(tokenized_test)
+            x_train = np.array(tokenized_input)
+            y_train = np.array(aug_y_train)
 
         # configure the cross-validation procedure
         # inner cv allows for finding best model w/ best params

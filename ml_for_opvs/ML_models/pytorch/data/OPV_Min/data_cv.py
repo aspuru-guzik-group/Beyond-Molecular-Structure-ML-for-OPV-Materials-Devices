@@ -294,7 +294,7 @@ class OPVDataModule(pl.LightningDataModule):
             parameter: type of parameters to include:
                 - electronic: HOMO, LUMO
                 - device: all device parameters
-                - impt_device: all the important device parameters (D:A ratio - Annealing Temp.)
+                - fabrication: all the important device parameters (D:A ratio - Annealing Temp.)
         """
         # convert other columns into numpy arrays
         if self.shuffled:
@@ -479,9 +479,9 @@ class OPVDataModule(pl.LightningDataModule):
             self.max_seq_length += 4
         elif parameter == "device":
             self.max_seq_length += 11
-        elif parameter == "impt_device":
+        elif parameter == "fabrication":
             self.max_seq_length += 7
-        
+
         index = 0
         while index < len(da_pair_list):
             if parameter == "electronic":
@@ -562,7 +562,7 @@ class OPVDataModule(pl.LightningDataModule):
                 da_pair_list[index].append(hole_contact_layer[index])
                 da_pair_list[index].append(electron_contact_layer[index])
 
-            elif parameter == "impt_device":
+            elif parameter == "fabrication":
                 d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
                 total_solids_conc = (
                     self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
@@ -729,7 +729,7 @@ def distribution_plot(data_dir):
 #     "none": 0,
 #     "electronic": 0,
 #     "device": 1,
-#     "impt_device": 0,
+#     "fabrication": 0,
 # }
 
 # for param in parameter_type:

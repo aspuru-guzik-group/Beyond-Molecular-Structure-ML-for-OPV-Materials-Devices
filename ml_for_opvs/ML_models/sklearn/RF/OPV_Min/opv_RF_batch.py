@@ -207,22 +207,47 @@ unique_datatype = {
     "fingerprint": 0,
 }
 parameter_type = {
-    "none": 1,
+    "none": 0,
     "electronic": 0,
-    "device": 0,
-    "impt_device": 0,
+    "electronic_only": 0,
+    "device": 1,
+    "fabrication": 0,
 }
+target_type = {
+    "PCE": 0,
+    "FF": 0,
+    "JSC": 1,
+    "VOC": 0,
+}
+for target in target_type:
+    if target_type[target] == 1:
+        target_predict = target
+        if target_predict == "PCE":
+            SUMMARY_DIR = SUMMARY_DIR + "PCE_"
+        elif target_predict == "FF":
+            SUMMARY_DIR = SUMMARY_DIR + "FF_"
+        elif target_predict == "JSC":
+            SUMMARY_DIR = SUMMARY_DIR + "JSC_"
+        elif target_predict == "VOC":
+            SUMMARY_DIR = SUMMARY_DIR + "VOC_"
+
 for param in parameter_type:
     if parameter_type[param] == 1:
         dev_param = param
         if dev_param == "none":
             SUMMARY_DIR = SUMMARY_DIR + "none_opv_rf_results.csv"
+            device_idx = 0
         elif dev_param == "electronic":
             SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_rf_results.csv"
+            device_idx = 4
         elif dev_param == "device":
             SUMMARY_DIR = SUMMARY_DIR + "device_opv_rf_results.csv"
-        elif dev_param == "impt_device":
-            SUMMARY_DIR = SUMMARY_DIR + "impt_device_opv_rf_results.csv"
+            device_idx = 11
+        elif dev_param == "fabrication":
+            SUMMARY_DIR = SUMMARY_DIR + "fabrication_opv_rf_results.csv"
+            device_idx = 7
+
+
 for i in range(len(unique_datatype)):
     # reset conditions
     unique_datatype = {
@@ -249,51 +274,52 @@ for i in range(len(unique_datatype)):
         radius = 3
         nbits = 512
 
-    shuffled = False
     if unique_datatype["smiles"] == 1:
-        dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-        dataset.prepare_data()
-        x, y = dataset.setup(dev_param)
+        dataset = Dataset()
+        dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "SMILES"
     elif unique_datatype["bigsmiles"] == 1:
-        dataset = Dataset(MANUAL_MASTER_DATA, 1, shuffled)
-        dataset.prepare_data()
-        x, y = dataset.setup(dev_param)
+        dataset = Dataset()
+        dataset.prepare_data(TRAIN_MASTER_DATA, "bigsmi")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "BigSMILES"
     elif unique_datatype["selfies"] == 1:
-        dataset = Dataset(TRAIN_MASTER_DATA, 2, shuffled)
-        dataset.prepare_data()
-        x, y = dataset.setup(dev_param)
+        dataset = Dataset()
+        dataset.prepare_data(TRAIN_MASTER_DATA, "selfies")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "SELFIES"
     elif unique_datatype["aug_smiles"] == 1:
-        dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-        dataset.prepare_data()
-        x, y, token_dict = dataset.setup_aug_smi(dev_param)
+        dataset = Dataset()
+        dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
+        x, y, token_dict = dataset.setup_aug_smi(dev_param, target_predict)
         num_of_augment = 4  # 1+4x amount of data
         datatype = "AUG_SMILES"
     elif unique_datatype["brics"] == 1:
-        dataset = Dataset(BRICS_MASTER_DATA, 0, shuffled)
-        x, y = dataset.setup_frag_BRICS(dev_param)
+        dataset = Dataset()
+        dataset.prepare_data(BRICS_MASTER_DATA, "brics")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "BRICS"
     elif unique_datatype["manual"] == 1:
-        dataset = Dataset(MANUAL_MASTER_DATA, 0, shuffled)
-        x, y, device_idx = dataset.setup_manual_frag(dev_param)
+        dataset = Dataset()
+        dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "MANUAL"
     elif unique_datatype["aug_manual"] == 1:
-        dataset = Dataset(MANUAL_MASTER_DATA, 0, shuffled)
-        x, y, device_idx = dataset.setup_manual_frag(dev_param)
+        dataset = Dataset()
+        dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "AUG_MANUAL"
     elif unique_datatype["fingerprint"] == 1:
-        dataset = Dataset(FP_MASTER_DATA, 0, shuffled)
-        x, y = dataset.setup_fp(radius, nbits, dev_param)
+        dataset = Dataset()
+        dataset.prepare_data(FP_MASTER_DATA, "fp")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "FINGERPRINT"
         print("RADIUS: " + str(radius) + " NBITS: " + str(nbits))
 
-    if shuffled:
-        datatype += "_SHUFFLED"
-
     print(datatype)  # Ensures we know which model is running
     print(dev_param)
+    print(target_predict)
 
     # outer cv gives different training and testing sets for inner cv
     cv_outer = KFold(n_splits=5, shuffle=True, random_state=0)
@@ -325,9 +351,8 @@ for i in range(len(unique_datatype)):
             aug_y_train = []
             x_aug_dev_list = []
             for x_, y_ in zip(x_train, y_train):
-
+                print(x_)
                 if dev_param == "none":
-                    print("YES NONE")
                     x_aug, y_aug = augment_smi_in_loop(x_, y_, num_of_augment, True)
                 else:
                     x_list = list(x_)
@@ -447,7 +472,7 @@ for i in range(len(unique_datatype)):
             refit=True,
             n_jobs=-1,
             verbose=0,
-            n_iter=25,
+            n_iter=2,
         )
         # execute search
         result = search.fit(x_train, y_train)

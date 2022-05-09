@@ -297,7 +297,7 @@ class Correlation:
 
 
 corr_plot = Correlation(MASTER_ML_DATA_PLOT)
-corr_plot.parity_plot()
-corr_plot.heatmap_plot("r")
+# corr_plot.parity_plot()
+# corr_plot.heatmap_plot("r")
 
 # corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA_PLOT)

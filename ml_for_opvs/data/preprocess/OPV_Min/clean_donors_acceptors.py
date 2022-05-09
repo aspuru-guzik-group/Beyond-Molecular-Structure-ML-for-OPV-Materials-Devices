@@ -784,61 +784,11 @@ pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 pairings.convert_str_to_float(MASTER_ML_DATA)
 pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
 
-# # # WARNING: DO NOT FILL BEFORE CREATING DISTRIBUTION AND CORRELATION PLOTS
+# Step 4c - Fill empty values for Thermal Annealing, and Solvent Additives
 pairings.fill_empty_values(MASTER_ML_DATA)
 
-# # Step 4c - FILTER!
-# # created filtered master data
-# ELECTRONIC_MASTER_ML_DATA = pkg_resources.resource_filename(
-#     "ml_for_opvs", "data/process/OPV_Min/electronic_master_ml_for_opvs_from_min.csv"
-# )
-
-# electronic_config = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 25, 26, 27]
-# pairings.filter_master_csv(MASTER_ML_DATA, ELECTRONIC_MASTER_ML_DATA, electronic_config)
-
-# IMPORTANT_DEVICE_MASTER_ML_DATA = pkg_resources.resource_filename(
-#     "ml_for_opvs",
-#     "data/process/OPV_Min/important_device_master_ml_for_opvs_from_min.csv",
-# )
-# impt_device_config = [
-#     1,
-#     2,
-#     3,
-#     4,
-#     5,
-#     6,
-#     7,
-#     8,
-#     13,
-#     14,
-#     15,
-#     16,
-#     17,
-#     18,
-#     19,
-#     24,
-#     25,
-#     26,
-#     27,
-# ]
-# pairings.filter_master_csv(
-#     MASTER_ML_DATA, IMPORTANT_DEVICE_MASTER_ML_DATA, impt_device_config
-# )
-
-# ALL_MASTER_ML_DATA = pkg_resources.resource_filename(
-#     "ml_for_opvs", "data/process/OPV_Min/filtered_master_ml_for_opvs_from_min.csv",
-# )
-# all_config = range(1, 28)
-# pairings.filter_master_csv(MASTER_ML_DATA, ALL_MASTER_ML_DATA, all_config)
-
-# impt_no_active_config = [1, 2, 3, 4, 5, 6, 7, 8, 13, 14, 15, 16, 17, 19, 24, 25, 26, 27]
-# IMPORTANT_DEV_NO_ACTIVE_MASTER_ML_DATA = pkg_resources.resource_filename(
-#     "ml_for_opvs",
-#     "data/process/OPV_Min/important_device_no_active_master_ml_for_opvs_from_min.csv",
-# )
-# pairings.filter_master_csv(
-#     MASTER_ML_DATA, IMPORTANT_DEV_NO_ACTIVE_MASTER_ML_DATA, impt_no_active_config
-# )
+# Step 4d - Remove anomalies!
+# Go to ml_for_opvs > data > error_correction > remove_anomaly.py
 
 # Step 5
 # Go to rdkit_frag.py (if needed)
