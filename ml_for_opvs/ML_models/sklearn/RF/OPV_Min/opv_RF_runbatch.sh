@@ -5,7 +5,7 @@
 #SBATCH --account=def-aspuru
 #SBATCH --nodes=2
 #SBATCH --cpus-per-task=48
-#SBATCH --mem=12G
+#SBATCH --mem=24G
 module load python
 source /project/6025683/stanlo/opv_project/bin/activate
 python opv_RF_batch.py
