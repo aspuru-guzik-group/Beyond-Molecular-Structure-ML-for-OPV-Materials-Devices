@@ -22,6 +22,9 @@ ACCEPTOR_SOLVENT_PATH = pkg_resources.resource_filename(
     "ml_for_opvs", "data/exploration/OPV_Min/acceptor_solvent_heatmap.png"
 )
 
+DONOR_ACCEPTOR_PATH = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/exploration/OPV_Min/donor_acceptor_heatmap.png"
+)
 
 class Distribution:
     """
@@ -110,67 +113,67 @@ class Distribution:
         plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
         plt.savefig(DISTRIBUTION_PLOT)
 
-    def solvent_heatmap(self, opv_solvent_path, mol_type):
+    def x_y_heatmap(self, x, y, x_y_path):
         """
-        Function that creates heatmap of Top_X_axis: donor/acceptor, Left_Y_Axis: solvent, color = frequency
+        Function that plots the heatmap of any 2 variables in the dataset
+        NOTE: you must know the variable names beforehand
+
         Args:
-            opv_solvent_path: path to .png heatmap for opv-solvent
-            mol_type: donor or acceptor?
+            2 column names and file path we want to save to
+
         Returns:
-            .png of heatmap
+            Heatmaps of 2 chosen variables.
         """
-        if mol_type == "D":
-            label = "Donor"
-        elif mol_type == "A":
-            label = "Acceptor"
-        unique_opv_solvent_dict = {}
+        unique_x_y_dict = {}
         for index, row in self.data.iterrows():
-            if str(self.data.at[index, "solvent"]) != "nan":
+            if str(self.data.at[index, x]) != "nan" and str(self.data.at[index, y]) != "nan":
                 if (
-                    self.data.at[index, label],
-                    self.data.at[index, "solvent"],
-                ) not in unique_opv_solvent_dict:
-                    unique_opv_solvent_dict[
-                        (self.data.at[index, label], self.data.at[index, "solvent"])
+                    self.data.at[index, x],
+                    self.data.at[index, y],
+                ) not in unique_x_y_dict:
+                    unique_x_y_dict[
+                        (self.data.at[index, x], self.data.at[index, y])
                     ] = 1
                 elif (
-                    self.data.at[index, label],
-                    self.data.at[index, "solvent"],
-                ) in unique_opv_solvent_dict:
-                    unique_opv_solvent_dict[
-                        (self.data.at[index, label], self.data.at[index, "solvent"])
+                    self.data.at[index, x],
+                    self.data.at[index, y],
+                ) in unique_x_y_dict:
+                    unique_x_y_dict[
+                        (self.data.at[index, x], self.data.at[index, y])
                     ] += 1
 
-        unique_opv = []
-        unique_solvent = []
-        for opv_solvent in unique_opv_solvent_dict:
-            if opv_solvent[0] not in unique_opv:
-                unique_opv.append(opv_solvent[0])
-            if opv_solvent[1] not in unique_solvent:
-                unique_solvent.append(opv_solvent[1])
+        unique_x = set()
+        unique_y = set()
+        for x_y in unique_x_y_dict:
+            if x_y[0] not in unique_x:
+                unique_x.add(x_y[0])
+            if x_y[1] not in unique_y:
+                unique_y.add(x_y[1])
+        unique_x = list(unique_x)
+        unique_y = list(unique_y)
 
-        heatmap_array = np.zeros((len(unique_solvent), len(unique_opv)))
-        for opv_solvent in unique_opv_solvent_dict:
-            x_idx = unique_opv.index(opv_solvent[0])
-            y_idx = unique_solvent.index(opv_solvent[1])
-            freq = unique_opv_solvent_dict[opv_solvent]
+        heatmap_array = np.zeros((len(unique_y),len(unique_x)))
+        for x_y in unique_x_y_dict:
+            x_idx = unique_x.index(x_y[0])
+            y_idx = unique_y.index(x_y[1])
+            freq = unique_x_y_dict[x_y]
             heatmap_array[y_idx, x_idx] = freq
 
-        fig, ax = plt.subplots(figsize=(150, 20))
+        fig, ax = plt.subplots(figsize=(200, 100))
         heatmap_array_masked = np.ma.masked_where(heatmap_array == 0, heatmap_array)
         im = ax.imshow(heatmap_array_masked)
         # Show all ticks and label them with the respective list entries
-        ax.set_xticks(np.arange(len(unique_opv)))
-        ax.set_yticks(np.arange(len(unique_solvent)))
-        ax.set_xticklabels(unique_opv)
-        ax.set_yticklabels(unique_solvent)
+        ax.set_xticks(np.arange(len(unique_x)))
+        ax.set_yticks(np.arange(len(unique_y)))
+        ax.set_xticklabels(unique_x)
+        ax.set_yticklabels(unique_y)
 
         # Rotate the tick labels and set their alignment.
         plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 
         # Loop over data dimensions and create text annotations.
-        for i in range(len(unique_opv)):
-            for j in range(len(unique_solvent)):
+        for i in range(len(unique_x)):
+            for j in range(len(unique_y)):
                 text_r = ax.text(
                     i,
                     j,
@@ -180,22 +183,15 @@ class Distribution:
                     color="w",
                 )
         # Create colorbar
-        cbar = ax.figure.colorbar(im, ax=ax, shrink=0.7)
+        cbar = ax.figure.colorbar(im, ax=ax, shrink=0.35)
         cbar.ax.set_ylabel("Frequency", rotation=-90, va="bottom")
-
-        if mol_type == "D":
-            label = "Donor"
-            ax.set_title("Heatmap of Frequency between Donor and Solvent")
-        elif mol_type == "A":
-            label = "Acceptor"
-            ax.set_title("Heatmap of Frequency between Acceptor and Solvent")
+        
+        ax.set_title("Heatmap of {} and {} Pair Frequency".format(x,y)) 
         fig.tight_layout()
-        plt.savefig(opv_solvent_path)
-
+        plt.savefig(x_y_path)    
 
 dist = Distribution(MASTER_ML_DATA_PLOT)
 
 # dist.histogram()
 
-# dist.solvent_heatmap(DONOR_SOLVENT_PATH, "D")
-# dist.solvent_heatmap(ACCEPTOR_SOLVENT_PATH, "A")
+dist.x_y_heatmap('Donor','Acceptor',DONOR_ACCEPTOR_PATH)
