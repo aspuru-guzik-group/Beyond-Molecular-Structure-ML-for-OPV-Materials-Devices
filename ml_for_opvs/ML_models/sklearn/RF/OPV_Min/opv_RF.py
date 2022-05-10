@@ -47,14 +47,6 @@ SUMMARY_DIR = pkg_resources.resource_filename(
     "ml_for_opvs", "ML_models/sklearn/RF/OPV_Min/"
 )
 
-# For Manual Fragments!
-MANUAL_DONOR_CSV = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
-)
-
-MANUAL_ACCEPTOR_CSV = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
-)
 
 np.set_printoptions(precision=3)
 SEED_VAL = 4
@@ -214,10 +206,10 @@ parameter_type = {
     "fabrication": 0,
 }
 target_type = {
-    "PCE": 1,
+    "PCE": 0,
     "FF": 0,
     "JSC": 0,
-    "VOC": 0,
+    "VOC": 1,
 }
 for target in target_type:
     if target_type[target] == 1:

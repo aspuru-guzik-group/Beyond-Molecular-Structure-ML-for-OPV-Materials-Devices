@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from typing import Dict, List, Optional, Union
 from collections import deque
 from rdkit import Chem
+import random
 
 # for plotting
 import pkg_resources
@@ -15,7 +16,6 @@ import matplotlib.pyplot as plt
 from ml_for_opvs.ML_models.sklearn.data.OPV_Min.data import Dataset
 
 # sklearn
-from scipy.sparse.construct import random
 from sklearn.model_selection import KFold
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer
@@ -26,11 +26,11 @@ from skopt import BayesSearchCV
 from ml_for_opvs.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
 
 TRAIN_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
@@ -45,16 +45,34 @@ FP_MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
+DATA_EVAL = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/ablation_study/poor_prediction_data.csv"
+)
+
+SUMMARY_DIR = pkg_resources.resource_filename(
+    "ml_for_opvs", "ML_models/sklearn/SVM/OPV_Min/"
+)
+
+np.set_printoptions(precision=3)
+SEED_VAL = 4
+
 
 def custom_scorer(y, yhat):
     corr_coef = np.corrcoef(y, yhat)[0, 1]
     return corr_coef
 
 
-def augment_smi_in_loop(x, y, num_of_augment, da_pair):
+def augment_smi_in_loop(x, y, num_of_augment, swap: bool):
     """
-    Function that creates augmented DA and AD pairs with X number of augmented SMILES
+    Function that creates augmented DA with X number of augmented SMILES
     Uses doRandom=True for augmentation
+    Ex. num_of_augment = 4 --> 5x amount of data, if swap = True --> 2x amount of data
+    Result of both --> 10x amount of data.
+    
+    Arguments
+    ----------
+    num_of_augment: number of new random SMILES
+    swap: whether to augmented frags by swapping D.A -> A.D
 
     Returns
     ---------
@@ -71,6 +89,17 @@ def augment_smi_in_loop(x, y, num_of_augment, da_pair):
     unique_acceptor = [acceptor_smi]
     donor_mol = Chem.MolFromSmiles(donor_smi)
     acceptor_mol = Chem.MolFromSmiles(acceptor_smi)
+    # add canonical SMILES
+    canonical_smi = Chem.CanonSmiles(donor_smi) + "." + Chem.CanonSmiles(acceptor_smi)
+    aug_smi_list.append(canonical_smi)
+    aug_pce_list.append(y)
+    if swap:
+        swap_canonical_smi = (
+            Chem.CanonSmiles(acceptor_smi) + "." + Chem.CanonSmiles(donor_smi)
+        )
+        aug_smi_list.append(swap_canonical_smi)
+        aug_pce_list.append(y)
+
     augmented = 0
     while augmented < num_of_augment:
         donor_aug_smi = Chem.MolToSmiles(donor_mol, doRandom=True)
@@ -83,8 +112,9 @@ def augment_smi_in_loop(x, y, num_of_augment, da_pair):
             unique_acceptor.append(acceptor_aug_smi)
             aug_smi_list.append(donor_aug_smi + "." + acceptor_aug_smi)
             aug_pce_list.append(y)
-            aug_smi_list.append(acceptor_aug_smi + "." + donor_aug_smi)
-            aug_pce_list.append(y)
+            if swap:
+                aug_smi_list.append(acceptor_aug_smi + "." + donor_aug_smi)
+                aug_pce_list.append(y)
             augmented += 1
 
     aug_pce_array = np.asarray(aug_pce_list)
@@ -92,16 +122,23 @@ def augment_smi_in_loop(x, y, num_of_augment, da_pair):
     return aug_smi_list, aug_pce_array
 
 
-def augment_donor_frags_in_loop(x, y: float):
+def augment_donor_frags_in_loop(x, y: float, device_idx, swap: bool):
     """
     Function that augments donor frags by swapping D.A -> A.D, and D1D2D3 -> D2D3D1 -> D3D1D2
     Assumes that input (x) is DA_tokenized.
     Returns 2 arrays, one of lists with augmented DA and AD pairs
     and another with associated PCE (y)
+
+    Arguments
+    ----------
+    x: d-a pair to augment
+    swap: whether to augmented frags by swapping D.A -> A.D
     """
     # assuming 1 = ".", first part is donor!
     x = list(x)
     period_idx = x.index(1)
+    device_idx = len(x) - device_idx
+    # for padding
     if 0 in x:
         last_zero_idx = len(x) - 1 - x[::-1].index(0)
         donor_frag_to_aug = x[last_zero_idx + 1 : period_idx]
@@ -114,16 +151,34 @@ def augment_donor_frags_in_loop(x, y: float):
         donor_frag_deque_rotate = copy.copy(donor_frag_deque)
         donor_frag_deque_rotate.rotate(i)
         rotated_donor_frag_list = list(donor_frag_deque_rotate)
-        # replace original frags with rotated donor frags
+        # for padding
         if 0 in x:
-            rotated_donor_frag_list = (
+            aug_donor_frags = (
                 x[: last_zero_idx + 1] + rotated_donor_frag_list + x[period_idx:]
             )
         else:
-            rotated_donor_frag_list = rotated_donor_frag_list + x[period_idx:]
-        # NOTE: do not keep original
-        if rotated_donor_frag_list != x:
-            aug_donor_list.append(rotated_donor_frag_list)
+            aug_donor_frags = rotated_donor_frag_list + x[period_idx:]
+        if swap:
+            if 0 in x:
+                swap_aug_donor_frags = (
+                    x[: last_zero_idx + 1]
+                    + x[period_idx + 1 : device_idx]
+                    + [x[period_idx]]
+                    + rotated_donor_frag_list
+                    + x[device_idx:]
+                )
+            else:
+                swap_aug_donor_frags = (
+                    x[period_idx + 1 : device_idx]
+                    + [x[period_idx]]
+                    + rotated_donor_frag_list
+                    + x[device_idx:]
+                )
+        # NOTE: augment original too
+        aug_donor_list.append(aug_donor_frags)
+        aug_pce_list.append(y)
+        if swap:
+            aug_donor_list.append(swap_aug_donor_frags)
             aug_pce_list.append(y)
 
     return aug_donor_list, aug_pce_list
@@ -132,91 +187,148 @@ def augment_donor_frags_in_loop(x, y: float):
 # create scoring function
 r_score = make_scorer(custom_scorer, greater_is_better=True)
 
+# log results
+summary_df = pd.DataFrame(
+    columns=["Datatype", "R_mean", "R_std", "RMSE_mean", "RMSE_std", "num_of_data"]
+)
+
+# run batch of conditions
 unique_datatype = {
-    "smiles": 0,
+    "smiles": 1,
     "bigsmiles": 0,
     "selfies": 0,
     "aug_smiles": 0,
-    "hw_frag": 0,
-    "aug_hw_frag": 1,
     "brics": 0,
     "manual": 0,
     "aug_manual": 0,
     "fingerprint": 0,
 }
+parameter_type = {
+    "none": 0,
+    "electronic": 0,
+    "electronic_only": 1,
+    "device": 0,
+    "fabrication": 0,
+}
+target_type = {
+    "PCE": 1,
+    "FF": 0,
+    "JSC": 0,
+    "VOC": 0,
+}
+for target in target_type:
+    if target_type[target] == 1:
+        target_predict = target
+        if target_predict == "PCE":
+            SUMMARY_DIR = SUMMARY_DIR + "PCE_"
+        elif target_predict == "FF":
+            SUMMARY_DIR = SUMMARY_DIR + "FF_"
+        elif target_predict == "JSC":
+            SUMMARY_DIR = SUMMARY_DIR + "JSC_"
+        elif target_predict == "VOC":
+            SUMMARY_DIR = SUMMARY_DIR + "VOC_"
 
-if unique_datatype["fingerprint"] == 1:
-    radius = 3
-    nbits = 512
+for param in parameter_type:
+    if parameter_type[param] == 1:
+        dev_param = param
+        if dev_param == "none":
+            SUMMARY_DIR = SUMMARY_DIR + "none_opv_svr_results.csv"
+            device_idx = 0
+        elif dev_param == "electronic":
+            SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_svr_results.csv"
+            device_idx = 4
+        elif dev_param == "electronic_only":
+            SUMMARY_DIR = SUMMARY_DIR + "electronic_only_opv_svr_results.csv"
+            device_idx = 4
+        elif dev_param == "device":
+            SUMMARY_DIR = SUMMARY_DIR + "device_opv_svr_results.csv"
+            device_idx = 11
+        elif dev_param == "fabrication":
+            SUMMARY_DIR = SUMMARY_DIR + "fabrication_opv_svr_results.csv"
+            device_idx = 7
 
-shuffled = False
+
+dataset = Dataset()
 if unique_datatype["smiles"] == 1:
-    dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-    dataset.prepare_data()
-    x, y = dataset.setup()
-    print("SMILES")
+    dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
+    x, y = dataset.setup(dev_param, target_predict)
+    datatype = "SMILES"
 elif unique_datatype["bigsmiles"] == 1:
-    dataset = Dataset(MANUAL_MASTER_DATA, 1, shuffled)
-    dataset.prepare_data()
-    x, y = dataset.setup()
-    print("BigSMILES")
+    dataset.prepare_data(TRAIN_MASTER_DATA, "bigsmi")
+    x, y = dataset.setup(dev_param, target_predict)
+    datatype = "BigSMILES"
 elif unique_datatype["selfies"] == 1:
-    dataset = Dataset(TRAIN_MASTER_DATA, 2, shuffled)
-    dataset.prepare_data()
-    x, y = dataset.setup()
-    print("SELFIES")
+    dataset.prepare_data(TRAIN_MASTER_DATA, "selfies")
+    x, y = dataset.setup(dev_param, target_predict)
+    datatype = "SELFIES"
 elif unique_datatype["aug_smiles"] == 1:
-    dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-    dataset.prepare_data()
-    x, y = dataset.setup_aug_smi()
-    print("AUG_SMILES")
+    dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
+    x, y, token_dict = dataset.setup_aug_smi(dev_param, target_predict)
+    num_of_augment = 4  # 1+4x amount of data
+    datatype = "AUG_SMILES"
 elif unique_datatype["brics"] == 1:
-    dataset = Dataset(BRICS_MASTER_DATA, 0, shuffled)
-    x, y = dataset.setup_frag_BRICS()
-    print("BRICS")
+    dataset.prepare_data(BRICS_MASTER_DATA, "brics")
+    x, y = dataset.setup(dev_param, target_predict)
+    datatype = "BRICS"
 elif unique_datatype["manual"] == 1:
-    dataset = Dataset(MANUAL_MASTER_DATA, 0, shuffled)
-    x, y = dataset.setup_manual_frag()
-    print("MANUAL")
+    dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
+    x, y = dataset.setup(dev_param, target_predict)
+    datatype = "MANUAL"
 elif unique_datatype["aug_manual"] == 1:
-    dataset = Dataset(MANUAL_MASTER_DATA, 0, shuffled)
-    x, y = dataset.setup_manual_frag()
-    print("AUG_MANUAL")
+    dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
+    x, y = dataset.setup(dev_param, target_predict)
+    datatype = "AUG_MANUAL"
 elif unique_datatype["fingerprint"] == 1:
-    dataset = Dataset(FP_MASTER_DATA, 0, shuffled)
-    x, y = dataset.setup_fp(radius, nbits)
-    print("RADIUS: " + str(radius) + " NBITS: " + str(nbits))
+    dataset.prepare_data(FP_MASTER_DATA, "fp")
+    x, y = dataset.setup(dev_param, target_predict)
+    datatype = "FINGERPRINT"
 
-if shuffled:
-    print("SHUFFLED")
-
+print(datatype)  # Ensures we know which model is running
+print(dev_param)
+print(target_predict)
 
 # outer cv gives different training and testing sets for inner cv
 cv_outer = KFold(n_splits=5, shuffle=True, random_state=0)
 outer_corr_coef = list()
 outer_rmse = list()
 
+# feature scaling
+# scaler = preprocessing.MinMaxScaler().fit(x)
+# x = scaler.transform(x)
+
 for train_ix, test_ix in cv_outer.split(x):
     # split data
     x_train, x_test = x[train_ix], x[test_ix]
     y_train, y_test = y[train_ix], y[test_ix]
-    if unique_datatype["aug_manual"] == 1 or unique_datatype["aug_hw_frag"] == 1:
-        # concatenate augmented data to x_train and y_train
+    if unique_datatype["aug_manual"] == 1:
         print("AUGMENTED")
-        aug_x_train = list(copy.copy(x_train))
-        aug_y_train = list(copy.copy(y_train))
+        # concatenate augmented data to x_train and y_train
+        aug_x_train = []
+        aug_y_train = []
         for x_, y_ in zip(x_train, y_train):
-            x_aug, y_aug = augment_donor_frags_in_loop(x_, y_)
+            x_aug, y_aug = augment_donor_frags_in_loop(x_, y_, device_idx, True)
             aug_x_train.extend(x_aug)
             aug_y_train.extend(y_aug)
 
         x_train = np.array(aug_x_train)
         y_train = np.array(aug_y_train)
     elif unique_datatype["aug_smiles"] == 1:
-        aug_x_train = list(copy.copy(x_train))
-        aug_y_train = list(copy.copy(y_train))
+        aug_x_train = []
+        aug_y_train = []
+        x_aug_dev_list = []
         for x_, y_ in zip(x_train, y_train):
-            x_aug, y_aug = augment_smi_in_loop(x_, y_, 4, True)
+            print(x_)
+            if dev_param == "none":
+                x_aug, y_aug = augment_smi_in_loop(x_, y_, num_of_augment, True)
+            else:
+                x_list = list(x_)
+                x_aug, y_aug = augment_smi_in_loop(
+                    str(x_list[0]), y_, num_of_augment, True
+                )
+                for x_a in x_aug:
+                    x_aug_dev = x_list[1:]
+                    x_aug_dev_list.append(x_aug_dev)
+
             aug_x_train.extend(x_aug)
             aug_y_train.extend(y_aug)
         # tokenize Augmented SMILES
@@ -224,15 +336,79 @@ for train_ix, test_ix in cv_outer.split(x):
             tokenized_input,
             max_seq_length,
             vocab_length,
-            dictionary,
+            input_dict,  # dictionary of vocab
         ) = Tokenizer().tokenize_data(aug_x_train)
+
+        if dev_param == "none":
+            print("YES NONE")
+            tokenized_test, max_test_seq_length = Tokenizer().tokenize_from_dict(
+                x_test, max_seq_length, input_dict
+            )
+
+        else:
+            # preprocess x_test_array
+            x_test_array = []
+            x_test_dev_list = []
+            for x_t in x_test:
+                x_t_list = list(x_t)
+                x_test_array.append(x_t_list[0])
+                x_test_dev_list.append(x_t_list[1:])
+
+            tokenized_test, test_max_seq_length = Tokenizer().tokenize_from_dict(
+                x_test_array, max_seq_length, input_dict
+            )
+
+            # make sure test set max_seq_length is same as train set max_seq_length
+            # NOTE: test set could have longer sequence because we separated the tokenization
+            if test_max_seq_length > max_seq_length:
+                tokenized_input, max_seq_length = Tokenizer().tokenize_from_dict(
+                    aug_x_train, test_max_seq_length, input_dict
+                )
+
+            # add device parameters to token2idx
+            token_idx = len(input_dict)
+            for token in token_dict:
+                input_dict[token] = token_idx
+                token_idx += 1
+
+            # tokenize device parameters
+            tokenized_dev_input_list = []
+            for dev in x_aug_dev_list:
+                tokenized_dev_input = []
+                for _d in dev:
+                    if isinstance(_d, str):
+                        tokenized_dev_input.append(input_dict[_d])
+                    else:
+                        tokenized_dev_input.append(_d)
+                tokenized_dev_input_list.append(tokenized_dev_input)
+
+            tokenized_dev_test_list = []
+            for dev in x_test_dev_list:
+                tokenized_dev_test = []
+                for _d in dev:
+                    if isinstance(_d, str):
+                        tokenized_dev_test.append(input_dict[_d])
+                    else:
+                        tokenized_dev_test.append(_d)
+                tokenized_dev_test_list.append(tokenized_dev_test)
+
+            # add device parameters to data
+            input_idx = 0
+            while input_idx < len(tokenized_input):
+                tokenized_input[input_idx].extend(tokenized_dev_input_list[input_idx])
+                input_idx += 1
+
+            test_input_idx = 0
+            while test_input_idx < len(tokenized_test):
+                tokenized_test[test_input_idx].extend(
+                    tokenized_dev_test_list[test_input_idx]
+                )
+                test_input_idx += 1
+
+        x_test = np.array(tokenized_test)
         x_train = np.array(tokenized_input)
         y_train = np.array(aug_y_train)
-        # tokenize with existing dictionary
-        tokenized_input = Tokenizer().tokenize_from_dict(
-            x_test, max_seq_length, dictionary
-        )
-        x_test = np.array(tokenized_input)
+
     # configure the cross-validation procedure
     # inner cv allows for finding best model w/ best params
     cv_inner = KFold(n_splits=5, shuffle=True, random_state=1)
@@ -259,8 +435,8 @@ for train_ix, test_ix in cv_outer.split(x):
     best_model = result.best_estimator_
     # evaluate model on the hold out dataset
     yhat = best_model.predict(x_test)
-    print("Y_TEST: ", list(y_test))
-    print("Y_HAT: ", list(yhat))
+    print("Y_TEST: ", y_test)
+    print("Y_HAT: ", yhat)
     # evaluate the model
     corr_coef = np.corrcoef(y_test, yhat)[0, 1]
     rmse = np.sqrt(mean_squared_error(y_test, yhat))
@@ -272,11 +448,23 @@ for train_ix, test_ix in cv_outer.split(x):
         ">corr_coef=%.3f, est=%.3f, cfg=%s"
         % (corr_coef, result.best_score_, result.best_params_)
     )
-    print("RMSE: ", rmse)
 
 # summarize the estimated performance of the model
 print("R: %.3f (%.3f)" % (mean(outer_corr_coef), std(outer_corr_coef)))
 print("RMSE: %.3f (%.3f)" % (mean(outer_rmse), std(outer_rmse)))
+summary_series = pd.DataFrame(
+    {
+        "Datatype": datatype,
+        "R_mean": mean(outer_corr_coef),
+        "R_std": std(outer_corr_coef),
+        "RMSE_mean": mean(outer_rmse),
+        "RMSE_std": std(outer_rmse),
+        "num_of_data": len(x),
+    },
+    index=[0],
+)
+summary_df = pd.concat([summary_df, summary_series], ignore_index=True,)
+summary_df.to_csv(SUMMARY_DIR, index=False)
 
 # add R score from cross-validation results
 # ablation_df = pd.read_csv(ABLATION_STUDY)

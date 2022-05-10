@@ -60,15 +60,6 @@ SUMMARY_DIR = pkg_resources.resource_filename(
     "ml_for_opvs", "ML_models/sklearn/BRT/OPV_Min/"
 )
 
-# For Manual Fragments!
-MANUAL_DONOR_CSV = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
-)
-
-MANUAL_ACCEPTOR_CSV = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
-)
-
 np.set_printoptions(precision=3)
 SEED_VAL = 4
 
@@ -230,22 +221,46 @@ unique_datatype = {
     "fingerprint": 0,
 }
 parameter_type = {
-    "none": 1,
+    "none": 0,
     "electronic": 0,
-    "device": 0,
+    "electronic_only": 0,
+    "device": 1,
     "fabrication": 0,
 }
+target_type = {
+    "PCE": 0,
+    "FF": 0,
+    "JSC": 1,
+    "VOC": 0,
+}
+for target in target_type:
+    if target_type[target] == 1:
+        target_predict = target
+        if target_predict == "PCE":
+            SUMMARY_DIR = SUMMARY_DIR + "PCE_"
+        elif target_predict == "FF":
+            SUMMARY_DIR = SUMMARY_DIR + "FF_"
+        elif target_predict == "JSC":
+            SUMMARY_DIR = SUMMARY_DIR + "JSC_"
+        elif target_predict == "VOC":
+            SUMMARY_DIR = SUMMARY_DIR + "VOC_"
+
 for param in parameter_type:
     if parameter_type[param] == 1:
         dev_param = param
         if dev_param == "none":
             SUMMARY_DIR = SUMMARY_DIR + "none_opv_brt_results.csv"
+            device_idx = 0
         elif dev_param == "electronic":
             SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_brt_results.csv"
+            device_idx = 4
         elif dev_param == "device":
             SUMMARY_DIR = SUMMARY_DIR + "device_opv_brt_results.csv"
+            device_idx = 11
         elif dev_param == "fabrication":
             SUMMARY_DIR = SUMMARY_DIR + "fabrication_opv_brt_results.csv"
+            device_idx = 7
+
 
 for i in range(len(unique_datatype)):
     # reset conditions
@@ -273,54 +288,54 @@ for i in range(len(unique_datatype)):
         radius = 3
         nbits = 512
 
-    shuffled = False
+    dataset = Dataset()
     if unique_datatype["smiles"] == 1:
-        dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-        dataset.prepare_data()
-        x, y = dataset.setup(dev_param)
+        dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "SMILES"
     elif unique_datatype["bigsmiles"] == 1:
-        dataset = Dataset(MANUAL_MASTER_DATA, 1, shuffled)
-        dataset.prepare_data()
-        x, y = dataset.setup(dev_param)
+        dataset.prepare_data(TRAIN_MASTER_DATA, "bigsmi")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "BigSMILES"
     elif unique_datatype["selfies"] == 1:
-        dataset = Dataset(TRAIN_MASTER_DATA, 2, shuffled)
-        dataset.prepare_data()
-        x, y = dataset.setup(dev_param)
+        dataset.prepare_data(TRAIN_MASTER_DATA, "selfies")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "SELFIES"
     elif unique_datatype["aug_smiles"] == 1:
-        dataset = Dataset(TRAIN_MASTER_DATA, 0, shuffled)
-        dataset.prepare_data()
-        x, y, token_dict = dataset.setup_aug_smi(dev_param)
+        dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
+        x, y, token_dict = dataset.setup_aug_smi(dev_param, target_predict)
         num_of_augment = 4  # 1+4x amount of data
         datatype = "AUG_SMILES"
     elif unique_datatype["brics"] == 1:
-        dataset = Dataset(BRICS_MASTER_DATA, 0, shuffled)
-        x, y = dataset.setup_frag_BRICS(dev_param)
+        dataset.prepare_data(BRICS_MASTER_DATA, "brics")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "BRICS"
     elif unique_datatype["manual"] == 1:
-        dataset = Dataset(MANUAL_MASTER_DATA, 0, shuffled)
-        x, y, device_idx = dataset.setup_manual_frag(dev_param)
+        dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "MANUAL"
     elif unique_datatype["aug_manual"] == 1:
-        dataset = Dataset(MANUAL_MASTER_DATA, 0, shuffled)
-        x, y, device_idx = dataset.setup_manual_frag(dev_param)
+        dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "AUG_MANUAL"
     elif unique_datatype["fingerprint"] == 1:
-        dataset = Dataset(FP_MASTER_DATA, 0, shuffled)
-        x, y = dataset.setup_fp(radius, nbits, dev_param)
+        dataset.prepare_data(FP_MASTER_DATA, "fp")
+        x, y = dataset.setup(dev_param, target_predict)
         datatype = "FINGERPRINT"
         print("RADIUS: " + str(radius) + " NBITS: " + str(nbits))
 
-    if shuffled:
-        datatype += "_SHUFFLED"
-
     print(datatype)  # Ensures we know which model is running
+    print(dev_param)
+    print(target_predict)
 
+    # outer cv gives different training and testing sets for inner cv
     cv_outer = KFold(n_splits=5, shuffle=True, random_state=0)
     outer_corr_coef = list()
     outer_rmse = list()
+
+    # feature scaling
+    # scaler = preprocessing.MinMaxScaler().fit(x)
+    # x = scaler.transform(x)
 
     for train_ix, test_ix in cv_outer.split(x):
         # split data
@@ -343,7 +358,7 @@ for i in range(len(unique_datatype)):
             aug_y_train = []
             x_aug_dev_list = []
             for x_, y_ in zip(x_train, y_train):
-
+                print(x_)
                 if dev_param == "none":
                     x_aug, y_aug = augment_smi_in_loop(x_, y_, num_of_augment, True)
                 else:
@@ -440,6 +455,7 @@ for i in range(len(unique_datatype)):
         # configure the cross-validation procedure
         # inner cv allows for finding best model w/ best params
         cv_inner = KFold(n_splits=5, shuffle=True, random_state=1)
+        # define the model
         model = xgboost.XGBRegressor(
             objective="reg:squarederror",
             random_state=0,
@@ -505,54 +521,3 @@ for i in range(len(unique_datatype)):
     )
     summary_df = pd.concat([summary_df, summary_series], ignore_index=True)
 summary_df.to_csv(SUMMARY_DIR, index=False)
-
-# # evaluate model
-# scores = cross_val_score(model, x, y, scoring=r_score, cv=cv, n_jobs=-1)
-# # report performance
-# print("R: %.3f (%.3f)" % (mean(scores), std(scores)))
-# if plot == True:
-#     yhat = cross_val_predict(model, x, y, cv=cv, n_jobs=-1)
-#     fig, ax = plt.subplots()
-#     ax.scatter(y, yhat, edgecolors=(0, 0, 0))
-#     ax.plot([y.min(), y.max()], [y.min(), y.max()], "k--", lw=4)
-#     ax.set_xlabel("Measured")
-#     ax.set_ylabel("Predicted")
-#     plt.show()
-
-# # TODO: store bad predictions and corresponding labels
-# poor_pred_df = pd.DataFrame(
-#     columns=[
-#         "Donor",
-#         "Acceptor",
-#         "DA_pair_fragments",
-#         "y_diff",
-#         "y_measured",
-#         "y_pred",
-#     ]
-# )
-# train_frag_df = pd.read_csv(TRAIN_MASTER_DATA)
-# y_diff_all = abs(yhat - y)
-# y_diff_avg = mean(y_diff_all)
-# y_diff_std = std(y_diff_all)
-# print("avg_diff: ", y_diff_avg, "std_diff: ", y_diff_std)
-
-# for i in range(len(yhat)):
-#     y_diff = abs(yhat[i] - y[i])
-#     if y_diff > 2 * y_diff_std:  # use 1 standard deviation from mean
-#         poor_pred_df.at[i, "Donor"] = train_frag_df.at[i, "Donor"]
-#         poor_pred_df.at[i, "Acceptor"] = train_frag_df.at[i, "Acceptor"]
-#         poor_pred_df.at[i, "DA_pair_fragments"] = train_frag_df.at[
-#             i, "DA_pair_fragments"
-#         ]
-#         poor_pred_df.at[i, "y_diff"] = y_diff
-#         poor_pred_df.at[i, "y_measured"] = y[i]
-#         poor_pred_df.at[i, "y_pred"] = yhat[i]
-
-# poor_pred_df.to_csv(DATA_EVAL)
-# print("Number of Poor Predictions: ", len(poor_pred_df.index))
-
-# TODO: compare xgboost with sklearn, and then with augmented versions, and then with LSTM version
-
-# NOTE: average of averages != average over all data
-# NOTE: https://math.stackexchange.com/questions/95909/why-is-an-average-of-an-average-usually-incorrect/95912#:~:text=The%20average%20of%20averages%20is,all%20values%20in%20two%20cases%3A&text=This%20answers%20the%20first%20OP,usually%20gives%20the%20wrong%20answer.&text=This%20is%20why%20the%20average,groups%20have%20the%20same%20size.
-

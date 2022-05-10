@@ -240,6 +240,9 @@ for param in parameter_type:
         elif dev_param == "electronic":
             SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_rf_results.csv"
             device_idx = 4
+        elif dev_param == "electronic_only":
+            SUMMARY_DIR = SUMMARY_DIR + "electronic_only_opv_rf_results.csv"
+            device_idx = 4
         elif dev_param == "device":
             SUMMARY_DIR = SUMMARY_DIR + "device_opv_rf_results.csv"
             device_idx = 11
@@ -273,45 +276,37 @@ for i in range(len(unique_datatype)):
     if unique_datatype["fingerprint"] == 1:
         radius = 3
         nbits = 512
-
+    dataset = Dataset()
     if unique_datatype["smiles"] == 1:
-        dataset = Dataset()
         dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
         x, y = dataset.setup(dev_param, target_predict)
         datatype = "SMILES"
     elif unique_datatype["bigsmiles"] == 1:
-        dataset = Dataset()
         dataset.prepare_data(TRAIN_MASTER_DATA, "bigsmi")
         x, y = dataset.setup(dev_param, target_predict)
         datatype = "BigSMILES"
     elif unique_datatype["selfies"] == 1:
-        dataset = Dataset()
         dataset.prepare_data(TRAIN_MASTER_DATA, "selfies")
         x, y = dataset.setup(dev_param, target_predict)
         datatype = "SELFIES"
     elif unique_datatype["aug_smiles"] == 1:
-        dataset = Dataset()
         dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
         x, y, token_dict = dataset.setup_aug_smi(dev_param, target_predict)
         num_of_augment = 4  # 1+4x amount of data
         datatype = "AUG_SMILES"
     elif unique_datatype["brics"] == 1:
-        dataset = Dataset()
         dataset.prepare_data(BRICS_MASTER_DATA, "brics")
         x, y = dataset.setup(dev_param, target_predict)
         datatype = "BRICS"
     elif unique_datatype["manual"] == 1:
-        dataset = Dataset()
         dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
         x, y = dataset.setup(dev_param, target_predict)
         datatype = "MANUAL"
     elif unique_datatype["aug_manual"] == 1:
-        dataset = Dataset()
         dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
         x, y = dataset.setup(dev_param, target_predict)
         datatype = "AUG_MANUAL"
     elif unique_datatype["fingerprint"] == 1:
-        dataset = Dataset()
         dataset.prepare_data(FP_MASTER_DATA, "fp")
         x, y = dataset.setup(dev_param, target_predict)
         datatype = "FINGERPRINT"
