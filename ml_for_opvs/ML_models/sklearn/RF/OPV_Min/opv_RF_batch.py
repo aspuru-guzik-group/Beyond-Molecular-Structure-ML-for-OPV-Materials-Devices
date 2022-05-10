@@ -61,8 +61,8 @@ SEED_VAL = 4
 
 
 def custom_scorer(y, yhat):
-    corr_coef = np.corrcoef(y, yhat)[0, 1]
-    return corr_coef
+    rmse = np.sqrt(mean_squared_error(y, yhat))
+    return rmse
 
 
 def augment_smi_in_loop(x, y, num_of_augment, swap: bool):
@@ -188,7 +188,7 @@ def augment_donor_frags_in_loop(x, y: float, device_idx, swap: bool):
 
 
 # create scoring function
-r_score = make_scorer(custom_scorer, greater_is_better=True)
+r_score = make_scorer(custom_scorer, greater_is_better=False)
 
 # log results
 summary_df = pd.DataFrame(
@@ -207,16 +207,16 @@ unique_datatype = {
     "fingerprint": 0,
 }
 parameter_type = {
-    "none": 0,
+    "none": 1,
     "electronic": 0,
     "electronic_only": 0,
-    "device": 1,
+    "device": 0,
     "fabrication": 0,
 }
 target_type = {
-    "PCE": 0,
+    "PCE": 1,
     "FF": 0,
-    "JSC": 1,
+    "JSC": 0,
     "VOC": 0,
 }
 for target in target_type:
@@ -346,13 +346,12 @@ for i in range(len(unique_datatype)):
             aug_y_train = []
             x_aug_dev_list = []
             for x_, y_ in zip(x_train, y_train):
-                print(x_)
                 if dev_param == "none":
-                    x_aug, y_aug = augment_smi_in_loop(x_, y_, num_of_augment, True)
+                    x_aug, y_aug = augment_smi_in_loop(x_[0], y_, num_of_augment, True)
                 else:
                     x_list = list(x_)
                     x_aug, y_aug = augment_smi_in_loop(
-                        str(x_list[0]), y_, num_of_augment, True
+                        x_list[0], y_, num_of_augment, True
                     )
                     for x_a in x_aug:
                         x_aug_dev = x_list[1:]
@@ -369,7 +368,6 @@ for i in range(len(unique_datatype)):
             ) = Tokenizer().tokenize_data(aug_x_train)
 
             if dev_param == "none":
-                print("YES NONE")
                 tokenized_test, max_test_seq_length = Tokenizer().tokenize_from_dict(
                     x_test, max_seq_length, input_dict
                 )
@@ -467,7 +465,7 @@ for i in range(len(unique_datatype)):
             refit=True,
             n_jobs=-1,
             verbose=0,
-            n_iter=2,
+            n_iter=5,
         )
         # execute search
         result = search.fit(x_train, y_train)

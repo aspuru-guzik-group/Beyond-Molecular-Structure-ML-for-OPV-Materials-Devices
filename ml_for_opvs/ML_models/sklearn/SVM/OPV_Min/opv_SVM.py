@@ -58,8 +58,8 @@ SEED_VAL = 4
 
 
 def custom_scorer(y, yhat):
-    corr_coef = np.corrcoef(y, yhat)[0, 1]
-    return corr_coef
+    rmse = np.sqrt(mean_squared_error(y, yhat))
+    return rmse
 
 
 def augment_smi_in_loop(x, y, num_of_augment, swap: bool):
@@ -185,7 +185,7 @@ def augment_donor_frags_in_loop(x, y: float, device_idx, swap: bool):
 
 
 # create scoring function
-r_score = make_scorer(custom_scorer, greater_is_better=True)
+r_score = make_scorer(custom_scorer, greater_is_better=False)
 
 # log results
 summary_df = pd.DataFrame(
@@ -427,7 +427,7 @@ for train_ix, test_ix in cv_outer.split(x):
         n_iter=25,
         cv=cv_inner,
         n_jobs=-1,
-        verbose=0,
+        verbose=2,
     )
     # execute search
     result = search.fit(x_train, y_train)

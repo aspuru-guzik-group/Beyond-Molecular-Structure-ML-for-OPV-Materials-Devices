@@ -441,12 +441,10 @@ class Dataset:
         if parameter != "none":
             # add device parameters to the end of input
             tokenized_input, token_dict = self.add_device_params(parameter, x, {})
-            print(tokenized_input)
             # filter out "nan" values
             filtered_tokenized_input, filtered_target_array = self.filter_nan(
                 tokenized_input, target_array
             )
-            print(token_dict)
             return (
                 np.asarray(filtered_tokenized_input, dtype="object"),
                 np.asarray(filtered_target_array, dtype="float32"),
