@@ -82,5 +82,5 @@ class fp_data:
 
 
 # put master_ml_data first, and then when you create more fingerprints, use fp_data
-fp_main = fp_data(FP_DATA)
-fp_main.create_master_fp(FP_DATA, 3, 512)
+# fp_main = fp_data(FP_DATA)
+# fp_main.create_master_fp(FP_DATA, 3, 512)

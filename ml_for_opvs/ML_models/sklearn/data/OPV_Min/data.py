@@ -1,5 +1,6 @@
 # data.py for classical ML
 from cmath import nan
+from ctypes import Union
 from lib2to3.pgen2 import token
 from lib2to3.pgen2.tokenize import tokenize
 import pandas as pd
@@ -98,46 +99,38 @@ class Dataset:
             tokenized_input: same input array but with added parameters
         """
         # add device parameters to the end of input
+        homo_d, max_homo_d = self.feature_scale(self.data["HOMO_D (eV)"])
+        lumo_d, max_lumo_d = self.feature_scale(self.data["LUMO_D (eV)"])
+        homo_a, max_homo_a = self.feature_scale(self.data["HOMO_A (eV)"])
+        lumo_a, max_lumo_a = self.feature_scale(self.data["LUMO_A (eV)"])
+        d_a_ratio, max_d_a_ratio = self.feature_scale(self.data["D:A ratio (m/m)"])
+        total_solids_conc, max_total_solids_conc = self.feature_scale(
+            self.data["total solids conc. (mg/mL)"]
+        )
+        solvent_add_conc, max_solvent_add_conc = self.feature_scale(
+            self.data["solvent additive conc. (%v/v)"]
+        )
+        active_layer_thickness, max_active_layer_thickness = self.feature_scale(
+            self.data["active layer thickness (nm)"]
+        )
+        annealing_temp, max_annealing_temp = self.feature_scale(
+            self.data["annealing temperature"]
+        )
+        print(annealing_temp)
+        hole_mobility_blend, max_hole_mobility_blend = self.feature_scale(
+            self.data["hole mobility blend (cm^2 V^-1 s^-1)"]
+        )
+        electron_mobility_blend, max_electron_mobility_blend = self.feature_scale(
+            self.data["electron mobility blend (cm^2 V^-1 s^-1)"]
+        )
         index = 0
         while index < len(tokenized_input):
             if parameter == "electronic" or parameter == "electronic_only":
-                homo_d = self.data["HOMO_D (eV)"].to_numpy().astype("float32")
-                lumo_d = self.data["LUMO_D (eV)"].to_numpy().astype("float32")
-                homo_a = self.data["HOMO_A (eV)"].to_numpy().astype("float32")
-                lumo_a = self.data["LUMO_A (eV)"].to_numpy().astype("float32")
                 tokenized_input[index].append(homo_d[index])
                 tokenized_input[index].append(lumo_d[index])
                 tokenized_input[index].append(homo_a[index])
                 tokenized_input[index].append(lumo_a[index])
             elif parameter == "device":
-                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
-                total_solids_conc = (
-                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
-                )
-                solvent_add_conc = (
-                    self.data["solvent additive conc. (%v/v)"]
-                    .to_numpy()
-                    .astype("float32")
-                )
-                active_layer_thickness = (
-                    self.data["active layer thickness (nm)"]
-                    .to_numpy()
-                    .astype("float32")
-                )
-                annealing_temp = (
-                    self.data["annealing temperature"].to_numpy().astype("float32")
-                )
-                hole_mobility_blend = (
-                    self.data["hole mobility blend (cm^2 V^-1 s^-1)"]
-                    .to_numpy()
-                    .astype("float32")
-                )
-                electron_mobility_blend = (
-                    self.data["electron mobility blend (cm^2 V^-1 s^-1)"]
-                    .to_numpy()
-                    .astype("float32")
-                )
-
                 # tokenize non-numerical variables
                 # for str (non-numerical) variables
                 dict_idx = len(token_dict)
@@ -179,24 +172,6 @@ class Dataset:
                 tokenized_input[index].append(electron_contact_layer[index])
 
             elif parameter == "fabrication":
-                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
-                total_solids_conc = (
-                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
-                )
-                solvent_add_conc = (
-                    self.data["solvent additive conc. (%v/v)"]
-                    .to_numpy()
-                    .astype("float32")
-                )
-                active_layer_thickness = (
-                    self.data["active layer thickness (nm)"]
-                    .to_numpy()
-                    .astype("float32")
-                )
-                annealing_temp = (
-                    self.data["annealing temperature"].to_numpy().astype("float32")
-                )
-
                 # tokenize non-numerical variables
                 # for str (non-numerical) variables
                 dict_idx = len(token_dict)
@@ -223,7 +198,23 @@ class Dataset:
             else:
                 return np.asarray(tokenized_input)
             index += 1
+
         return tokenized_input, token_dict
+
+    def feature_scale(self, feature_series: pd.Series) -> np.array:
+        """
+        Min-max scaling of a feature.
+        Args:
+            feature_series: a pd.Series of a feature
+        Returns:
+            scaled_feature: a np.array (same index) of feature that is min-max scaled
+            max_value: maximum value from the entire feature array
+        """
+        feature_array = feature_series.to_numpy().astype("float32")
+        max_value = np.nanmax(feature_array)
+        min_value = np.nanmin(feature_array)
+        scaled_feature = (feature_array - min_value) / (max_value - min_value)
+        return scaled_feature, max_value
 
     def tokenize_data(self, tokenized_input: list, token_dict: dict) -> np.array:
         """
@@ -302,8 +293,11 @@ class Dataset:
 
         # minimize range of target between 0-1
         # find max of target_array
+        self.min_target = target_array.min()
         self.max_target = target_array.max()
-        target_array = target_array / self.max_target
+        target_array = (target_array - self.min_target) / (
+            self.max_target - self.min_target
+        )
 
         if self.input == "smi":
             # tokenize data
@@ -384,6 +378,7 @@ class Dataset:
             return (
                 np.asarray(filtered_tokenized_input),
                 np.asarray(filtered_target_array),
+                self.max_target,
             )
         elif parameter != "none":
             # add device parameters to the end of input
@@ -401,9 +396,14 @@ class Dataset:
             return (
                 np.asarray(filtered_tokenized_input),
                 np.asarray(filtered_target_array),
+                self.max_target,
             )
         else:
-            return np.asarray(tokenized_input), np.asarray(target_array)
+            return (
+                np.asarray(tokenized_input),
+                np.asarray(target_array),
+                self.max_target,
+            )
 
     def setup_aug_smi(self, parameter, target):
         """
@@ -448,6 +448,7 @@ class Dataset:
             return (
                 np.asarray(filtered_tokenized_input, dtype="object"),
                 np.asarray(filtered_target_array, dtype="float32"),
+                self.max_target,
                 token_dict,
             )
         else:
@@ -457,12 +458,13 @@ class Dataset:
                 vocab_length,
                 token_dict,
             ) = Tokenizer().tokenize_data(self.data["DA_pair"])
-            return np.asarray(x), np.asarray(target_array), token_dict
+            return np.asarray(x), np.asarray(target_array), self.max_target, token_dict
 
 
-# dataset = Dataset()
-# dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
-# x, y = dataset.setup("device", "JSC")
+dataset = Dataset()
+dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
+x, y, max_target = dataset.setup("device", "PCE")
+# print(x[0])
 # print("1")
 # print(x, y)
 # dataset.prepare_data(TRAIN_MASTER_DATA, "bigsmi")

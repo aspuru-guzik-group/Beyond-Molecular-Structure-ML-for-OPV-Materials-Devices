@@ -16,6 +16,10 @@ MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
 )
 
+MASTER_ML_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
+)
+
 CORRELATION_PLOT = pkg_resources.resource_filename(
     "ml_for_opvs", "data/exploration/OPV_Min/correlation_parity_plot.png"
 )
@@ -300,4 +304,4 @@ corr_plot = Correlation(MASTER_ML_DATA_PLOT)
 # corr_plot.parity_plot()
 # corr_plot.heatmap_plot("r")
 
-# corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA_PLOT)
+corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA)
