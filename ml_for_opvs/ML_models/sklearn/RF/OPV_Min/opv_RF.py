@@ -199,17 +199,17 @@ unique_datatype = {
     "fingerprint": 0,
 }
 parameter_type = {
-    "none": 0,
+    "none": 1,
     "electronic": 0,
-    "electronic_only": 1,
+    "electronic_only": 0,
     "device": 0,
     "fabrication": 0,
 }
 target_type = {
-    "PCE": 0,
+    "PCE": 1,
     "FF": 0,
     "JSC": 0,
-    "VOC": 1,
+    "VOC": 0,
 }
 for target in target_type:
     if target_type[target] == 1:

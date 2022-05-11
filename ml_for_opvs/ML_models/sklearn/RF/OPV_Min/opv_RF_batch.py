@@ -465,7 +465,7 @@ for i in range(len(unique_datatype)):
             refit=True,
             n_jobs=-1,
             verbose=0,
-            n_iter=5,
+            n_iter=25,
         )
         # execute search
         result = search.fit(x_train, y_train)
