@@ -116,12 +116,29 @@ class Dataset:
         annealing_temp, max_annealing_temp = self.feature_scale(
             self.data["annealing temperature"]
         )
-        print(annealing_temp)
         hole_mobility_blend, max_hole_mobility_blend = self.feature_scale(
             self.data["hole mobility blend (cm^2 V^-1 s^-1)"]
         )
         electron_mobility_blend, max_electron_mobility_blend = self.feature_scale(
             self.data["electron mobility blend (cm^2 V^-1 s^-1)"]
+        )
+        # solvent descriptors
+        solv_bp, max_solv_bp = self.feature_scale(self.data["BP"])
+        solv_mp, max_solv_mp = self.feature_scale(self.data["MP"])
+        solv_density, max_solv_density = self.feature_scale(self.data["Density"])
+        solv_dielectric, max_solv_dielectric = self.feature_scale(
+            self.data["Dielectric"]
+        )
+        solv_dipole, max_solv_dipole = self.feature_scale(self.data["Dipole"])
+        solv_logpow, max_solv_logpow = self.feature_scale(self.data["log Pow"])
+        solv_hansen_disp, max_solv_hansen_disp = self.feature_scale(
+            self.data["Hansen Disp"]
+        )
+        solv_hansen_hbond, max_solv_hansen_hbond = self.feature_scale(
+            self.data["Hansen H-Bond"]
+        )
+        solv_hansen_polar, max_solv_hansen_polar = self.feature_scale(
+            self.data["Hansen Polar"]
         )
         index = 0
         while index < len(tokenized_input):
@@ -130,7 +147,7 @@ class Dataset:
                 tokenized_input[index].append(lumo_d[index])
                 tokenized_input[index].append(homo_a[index])
                 tokenized_input[index].append(lumo_a[index])
-            elif parameter == "device":
+            elif parameter == "device" or parameter == "device_only":
                 # tokenize non-numerical variables
                 # for str (non-numerical) variables
                 dict_idx = len(token_dict)
@@ -171,7 +188,7 @@ class Dataset:
                 tokenized_input[index].append(hole_contact_layer[index])
                 tokenized_input[index].append(electron_contact_layer[index])
 
-            elif parameter == "fabrication":
+            elif parameter == "fabrication" or parameter == "fabrication_only":
                 # tokenize non-numerical variables
                 # for str (non-numerical) variables
                 dict_idx = len(token_dict)
@@ -195,6 +212,78 @@ class Dataset:
                 tokenized_input[index].append(solvent_add_conc[index])
                 tokenized_input[index].append(active_layer_thickness[index])
                 tokenized_input[index].append(annealing_temp[index])
+            elif parameter == "device_solvent" or parameter == "device_solvent_only":
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                hole_contact_layer = self.data["hole contact layer"]
+                for input in hole_contact_layer:
+                    # unique hole contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+                electron_contact_layer = self.data["electron contact layer"]
+                for input in electron_contact_layer:
+                    # unique electron contact layer
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                tokenized_input[index].append(d_a_ratio[index])
+                tokenized_input[index].append(total_solids_conc[index])
+                tokenized_input[index].append(solvent_add[index])
+                tokenized_input[index].append(solvent_add_conc[index])
+                tokenized_input[index].append(active_layer_thickness[index])
+                tokenized_input[index].append(annealing_temp[index])
+                tokenized_input[index].append(hole_mobility_blend[index])
+                tokenized_input[index].append(electron_mobility_blend[index])
+                tokenized_input[index].append(hole_contact_layer[index])
+                tokenized_input[index].append(electron_contact_layer[index])
+                tokenized_input[index].append(solv_bp[index])
+                tokenized_input[index].append(solv_mp[index])
+                tokenized_input[index].append(solv_density[index])
+                tokenized_input[index].append(solv_dielectric[index])
+                tokenized_input[index].append(solv_dipole[index])
+                tokenized_input[index].append(solv_logpow[index])
+                tokenized_input[index].append(solv_hansen_disp[index])
+                tokenized_input[index].append(solv_hansen_hbond[index])
+                tokenized_input[index].append(solv_hansen_polar[index])
+
+            elif (
+                parameter == "fabrication_solvent"
+                or parameter == "fabrication_solvent_only"
+            ):
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                tokenized_input[index].append(d_a_ratio[index])
+                tokenized_input[index].append(total_solids_conc[index])
+                tokenized_input[index].append(solvent_add[index])
+                tokenized_input[index].append(solvent_add_conc[index])
+                tokenized_input[index].append(active_layer_thickness[index])
+                tokenized_input[index].append(annealing_temp[index])
+                tokenized_input[index].append(solv_bp[index])
+                tokenized_input[index].append(solv_mp[index])
+                tokenized_input[index].append(solv_density[index])
+                tokenized_input[index].append(solv_dielectric[index])
+                tokenized_input[index].append(solv_dipole[index])
+                tokenized_input[index].append(solv_logpow[index])
+                tokenized_input[index].append(solv_hansen_disp[index])
+                tokenized_input[index].append(solv_hansen_hbond[index])
+                tokenized_input[index].append(solv_hansen_polar[index])
             else:
                 return np.asarray(tokenized_input)
             index += 1
@@ -464,7 +553,7 @@ class Dataset:
 dataset = Dataset()
 dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
 x, y, max_target = dataset.setup("device", "PCE")
-# print(x[0])
+print(len(x))
 # print("1")
 # print(x, y)
 # dataset.prepare_data(TRAIN_MASTER_DATA, "bigsmi")

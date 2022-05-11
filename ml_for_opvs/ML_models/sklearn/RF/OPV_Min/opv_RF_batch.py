@@ -47,6 +47,11 @@ SUMMARY_DIR = pkg_resources.resource_filename(
     "ml_for_opvs", "ML_models/sklearn/RF/OPV_Min/"
 )
 
+FEATURE_DIR = pkg_resources.resource_filename(
+    "ml_for_opvs", "ML_models/sklearn/RF/OPV_Min/"
+)
+
+
 # For Manual Fragments!
 MANUAL_DONOR_CSV = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
@@ -55,6 +60,7 @@ MANUAL_DONOR_CSV = pkg_resources.resource_filename(
 MANUAL_ACCEPTOR_CSV = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
 )
+
 
 np.set_printoptions(precision=3)
 SEED_VAL = 4
@@ -195,6 +201,7 @@ summary_df = pd.DataFrame(
     columns=["Datatype", "R_mean", "R_std", "RMSE_mean", "RMSE_std", "num_of_data"]
 )
 
+# ALL THE PARAMETERS!!!
 # run batch of conditions
 unique_datatype = {
     "smiles": 0,
@@ -211,7 +218,13 @@ parameter_type = {
     "electronic": 0,
     "electronic_only": 0,
     "device": 0,
+    "device_only": 0,
+    "device_solvent": 0,
+    "device_solvent_only": 0,
     "fabrication": 0,
+    "fabrication_only": 0,
+    "fabrication_solvent": 0,
+    "fabrication_solvent_only": 0,
 }
 target_type = {
     "PCE": 1,
@@ -224,31 +237,149 @@ for target in target_type:
         target_predict = target
         if target_predict == "PCE":
             SUMMARY_DIR = SUMMARY_DIR + "PCE_"
+            FEATURE_DIR = FEATURE_DIR + "PCE_"
         elif target_predict == "FF":
             SUMMARY_DIR = SUMMARY_DIR + "FF_"
+            FEATURE_DIR = FEATURE_DIR + "FF_"
         elif target_predict == "JSC":
             SUMMARY_DIR = SUMMARY_DIR + "JSC_"
+            FEATURE_DIR = FEATURE_DIR + "JSC_"
         elif target_predict == "VOC":
             SUMMARY_DIR = SUMMARY_DIR + "VOC_"
+            FEATURE_DIR = FEATURE_DIR + "VOC_"
 
 for param in parameter_type:
     if parameter_type[param] == 1:
         dev_param = param
         if dev_param == "none":
             SUMMARY_DIR = SUMMARY_DIR + "none_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "none_opv_rf_feature_impt.csv"
             device_idx = 0
         elif dev_param == "electronic":
             SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "electronic_opv_rf_feature_impt.csv"
             device_idx = 4
         elif dev_param == "electronic_only":
             SUMMARY_DIR = SUMMARY_DIR + "electronic_only_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "electronic_only_opv_rf_feature_impt.csv"
             device_idx = 4
         elif dev_param == "device":
             SUMMARY_DIR = SUMMARY_DIR + "device_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "device_opv_rf_feature_impt.csv"
             device_idx = 11
+        elif dev_param == "device_only":
+            SUMMARY_DIR = SUMMARY_DIR + "device_only_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "device_only_opv_rf_feature_impt.csv"
+            device_idx = 11
+        elif dev_param == "device_solvent":
+            SUMMARY_DIR = SUMMARY_DIR + "device_solv_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "device_solv_opv_rf_feature_impt.csv"
+            # for device_solvent
+            feature_idx = [
+                13,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+            ]
+            device_idx = 19
+        elif dev_param == "device_solvent_only":
+            SUMMARY_DIR = SUMMARY_DIR + "device_solv_only_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "device_solv_only_opv_rf_feature_impt.csv"
+            # for device_solvent
+            feature_idx = [
+                13,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+            ]
+            device_idx = 19
         elif dev_param == "fabrication":
             SUMMARY_DIR = SUMMARY_DIR + "fabrication_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "fabrication_opv_rf_feature_impt.csv"
             device_idx = 7
+        elif dev_param == "fabrication_only":
+            SUMMARY_DIR = SUMMARY_DIR + "fabrication_only_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "fabrication_only_opv_rf_feature_impt.csv"
+            device_idx = 7
+        elif dev_param == "fabrication_solvent":
+            SUMMARY_DIR = SUMMARY_DIR + "fabrication_solv_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "fabrication_solv_opv_rf_feature_impt.csv"
+            # for fabrication_solvent
+            feature_idx = [
+                13,
+                15,
+                16,
+                17,
+                18,
+                19,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+            ]
+            device_idx = 15
+        elif dev_param == "fabrication_solvent_only":
+            SUMMARY_DIR = SUMMARY_DIR + "fabrication_solv_only_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "fabrication_solv_only_opv_rf_feature_impt.csv"
+            # for fabrication_solvent
+            feature_idx = [
+                13,
+                15,
+                16,
+                17,
+                18,
+                19,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+            ]
+            device_idx = 15
+
+# feature = True
+feature = False
+
+feature_impt_df = pd.DataFrame()
 
 
 for i in range(len(unique_datatype)):
@@ -476,20 +607,22 @@ for i in range(len(unique_datatype)):
         # get feature importances of best performing model
         # NOTE: set cutoff threshold for importance OR set X most important features
         # NOTE: set labels for each feature!
-        # NOTE: we should use permutation feature importance
-        # importances = best_model.feature_importances_
-        # importances = importances[len(importances) - 7 : len(importances)]
-        # std = np.std(
-        #     [tree.feature_importances_ for tree in best_model.estimators_], axis=0
-        # )
-        # std = std[len(importances) - 7 : len(importances)]
-        # forest_importances = pd.Series(importances)
-        # fig, ax = plt.subplots()
-        # forest_importances.plot.bar(yerr=std, ax=ax)
-        # ax.set_title("Feature importances using MDI")
-        # ax.set_ylabel("Mean decrease in impurity")
-        # fig.tight_layout()
-        # plt.show()
+        if feature:
+            dataset_columns = list(dataset.data.columns)
+            # col_idx = 0
+            # dataset_columns_dict = {}
+            # for col in dataset_columns:
+            #     dataset_columns_dict[col] = col_idx
+            #     col_idx += 1
+            feature_columns = []
+            for idx in feature_idx:
+                feature_columns.append(dataset_columns[idx])
+            importances = best_model.feature_importances_
+            importances = importances[len(importances) - device_idx : len(importances)]
+            forest_importances = pd.DataFrame(importances, index=feature_columns)
+            feature_impt_df = pd.concat(
+                [feature_impt_df, forest_importances], axis=1, ignore_index=False,
+            )
 
         # evaluate model on the hold out dataset
         yhat = best_model.predict(x_test)
@@ -526,16 +659,17 @@ for i in range(len(unique_datatype)):
     summary_df = pd.concat([summary_df, summary_series], ignore_index=True,)
 summary_df.to_csv(SUMMARY_DIR, index=False)
 
-# add R score from cross-validation results
-# ablation_df = pd.read_csv(ABLATION_STUDY)
-# results_list = [
-#     "OPV",
-#     "RF",
-#     "sklearn",
-#     "Manual Fragments",
-#     mean(outer_results),
-#     std(outer_results),
-# ]
-# ablation_df.loc[len(ablation_df.index) + 1] = results_list
-# ablation_df.to_csv(ABLATION_STUDY, index=False)
+if feature:
+    # feature importance summary
+    if dev_param in [
+        "device",
+        "device_solvent",
+        "fabrication",
+        "fabrication_solvent",
+        "device_only",
+        "device_solvent_only",
+        "fabrication_only",
+        "fabrication_solvent_only",
+    ]:
+        feature_impt_df.to_csv(FEATURE_DIR)
 

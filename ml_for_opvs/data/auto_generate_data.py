@@ -90,19 +90,23 @@ pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 pairings.convert_str_to_float(MASTER_ML_DATA)
 pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
 
-# # Step 4c - Fill empty values for Thermal Annealing, and Solvent Additives
-pairings.fill_empty_values(MASTER_ML_DATA)
-
-# Step 4d - Remove anomalies!
+# Step 4c - Remove anomalies!
 # Go to ml_for_opvs > data > error_correction > remove_anomaly.py
 anomaly = Anomaly(MASTER_ML_DATA)
 anomaly.remove_anomaly(MASTER_ML_DATA)
+anomaly.remove_anomaly(MASTER_ML_DATA_PLOT)
+anomaly.correct_anomaly(MASTER_ML_DATA)
+anomaly.correct_anomaly(MASTER_ML_DATA_PLOT)
+
+# # Step 4c - Fill empty values for Thermal Annealing, and Solvent Additives
+pairings.fill_empty_values(MASTER_ML_DATA)
 
 # Step 5
 # Add solvents
 corr_plot = Correlation(MASTER_ML_DATA_PLOT)
-corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA)
 corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA_PLOT)
+corr_plot = Correlation(MASTER_ML_DATA)
+corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA)
 
 # Step 6
 # Postprocessing!!!

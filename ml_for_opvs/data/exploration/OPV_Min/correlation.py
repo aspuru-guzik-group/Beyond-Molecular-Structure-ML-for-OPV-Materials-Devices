@@ -71,7 +71,7 @@ class Correlation:
         print(columns_dict)
         # select which columns you want to plot
         column_idx_first = 9
-        column_idx_last = 35 + 1
+        column_idx_last = 37 + 1
 
         x_columns = column_idx_last - column_idx_first
         y_rows = column_idx_last - column_idx_first
@@ -167,7 +167,7 @@ class Correlation:
         print(columns_dict)
         # select which columns you want to plot
         column_idx_first = 9
-        column_idx_last = 35 + 1
+        column_idx_last = 37 + 1
 
         x_columns = column_idx_last - column_idx_first
         y_rows = column_idx_last - column_idx_first
@@ -261,11 +261,13 @@ class Correlation:
         """
         self.data["BP"] = ""
         self.data["MP"] = ""
+        self.data["Density"] = ""
+        self.data["Dielectric"] = ""
+        self.data["Dipole"] = ""
         self.data["log Pow"] = ""
         self.data["Hansen Disp"] = ""
         self.data["Hansen H-Bond"] = ""
         self.data["Hansen Polar"] = ""
-        self.data["Hildebrand"] = ""
         solvent_df = pd.read_csv(solvent_inventory)
         options = ["['Solvent']", "['Solvent', 'Solvent_Additive']"]
 
@@ -284,6 +286,11 @@ class Correlation:
                 ]
                 self.data.at[index, "BP"] = curr_solvent_df["BP"].values[0]
                 self.data.at[index, "MP"] = curr_solvent_df["MP"].values[0]
+                self.data.at[index, "Density"] = curr_solvent_df["Density"].values[0]
+                self.data.at[index, "Dielectric"] = curr_solvent_df[
+                    "Dielectric"
+                ].values[0]
+                self.data.at[index, "Dipole"] = curr_solvent_df["Dipole"].values[0]
                 self.data.at[index, "log Pow"] = curr_solvent_df["log Pow"].values[0]
                 self.data.at[index, "Hansen Disp"] = curr_solvent_df[
                     "Hansen Disp"
@@ -294,14 +301,11 @@ class Correlation:
                 self.data.at[index, "Hansen Polar"] = curr_solvent_df[
                     "Hansen Polar"
                 ].values[0]
-                self.data.at[index, "Hildebrand"] = curr_solvent_df[
-                    "Hildebrand"
-                ].values[0]
         self.data.to_csv(master_ml_data_path, index=False)
 
 
-corr_plot = Correlation(MASTER_ML_DATA_PLOT)
+# corr_plot = Correlation(MASTER_ML_DATA_PLOT)
 # corr_plot.parity_plot()
 # corr_plot.heatmap_plot("r")
 
-corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA)
+# corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA)

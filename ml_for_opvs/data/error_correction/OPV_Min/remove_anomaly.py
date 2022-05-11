@@ -62,6 +62,24 @@ class Anomaly:
 
         self.data.to_csv(master_data_path, index=False)
 
+    def correct_anomaly(self, master_data_path):
+        """
+        Function that standardizes the labels!
+        Args:
+            master_data_path: path back to main opv file for ML training/plotting
+        Returns:
+            .csv file with labels corrected from main opv file
+        """
+        for index, row in self.data.iterrows():
+            if self.data.at[index, "solvent"] == "DCB":
+                self.data.at[index, "solvent"] = "o-DCB"
+            if self.data.at[index, "solvent"] == "CF:DCB (80:20)":
+                self.data.at[index, "solvent"] = "o-DCB:CF (4:1)"
+            if self.data.at[index, "hole contact layer"] == "MoO3":
+                self.data.at[index, "hole contact layer"] = "MoOx"
+
+        self.data.to_csv(master_data_path, index=False)
+
 
 # anomaly = Anomaly(MASTER_ML_DATA)
 # anomaly.remove_anomaly(MASTER_ML_DATA)
