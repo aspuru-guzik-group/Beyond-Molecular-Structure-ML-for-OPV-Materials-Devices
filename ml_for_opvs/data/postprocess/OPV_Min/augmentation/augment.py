@@ -63,69 +63,9 @@ class Augment:
         """
         # keeps randomness the same
         random.seed(1)
-        column_names = [
-            "Donor",
-            "Donor_SMILES",
-            "Acceptor",
-            "Acceptor_SMILES",
-            "DA_pair_aug",
-            "AD_pair_aug",
-            "HOMO_D (eV)",
-            "LUMO_D (eV)",
-            "HOMO_A (eV)",
-            "LUMO_A (eV)",
-            "D:A ratio (m/m)",
-            "solvent",
-            "total solids conc. (mg/mL)",
-            "solvent additive",
-            "solvent additive conc. (%v/v)",
-            "active layer thickness (nm)",
-            "annealing temperature",
-            "hole contact layer",
-            "electron contact layer",
-            "hole mobility blend (cm^2 V^-1 s^-1)",
-            "electron mobility blend (cm^2 V^-1 s^-1)",
-            "PCE (%)",
-            "calc_PCE (%)",
-            "Voc (V)",
-            "Jsc (mA cm^-2)",
-            "FF (%)",
-        ]
-        train_aug_df = pd.DataFrame(columns=column_names)
-        train_aug_df["Donor"] = self.data["Donor"]
-        train_aug_df["Donor_SMILES"] = self.data["Donor_SMILES"]
-        train_aug_df["Acceptor"] = self.data["Acceptor"]
-        train_aug_df["Acceptor_SMILES"] = self.data["Acceptor_SMILES"]
-        train_aug_df["HOMO_D (eV)"] = self.data["HOMO_D (eV)"]
-        train_aug_df["LUMO_D (eV)"] = self.data["LUMO_D (eV)"]
-        train_aug_df["HOMO_A (eV)"] = self.data["HOMO_A (eV)"]
-        train_aug_df["LUMO_A (eV)"] = self.data["LUMO_A (eV)"]
-        train_aug_df["D:A ratio (m/m)"] = self.data["D:A ratio (m/m)"]
-        train_aug_df["solvent"] = self.data["solvent"]
-        train_aug_df["total solids conc. (mg/mL)"] = self.data[
-            "total solids conc. (mg/mL)"
-        ]
-        train_aug_df["solvent additive"] = self.data["solvent additive"]
-        train_aug_df["solvent additive conc. (%v/v)"] = self.data[
-            "solvent additive conc. (%v/v)"
-        ]
-        train_aug_df["active layer thickness (nm)"] = self.data[
-            "active layer thickness (nm)"
-        ]
-        train_aug_df["annealing temperature"] = self.data["annealing temperature"]
-        train_aug_df["hole contact layer"] = self.data["hole contact layer"]
-        train_aug_df["electron contact layer"] = self.data["electron contact layer"]
-        train_aug_df["hole mobility blend (cm^2 V^-1 s^-1)"] = self.data[
-            "hole mobility blend (cm^2 V^-1 s^-1)"
-        ]
-        train_aug_df["electron mobility blend (cm^2 V^-1 s^-1)"] = self.data[
-            "electron mobility blend (cm^2 V^-1 s^-1)"
-        ]
-        train_aug_df["PCE (%)"] = self.data["PCE (%)"]
-        train_aug_df["calc_PCE (%)"] = self.data["calc_PCE (%)"]
-        train_aug_df["Voc (V)"] = self.data["Voc (V)"]
-        train_aug_df["Jsc (mA cm^-2)"] = self.data["Jsc (mA cm^-2)"]
-        train_aug_df["FF (%)"] = self.data["FF (%)"]
+        train_aug_df = self.data
+        train_aug_df["DA_pair_aug"] = ""
+        train_aug_df["AD_pair_aug"] = ""
 
         for i in range(len(train_aug_df["Donor"])):
             augmented_da_list = []
