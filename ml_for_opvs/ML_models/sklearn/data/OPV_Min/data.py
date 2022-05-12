@@ -468,6 +468,7 @@ class Dataset:
                 np.asarray(filtered_tokenized_input),
                 np.asarray(filtered_target_array),
                 self.max_target,
+                self.min_target,
             )
         elif parameter != "none":
             # add device parameters to the end of input
@@ -486,12 +487,14 @@ class Dataset:
                 np.asarray(filtered_tokenized_input),
                 np.asarray(filtered_target_array),
                 self.max_target,
+                self.min_target,
             )
         else:
             return (
                 np.asarray(tokenized_input),
                 np.asarray(target_array),
                 self.max_target,
+                self.min_target,
             )
 
     def setup_aug_smi(self, parameter, target):
@@ -538,6 +541,7 @@ class Dataset:
                 np.asarray(filtered_tokenized_input, dtype="object"),
                 np.asarray(filtered_target_array, dtype="float32"),
                 self.max_target,
+                self.min_target,
                 token_dict,
             )
         else:
@@ -547,13 +551,19 @@ class Dataset:
                 vocab_length,
                 token_dict,
             ) = Tokenizer().tokenize_data(self.data["DA_pair"])
-            return np.asarray(x), np.asarray(target_array), self.max_target, token_dict
+            return (
+                np.asarray(x),
+                np.asarray(target_array),
+                self.max_target,
+                self.min_target,
+                token_dict,
+            )
 
 
-dataset = Dataset()
-dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
-x, y, max_target = dataset.setup("device", "PCE")
-print(len(x))
+# dataset = Dataset()
+# dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
+# x, y, max_target, min_target = dataset.setup("device", "PCE")
+# print(len(x))
 # print("1")
 # print(x, y)
 # dataset.prepare_data(TRAIN_MASTER_DATA, "bigsmi")
