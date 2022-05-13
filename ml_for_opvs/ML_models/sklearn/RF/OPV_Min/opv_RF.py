@@ -206,8 +206,8 @@ unique_datatype = {
     "fingerprint": 1,
 }
 parameter_type = {
-    "none": 1,
-    "electronic": 0,
+    "none": 0,
+    "electronic": 1,
     "electronic_only": 0,
     "device": 0,
     "device_only": 0,
@@ -220,10 +220,10 @@ parameter_type = {
     "fabrication_solvent_minus_active_layer": 0,
 }
 target_type = {
-    "PCE": 1,
+    "PCE": 0,
     "FF": 0,
     "JSC": 0,
-    "VOC": 0,
+    "VOC": 1,
 }
 for target in target_type:
     if target_type[target] == 1:
@@ -453,8 +453,8 @@ for param in parameter_type:
             ]
             device_idx = 14
 
-# feature = True
-feature = False
+feature = True
+# feature = False
 # shapley = True
 shapley = False
 
@@ -693,7 +693,7 @@ for train_ix, test_ix in cv_outer.split(x):
     yhat = (yhat * (max_target - min_target)) + min_target
     y_test = (y_test * (max_target - min_target)) + min_target
 
-    parity_plot(y_test, yhat, max_target)
+    # parity_plot(y_test, yhat, max_target)
 
     # evaluate the model
     corr_coef = np.corrcoef(y_test, yhat)[0, 1]
