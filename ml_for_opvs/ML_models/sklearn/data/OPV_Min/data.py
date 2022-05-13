@@ -177,8 +177,8 @@ class Dataset:
                         dict_idx += 1
 
                 tokenized_input[index].append(d_a_ratio[index])
-                tokenized_input[index].append(total_solids_conc[index])
                 tokenized_input[index].append(solvent[index])
+                tokenized_input[index].append(total_solids_conc[index])
                 tokenized_input[index].append(solvent_add[index])
                 tokenized_input[index].append(solvent_add_conc[index])
                 tokenized_input[index].append(active_layer_thickness[index])
@@ -206,8 +206,8 @@ class Dataset:
                         dict_idx += 1
 
                 tokenized_input[index].append(d_a_ratio[index])
-                tokenized_input[index].append(total_solids_conc[index])
                 tokenized_input[index].append(solvent[index])
+                tokenized_input[index].append(total_solids_conc[index])
                 tokenized_input[index].append(solvent_add[index])
                 tokenized_input[index].append(solvent_add_conc[index])
                 tokenized_input[index].append(active_layer_thickness[index])
@@ -271,7 +271,6 @@ class Dataset:
 
                 tokenized_input[index].append(d_a_ratio[index])
                 tokenized_input[index].append(total_solids_conc[index])
-                tokenized_input[index].append(solvent_add[index])
                 tokenized_input[index].append(solvent_add_conc[index])
                 tokenized_input[index].append(active_layer_thickness[index])
                 tokenized_input[index].append(annealing_temp[index])

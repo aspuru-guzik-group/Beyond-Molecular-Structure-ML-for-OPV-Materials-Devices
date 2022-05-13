@@ -19,6 +19,7 @@ from sklearn import preprocessing
 import shap
 
 from ml_for_opvs.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
+from ml_for_opvs.ML_models.evaluation.OPV_Min.plotter import parity_plot
 
 TRAIN_MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
@@ -272,10 +273,38 @@ for param in parameter_type:
             SUMMARY_DIR = SUMMARY_DIR + "device_opv_rf_results.csv"
             FEATURE_DIR = FEATURE_DIR + "device_opv_rf_feature_impt.csv"
             device_idx = 11
+            # for device_solvent
+            feature_idx = [
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+            ]
         elif dev_param == "device_only":
             SUMMARY_DIR = SUMMARY_DIR + "device_only_opv_rf_results.csv"
             FEATURE_DIR = FEATURE_DIR + "device_only_opv_rf_feature_impt.csv"
             device_idx = 11
+            # for device_solvent
+            feature_idx = [
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+            ]
         elif dev_param == "device_solvent":
             SUMMARY_DIR = SUMMARY_DIR + "device_solv_opv_rf_results.csv"
             FEATURE_DIR = FEATURE_DIR + "device_solv_opv_rf_feature_impt.csv"
@@ -424,8 +453,8 @@ for param in parameter_type:
             ]
             device_idx = 14
 
-feature = True
-# feature = False
+# feature = True
+feature = False
 # shapley = True
 shapley = False
 
@@ -644,11 +673,11 @@ for train_ix, test_ix in cv_outer.split(x):
         print(dataset_columns_dict)
 
         feature_columns = []
-        # for idx in feature_idx:
-        #     feature_columns.append(dataset_columns[idx])
+        for idx in feature_idx:
+            feature_columns.append(dataset_columns[idx])
         importances = best_model.feature_importances_
         importances = importances[len(importances) - device_idx : len(importances)]
-        forest_importances = pd.DataFrame(importances)
+        forest_importances = pd.DataFrame(importances, index=feature_columns)
         feature_impt_df = pd.concat(
             [feature_impt_df, forest_importances], axis=1, ignore_index=False,
         )
@@ -663,6 +692,8 @@ for train_ix, test_ix in cv_outer.split(x):
     # reverse min-max scaling
     yhat = (yhat * (max_target - min_target)) + min_target
     y_test = (y_test * (max_target - min_target)) + min_target
+
+    parity_plot(y_test, yhat, max_target)
 
     # evaluate the model
     corr_coef = np.corrcoef(y_test, yhat)[0, 1]

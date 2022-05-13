@@ -6,7 +6,7 @@ RF,AugSMILES,none,calc_PCE,0.506652863,0.102629365,2.683709786,0.1515536,555
 RF,BRICS,none,calc_PCE,0.669265759,0.046897399,2.311113664,0.082958599,555
 RF,Manual Fragments,none,calc_PCE,0.65686929,0.084044872,2.319244947,0.198496678,555
 RF,Augmented Manual Fragments,none,calc_PCE,0.640637666,0.079157763,2.418526634,0.221744224,555
-RF,"Fingerprints (r=3, bits=512)",none,calc_PCE,0.717675101,0.054441967,2.147094213,0.173629827,555
+RF,Fingerprints,none,calc_PCE,0.717675101,0.054441967,2.147094213,0.173629827,555
 RF,SMILES,none,FF,0.438899276,0.111639394,9.216074158,1.3253891,555
 RF,BigSMILES,none,FF,0.431298195,0.110365593,9.241755113,1.297157398,555
 RF,SELFIES,none,FF,0.455664678,0.125343464,9.107901921,1.307736631,555
@@ -14,7 +14,7 @@ RF,AugSMILES,none,FF,0.331769255,0.180305374,9.593707776,1.232249265,555
 RF,BRICS,none,FF,0.521574476,0.124080774,8.76747938,0.909030245,555
 RF,Manual Fragments,none,FF,0.562931437,0.105801935,8.370861494,1.147523331,555
 RF,Augmented Manual Fragments,none,FF,0.529216964,0.127607655,8.666381286,1.229410263,555
-RF,"Fingerprints (r=3, bits=512)",none,FF,0.59810206,0.104738254,8.081204481,1.148584143,555
+RF,Fingerprints,none,FF,0.59810206,0.104738254,8.081204481,1.148584143,555
 RF,SMILES,none,VOC,0.443516954,0.040416238,0.161631528,0.008508802,555
 RF,BigSMILES,none,VOC,0.449154076,0.058639314,0.160917126,0.00686059,555
 RF,SELFIES,none,VOC,0.494408114,0.019215864,0.15707955,0.011078822,555
@@ -22,7 +22,7 @@ RF,AugSMILES,none,VOC,0.243303522,0.088952396,0.105042243,0.00748111,555
 RF,BRICS,none,VOC,0.6031272,0.070397173,0.144132906,0.010979746,555
 RF,Manual Fragments,none,VOC,0.568018881,0.068305564,0.150165445,0.009514727,555
 RF,Augmented Manual Fragments,none,VOC,0.49748671,0.071284815,0.163245201,0.011993978,555
-RF,"Fingerprints (r=3, bits=512)",none,VOC,0.665051143,0.068045127,0.134929319,0.018085032,555
+RF,Fingerprints,none,VOC,0.665051143,0.068045127,0.134929319,0.018085032,555
 RF,SMILES,none,JSC,0.670471048,0.121993652,3.476526541,0.361240519,555
 RF,BigSMILES,none,JSC,0.678514881,0.103878976,3.460061592,0.302040001,555
 RF,SELFIES,none,JSC,0.669165409,0.108926624,3.47772495,0.326161794,555
@@ -30,7 +30,7 @@ RF,AugSMILES,none,JSC,0.51717442,0.101476158,4.03918365,0.366911496,555
 RF,BRICS,none,JSC,0.678409169,0.055900165,3.451824831,0.36954723,555
 RF,Manual Fragments,none,JSC,0.730490591,0.12182731,3.152669865,0.476043143,555
 RF,Augmented Manual Fragments,none,JSC,0.68983078,0.126869756,3.407176155,0.48481658,555
-RF,"Fingerprints (r=3, bits=512)",none,JSC,0.790597692,0.06125101,2.858509539,0.388514181,555
+RF,Fingerprints,none,JSC,0.790597692,0.06125101,2.858509539,0.388514181,555
 RF,SMILES,electronic,calc_PCE,0.614254083,0.040818123,2.453548948,0.166679418,456
 RF,BigSMILES,electronic,calc_PCE,0.630195555,0.047174539,2.417416582,0.145729428,456
 RF,SELFIES,electronic,calc_PCE,0.614979497,0.042127613,2.448360682,0.112628013,456
@@ -38,7 +38,7 @@ RF,AugSMILES,electronic,calc_PCE,0.561325601,0.085507319,2.614866484,0.203567919
 RF,BRICS,electronic,calc_PCE,0.686108267,0.04159419,2.26898389,0.122244723,456
 RF,Manual Fragments,electronic,calc_PCE,0.688421027,0.057570594,2.257275942,0.178829773,456
 RF,Augmented Manual Fragments,electronic,calc_PCE,0.584600831,0.082017958,2.57811513,0.228831189,456
-RF,"Fingerprints (r=3, bits=512)",electronic,calc_PCE,0.736422059,0.026153253,2.133090879,0.096058032,456
+RF,Fingerprints,electronic,calc_PCE,0.736422059,0.026153253,2.133090879,0.096058032,456
 RF,SMILES,electronic,FF,0.313055205,0.087551912,9.673599445,1.809417745,456
 RF,BigSMILES,electronic,FF,0.324633799,0.096658454,9.610208084,1.794211206,456
 RF,SELFIES,electronic,FF,0.363214739,0.09490438,9.423295498,1.514219897,456
@@ -46,7 +46,7 @@ RF,AugSMILES,electronic,FF,0.312700029,0.102364337,9.992959278,1.343583034,456
 RF,BRICS,electronic,FF,0.503009262,0.088947498,8.744945571,1.4133993,456
 RF,Manual Fragments,electronic,FF,0.469070963,0.1082779,9.050422381,1.475840216,456
 RF,Augmented Manual Fragments,electronic,FF,0.334241021,0.091557241,10.12790902,1.320690468,456
-RF,"Fingerprints (r=3, bits=512)",electronic,FF,0.552644706,0.058395293,8.514515188,1.322684155,456
+RF,Fingerprints,electronic,FF,0.552644706,0.058395293,8.514515188,1.322684155,456
 RF,SMILES,electronic,VOC,0.635004099,0.051773764,0.146460131,0.015035173,456
 RF,BigSMILES,electronic,VOC,0.646633402,0.054803545,0.145025847,0.015156918,456
 RF,SELFIES,electronic,VOC,0.638639651,0.036158094,0.146032086,0.013186857,456
@@ -54,7 +54,7 @@ RF,AugSMILES,electronic,VOC,0.602083752,0.031468864,0.092730708,0.005325835,456
 RF,BRICS,electronic,VOC,0.691296539,0.027634391,0.136976008,0.009452994,456
 RF,Manual Fragments,electronic,VOC,0.713797065,0.037905243,0.1320279,0.013675729,456
 RF,Augmented Manual Fragments,electronic,VOC,0.646868492,0.051226537,0.146652433,0.013058833,456
-RF,"Fingerprints (r=3, bits=512)",electronic,VOC,0.730089554,0.037811916,0.129699896,0.012144871,456
+RF,Fingerprints,electronic,VOC,0.730089554,0.037811916,0.129699896,0.012144871,456
 RF,SMILES,electronic,JSC,0.699622744,0.059231469,3.358816554,0.114016897,456
 RF,BigSMILES,electronic,JSC,0.701865974,0.058556372,3.35605025,0.092127755,456
 RF,SELFIES,electronic,JSC,0.703587848,0.077388193,3.313895321,0.161891485,456
@@ -62,7 +62,7 @@ RF,AugSMILES,electronic,JSC,0.630803085,0.081590755,3.659665535,0.297271832,456
 RF,BRICS,electronic,JSC,0.741804185,0.05323663,3.129746352,0.141018391,456
 RF,Manual Fragments,electronic,JSC,0.766465093,0.04808402,2.996685503,0.201038522,456
 RF,Augmented Manual Fragments,electronic,JSC,0.678690058,0.061641973,3.486703356,0.257311116,456
-RF,"Fingerprints (r=3, bits=512)",electronic,JSC,0.80978963,0.059303126,2.732987895,0.240143056,456
+RF,Fingerprints,electronic,JSC,0.80978963,0.059303126,2.732987895,0.240143056,456
 BRT,SMILES,none,calc_PCE,,,,,
 BRT,BigSMILES,none,calc_PCE,,,,,
 BRT,SELFIES,none,calc_PCE,,,,,
@@ -70,7 +70,7 @@ BRT,AugSMILES,none,calc_PCE,,,,,
 BRT,BRICS,none,calc_PCE,,,,,
 BRT,Manual Fragments,none,calc_PCE,,,,,
 BRT,Augmented Manual Fragments,none,calc_PCE,,,,,
-BRT,"Fingerprints (r=3, bits=512)",none,calc_PCE,,,,,
+BRT,Fingerprints,none,calc_PCE,,,,,
 SVM,SMILES,none,calc_PCE,,,,,
 SVM,BigSMILES,none,calc_PCE,,,,,
 SVM,SELFIES,none,calc_PCE,,,,,
@@ -78,7 +78,7 @@ SVM,AugSMILES,none,calc_PCE,,,,,
 SVM,BRICS,none,calc_PCE,,,,,
 SVM,Manual Fragments,none,calc_PCE,,,,,
 SVM,Augmented Manual Fragments,none,calc_PCE,,,,,
-SVM,"Fingerprints (r=3, bits=512)",none,calc_PCE,,,,,
+SVM,Fingerprints,none,calc_PCE,,,,,
 NN,SMILES,none,calc_PCE,,,,,
 NN,BigSMILES,none,calc_PCE,,,,,
 NN,SELFIES,none,calc_PCE,,,,,
@@ -86,7 +86,7 @@ NN,AugSMILES,none,calc_PCE,,,,,
 NN,BRICS,none,calc_PCE,,,,,
 NN,Manual Fragments,none,calc_PCE,,,,,
 NN,Augmented Manual Fragments,none,calc_PCE,,,,,
-NN,"Fingerprints (r=3, bits=512)",none,calc_PCE,,,,,
+NN,Fingerprints,none,calc_PCE,,,,,
 LSTM,SMILES,none,calc_PCE,,,,,
 LSTM,BigSMILES,none,calc_PCE,,,,,
 LSTM,SELFIES,none,calc_PCE,,,,,
@@ -94,7 +94,7 @@ LSTM,AugSMILES,none,calc_PCE,,,,,
 LSTM,BRICS,none,calc_PCE,,,,,
 LSTM,Manual Fragments,none,calc_PCE,,,,,
 LSTM,Augmented Manual Fragments,none,calc_PCE,,,,,
-LSTM,"Fingerprints (r=3, bits=512)",none,calc_PCE,,,,,
+LSTM,Fingerprints,none,calc_PCE,,,,,
 RF,SMILES,electronic,calc_PCE,,,,,
 RF,BigSMILES,electronic,calc_PCE,,,,,
 RF,SELFIES,electronic,calc_PCE,,,,,
@@ -102,7 +102,7 @@ RF,AugSMILES,electronic,calc_PCE,,,,,
 RF,BRICS,electronic,calc_PCE,,,,,
 RF,Manual Fragments,electronic,calc_PCE,,,,,
 RF,Augmented Manual Fragments,electronic,calc_PCE,,,,,
-RF,"Fingerprints (r=3, bits=512)",electronic,calc_PCE,,,,,
+RF,Fingerprints,electronic,calc_PCE,,,,,
 BRT,SMILES,electronic,calc_PCE,,,,,
 BRT,BigSMILES,electronic,calc_PCE,,,,,
 BRT,SELFIES,electronic,calc_PCE,,,,,
@@ -110,7 +110,7 @@ BRT,AugSMILES,electronic,calc_PCE,,,,,
 BRT,BRICS,electronic,calc_PCE,,,,,
 BRT,Manual Fragments,electronic,calc_PCE,,,,,
 BRT,Augmented Manual Fragments,electronic,calc_PCE,,,,,
-BRT,"Fingerprints (r=3, bits=512)",electronic,calc_PCE,,,,,
+BRT,Fingerprints,electronic,calc_PCE,,,,,
 SVM,SMILES,electronic,calc_PCE,,,,,
 SVM,BigSMILES,electronic,calc_PCE,,,,,
 SVM,SELFIES,electronic,calc_PCE,,,,,
@@ -118,7 +118,7 @@ SVM,AugSMILES,electronic,calc_PCE,,,,,
 SVM,BRICS,electronic,calc_PCE,,,,,
 SVM,Manual Fragments,electronic,calc_PCE,,,,,
 SVM,Augmented Manual Fragments,electronic,calc_PCE,,,,,
-SVM,"Fingerprints (r=3, bits=512)",electronic,calc_PCE,,,,,
+SVM,Fingerprints,electronic,calc_PCE,,,,,
 NN,SMILES,electronic,calc_PCE,,,,,
 NN,BigSMILES,electronic,calc_PCE,,,,,
 NN,SELFIES,electronic,calc_PCE,,,,,
@@ -126,7 +126,7 @@ NN,AugSMILES,electronic,calc_PCE,,,,,
 NN,BRICS,electronic,calc_PCE,,,,,
 NN,Manual Fragments,electronic,calc_PCE,,,,,
 NN,Augmented Manual Fragments,electronic,calc_PCE,,,,,
-NN,"Fingerprints (r=3, bits=512)",electronic,calc_PCE,,,,,
+NN,Fingerprints,electronic,calc_PCE,,,,,
 LSTM,SMILES,electronic,calc_PCE,,,,,
 LSTM,BigSMILES,electronic,calc_PCE,,,,,
 LSTM,SELFIES,electronic,calc_PCE,,,,,
@@ -134,12 +134,12 @@ LSTM,AugSMILES,electronic,calc_PCE,,,,,
 LSTM,BRICS,electronic,calc_PCE,,,,,
 LSTM,Manual Fragments,electronic,calc_PCE,,,,,
 LSTM,Augmented Manual Fragments,electronic,calc_PCE,,,,,
-LSTM,"Fingerprints (r=3, bits=512)",electronic,calc_PCE,,,,,
-RF,no_representation,electronic_only,calc_PCE,0.571517696,0.057506183,2.554823539,0.12570158,456
-BRT,no_representation,electronic_only,calc_PCE,,,,,
-SVM,no_representation,electronic_only,calc_PCE,,,,,
-NN,no_representation,electronic_only,calc_PCE,,,,,
-LSTM,no_representation,electronic_only,calc_PCE,,,,,
+LSTM,Fingerprints,electronic,calc_PCE,,,,,
+RF,Fingerprints,electronic_only,calc_PCE,0.571517696,0.057506183,2.554823539,0.12570158,456
+BRT,Fingerprints,electronic_only,calc_PCE,,,,,
+SVM,Fingerprints,electronic_only,calc_PCE,,,,,
+NN,Fingerprints,electronic_only,calc_PCE,,,,,
+LSTM,Fingerprints,electronic_only,calc_PCE,,,,,
 RF,SMILES,device,calc_PCE,,,,,
 RF,BigSMILES,device,calc_PCE,,,,,
 RF,SELFIES,device,calc_PCE,,,,,
@@ -147,7 +147,7 @@ RF,AugSMILES,device,calc_PCE,,,,,
 RF,BRICS,device,calc_PCE,,,,,
 RF,Manual Fragments,device,calc_PCE,,,,,
 RF,Augmented Manual Fragments,device,calc_PCE,,,,,
-RF,"Fingerprints (r=3, bits=512)",device,calc_PCE,,,,,
+RF,Fingerprints,device,calc_PCE,,,,,
 BRT,SMILES,device,calc_PCE,,,,,
 BRT,BigSMILES,device,calc_PCE,,,,,
 BRT,SELFIES,device,calc_PCE,,,,,
@@ -155,7 +155,7 @@ BRT,AugSMILES,device,calc_PCE,,,,,
 BRT,BRICS,device,calc_PCE,,,,,
 BRT,Manual Fragments,device,calc_PCE,,,,,
 BRT,Augmented Manual Fragments,device,calc_PCE,,,,,
-BRT,"Fingerprints (r=3, bits=512)",device,calc_PCE,,,,,
+BRT,Fingerprints,device,calc_PCE,,,,,
 SVM,SMILES,device,calc_PCE,,,,,
 SVM,BigSMILES,device,calc_PCE,,,,,
 SVM,SELFIES,device,calc_PCE,,,,,
@@ -163,7 +163,7 @@ SVM,AugSMILES,device,calc_PCE,,,,,
 SVM,BRICS,device,calc_PCE,,,,,
 SVM,Manual Fragments,device,calc_PCE,,,,,
 SVM,Augmented Manual Fragments,device,calc_PCE,,,,,
-SVM,"Fingerprints (r=3, bits=512)",device,calc_PCE,,,,,
+SVM,Fingerprints,device,calc_PCE,,,,,
 NN,SMILES,device,calc_PCE,,,,,
 NN,BigSMILES,device,calc_PCE,,,,,
 NN,SELFIES,device,calc_PCE,,,,,
@@ -171,7 +171,7 @@ NN,AugSMILES,device,calc_PCE,,,,,
 NN,BRICS,device,calc_PCE,,,,,
 NN,Manual Fragments,device,calc_PCE,,,,,
 NN,Augmented Manual Fragments,device,calc_PCE,,,,,
-NN,"Fingerprints (r=3, bits=512)",device,calc_PCE,,,,,
+NN,Fingerprints,device,calc_PCE,,,,,
 LSTM,SMILES,device,calc_PCE,,,,,
 LSTM,BigSMILES,device,calc_PCE,,,,,
 LSTM,SELFIES,device,calc_PCE,,,,,
@@ -179,7 +179,7 @@ LSTM,AugSMILES,device,calc_PCE,,,,,
 LSTM,BRICS,device,calc_PCE,,,,,
 LSTM,Manual Fragments,device,calc_PCE,,,,,
 LSTM,Augmented Manual Fragments,device,calc_PCE,,,,,
-LSTM,"Fingerprints (r=3, bits=512)",device,calc_PCE,,,,,
+LSTM,Fingerprints,device,calc_PCE,,,,,
 RF,SMILES,fabrication,calc_PCE,,,,,
 RF,BigSMILES,fabrication,calc_PCE,,,,,
 RF,SELFIES,fabrication,calc_PCE,,,,,
@@ -187,7 +187,7 @@ RF,AugSMILES,fabrication,calc_PCE,,,,,
 RF,BRICS,fabrication,calc_PCE,,,,,
 RF,Manual Fragments,fabrication,calc_PCE,,,,,
 RF,Augmented Manual Fragments,fabrication,calc_PCE,,,,,
-RF,"Fingerprints (r=3, bits=512)",fabrication,calc_PCE,,,,,
+RF,Fingerprints,fabrication,calc_PCE,,,,,
 BRT,SMILES,fabrication,calc_PCE,,,,,
 BRT,BigSMILES,fabrication,calc_PCE,,,,,
 BRT,SELFIES,fabrication,calc_PCE,,,,,
@@ -195,7 +195,7 @@ BRT,AugSMILES,fabrication,calc_PCE,,,,,
 BRT,BRICS,fabrication,calc_PCE,,,,,
 BRT,Manual Fragments,fabrication,calc_PCE,,,,,
 BRT,Augmented Manual Fragments,fabrication,calc_PCE,,,,,
-BRT,"Fingerprints (r=3, bits=512)",fabrication,calc_PCE,,,,,
+BRT,Fingerprints,fabrication,calc_PCE,,,,,
 SVM,SMILES,fabrication,calc_PCE,,,,,
 SVM,BigSMILES,fabrication,calc_PCE,,,,,
 SVM,SELFIES,fabrication,calc_PCE,,,,,
@@ -203,7 +203,7 @@ SVM,AugSMILES,fabrication,calc_PCE,,,,,
 SVM,BRICS,fabrication,calc_PCE,,,,,
 SVM,Manual Fragments,fabrication,calc_PCE,,,,,
 SVM,Augmented Manual Fragments,fabrication,calc_PCE,,,,,
-SVM,"Fingerprints (r=3, bits=512)",fabrication,calc_PCE,,,,,
+SVM,Fingerprints,fabrication,calc_PCE,,,,,
 NN,SMILES,fabrication,calc_PCE,,,,,
 NN,BigSMILES,fabrication,calc_PCE,,,,,
 NN,SELFIES,fabrication,calc_PCE,,,,,
@@ -211,7 +211,7 @@ NN,AugSMILES,fabrication,calc_PCE,,,,,
 NN,BRICS,fabrication,calc_PCE,,,,,
 NN,Manual Fragments,fabrication,calc_PCE,,,,,
 NN,Augmented Manual Fragments,fabrication,calc_PCE,,,,,
-NN,"Fingerprints (r=3, bits=512)",fabrication,calc_PCE,,,,,
+NN,Fingerprints,fabrication,calc_PCE,,,,,
 LSTM,SMILES,fabrication,calc_PCE,,,,,
 LSTM,BigSMILES,fabrication,calc_PCE,,,,,
 LSTM,SELFIES,fabrication,calc_PCE,,,,,
@@ -219,19 +219,24 @@ LSTM,AugSMILES,fabrication,calc_PCE,,,,,
 LSTM,BRICS,fabrication,calc_PCE,,,,,
 LSTM,Manual Fragments,fabrication,calc_PCE,,,,,
 LSTM,Augmented Manual Fragments,fabrication,calc_PCE,,,,,
-LSTM,"Fingerprints (r=3, bits=512)",fabrication,calc_PCE,,,,,
-RF,no_representation,electronic_only,FF,,,,,
-BRT,no_representation,electronic_only,FF,,,,,
-SVM,no_representation,electronic_only,FF,,,,,
-NN,no_representation,electronic_only,FF,,,,,
-LSTM,no_representation,electronic_only,FF,,,,,
-RF,no_representation,electronic_only,JSC,,,,,
-BRT,no_representation,electronic_only,JSC,,,,,
-SVM,no_representation,electronic_only,JSC,,,,,
-NN,no_representation,electronic_only,JSC,,,,,
-LSTM,no_representation,electronic_only,JSC,,,,,
-RF,no_representation,electronic_only,VOC,,,,,
-BRT,no_representation,electronic_only,VOC,,,,,
-SVM,no_representation,electronic_only,VOC,,,,,
-NN,no_representation,electronic_only,VOC,,,,,
-LSTM,no_representation,electronic_only,VOC,,,,,
+LSTM,Fingerprints,fabrication,calc_PCE,,,,,
+RF,Fingerprints,electronic_only,FF,,,,,
+BRT,Fingerprints,electronic_only,FF,,,,,
+SVM,Fingerprints,electronic_only,FF,,,,,
+NN,Fingerprints,electronic_only,FF,,,,,
+LSTM,Fingerprints,electronic_only,FF,,,,,
+RF,Fingerprints,electronic_only,JSC,,,,,
+BRT,Fingerprints,electronic_only,JSC,,,,,
+SVM,Fingerprints,electronic_only,JSC,,,,,
+NN,Fingerprints,electronic_only,JSC,,,,,
+LSTM,Fingerprints,electronic_only,JSC,,,,,
+RF,Fingerprints,electronic_only,VOC,,,,,
+BRT,Fingerprints,electronic_only,VOC,,,,,
+SVM,Fingerprints,electronic_only,VOC,,,,,
+NN,Fingerprints,electronic_only,VOC,,,,,
+LSTM,Fingerprints,electronic_only,VOC,,,,,
+RF,Fingerprints,device_solvent,calc_PCE,0.386831098,0.335496753,2.357470322,0.579642239,102
+RF,Fingerprints,fabrication,calc_PCE,0.420602074,0.193499891,2.280155571,0.613206524,127
+RF,Fingerprints,device,calc_PCE,0.37609628,0.352481286,2.36809845,0.589025217,102
+RF,Fingerprints,fabrication_solvent,calc_PCE,0.419457819,0.181160423,2.283299617,0.588876819,127
+RF,Fingerprints,fabrication_solvent_minus_active_layer,calc_PCE,0.480338241,0.092130588,2.635947224,0.1907257,170

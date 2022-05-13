@@ -12,7 +12,7 @@ PLOT_PATH = pkg_resources.resource_filename(
     "ml_for_opvs", "ML_models/sklearn/RF/OPV_Min/",
 )
 
-CURRENT_PATH = "PCE_none_opv_rf_feature_impt"
+CURRENT_PATH = "PCE_device_only_opv_rf_feature_impt"
 
 FEATURE_DIR = FEATURE_DIR + CURRENT_PATH + ".csv"
 
@@ -57,7 +57,8 @@ class PLOT_FEATURE:
         avg_df = pd.DataFrame.from_dict(avg_dict, orient="index")
         std_df = pd.DataFrame.from_dict(std_dict, orient="index")
 
-        avg_df.plot(yerr=std_df, kind="bar", ylabel="Importance")
+        ax = avg_df.plot(yerr=std_df, kind="bar", ylabel="Importance")
+
         plt.tight_layout()
         plt.savefig(plot_path)
 

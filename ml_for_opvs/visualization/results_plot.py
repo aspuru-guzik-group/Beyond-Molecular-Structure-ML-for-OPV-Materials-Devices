@@ -46,12 +46,12 @@ class PLOT_RESULTS:
             # Min paper
             avg_array.append(0.71)
             std_array.append(0)
-            xlabel.append("BRT_Fragments" + "\n" + "PCE_None")
+            xlabel.append("Min_BRT_Fragments" + "\n" + "PCE_None")
             num_of_data_array.append(565)
             # Saeki paper
             avg_array.append(0.85)
             std_array.append(0.02)
-            xlabel.append("RF_Fingerprints_PCE" + "\n" + "Material_Properties")
+            xlabel.append("Saeki_RF_Fingerprints_PCE" + "\n" + "Material_Properties")
             num_of_data_array.append(566)
         ylabel = stat
         stat_avg = stat + "_mean"
@@ -80,7 +80,7 @@ class PLOT_RESULTS:
                                 + feature_list[1]
                                 + "\n"
                                 + feature_list[2]
-                                + "_"
+                                + "\n"
                                 + feature_list[3]
                             )
             # 2 feature
@@ -100,7 +100,7 @@ class PLOT_RESULTS:
                                 + feature_list[1]
                                 + "\n"
                                 + feature_list[2]
-                                + "_"
+                                + "\n"
                                 + feature_list[3]
                             )
             # 3 feature
@@ -120,7 +120,7 @@ class PLOT_RESULTS:
                                 + feature_list[1]
                                 + "\n"
                                 + feature_list[2]
-                                + "_"
+                                + "\n"
                                 + feature_list[3]
                             )
             # 4 feature
@@ -140,7 +140,7 @@ class PLOT_RESULTS:
                                 + feature_list[1]
                                 + "\n"
                                 + feature_list[2]
-                                + "_"
+                                + "\n"
                                 + feature_list[3]
                             )
 
@@ -193,9 +193,9 @@ class PLOT_RESULTS:
         )
         ax1.set_ylabel(ylabel, color="blue")
         ax1.tick_params(axis="y", labelcolor="blue")
-        ax1.set_xticklabels(xlabel)
+        ax1.set_xticklabels(xlabel, fontsize=10)
         ax1.set_xticks(x_axis_positions)
-        ax1.bar_label(bar1, avg_array)
+        ax1.bar_label(bar1, avg_array, label_type="edge")
 
         ax2 = ax1.twinx()
         ax2.set_ylabel("number of datapoints", color="green")
@@ -206,14 +206,14 @@ class PLOT_RESULTS:
             color="green",
         )
         ax2.tick_params(axis="y", labelcolor="green")
-        ax2.bar_label(bar2, num_of_data_array)
+        ax2.bar_label(bar2, num_of_data_array, label_type="edge")
 
         plt.show()
 
 
 plot = PLOT_RESULTS(RESULTS_PATH)
 avg_array, std_array, xlabel, ylabel, num_of_data_array = plot.filter_results(
-    "RF", "Fingerprints (r=3, bits=512)", "electronic", None, "R"
+    "RF", "Fingerprints", None, "JSC", "R"
 )
 print(avg_array, std_array, xlabel, ylabel, num_of_data_array)
 plot.barplot(avg_array, std_array, xlabel, ylabel, num_of_data_array)
