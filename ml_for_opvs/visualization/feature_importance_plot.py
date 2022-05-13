@@ -12,7 +12,7 @@ PLOT_PATH = pkg_resources.resource_filename(
     "ml_for_opvs", "ML_models/sklearn/RF/OPV_Min/",
 )
 
-CURRENT_PATH = "PCE_device_solv_only_opv_rf_feature_impt"
+CURRENT_PATH = "PCE_none_opv_rf_feature_impt"
 
 FEATURE_DIR = FEATURE_DIR + CURRENT_PATH + ".csv"
 

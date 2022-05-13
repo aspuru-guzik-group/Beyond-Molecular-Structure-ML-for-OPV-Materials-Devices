@@ -213,7 +213,7 @@ class PLOT_RESULTS:
 
 plot = PLOT_RESULTS(RESULTS_PATH)
 avg_array, std_array, xlabel, ylabel, num_of_data_array = plot.filter_results(
-    "RF", None, None, "calc_PCE", "R"
+    "RF", "Fingerprints (r=3, bits=512)", "electronic", None, "R"
 )
 print(avg_array, std_array, xlabel, ylabel, num_of_data_array)
 plot.barplot(avg_array, std_array, xlabel, ylabel, num_of_data_array)

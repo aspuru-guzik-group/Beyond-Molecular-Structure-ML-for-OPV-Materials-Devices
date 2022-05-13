@@ -284,6 +284,31 @@ class Dataset:
                 tokenized_input[index].append(solv_hansen_disp[index])
                 tokenized_input[index].append(solv_hansen_hbond[index])
                 tokenized_input[index].append(solv_hansen_polar[index])
+            elif parameter == "fabrication_solvent_minus_active_layer":
+                # tokenize non-numerical variables
+                # for str (non-numerical) variables
+                dict_idx = len(token_dict)
+                solvent_add = self.data["solvent additive"]
+                for input in solvent_add:
+                    # unique solvent additives
+                    if input not in token_dict:
+                        token_dict[input] = dict_idx
+                        dict_idx += 1
+
+                tokenized_input[index].append(d_a_ratio[index])
+                tokenized_input[index].append(total_solids_conc[index])
+                tokenized_input[index].append(solvent_add[index])
+                tokenized_input[index].append(solvent_add_conc[index])
+                tokenized_input[index].append(annealing_temp[index])
+                tokenized_input[index].append(solv_bp[index])
+                tokenized_input[index].append(solv_mp[index])
+                tokenized_input[index].append(solv_density[index])
+                tokenized_input[index].append(solv_dielectric[index])
+                tokenized_input[index].append(solv_dipole[index])
+                tokenized_input[index].append(solv_logpow[index])
+                tokenized_input[index].append(solv_hansen_disp[index])
+                tokenized_input[index].append(solv_hansen_hbond[index])
+                tokenized_input[index].append(solv_hansen_polar[index])
             else:
                 return np.asarray(tokenized_input)
             index += 1

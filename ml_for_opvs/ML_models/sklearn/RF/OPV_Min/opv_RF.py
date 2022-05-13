@@ -16,6 +16,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.inspection import permutation_importance
 from skopt import BayesSearchCV
 from sklearn import preprocessing
+import shap
 
 from ml_for_opvs.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
 
@@ -204,9 +205,9 @@ unique_datatype = {
     "fingerprint": 1,
 }
 parameter_type = {
-    "none": 0,
+    "none": 1,
     "electronic": 0,
-    "electronic_only": 1,
+    "electronic_only": 0,
     "device": 0,
     "device_only": 0,
     "device_solvent": 0,
@@ -215,6 +216,7 @@ parameter_type = {
     "fabrication_only": 0,
     "fabrication_solvent": 0,
     "fabrication_solvent_only": 0,
+    "fabrication_solvent_minus_active_layer": 0,
 }
 target_type = {
     "PCE": 1,
@@ -244,14 +246,27 @@ for param in parameter_type:
         if dev_param == "none":
             SUMMARY_DIR = SUMMARY_DIR + "none_opv_rf_results.csv"
             FEATURE_DIR = FEATURE_DIR + "none_opv_rf_feature_impt.csv"
-            device_idx = 0
+            # feature_idx = np.arange(512)
+            device_idx = 512  # customize for each representation
         elif dev_param == "electronic":
             SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_rf_results.csv"
             FEATURE_DIR = FEATURE_DIR + "electronic_opv_rf_feature_impt.csv"
+            feature_idx = [
+                9,
+                10,
+                11,
+                12,
+            ]
             device_idx = 4
         elif dev_param == "electronic_only":
             SUMMARY_DIR = SUMMARY_DIR + "electronic_only_opv_rf_results.csv"
             FEATURE_DIR = FEATURE_DIR + "electronic_only_opv_rf_feature_impt.csv"
+            feature_idx = [
+                9,
+                10,
+                11,
+                12,
+            ]
             device_idx = 4
         elif dev_param == "device":
             SUMMARY_DIR = SUMMARY_DIR + "device_opv_rf_results.csv"
@@ -316,10 +331,28 @@ for param in parameter_type:
         elif dev_param == "fabrication":
             SUMMARY_DIR = SUMMARY_DIR + "fabrication_opv_rf_results.csv"
             FEATURE_DIR = FEATURE_DIR + "fabrication_opv_rf_feature_impt.csv"
+            feature_idx = [
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+            ]
             device_idx = 7
         elif dev_param == "fabrication_only":
             SUMMARY_DIR = SUMMARY_DIR + "fabrication_only_opv_rf_results.csv"
             FEATURE_DIR = FEATURE_DIR + "fabrication_only_opv_rf_feature_impt.csv"
+            feature_idx = [
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+            ]
             device_idx = 7
         elif dev_param == "fabrication_solvent":
             SUMMARY_DIR = SUMMARY_DIR + "fabrication_solv_opv_rf_results.csv"
@@ -365,9 +398,36 @@ for param in parameter_type:
                 37,
             ]
             device_idx = 15
+        elif dev_param == "fabrication_solvent_minus_active_layer":
+            SUMMARY_DIR = (
+                SUMMARY_DIR + "fabrication_solv_minus_active_opv_rf_results.csv"
+            )
+            FEATURE_DIR = (
+                FEATURE_DIR + "fabrication_solv_minus_active_opv_rf_feature_impt.csv"
+            )
+            # for fabrication_solvent
+            feature_idx = [
+                13,
+                15,
+                16,
+                17,
+                19,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+            ]
+            device_idx = 14
 
-# feature = True
-feature = False
+feature = True
+# feature = False
+# shapley = True
+shapley = False
 
 feature_impt_df = pd.DataFrame()
 
@@ -576,20 +636,27 @@ for train_ix, test_ix in cv_outer.split(x):
     # NOTE: set labels for each feature!
     if feature:
         dataset_columns = list(dataset.data.columns)
-        # col_idx = 0
-        # dataset_columns_dict = {}
-        # for col in dataset_columns:
-        #     dataset_columns_dict[col] = col_idx
-        #     col_idx += 1
+        col_idx = 0
+        dataset_columns_dict = {}
+        for col in dataset_columns:
+            dataset_columns_dict[col] = col_idx
+            col_idx += 1
+        print(dataset_columns_dict)
+
         feature_columns = []
-        for idx in feature_idx:
-            feature_columns.append(dataset_columns[idx])
+        # for idx in feature_idx:
+        #     feature_columns.append(dataset_columns[idx])
         importances = best_model.feature_importances_
         importances = importances[len(importances) - device_idx : len(importances)]
-        forest_importances = pd.DataFrame(importances, index=feature_columns)
+        forest_importances = pd.DataFrame(importances)
         feature_impt_df = pd.concat(
             [feature_impt_df, forest_importances], axis=1, ignore_index=False,
         )
+    if shapley:
+        explainer = shap.TreeExplainer(best_model)
+        shap_values = explainer.shap_values(x_test)
+        print(shap_values)
+        # shap.summary_plot(shap_values, x_test)
 
     # evaluate model on the hold out dataset
     yhat = best_model.predict(x_test)
@@ -629,6 +696,9 @@ summary_df.to_csv(SUMMARY_DIR, index=False)
 if feature:
     # feature importance summary
     if dev_param in [
+        "none",
+        "electronic",
+        "electronic_only",
         "device",
         "device_solvent",
         "fabrication",
@@ -637,6 +707,7 @@ if feature:
         "device_solvent_only",
         "fabrication_only",
         "fabrication_solvent_only",
+        "fabrication_solvent_minus_active_layer",
     ]:
         feature_impt_df.to_csv(FEATURE_DIR)
 
