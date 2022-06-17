@@ -104,6 +104,7 @@ class Tokenizer:
         * usually for test set
         """
         tokenized_array = copy.copy(input_series)
+        tokenized_array = list(tokenized_array)
         # Dictionaries to store the token to index mappings and vice versa
         token2idx = {j: i for i, j in enumerate(dictionary)}
         for i, reaction in enumerate(input_series):

@@ -8,6 +8,22 @@ MASTER_ML_DATA = pkg_resources.resource_filename(
 MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
 )
+# All postprocessing data too!
+AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
+)
+
+BRICS_MASTER_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+)
+
+MANUAL_MASTER_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+)
+
+FP_MASTER_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+)
 
 
 class Anomaly:
@@ -46,9 +62,39 @@ class Anomaly:
 
         self.data.to_csv(master_data_path, index=False)
 
+    def correct_anomaly(self, master_data_path):
+        """
+        Function that standardizes the labels!
+        Args:
+            master_data_path: path back to main opv file for ML training/plotting
+        Returns:
+            .csv file with labels corrected from main opv file
+        """
+        for index, row in self.data.iterrows():
+            if self.data.at[index, "solvent"] == "DCB":
+                self.data.at[index, "solvent"] = "o-DCB"
+            if self.data.at[index, "solvent"] == "CF:DCB (80:20)":
+                self.data.at[index, "solvent"] = "o-DCB:CF (4:1)"
+            if self.data.at[index, "hole contact layer"] == "MoO3":
+                self.data.at[index, "hole contact layer"] = "MoOx"
 
-anomaly = Anomaly(MASTER_ML_DATA)
-anomaly.remove_anomaly(MASTER_ML_DATA)
+        self.data.to_csv(master_data_path, index=False)
 
-anomaly = Anomaly(MASTER_ML_DATA_PLOT)
-anomaly.remove_anomaly(MASTER_ML_DATA_PLOT)
+
+# anomaly = Anomaly(MASTER_ML_DATA)
+# anomaly.remove_anomaly(MASTER_ML_DATA)
+
+# anomaly = Anomaly(MASTER_ML_DATA_PLOT)
+# anomaly.remove_anomaly(MASTER_ML_DATA_PLOT)
+
+# anomaly = Anomaly(AUG_SMI_MASTER_DATA)
+# anomaly.remove_anomaly(AUG_SMI_MASTER_DATA)
+
+# anomaly = Anomaly(BRICS_MASTER_DATA)
+# anomaly.remove_anomaly(BRICS_MASTER_DATA)
+
+# anomaly = Anomaly(MANUAL_MASTER_DATA)
+# anomaly.remove_anomaly(MANUAL_MASTER_DATA)
+
+# anomaly = Anomaly(FP_MASTER_DATA)
+# anomaly.remove_anomaly(FP_MASTER_DATA)

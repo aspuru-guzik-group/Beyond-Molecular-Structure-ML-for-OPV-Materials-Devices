@@ -26,6 +26,7 @@ DONOR_ACCEPTOR_PATH = pkg_resources.resource_filename(
     "ml_for_opvs", "data/exploration/OPV_Min/donor_acceptor_heatmap.png"
 )
 
+
 class Distribution:
     """
     Class that contains functions to determine the distribution of each variable in the dataset.
@@ -57,7 +58,7 @@ class Distribution:
         print(columns_dict)
         # select which columns you want to plot in the histogram
         column_idx_first = 9
-        column_idx_last = 28 + 1
+        column_idx_last = 37 + 1
 
         # prepares the correct number of (x,y) subplots
         num_columns = column_idx_last - column_idx_first
@@ -126,7 +127,10 @@ class Distribution:
         """
         unique_x_y_dict = {}
         for index, row in self.data.iterrows():
-            if str(self.data.at[index, x]) != "nan" and str(self.data.at[index, y]) != "nan":
+            if (
+                str(self.data.at[index, x]) != "nan"
+                and str(self.data.at[index, y]) != "nan"
+            ):
                 if (
                     self.data.at[index, x],
                     self.data.at[index, y],
@@ -152,7 +156,7 @@ class Distribution:
         unique_x = list(unique_x)
         unique_y = list(unique_y)
 
-        heatmap_array = np.zeros((len(unique_y),len(unique_x)))
+        heatmap_array = np.zeros((len(unique_y), len(unique_x)))
         for x_y in unique_x_y_dict:
             x_idx = unique_x.index(x_y[0])
             y_idx = unique_y.index(x_y[1])
@@ -185,13 +189,15 @@ class Distribution:
         # Create colorbar
         cbar = ax.figure.colorbar(im, ax=ax, shrink=0.35)
         cbar.ax.set_ylabel("Frequency", rotation=-90, va="bottom")
-        
-        ax.set_title("Heatmap of {} and {} Pair Frequency".format(x,y)) 
+
+        ax.set_title("Heatmap of {} and {} Pair Frequency".format(x, y))
         fig.tight_layout()
-        plt.savefig(x_y_path)    
+        plt.savefig(x_y_path)
+
 
 dist = Distribution(MASTER_ML_DATA_PLOT)
 
-# dist.histogram()
+dist.histogram()
 
-dist.x_y_heatmap('Donor','Acceptor',DONOR_ACCEPTOR_PATH)
+# dist.x_y_heatmap("Donor", "Acceptor", DONOR_ACCEPTOR_PATH)
+

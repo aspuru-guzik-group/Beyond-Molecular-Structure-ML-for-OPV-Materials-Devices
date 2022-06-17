@@ -393,6 +393,15 @@ class manual_frag:
             "Voc (V)",
             "Jsc (mA cm^-2)",
             "FF (%)",
+            "BP",
+            "MP",
+            "Density",
+            "Dielectric",
+            "Dipole",
+            "log Pow",
+            "Hansen Disp",
+            "Hansen H-Bond",
+            "Hansen Polar",
         ]
         manual_df = pd.DataFrame(columns=headers)
 
@@ -456,6 +465,15 @@ class manual_frag:
                         "Voc (V)": row["Voc (V)"],
                         "Jsc (mA cm^-2)": row["Jsc (mA cm^-2)"],
                         "FF (%)": row["FF (%)"],
+                        "BP": row["BP"],
+                        "MP": row["MP"],
+                        "Density": row["Density"],
+                        "Dielectric": row["Dielectric"],
+                        "Dipole": row["Dipole"],
+                        "log Pow": row["log Pow"],
+                        "Hansen Disp": row["Hansen Disp"],
+                        "Hansen H-Bond": row["Hansen H-Bond"],
+                        "Hansen Polar": row["Hansen Polar"],
                     },
                     ignore_index=True,
                 )
@@ -664,4 +682,5 @@ def cli_main():
 
 
 if __name__ == "__main__":
-    cli_main()
+    # cli_main()
+    pass

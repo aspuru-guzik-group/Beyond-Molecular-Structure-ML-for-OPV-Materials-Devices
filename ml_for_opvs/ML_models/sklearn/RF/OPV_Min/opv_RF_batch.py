@@ -47,6 +47,11 @@ SUMMARY_DIR = pkg_resources.resource_filename(
     "ml_for_opvs", "ML_models/sklearn/RF/OPV_Min/"
 )
 
+FEATURE_DIR = pkg_resources.resource_filename(
+    "ml_for_opvs", "ML_models/sklearn/RF/OPV_Min/"
+)
+
+
 # For Manual Fragments!
 MANUAL_DONOR_CSV = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
@@ -56,13 +61,14 @@ MANUAL_ACCEPTOR_CSV = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
 )
 
+
 np.set_printoptions(precision=3)
 SEED_VAL = 4
 
 
 def custom_scorer(y, yhat):
-    corr_coef = np.corrcoef(y, yhat)[0, 1]
-    return corr_coef
+    rmse = np.sqrt(mean_squared_error(y, yhat))
+    return rmse
 
 
 def augment_smi_in_loop(x, y, num_of_augment, swap: bool):
@@ -188,13 +194,14 @@ def augment_donor_frags_in_loop(x, y: float, device_idx, swap: bool):
 
 
 # create scoring function
-r_score = make_scorer(custom_scorer, greater_is_better=True)
+r_score = make_scorer(custom_scorer, greater_is_better=False)
 
 # log results
 summary_df = pd.DataFrame(
     columns=["Datatype", "R_mean", "R_std", "RMSE_mean", "RMSE_std", "num_of_data"]
 )
 
+# ALL THE PARAMETERS!!!
 # run batch of conditions
 unique_datatype = {
     "smiles": 0,
@@ -207,16 +214,22 @@ unique_datatype = {
     "fingerprint": 0,
 }
 parameter_type = {
-    "none": 0,
+    "none": 1,
     "electronic": 0,
     "electronic_only": 0,
-    "device": 1,
+    "device": 0,
+    "device_only": 0,
+    "device_solvent": 0,
+    "device_solvent_only": 0,
     "fabrication": 0,
+    "fabrication_only": 0,
+    "fabrication_solvent": 0,
+    "fabrication_solvent_only": 0,
 }
 target_type = {
-    "PCE": 0,
+    "PCE": 1,
     "FF": 0,
-    "JSC": 1,
+    "JSC": 0,
     "VOC": 0,
 }
 for target in target_type:
@@ -224,31 +237,149 @@ for target in target_type:
         target_predict = target
         if target_predict == "PCE":
             SUMMARY_DIR = SUMMARY_DIR + "PCE_"
+            FEATURE_DIR = FEATURE_DIR + "PCE_"
         elif target_predict == "FF":
             SUMMARY_DIR = SUMMARY_DIR + "FF_"
+            FEATURE_DIR = FEATURE_DIR + "FF_"
         elif target_predict == "JSC":
             SUMMARY_DIR = SUMMARY_DIR + "JSC_"
+            FEATURE_DIR = FEATURE_DIR + "JSC_"
         elif target_predict == "VOC":
             SUMMARY_DIR = SUMMARY_DIR + "VOC_"
+            FEATURE_DIR = FEATURE_DIR + "VOC_"
 
 for param in parameter_type:
     if parameter_type[param] == 1:
         dev_param = param
         if dev_param == "none":
             SUMMARY_DIR = SUMMARY_DIR + "none_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "none_opv_rf_feature_impt.csv"
             device_idx = 0
         elif dev_param == "electronic":
             SUMMARY_DIR = SUMMARY_DIR + "electronic_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "electronic_opv_rf_feature_impt.csv"
             device_idx = 4
         elif dev_param == "electronic_only":
             SUMMARY_DIR = SUMMARY_DIR + "electronic_only_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "electronic_only_opv_rf_feature_impt.csv"
             device_idx = 4
         elif dev_param == "device":
             SUMMARY_DIR = SUMMARY_DIR + "device_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "device_opv_rf_feature_impt.csv"
             device_idx = 11
+        elif dev_param == "device_only":
+            SUMMARY_DIR = SUMMARY_DIR + "device_only_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "device_only_opv_rf_feature_impt.csv"
+            device_idx = 11
+        elif dev_param == "device_solvent":
+            SUMMARY_DIR = SUMMARY_DIR + "device_solv_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "device_solv_opv_rf_feature_impt.csv"
+            # for device_solvent
+            feature_idx = [
+                13,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+            ]
+            device_idx = 19
+        elif dev_param == "device_solvent_only":
+            SUMMARY_DIR = SUMMARY_DIR + "device_solv_only_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "device_solv_only_opv_rf_feature_impt.csv"
+            # for device_solvent
+            feature_idx = [
+                13,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+            ]
+            device_idx = 19
         elif dev_param == "fabrication":
             SUMMARY_DIR = SUMMARY_DIR + "fabrication_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "fabrication_opv_rf_feature_impt.csv"
             device_idx = 7
+        elif dev_param == "fabrication_only":
+            SUMMARY_DIR = SUMMARY_DIR + "fabrication_only_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "fabrication_only_opv_rf_feature_impt.csv"
+            device_idx = 7
+        elif dev_param == "fabrication_solvent":
+            SUMMARY_DIR = SUMMARY_DIR + "fabrication_solv_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "fabrication_solv_opv_rf_feature_impt.csv"
+            # for fabrication_solvent
+            feature_idx = [
+                13,
+                15,
+                16,
+                17,
+                18,
+                19,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+            ]
+            device_idx = 15
+        elif dev_param == "fabrication_solvent_only":
+            SUMMARY_DIR = SUMMARY_DIR + "fabrication_solv_only_opv_rf_results.csv"
+            FEATURE_DIR = FEATURE_DIR + "fabrication_solv_only_opv_rf_feature_impt.csv"
+            # for fabrication_solvent
+            feature_idx = [
+                13,
+                15,
+                16,
+                17,
+                18,
+                19,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+            ]
+            device_idx = 15
+
+# feature = True
+feature = False
+
+feature_impt_df = pd.DataFrame()
 
 
 for i in range(len(unique_datatype)):
@@ -279,36 +410,38 @@ for i in range(len(unique_datatype)):
     dataset = Dataset()
     if unique_datatype["smiles"] == 1:
         dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "SMILES"
     elif unique_datatype["bigsmiles"] == 1:
         dataset.prepare_data(TRAIN_MASTER_DATA, "bigsmi")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "BigSMILES"
     elif unique_datatype["selfies"] == 1:
         dataset.prepare_data(TRAIN_MASTER_DATA, "selfies")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "SELFIES"
     elif unique_datatype["aug_smiles"] == 1:
         dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
-        x, y, token_dict = dataset.setup_aug_smi(dev_param, target_predict)
+        x, y, max_target, min_target, token_dict = dataset.setup_aug_smi(
+            dev_param, target_predict
+        )
         num_of_augment = 4  # 1+4x amount of data
         datatype = "AUG_SMILES"
     elif unique_datatype["brics"] == 1:
         dataset.prepare_data(BRICS_MASTER_DATA, "brics")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "BRICS"
     elif unique_datatype["manual"] == 1:
         dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "MANUAL"
     elif unique_datatype["aug_manual"] == 1:
         dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "AUG_MANUAL"
     elif unique_datatype["fingerprint"] == 1:
         dataset.prepare_data(FP_MASTER_DATA, "fp")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "FINGERPRINT"
         print("RADIUS: " + str(radius) + " NBITS: " + str(nbits))
 
@@ -346,13 +479,12 @@ for i in range(len(unique_datatype)):
             aug_y_train = []
             x_aug_dev_list = []
             for x_, y_ in zip(x_train, y_train):
-                print(x_)
                 if dev_param == "none":
-                    x_aug, y_aug = augment_smi_in_loop(x_, y_, num_of_augment, True)
+                    x_aug, y_aug = augment_smi_in_loop(x_[0], y_, num_of_augment, True)
                 else:
                     x_list = list(x_)
                     x_aug, y_aug = augment_smi_in_loop(
-                        str(x_list[0]), y_, num_of_augment, True
+                        x_list[0], y_, num_of_augment, True
                     )
                     for x_a in x_aug:
                         x_aug_dev = x_list[1:]
@@ -369,7 +501,6 @@ for i in range(len(unique_datatype)):
             ) = Tokenizer().tokenize_data(aug_x_train)
 
             if dev_param == "none":
-                print("YES NONE")
                 tokenized_test, max_test_seq_length = Tokenizer().tokenize_from_dict(
                     x_test, max_seq_length, input_dict
                 )
@@ -467,7 +598,7 @@ for i in range(len(unique_datatype)):
             refit=True,
             n_jobs=-1,
             verbose=0,
-            n_iter=2,
+            n_iter=25,
         )
         # execute search
         result = search.fit(x_train, y_train)
@@ -478,23 +609,29 @@ for i in range(len(unique_datatype)):
         # get feature importances of best performing model
         # NOTE: set cutoff threshold for importance OR set X most important features
         # NOTE: set labels for each feature!
-        # NOTE: we should use permutation feature importance
-        # importances = best_model.feature_importances_
-        # importances = importances[len(importances) - 7 : len(importances)]
-        # std = np.std(
-        #     [tree.feature_importances_ for tree in best_model.estimators_], axis=0
-        # )
-        # std = std[len(importances) - 7 : len(importances)]
-        # forest_importances = pd.Series(importances)
-        # fig, ax = plt.subplots()
-        # forest_importances.plot.bar(yerr=std, ax=ax)
-        # ax.set_title("Feature importances using MDI")
-        # ax.set_ylabel("Mean decrease in impurity")
-        # fig.tight_layout()
-        # plt.show()
+        if feature:
+            dataset_columns = list(dataset.data.columns)
+            # col_idx = 0
+            # dataset_columns_dict = {}
+            # for col in dataset_columns:
+            #     dataset_columns_dict[col] = col_idx
+            #     col_idx += 1
+            feature_columns = []
+            for idx in feature_idx:
+                feature_columns.append(dataset_columns[idx])
+            importances = best_model.feature_importances_
+            importances = importances[len(importances) - device_idx : len(importances)]
+            forest_importances = pd.DataFrame(importances, index=feature_columns)
+            feature_impt_df = pd.concat(
+                [feature_impt_df, forest_importances], axis=1, ignore_index=False,
+            )
 
         # evaluate model on the hold out dataset
         yhat = best_model.predict(x_test)
+        # reverse min-max scaling
+        yhat = (yhat * (max_target - min_target)) + min_target
+        y_test = (y_test * (max_target - min_target)) + min_target
+
         # evaluate the model
         corr_coef = np.corrcoef(y_test, yhat)[0, 1]
         rmse = np.sqrt(mean_squared_error(y_test, yhat))
@@ -524,16 +661,17 @@ for i in range(len(unique_datatype)):
     summary_df = pd.concat([summary_df, summary_series], ignore_index=True,)
 summary_df.to_csv(SUMMARY_DIR, index=False)
 
-# add R score from cross-validation results
-# ablation_df = pd.read_csv(ABLATION_STUDY)
-# results_list = [
-#     "OPV",
-#     "RF",
-#     "sklearn",
-#     "Manual Fragments",
-#     mean(outer_results),
-#     std(outer_results),
-# ]
-# ablation_df.loc[len(ablation_df.index) + 1] = results_list
-# ablation_df.to_csv(ABLATION_STUDY, index=False)
+if feature:
+    # feature importance summary
+    if dev_param in [
+        "device",
+        "device_solvent",
+        "fabrication",
+        "fabrication_solvent",
+        "device_only",
+        "device_solvent_only",
+        "fabrication_only",
+        "fabrication_solvent_only",
+    ]:
+        feature_impt_df.to_csv(FEATURE_DIR)
 

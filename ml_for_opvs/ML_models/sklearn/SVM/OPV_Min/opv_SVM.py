@@ -58,8 +58,8 @@ SEED_VAL = 4
 
 
 def custom_scorer(y, yhat):
-    corr_coef = np.corrcoef(y, yhat)[0, 1]
-    return corr_coef
+    rmse = np.sqrt(mean_squared_error(y, yhat))
+    return rmse
 
 
 def augment_smi_in_loop(x, y, num_of_augment, swap: bool):
@@ -185,7 +185,7 @@ def augment_donor_frags_in_loop(x, y: float, device_idx, swap: bool):
 
 
 # create scoring function
-r_score = make_scorer(custom_scorer, greater_is_better=True)
+r_score = make_scorer(custom_scorer, greater_is_better=False)
 
 # log results
 summary_df = pd.DataFrame(
@@ -251,15 +251,15 @@ for param in parameter_type:
 dataset = Dataset()
 if unique_datatype["smiles"] == 1:
     dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
-    x, y = dataset.setup(dev_param, target_predict)
+    x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
     datatype = "SMILES"
 elif unique_datatype["bigsmiles"] == 1:
     dataset.prepare_data(TRAIN_MASTER_DATA, "bigsmi")
-    x, y = dataset.setup(dev_param, target_predict)
+    x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
     datatype = "BigSMILES"
 elif unique_datatype["selfies"] == 1:
     dataset.prepare_data(TRAIN_MASTER_DATA, "selfies")
-    x, y = dataset.setup(dev_param, target_predict)
+    x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
     datatype = "SELFIES"
 elif unique_datatype["aug_smiles"] == 1:
     dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
@@ -268,19 +268,19 @@ elif unique_datatype["aug_smiles"] == 1:
     datatype = "AUG_SMILES"
 elif unique_datatype["brics"] == 1:
     dataset.prepare_data(BRICS_MASTER_DATA, "brics")
-    x, y = dataset.setup(dev_param, target_predict)
+    x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
     datatype = "BRICS"
 elif unique_datatype["manual"] == 1:
     dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
-    x, y = dataset.setup(dev_param, target_predict)
+    x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
     datatype = "MANUAL"
 elif unique_datatype["aug_manual"] == 1:
     dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
-    x, y = dataset.setup(dev_param, target_predict)
+    x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
     datatype = "AUG_MANUAL"
 elif unique_datatype["fingerprint"] == 1:
     dataset.prepare_data(FP_MASTER_DATA, "fp")
-    x, y = dataset.setup(dev_param, target_predict)
+    x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
     datatype = "FINGERPRINT"
 
 print(datatype)  # Ensures we know which model is running
@@ -427,7 +427,7 @@ for train_ix, test_ix in cv_outer.split(x):
         n_iter=25,
         cv=cv_inner,
         n_jobs=-1,
-        verbose=0,
+        verbose=2,
     )
     # execute search
     result = search.fit(x_train, y_train)
@@ -435,8 +435,9 @@ for train_ix, test_ix in cv_outer.split(x):
     best_model = result.best_estimator_
     # evaluate model on the hold out dataset
     yhat = best_model.predict(x_test)
-    print("Y_TEST: ", y_test)
-    print("Y_HAT: ", yhat)
+    # reverse min-max scaling
+    yhat = (yhat * (max_target - min_target)) + min_target
+    y_test = (y_test * (max_target - min_target)) + min_target
     # evaluate the model
     corr_coef = np.corrcoef(y_test, yhat)[0, 1]
     rmse = np.sqrt(mean_squared_error(y_test, yhat))

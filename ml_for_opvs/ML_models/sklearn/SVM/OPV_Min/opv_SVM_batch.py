@@ -58,8 +58,8 @@ SEED_VAL = 4
 
 
 def custom_scorer(y, yhat):
-    corr_coef = np.corrcoef(y, yhat)[0, 1]
-    return corr_coef
+    rmse = np.sqrt(mean_squared_error(y, yhat))
+    return rmse
 
 
 def augment_smi_in_loop(x, y, num_of_augment, swap: bool):
@@ -185,7 +185,7 @@ def augment_donor_frags_in_loop(x, y: float, device_idx, swap: bool):
 
 
 # create scoring function
-r_score = make_scorer(custom_scorer, greater_is_better=True)
+r_score = make_scorer(custom_scorer, greater_is_better=False)
 
 # log results
 summary_df = pd.DataFrame(
@@ -204,16 +204,16 @@ unique_datatype = {
     "fingerprint": 0,
 }
 parameter_type = {
-    "none": 0,
+    "none": 1,
     "electronic": 0,
     "electronic_only": 0,
-    "device": 1,
+    "device": 0,
     "fabrication": 0,
 }
 target_type = {
-    "PCE": 0,
+    "PCE": 1,
     "FF": 0,
-    "JSC": 1,
+    "JSC": 0,
     "VOC": 0,
 }
 for target in target_type:
@@ -273,36 +273,38 @@ for i in range(len(unique_datatype)):
     dataset = Dataset()
     if unique_datatype["smiles"] == 1:
         dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "SMILES"
     elif unique_datatype["bigsmiles"] == 1:
         dataset.prepare_data(TRAIN_MASTER_DATA, "bigsmi")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "BigSMILES"
     elif unique_datatype["selfies"] == 1:
         dataset.prepare_data(TRAIN_MASTER_DATA, "selfies")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "SELFIES"
     elif unique_datatype["aug_smiles"] == 1:
         dataset.prepare_data(TRAIN_MASTER_DATA, "smi")
-        x, y, token_dict = dataset.setup_aug_smi(dev_param, target_predict)
+        x, y, max_target, min_target, token_dict = dataset.setup_aug_smi(
+            dev_param, target_predict
+        )
         num_of_augment = 4  # 1+4x amount of data
         datatype = "AUG_SMILES"
     elif unique_datatype["brics"] == 1:
         dataset.prepare_data(BRICS_MASTER_DATA, "brics")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "BRICS"
     elif unique_datatype["manual"] == 1:
         dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "MANUAL"
     elif unique_datatype["aug_manual"] == 1:
         dataset.prepare_data(MANUAL_MASTER_DATA, "manual")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "AUG_MANUAL"
     elif unique_datatype["fingerprint"] == 1:
         dataset.prepare_data(FP_MASTER_DATA, "fp")
-        x, y = dataset.setup(dev_param, target_predict)
+        x, y, max_target, min_target = dataset.setup(dev_param, target_predict)
         datatype = "FINGERPRINT"
         print("RADIUS: " + str(radius) + " NBITS: " + str(nbits))
 
@@ -340,13 +342,12 @@ for i in range(len(unique_datatype)):
             aug_y_train = []
             x_aug_dev_list = []
             for x_, y_ in zip(x_train, y_train):
-                print(x_)
                 if dev_param == "none":
-                    x_aug, y_aug = augment_smi_in_loop(x_, y_, num_of_augment, True)
+                    x_aug, y_aug = augment_smi_in_loop(x_[0], y_, num_of_augment, True)
                 else:
                     x_list = list(x_)
                     x_aug, y_aug = augment_smi_in_loop(
-                        str(x_list[0]), y_, num_of_augment, True
+                        x_list[0], y_, num_of_augment, True
                     )
                     for x_a in x_aug:
                         x_aug_dev = x_list[1:]
@@ -363,7 +364,6 @@ for i in range(len(unique_datatype)):
             ) = Tokenizer().tokenize_data(aug_x_train)
 
             if dev_param == "none":
-                print("YES NONE")
                 tokenized_test, max_test_seq_length = Tokenizer().tokenize_from_dict(
                     x_test, max_seq_length, input_dict
                 )
@@ -460,6 +460,9 @@ for i in range(len(unique_datatype)):
         best_model = result.best_estimator_
         # evaluate model on the hold out dataset
         yhat = best_model.predict(x_test)
+        # reverse min-max scaling
+        yhat = (yhat * (max_target - min_target)) + min_target
+        y_test = (y_test * (max_target - min_target)) + min_target
         print("Y_TEST: ", y_test)
         print("Y_HAT: ", yhat)
         # evaluate the model
