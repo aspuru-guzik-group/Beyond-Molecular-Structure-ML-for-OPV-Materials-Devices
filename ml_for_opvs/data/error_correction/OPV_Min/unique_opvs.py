@@ -3,7 +3,7 @@ from typing import List
 import pkg_resources
 import pandas as pd
 
-from ml_for_opvs.data.preprocess.OPV_Min.clean_donors_acceptors import (
+from ml_for_opvs.data.archived.clean_donors_acceptors import (
     DonorClean,
     AcceptorClean,
 )
