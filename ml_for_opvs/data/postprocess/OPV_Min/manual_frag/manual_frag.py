@@ -1,3 +1,4 @@
+from doctest import master
 from rdkit import Chem
 import rdkit
 from rdkit.Chem import Draw, rdchem
@@ -21,11 +22,11 @@ IMG_PATH = pkg_resources.resource_filename(
 )
 
 FRAG_DONOR_DIR = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.json"
 )
 
 FRAG_ACCEPTOR_DIR = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
+    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.json"
 )
 
 # For Manual Fragments!
@@ -47,7 +48,7 @@ OPV_DATA = pkg_resources.resource_filename(
 )
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv",
+    "ml_for_opvs", "data/postprocess/OPV_Min/master_ml_for_opvs_from_min.csv",
 )
 
 
@@ -110,7 +111,7 @@ class manual_frag:
 
         return smi
 
-    def fragmenter(self, smi: str, mol_type: str):
+    def fragmenter(smi: str, mol_type: str):
         """
         Function that asks user how to fragment molecule
 
@@ -300,8 +301,8 @@ class manual_frag:
         acceptor_frag["SMILES"] = self.acceptor_data["SMILES"]
         acceptor_frag["Fragments"] = " "
 
-        donor_frag.to_csv(donor_frag_dir, index=False)
-        acceptor_frag.to_csv(acceptor_frag_dir, index=False)
+        donor_frag.to_json(donor_frag_dir)
+        acceptor_frag.to_json(acceptor_frag_dir)
 
     def return_frag_dict(self):
         """
@@ -335,313 +336,198 @@ class manual_frag:
 
         return frag_dict
 
-    def tokenize_frag(self, list_of_frag, frag_dict, max_seq_length):
-        """
-        Tokenizes input list of fragment from given dictionary
-        * Assumes frag_dict explains all of list_of_frig
 
-        Args:
-            list_of_frag: list of all the fragments for tokenization
-            frag_dict: dictionary of unique fragments from donor and acceptor molecules
-            max_seq_length: the largest number of fragments for one molecule
-        """
-        tokenized_list = []
-        # Add pre-padding
-        num_of_pad = max_seq_length - len(list_of_frag)
-        for i in range(num_of_pad):
-            tokenized_list.append(0)
+def tokenize_frag(list_of_frag, frag_dict, max_seq_length):
+    """
+    Tokenizes input list of fragment from given dictionary
+    * Assumes frag_dict explains all of list_of_frig
 
-        for frag in list_of_frag:
-            tokenized_list.append(frag_dict[frag])
+    Args:
+        list_of_frag: list of all the fragments for tokenization
+        frag_dict: dictionary of unique fragments from donor and acceptor molecules
+        max_seq_length: the largest number of fragments for one molecule
+    """
+    tokenized_list = []
+    # Add pre-padding
+    num_of_pad = max_seq_length - len(list_of_frag)
+    for i in range(num_of_pad):
+        tokenized_list.append(0)
 
-        return tokenized_list
+    for frag in list_of_frag:
+        tokenized_list.append(frag_dict[frag])
 
-    def create_manual_csv(self, frag_dict, master_manual_path):
-        """
-        Creates master data file for manual frags
+    return tokenized_list
 
-        Args:
-            frag_dict: dictionary of unique fragments from donor and acceptor molecules
-            master_manual_path: path to master .csv file for training on manual fragments
-        """
-        headers = [
-            "Donor",
-            "Donor_SMILES",
-            "Acceptor",
-            "Acceptor_SMILES",
-            "DA_manual_tokenized",
-            "AD_manual_tokenized",
-            "DA_manual_tokenized_aug",
-            "AD_manual_tokenized_aug",
-            "HOMO_D (eV)",
-            "LUMO_D (eV)",
-            "HOMO_A (eV)",
-            "LUMO_A (eV)",
-            "D:A ratio (m/m)",
-            "solvent",
-            "total solids conc. (mg/mL)",
-            "solvent additive",
-            "solvent additive conc. (%v/v)",
-            "active layer thickness (nm)",
-            "annealing temperature",
-            "hole contact layer",
-            "electron contact layer",
-            "hole mobility blend (cm^2 V^-1 s^-1)",
-            "electron mobility blend (cm^2 V^-1 s^-1)",
-            "PCE (%)",
-            "calc_PCE (%)",
-            "Voc (V)",
-            "Jsc (mA cm^-2)",
-            "FF (%)",
-            "BP",
-            "MP",
-            "Density",
-            "Dielectric",
-            "Dipole",
-            "log Pow",
-            "Hansen Disp",
-            "Hansen H-Bond",
-            "Hansen Polar",
+def create_manual_csv(donor_data_path, acceptor_data_path, opv_data_path, master_data_path, frag_dict, master_manual_path):
+    """
+    Creates master data file for manual frags
+
+    Args:
+        frag_dict: dictionary of unique fragments from donor and acceptor molecules
+        master_manual_path: path to master .csv file for training on manual fragments
+    """
+    donor_data = pd.read_csv(donor_data_path)
+    acceptor_data = pd.read_csv(acceptor_data_path)
+    opv_data = pd.read_csv(opv_data_path)
+    manual_df = pd.read_csv(master_data_path)
+
+    donor_avail = list(donor_data["Label"])
+    acceptor_avail = list(acceptor_data["Label"])
+    # iterate through data_from_min.csv for donor-acceptor pairs
+    for index, row in opv_data.iterrows():
+        # only keep the rows with available donor and acceptor molecules from clean donors and acceptors
+        if (row["Donor"] in donor_avail) and (row["Acceptor"] in acceptor_avail):
+            # get SMILES of donor and acceptor
+            donor_row = donor_data.loc[
+                donor_data["Label"] == row["Donor"]
+            ]
+            donor_smile = donor_row["SMILES"].values[0]
+            donor_big_smi = donor_row["Donor_BigSMILES"].values[0]
+            acceptor_row = acceptor_data.loc[
+                acceptor_data["Label"] == row["Acceptor"]
+            ]
+            acceptor_smile = acceptor_row["SMILES"].values[0]
+            acceptor_big_smi = acceptor_row["Acceptor_BigSMILES"].values[0]
+
+
+    # find max_seq_length
+    max_seq_length = 0
+    for i in range(len(manual_df)):
+        donor_label = manual_df.at[i, "Donor"]
+        acceptor_label = manual_df.at[i, "Acceptor"]
+        donor_row = donor_data.loc[donor_data["Label"] == donor_label]
+        acceptor_row = acceptor_data.loc[
+            acceptor_data["Label"] == acceptor_label
         ]
-        manual_df = pd.DataFrame(columns=headers)
+        donor_frags = list(ast.literal_eval(donor_row["Fragments"].values[0]))
+        acceptor_frags = list(ast.literal_eval(acceptor_row["Fragments"].values[0]))
+        max_frag_list = donor_frags
+        max_frag_list.append(".")
+        max_frag_list.extend(acceptor_frags)
+        max_frag_length = len(max_frag_list)
+        if max_frag_length > max_seq_length:
+            max_seq_length = max_frag_length
 
-        donor_avail = list(self.donor_data["Label"])
-        acceptor_avail = list(self.acceptor_data["Label"])
-        # iterate through data_from_min.csv for donor-acceptor pairs
-        for index, row in self.opv_data.iterrows():
-            # only keep the rows with available donor and acceptor molecules from clean donors and acceptors
-            if (row["Donor"] in donor_avail) and (row["Acceptor"] in acceptor_avail):
-                # get SMILES of donor and acceptor
-                donor_row = self.donor_data.loc[
-                    self.donor_data["Label"] == row["Donor"]
-                ]
-                donor_smile = donor_row["SMILES"].values[0]
-                donor_big_smi = donor_row["Donor_BigSMILES"].values[0]
-                acceptor_row = self.acceptor_data.loc[
-                    self.acceptor_data["Label"] == row["Acceptor"]
-                ]
-                acceptor_smile = acceptor_row["SMILES"].values[0]
-                acceptor_big_smi = acceptor_row["Acceptor_BigSMILES"].values[0]
+    print("max_frag_length: ", max_seq_length)
 
-                # strip whitespace of hole contact layer
-                hole_contact_layer = row["hole contact layer"]
-                if isinstance(row["hole contact layer"], str):
-                    hole_contact_layer = hole_contact_layer.strip()
+    for i in range(len(manual_df)):
+        donor_label = manual_df.at[i, "Donor"]
+        acceptor_label = manual_df.at[i, "Acceptor"]
+        donor_row = donor_data.loc[donor_data["Label"] == donor_label]
+        acceptor_row = acceptor_data.loc[
+            acceptor_data["Label"] == acceptor_label
+        ]
+        donor_frags = list(ast.literal_eval(donor_row["Fragments"].values[0]))
+        acceptor_frags = list(ast.literal_eval(acceptor_row["Fragments"].values[0]))
 
-                # append new donor-acceptor pair to masters dataframe
-                manual_df = manual_df.append(
-                    {
-                        "Donor": row["Donor"],
-                        "Donor_SMILES": donor_smile,
-                        "Donor_BigSMILES": donor_big_smi,
-                        "Acceptor": row["Acceptor"],
-                        "Acceptor_SMILES": acceptor_smile,
-                        "Acceptor_BigSMILES": acceptor_big_smi,
-                        "HOMO_D (eV)": row["HOMO_D (eV)"],
-                        "LUMO_D (eV)": row["LUMO_D (eV)"],
-                        "HOMO_A (eV)": row["HOMO_A (eV)"],
-                        "LUMO_A (eV)": row["LUMO_A (eV)"],
-                        "D:A ratio (m/m)": row["D:A ratio (m/m)"],
-                        "solvent": row["solvent"],
-                        "total solids conc. (mg/mL)": row["total solids conc. (mg/mL)"],
-                        "solvent additive": row["solvent additive"],
-                        "solvent additive conc. (%v/v)": row[
-                            "solvent additive conc. (%v/v)"
-                        ],
-                        "active layer thickness (nm)": row[
-                            "active layer thickness (nm)"
-                        ],
-                        "annealing temperature": row["annealing temperature"],
-                        "hole contact layer": hole_contact_layer,
-                        "electron contact layer": row["electron contact layer"],
-                        "hole mobility blend (cm^2 V^-1 s^-1)": row[
-                            "hole mobility blend (cm^2 V^-1 s^-1)"
-                        ],
-                        "electron mobility blend (cm^2 V^-1 s^-1)": row[
-                            "electron mobility blend (cm^2 V^-1 s^-1)"
-                        ],
-                        "PCE (%)": row["PCE (%)"],
-                        "calc_PCE (%)": row["calc_PCE (%)"],
-                        "Voc (V)": row["Voc (V)"],
-                        "Jsc (mA cm^-2)": row["Jsc (mA cm^-2)"],
-                        "FF (%)": row["FF (%)"],
-                        "BP": row["BP"],
-                        "MP": row["MP"],
-                        "Density": row["Density"],
-                        "Dielectric": row["Dielectric"],
-                        "Dipole": row["Dipole"],
-                        "log Pow": row["log Pow"],
-                        "Hansen Disp": row["Hansen Disp"],
-                        "Hansen H-Bond": row["Hansen H-Bond"],
-                        "Hansen Polar": row["Hansen Polar"],
-                    },
-                    ignore_index=True,
-                )
-
-        # find max_seq_length
-        max_seq_length = 0
-        for i in range(len(manual_df)):
-            donor_label = manual_df.at[i, "Donor"]
-            acceptor_label = manual_df.at[i, "Acceptor"]
-            donor_row = self.donor_data.loc[self.donor_data["Label"] == donor_label]
-            acceptor_row = self.acceptor_data.loc[
-                self.acceptor_data["Label"] == acceptor_label
-            ]
-            donor_frags = list(ast.literal_eval(donor_row["Fragments"].values[0]))
-            acceptor_frags = list(ast.literal_eval(acceptor_row["Fragments"].values[0]))
-            max_frag_list = donor_frags
-            max_frag_list.append(".")
-            max_frag_list.extend(acceptor_frags)
-            max_frag_length = len(max_frag_list)
-            if max_frag_length > max_seq_length:
-                max_seq_length = max_frag_length
-
-        print("max_frag_length: ", max_seq_length)
-
-        for i in range(len(manual_df)):
-            donor_label = manual_df.at[i, "Donor"]
-            acceptor_label = manual_df.at[i, "Acceptor"]
-            donor_row = self.donor_data.loc[self.donor_data["Label"] == donor_label]
-            acceptor_row = self.acceptor_data.loc[
-                self.acceptor_data["Label"] == acceptor_label
-            ]
-            donor_frags = list(ast.literal_eval(donor_row["Fragments"].values[0]))
-            acceptor_frags = list(ast.literal_eval(acceptor_row["Fragments"].values[0]))
-
-            # DA Pairs
-            da_pair_frags = copy.copy(donor_frags)
-            da_pair_frags.append(".")
-            da_pair_frags.extend(acceptor_frags)
-            da_pair_tokenized = self.tokenize_frag(
-                da_pair_frags, frag_dict, max_seq_length
-            )
-
-            # AD Pairs
-            ad_pair_frags = copy.copy(acceptor_frags)
-            ad_pair_frags.append(".")
-            ad_pair_frags.extend(donor_frags)
-            ad_pair_tokenized = self.tokenize_frag(
-                ad_pair_frags, frag_dict, max_seq_length
-            )
-
-            # AUGMENT Donor (pre-ordered)
-            augmented_donor_list = []
-            donor_frag_deque = deque(copy.copy(donor_frags))
-            for j in range(len(donor_frags)):
-                frag_rotate = copy.copy(donor_frag_deque)
-                frag_rotate.rotate(j)
-                frag_rotate = list(frag_rotate)
-                augmented_donor_list.append(frag_rotate)
-
-            # DA Pairs augmented
-            da_pair_tokenized_aug = []
-            for aug_donors in augmented_donor_list:
-                da_aug_pair = copy.copy(aug_donors)
-                da_aug_pair.append(".")
-                da_aug_pair.extend(acceptor_frags)
-                da_aug_tokenized = self.tokenize_frag(
-                    da_aug_pair, frag_dict, max_seq_length
-                )
-                da_pair_tokenized_aug.append(da_aug_tokenized)
-            # AD Pairs augmented
-            ad_pair_tokenized_aug = []
-            for aug_donors in augmented_donor_list:
-                ad_aug_pair = copy.copy(acceptor_frags)
-                ad_aug_pair.append(".")
-                ad_aug_pair.extend(aug_donors)
-                ad_aug_tokenized = self.tokenize_frag(
-                    ad_aug_pair, frag_dict, max_seq_length
-                )
-                ad_pair_tokenized_aug.append(ad_aug_tokenized)
-
-            # ADD TO MANUAL DF
-            # print(type(da_pair_tokenized))
-            manual_df["DA_manual_tokenized"] = manual_df["DA_manual_tokenized"].astype(
-                "object"
-            )
-            manual_df["AD_manual_tokenized"] = manual_df["AD_manual_tokenized"].astype(
-                "object"
-            )
-            manual_df["DA_manual_tokenized_aug"] = manual_df[
-                "DA_manual_tokenized_aug"
-            ].astype("object")
-            manual_df["AD_manual_tokenized_aug"] = manual_df[
-                "AD_manual_tokenized_aug"
-            ].astype("object")
-            manual_df.at[i, "DA_manual_tokenized"] = da_pair_tokenized
-            manual_df.at[i, "AD_manual_tokenized"] = ad_pair_tokenized
-            manual_df.at[i, "DA_manual_tokenized_aug"] = da_pair_tokenized_aug
-            manual_df.at[i, "AD_manual_tokenized_aug"] = ad_pair_tokenized_aug
-
-        manual_df.to_csv(master_manual_path, index=False)
-
-    def bigsmiles_from_frag(self, donor_frag_path, acceptor_frag_path):
-        """
-        Function that takes ordered fragments (manually by hand) and converts it into BigSMILES representation, specifically block copolymers
-        Args:
-            donor_frag_path: path to data with manually fragmented donors
-            acceptor_frag_path: path to data with manually fragmented acceptors
-
-        Returns:
-            concatenates manual fragments into BigSMILES representation and returns to donor/acceptor data
-        """
-        # donor BigSMILES
-        donor_df = pd.read_csv(donor_frag_path)
-        donor_df["Donor_BigSMILES"] = ""
-        for index, row in donor_df.iterrows():
-            donor_big_smi = ""
-            position = 0
-            for frag in ast.literal_eval(donor_df["Fragments"][index]):
-                if position == 0:
-                    donor_big_smi += "{[][<]"
-                    donor_big_smi += str(frag)
-                elif (
-                    position == len(ast.literal_eval(donor_df["Fragments"][index])) - 1
-                ):
-                    donor_big_smi += str(frag)
-                    donor_big_smi += "[>][]}"
-                else:
-                    donor_big_smi += "[>][<]}{[>][<]"
-                    donor_big_smi += str(frag)
-                position += 1
-            donor_df["Donor_BigSMILES"][index] = donor_big_smi
-
-        donor_df.to_csv(donor_frag_path, index=False)
-
-        # acceptor BigSMILES
-        acceptor_df = pd.read_csv(acceptor_frag_path)
-        acceptor_df["Acceptor_BigSMILES"] = ""
-        # NOTE: NFAs are not polymers, therefore BigSMILES = SMILES
-        acceptor_df["Acceptor_BigSMILES"] = acceptor_df["SMILES"]
-
-        acceptor_df.to_csv(acceptor_frag_path, index=False)
-
-    def frag_visualization(self, frag_dict):
-        """
-        Visualizes the dictionary of unique fragments
-        NOTE: use in jupyter notebook
-
-        Args:
-            dictionary of unique fragments from donor and acceptor molecules
-        
-        Returns:
-            img: image of all the unique fragments
-        """
-        print(len(frag_dict))
-        frag_list = [Chem.MolFromSmiles(frag) for frag in frag_dict.keys()]
-        frag_legends = []
-        for frag_key in frag_dict.keys():
-            label = str(frag_dict[frag_key])
-            frag_legends.append(label)
-
-        img = Draw.MolsToGridImage(
-            frag_list,
-            molsPerRow=20,
-            maxMols=400,
-            subImgSize=(300, 300),
-            legends=frag_legends,
+        # DA Pairs
+        da_pair_frags = copy.copy(donor_frags)
+        da_pair_frags.append(".")
+        da_pair_frags.extend(acceptor_frags)
+        da_pair_tokenized = tokenize_frag(
+            da_pair_frags, frag_dict, max_seq_length
         )
-        display(img)
+
+        # AUGMENT Donor (pre-ordered)
+        augmented_donor_list = []
+        donor_frag_deque = deque(copy.copy(donor_frags))
+        for j in range(len(donor_frags)):
+            frag_rotate = copy.copy(donor_frag_deque)
+            frag_rotate.rotate(j)
+            frag_rotate = list(frag_rotate)
+            augmented_donor_list.append(frag_rotate)
+
+        # DA Pairs augmented
+        da_pair_tokenized_aug = []
+        for aug_donors in augmented_donor_list:
+            da_aug_pair = copy.copy(aug_donors)
+            da_aug_pair.append(".")
+            da_aug_pair.extend(acceptor_frags)
+            da_aug_tokenized = tokenize_frag(
+                da_aug_pair, frag_dict, max_seq_length
+            )
+            da_pair_tokenized_aug.append(da_aug_tokenized)
+
+        # ADD TO MANUAL DF
+        # print(type(da_pair_tokenized))
+        manual_df["DA_manual_tokenized"] = manual_df["DA_manual_tokenized"].astype(
+            "object"
+        )
+        manual_df["DA_manual_tokenized_aug"] = manual_df[
+            "DA_manual_tokenized_aug"
+        ].astype("object")
+        manual_df.at[i, "DA_manual_tokenized"] = da_pair_tokenized
+        manual_df.at[i, "DA_manual_tokenized_aug"] = da_pair_tokenized_aug
+
+    manual_df.to_csv(master_manual_path, index=False)
+
+def bigsmiles_from_frag(donor_frag_path, acceptor_frag_path):
+    """
+    Function that takes ordered fragments (manually by hand) and converts it into BigSMILES representation, specifically block copolymers
+    Args:
+        donor_frag_path: path to data with manually fragmented donors
+        acceptor_frag_path: path to data with manually fragmented acceptors
+
+    Returns:
+        concatenates manual fragments into BigSMILES representation and returns to donor/acceptor data
+    """
+    # donor BigSMILES
+    donor_df = pd.read_csv(donor_frag_path)
+    donor_df["Donor_BigSMILES"] = ""
+    for index, row in donor_df.iterrows():
+        donor_big_smi = ""
+        position = 0
+        for frag in ast.literal_eval(donor_df["Fragments"][index]):
+            if position == 0:
+                donor_big_smi += "{[][<]"
+                donor_big_smi += str(frag)
+            elif (
+                position == len(ast.literal_eval(donor_df["Fragments"][index])) - 1
+            ):
+                donor_big_smi += str(frag)
+                donor_big_smi += "[>][]}"
+            else:
+                donor_big_smi += "[>][<]}{[>][<]"
+                donor_big_smi += str(frag)
+            position += 1
+        donor_df["Donor_BigSMILES"][index] = donor_big_smi
+
+    donor_df.to_csv(donor_frag_path, index=False)
+
+    # acceptor BigSMILES
+    acceptor_df = pd.read_csv(acceptor_frag_path)
+    acceptor_df["Acceptor_BigSMILES"] = ""
+    # NOTE: NFAs are not polymers, therefore BigSMILES = SMILES
+    acceptor_df["Acceptor_BigSMILES"] = acceptor_df["SMILES"]
+
+    acceptor_df.to_csv(acceptor_frag_path, index=False)
+
+def frag_visualization(frag_dict):
+    """
+    Visualizes the dictionary of unique fragments
+    NOTE: use in jupyter notebook
+
+    Args:
+        dictionary of unique fragments from donor and acceptor molecules
+    
+    Returns:
+        img: image of all the unique fragments
+    """
+    print(len(frag_dict))
+    frag_list = [Chem.MolFromSmiles(frag) for frag in frag_dict.keys()]
+    frag_legends = []
+    for frag_key in frag_dict.keys():
+        label = str(frag_dict[frag_key])
+        frag_legends.append(label)
+
+    img = Draw.MolsToGridImage(
+        frag_list,
+        molsPerRow=20,
+        maxMols=400,
+        subImgSize=(300, 300),
+        legends=frag_legends,
+    )
+    display(img)
 
 
 def cli_main():
@@ -672,13 +558,13 @@ def cli_main():
     # manual.fragment_new(FRAG_ACCEPTOR_DIR, MASTER_ML_DATA, "acceptor")
 
     # prepare manual frag data
-    manual = manual_frag(MASTER_ML_DATA, MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)
-    frag_dict = manual.return_frag_dict()
-    print(frag_dict)
-    # print(len(frag_dict))
-    # manual.frag_visualization(frag_dict)
-    manual.bigsmiles_from_frag(MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)
-    manual.create_manual_csv(frag_dict, MASTER_MANUAL_DATA)
+    # manual = manual_frag(MASTER_ML_DATA, MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)
+    # frag_dict = manual.return_frag_dict()
+    # print(frag_dict)
+    # # print(len(frag_dict))
+    # # manual.frag_visualization(frag_dict)
+    # manual.bigsmiles_from_frag(MANUAL_DONOR_CSV, MANUAL_ACCEPTOR_CSV)
+    # manual.create_manual_csv(frag_dict, MASTER_MANUAL_DATA)
 
 
 if __name__ == "__main__":

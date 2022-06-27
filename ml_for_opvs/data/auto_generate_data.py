@@ -1,4 +1,4 @@
-from ml_for_opvs.data.preprocess.OPV_Min.clean_donors_acceptors import (
+from ml_for_opvs.data.archived.clean_donors_acceptors import (
     MASTER_DONOR_CSV,
     OPV_DONOR_DATA,
     CLEAN_DONOR_CSV,
@@ -33,7 +33,7 @@ from ml_for_opvs.data.exploration.OPV_Min.correlation import (
     PARAMETER_INVENTORY,
 )
 
-from ml_for_opvs.data.postprocess.OPV_Min.augmentation.augment import (
+from ml_for_opvs.data.postprocess.OPV_Min.aug_SMILES.augment import (
     Augment,
     AUGMENT_SMILES_DATA,
 )
