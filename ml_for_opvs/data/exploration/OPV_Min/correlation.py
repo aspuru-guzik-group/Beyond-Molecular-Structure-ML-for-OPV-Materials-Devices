@@ -13,11 +13,11 @@ from sklearn.metrics import mean_squared_error
 
 # OPV data after pre-processing
 MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
 )
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 CORRELATION_PLOT = pkg_resources.resource_filename(
@@ -33,7 +33,7 @@ RMSE_HEATMAP_PLOT = pkg_resources.resource_filename(
 )
 
 PARAMETER_INVENTORY = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/device_parameter_inventory.csv"
+    "ml_for_opvs", "data/raw/OPV_Min/device_parameter_inventory.csv"
 )
 
 

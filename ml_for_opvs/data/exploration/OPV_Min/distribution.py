@@ -7,7 +7,7 @@ from cmath import nan
 
 # OPV data after pre-processing
 MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
 )
 
 DISTRIBUTION_PLOT = pkg_resources.resource_filename(
@@ -195,9 +195,9 @@ class Distribution:
         plt.savefig(x_y_path)
 
 
-dist = Distribution(MASTER_ML_DATA_PLOT)
+# dist = Distribution(MASTER_ML_DATA_PLOT)
 
-dist.histogram()
+# dist.histogram()
 
 # dist.x_y_heatmap("Donor", "Acceptor", DONOR_ACCEPTOR_PATH)
 

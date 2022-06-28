@@ -26,22 +26,22 @@ CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
 # From OPV Google Drive
 OPV_DATA = pkg_resources.resource_filename(
     "ml_for_opvs",
-    "data/process/OPV_Min/Machine Learning OPV Parameters - device_params.csv",
+    "data/raw/OPV_Min/Machine Learning OPV Parameters - device_params.csv",
 )
 OPV_DONOR_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/Machine Learning OPV Parameters - Donors.csv"
+    "ml_for_opvs", "data/raw/OPV_Min/Machine Learning OPV Parameters - Donors.csv"
 )
 OPV_ACCEPTOR_DATA = pkg_resources.resource_filename(
     "ml_for_opvs",
-    "data/process/OPV_Min/Machine Learning OPV Parameters - Acceptors.csv",
+    "data/raw/OPV_Min/Machine Learning OPV Parameters - Acceptors.csv",
 )
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
 )
 
 
@@ -767,16 +767,16 @@ class DAPairs:
 # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 
 # Step 4
-pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-pairings.create_master_csv(MASTER_ML_DATA)
-pairings.create_master_csv(MASTER_ML_DATA_PLOT)
+# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# pairings.create_master_csv(MASTER_ML_DATA)
+# pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 
-# # # Step 4b - Convert STR -> FLOAT
-pairings.convert_str_to_float(MASTER_ML_DATA)
-pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
+# # # # Step 4b - Convert STR -> FLOAT
+# pairings.convert_str_to_float(MASTER_ML_DATA)
+# pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
 
-# Step 4c - Fill empty values for Thermal Annealing, and Solvent Additives
-pairings.fill_empty_values(MASTER_ML_DATA)
+# # Step 4c - Fill empty values for Thermal Annealing, and Solvent Additives
+# pairings.fill_empty_values(MASTER_ML_DATA)
 
 # Step 4d - Remove anomalies!
 # Go to ml_for_opvs > data > error_correction > remove_anomaly.py

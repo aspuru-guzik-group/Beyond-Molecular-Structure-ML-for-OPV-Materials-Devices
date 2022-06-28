@@ -3,19 +3,19 @@ from typing import List
 import pkg_resources
 import pandas as pd
 
-from ml_for_opvs.data.archived.clean_donors_acceptors import (
+from ml_for_opvs.data.preprocess.clean_donors_acceptors import (
     DonorClean,
     AcceptorClean,
 )
 
 OPV_MIN = pkg_resources.resource_filename(
     "ml_for_opvs",
-    "data/process/OPV_Min/Machine Learning OPV Parameters - device_params.csv",
+    "data/raw/OPV_Min/Machine Learning OPV Parameters - device_params.csv",
 )
 
 # OPV data after pre-processing
 OPV_CLEAN = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 CLEAN_DONOR = pkg_resources.resource_filename(

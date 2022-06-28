@@ -10,7 +10,7 @@ MASTER_ML_DATA = pkg_resources.resource_filename(
 )
 
 FP_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/master_fingerprint.json"
+    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/master_fingerprint.csv"
 )
 
 
@@ -59,8 +59,8 @@ def create_master_fp(master_data, fp_path, radius: int, nbits: int):
 
         fp_df.at[index, new_column_da_pair] = fp_da
 
-    fp_df.to_json(fp_path)
+    fp_df.to_csv(fp_path, index=False)
 
 
 # put master_ml_data first, and then when you create more fingerprints, use fp_data
-create_master_fp(MASTER_ML_DATA, FP_DATA, 3, 512)
+# create_master_fp(MASTER_ML_DATA, FP_DATA, 3, 512)

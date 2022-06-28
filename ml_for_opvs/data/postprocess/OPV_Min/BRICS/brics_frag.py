@@ -16,7 +16,7 @@ MASTER_DATA = pkg_resources.resource_filename(
 )
 
 BRICS_FRAG_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.json"
+    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
 )
 def tokenize_frag(brics_frag):
     """
@@ -126,7 +126,7 @@ def bric_frag(data):
     for da_pair in tokenized_pair_array:
         brics_df.at[index, "DA_tokenized_BRICS"] = da_pair
         index += 1
-    brics_df.to_json(BRICS_FRAG_DATA)
+    brics_df.to_csv(BRICS_FRAG_DATA, index=False)
 
     return frag_dict
 
@@ -158,6 +158,6 @@ def frag_visualization(frag_dict):
     display(img)
 
 
-frag_dict = bric_frag(MASTER_DATA)
+# frag_dict = bric_frag(MASTER_DATA)
 # print(frag_dict)
 # b_frag.frag_visualization(frag_dict)

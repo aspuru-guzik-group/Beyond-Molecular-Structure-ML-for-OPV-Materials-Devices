@@ -3,10 +3,10 @@ import pandas as pd
 
 # OPV data after pre-processing
 MASTER_ML_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
 )
 # All postprocessing data too!
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(

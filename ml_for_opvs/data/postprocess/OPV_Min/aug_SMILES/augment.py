@@ -12,7 +12,7 @@ MASTER_DATA = pkg_resources.resource_filename(
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master5.json")
+    "ml_for_opvs", "data/postprocess/OPV_Min/aug_SMILES/train_aug_master5.csv")
 
 
 def pad_input(tokenized_array, seq_len):
@@ -83,7 +83,7 @@ def aug_smi_doRandom(smiles_data, augment_smiles_data, num_of_augment):
 
         train_aug_df.at[i, "DA_pair_aug"] = augmented_da_list
 
-    train_aug_df.to_json(augment_smiles_data)
+    train_aug_df.to_csv(augment_smiles_data, index=False)
 
 def aug_smi_tokenize(train_aug_data):
     """
@@ -95,7 +95,7 @@ def aug_smi_tokenize(train_aug_data):
     Returns:
         new columns to train_aug_master.csv: DA_pair_tokenized_aug, AD_pair_tokenized_aug 
     """
-    aug_smi_data = pd.read_json(train_aug_data)
+    aug_smi_data = pd.read_csv(train_aug_data)
 
     # initialize new columns
     aug_smi_data["DA_pair_tokenized_aug"] = " "
@@ -115,7 +115,7 @@ def aug_smi_tokenize(train_aug_data):
 
     for i in range(len(da_aug_list)):
         tokenized_list = []
-        da_list = da_aug_list[i]
+        da_list = ast.literal_eval(da_aug_list[i])
         for da in da_list:
             tokenized_smi = [
                 token2idx[token] if token in token2idx else 0 for token in da
@@ -123,12 +123,12 @@ def aug_smi_tokenize(train_aug_data):
             tokenized_list.append(tokenized_smi)
             if len(tokenized_smi) > max_length:
                 max_length = len(tokenized_smi)
-
+    print(max_length)
     # tokenize augmented data and return new column in .csv
     # TODO: add padding in a systematic way (only at beginning)
     for i in range(len(da_aug_list)):
         tokenized_list = []
-        da_list = da_aug_list[i]
+        da_list = ast.literal_eval(da_aug_list[i])
         for da in da_list:
             tokenized_smi = [
                 token2idx[token] if token in token2idx else 1 for token in da
@@ -138,9 +138,9 @@ def aug_smi_tokenize(train_aug_data):
         aug_smi_data.at[i, "DA_pair_tokenized_aug"] = tokenized_list
 
 
-    aug_smi_data.to_json(train_aug_data)
+    aug_smi_data.to_csv(train_aug_data, index=False)
 
 
-aug_smi_doRandom(MASTER_DATA, AUGMENT_SMILES_DATA, 5)
-aug_smi_tokenize(AUGMENT_SMILES_DATA)
+# aug_smi_doRandom(MASTER_DATA, AUGMENT_SMILES_DATA, 5)
+# aug_smi_tokenize(AUGMENT_SMILES_DATA)
 

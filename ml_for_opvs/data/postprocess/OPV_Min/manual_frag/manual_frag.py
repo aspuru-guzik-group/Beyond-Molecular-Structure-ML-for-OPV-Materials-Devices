@@ -22,11 +22,11 @@ IMG_PATH = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/"
 )
 
-FRAG_DONOR_PKL = pkg_resources.resource_filename(
+FRAG_DONOR_DIR = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
 )
 
-FRAG_ACCEPTOR_PKL = pkg_resources.resource_filename(
+FRAG_ACCEPTOR_DIR = pkg_resources.resource_filename(
     "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
 )
 
@@ -70,13 +70,13 @@ class manual_frag:
     # 3 ask for begin/end atom index OR bond index
     # 4 fragment
     # 5 show fragmented molecule
-    # 6 if correct, convert to smiles and store in new .json
+    # 6 if correct, convert to smiles and store in new .csv
     # 7 if incorrect, go back to step 3
     # 8 NOTE: be able to manually look up any donor/acceptor and re-fragment
 
     def lookup(self, group_type: str, index: int) -> str:
         """
-        Function that finds and returns SMILES from donor or acceptor .json
+        Function that finds and returns SMILES from donor or acceptor .csv
         
         Args:
             group_type: choose between donor and acceptor
@@ -244,7 +244,7 @@ class manual_frag:
             mol_type: option for donors and acceptors
         
         Returns:
-            .json file with new molecules that was fragmented by user's input, and properly ordered
+            .csv file with new molecules that was fragmented by user's input, and properly ordered
         """
         frag_df = pd.read_csv(frag_path)
         master_df = pd.read_csv(master_path)
@@ -281,7 +281,7 @@ class manual_frag:
 
     def new_frag_files(self, donor_frag_dir, acceptor_frag_dir):
         """
-        Creates empty .json files for donor frags and acceptor frags
+        Creates empty .csv files for donor frags and acceptor frags
         """
         donor_frag = pd.DataFrame(columns=["Label", "SMILES", "Fragments"])
         acceptor_frag = pd.DataFrame(columns=["Label", "SMILES", "Fragments"])
@@ -295,7 +295,7 @@ class manual_frag:
         acceptor_frag["Fragments"] = " "
 
         donor_frag.to_csv(donor_frag_dir, index=False)
-        acceptor_frag.to_csv(acceptor_frag_di, index=False)
+        acceptor_frag.to_csv(acceptor_frag_dir, index=False)
 
 def return_frag_dict(donor_frag_dir, acceptor_frag_dir):
     """
@@ -315,7 +315,7 @@ def return_frag_dict(donor_frag_dir, acceptor_frag_dir):
     frag_dict["."] = 1
     id = len(frag_dict)
     for i in range(len(donor_frag)):
-        frag_str = donor_frag.at[i, "Fragments"]
+        frag_str = ast.literal_eval(donor_frag.at[i, "Fragments"])
         frag_list = frag_str
         for frag in frag_list:
             if frag not in list(frag_dict.keys()):
@@ -323,7 +323,7 @@ def return_frag_dict(donor_frag_dir, acceptor_frag_dir):
                 id += 1
 
     for i in range(len(acceptor_frag)):
-        frag_str = acceptor_frag.at[i, "Fragments"]
+        frag_str = ast.literal_eval(acceptor_frag.at[i, "Fragments"])
         frag_list = frag_str
         for frag in frag_list:
             if frag not in list(frag_dict.keys()):
@@ -359,7 +359,7 @@ def create_manual_json(donor_data_path, acceptor_data_path, opv_data_path, frag_
 
     Args:
         frag_dict: dictionary of unique fragments from donor and acceptor molecules
-        master_manual_path: path to master .json file for training on manual fragments
+        master_manual_path: path to master .csv file for training on manual fragments
     """
     donor_data = pd.read_csv(donor_data_path)
     acceptor_data = pd.read_csv(acceptor_data_path)
@@ -397,8 +397,8 @@ def create_manual_json(donor_data_path, acceptor_data_path, opv_data_path, frag_
         acceptor_row = acceptor_data.loc[
             acceptor_data["Label"] == acceptor_label
         ]
-        donor_frags = donor_row["Fragments"].values[0]
-        acceptor_frags = acceptor_row["Fragments"].values[0]
+        donor_frags = ast.literal_eval(donor_row["Fragments"].values[0])
+        acceptor_frags = ast.literal_eval(acceptor_row["Fragments"].values[0])
         max_frag_list = donor_frags
         max_frag_list.append(".")
         max_frag_list.extend(acceptor_frags)
@@ -415,8 +415,8 @@ def create_manual_json(donor_data_path, acceptor_data_path, opv_data_path, frag_
         acceptor_row = acceptor_data.loc[
             acceptor_data["Label"] == acceptor_label
         ]
-        donor_frags = donor_row["Fragments"].values[0]
-        acceptor_frags = acceptor_row["Fragments"].values[0]
+        donor_frags = ast.literal_eval(donor_row["Fragments"].values[0])
+        acceptor_frags = ast.literal_eval(acceptor_row["Fragments"].values[0])
 
         # DA Pairs
         da_pair_frags = copy.copy(donor_frags)
@@ -454,8 +454,8 @@ def create_manual_json(donor_data_path, acceptor_data_path, opv_data_path, frag_
         manual_df["DA_manual_tokenized_aug"] = manual_df[
             "DA_manual_tokenized_aug"
         ].astype("object")
-        manual_df.at[i, "DA_manual_tokenized"] = np.array(da_pair_tokenized)
-        manual_df.at[i, "DA_manual_tokenized_aug"] = np.array(da_pair_tokenized_aug)
+        manual_df.at[i, "DA_manual_tokenized"] = da_pair_tokenized
+        manual_df.at[i, "DA_manual_tokenized_aug"] = da_pair_tokenized_aug
 
     manual_df.to_csv(master_manual_path, index=False)
 
@@ -475,7 +475,7 @@ def bigsmiles_from_frag(donor_frag_path, acceptor_frag_path):
     for index, row in donor_df.iterrows():
         donor_big_smi = ""
         position = 0
-        for frag in donor_df["Fragments"][index]:
+        for frag in ast.literal_eval(donor_df["Fragments"][index]):
             if position == 0:
                 donor_big_smi += "{[][<]"
                 donor_big_smi += str(frag)
@@ -529,48 +529,45 @@ def frag_visualization(frag_dict):
 
 
 def fragment_files():
-    pass
-    # manual = manual_frag(MASTER_ML_DATA, DONOR_DIR, ACCEPTOR_DIR)
+    manual = manual_frag(MASTER_ML_DATA, DONOR_DIR, ACCEPTOR_DIR)
 
-    # NOTE: DO NOT USE IF FRAGMENTED
+    # # NOTE: DO NOT USE IF FRAGMENTED
     # manual.new_frag_files(
     #     FRAG_DONOR_DIR, FRAG_ACCEPTOR_DIR
     # )  # do it only the first time
 
     # iterate through donor and acceptor files
-    # donor_df = pd.read_json(FRAG_DONOR_DIR)
-    # for i in range(0, 26):  # len(donor_df["SMILES"])
+    # donor_df = pd.read_csv(FRAG_DONOR_DIR)
+    # for i in range(0, len(donor_df["SMILES"])):  # len(donor_df["SMILES"])
     #     smi = manual.lookup("donor", i)
     #     frag_list = manual.fragmenter(smi, "donor")
     #     donor_df.at[i, "Fragments"] = frag_list
-    #     donor_df.to_json(FRAG_DONOR_DIR)
+    #     donor_df.to_csv(FRAG_DONOR_DIR, index=False)
 
-    # acceptor_df = pd.read_json(FRAG_ACCEPTOR_DIR)
-    # for i in range(0, 43):
+    # acceptor_df = pd.read_csv(FRAG_ACCEPTOR_DIR)
+    # for i in range(0, len(acceptor_df["SMILES"])):
     #     smi = manual.lookup("acceptor", i)
     #     frag_list = manual.fragmenter(smi, "acceptor")
     #     acceptor_df.at[i, "Fragments"] = frag_list
-    #     acceptor_df.to_json(FRAG_ACCEPTOR_DIR)
+    #     acceptor_df.to_csv(FRAG_ACCEPTOR_DIR, index=False)
 
     # fragment by unique/new donors/acceptors
     # prints index of donors that have not been fragmented.
-    # manual.fragment_new(FRAG_ACCEPTOR_DIR, MASTER_ML_DATA, "acceptor")
+    # For Donors
+    manual.fragment_new(FRAG_DONOR_DIR, MASTER_ML_DATA, "donor")
+    # For Acceptors
+    manual.fragment_new(FRAG_ACCEPTOR_DIR, MASTER_ML_DATA, "acceptor")
 
 def export_manual_frag():
     # prepare manual frag data
-    manual = manual_frag(MASTER_ML_DATA, FRAG_DONOR_PKL, FRAG_ACCEPTOR_PKL)
-    frag_dict = return_frag_dict(FRAG_DONOR_PKL, FRAG_ACCEPTOR_PKL)
+    frag_dict = return_frag_dict(FRAG_DONOR_DIR, FRAG_ACCEPTOR_DIR)
     print(frag_dict)
     # # print(len(frag_dict))
-    # # manual.frag_visualization(frag_dict)
-    bigsmiles_from_frag(FRAG_DONOR_PKL, FRAG_ACCEPTOR_PKL)
-    create_manual_json(FRAG_DONOR_PKL, FRAG_ACCEPTOR_PKL, MASTER_ML_DATA, frag_dict, MASTER_MANUAL_DATA)
+    bigsmiles_from_frag(FRAG_DONOR_DIR, FRAG_ACCEPTOR_DIR)
+    create_manual_json(FRAG_DONOR_DIR, FRAG_ACCEPTOR_DIR, MASTER_ML_DATA, frag_dict, MASTER_MANUAL_DATA)
 
 
 if __name__ == "__main__":
     # fragment_files()
     # export_manual_frag()
-    # convert_json_to_pkl(FRAG_DONOR_PKL, FRAG_ACCEPTOR_PKL)
-    test = pd.read_csv(MASTER_MANUAL_DATA)
-    print(test.head())
-    # pass
+    pass
