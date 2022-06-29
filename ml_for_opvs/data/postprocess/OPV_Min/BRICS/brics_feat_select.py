@@ -55,7 +55,7 @@ class FeatureSelection:
         # delete all rows that have at least 1 empty entry
         df = df_full.dropna(how = 'any')
         # save the processed dataframe to a new csv file whose name includes the group of features that are included
-        df.to_csv('processed_brics_frag_{x}.csv'.format(x = feat_list))
+        df.to_csv('processed_brics_frag_{x}.csv'.format(x = feat_list), index=False)
 
 fs = FeatureSelection(MASTER_BRICS_DATA)
 
