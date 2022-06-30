@@ -33,7 +33,7 @@ class PC:
             plots of each feature's contribution to PC
         """
         # Create a proper feature matrix for PCA by dropping all outputs and categorical variables
-        df_full = self.data.drop(columns = ['Unnamed: 0','Donor','Donor_SMILES','Donor_Big_SMILES','Donor_SELFIES','Acceptor','Acceptor_SMILES','Acceptor_Big_SMILES','Acceptor_SELFIES','solvent','solvent additive','hole contact layer','electron contact layer','calc_PCE (%)','Jsc (mA cm^-2)','Voc (V)','FF (%)','PCE (%)'])
+        df_full = self.data.drop(columns = ['Unnamed: 0','Donor','Donor_SMILES','Donor_Big_SMILES','Donor_SELFIES','Acceptor','Acceptor_SMILES','Acceptor_Big_SMILES','Acceptor_SELFIES','solvent','solvent additive','hole_contact_layer','electron_contact_layer','calc_PCE_percent','Jsc_mA_cm_pow_neg_2','Voc_V','FF_percent','PCE_percent'])
         # Drop rows with any empty entries
         df = df_full.dropna(how = 'any')
 

@@ -12,7 +12,7 @@ import numpy as np
 import copy
 import itertools
 
-IMAGE_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/postprocess/test/")
+IMAGE_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/input_representation/test/")
 
 # smi = "CCCCCCc1ccc(C2(c3ccc(CCCCCC)cc3)c3c4sc(/C=C5C(c6ccccc6C/5=C(C#N)\C#N)=O)cc4sc3c3cc4c(c5sc6cc(/C=C7C(c8ccccc8C/7=C(C#N)\C#N)=O)sc6c5C(c5ccc(CCCCCC)cc5)4c4ccc(CCCCCC)cc4)cc32)cc1"
 

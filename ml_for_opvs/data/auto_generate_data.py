@@ -28,10 +28,10 @@ from ml_for_opvs.data.error_correction.OPV_Min.unique_opvs import (
 
 from ml_for_opvs.data.error_correction.OPV_Min.remove_anomaly import Anomaly
 
-from ml_for_opvs.data.postprocess.OPV_Min.aug_SMILES.augment import aug_smi_doRandom, aug_smi_tokenize
-from ml_for_opvs.data.postprocess.OPV_Min.fingerprint.morgan_fingerprints import create_master_fp
-from ml_for_opvs.data.postprocess.OPV_Min.BRICS.brics_frag import bric_frag
-from ml_for_opvs.data.postprocess.OPV_Min.manual_frag.manual_frag import export_manual_frag, fragment_files
+from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import aug_smi_doRandom, aug_smi_tokenize
+from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.morgan_fingerprints import create_master_fp
+from ml_for_opvs.data.input_representation.OPV_Min.BRICS.brics_frag import bric_frag
+from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag import export_manual_frag, fragment_files
 from ml_for_opvs.data.preprocess.OPV_Min.smiles_to_bigsmiles import smile_to_bigsmile
 from ml_for_opvs.data.preprocess.OPV_Min.smiles_to_selfies import opv_smiles_to_selfies
 
@@ -40,14 +40,14 @@ from ml_for_opvs.data.exploration.OPV_Min.correlation import (
     PARAMETER_INVENTORY,
 )
 
-from ml_for_opvs.data.postprocess.OPV_Min.aug_SMILES.augment import (
+from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import (
     AUGMENT_SMILES_DATA,
 )
-from ml_for_opvs.data.postprocess.OPV_Min.manual_frag.manual_frag import (
+from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag import (
     manual_frag,
     MASTER_MANUAL_DATA,
 )
-from ml_for_opvs.data.postprocess.OPV_Min.fingerprint.morgan_fingerprints import (
+from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.morgan_fingerprints import (
     FP_DATA,
 )
 
@@ -119,6 +119,4 @@ aug_smi_tokenize(AUGMENT_SMILES_DATA)
 
 create_master_fp(MASTER_ML_DATA, FP_DATA, 3, 512)
 
-# For manual fragments, you might want to fragment some new donors or acceptors.
-# fragment_files()
 export_manual_frag()

@@ -23,23 +23,23 @@ DATA_DIR = pkg_resources.resource_filename(
 )
 
 FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/hw_frag/train_frag_master.csv"
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master15.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/augmentation/train_aug_master15.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 PREDICTION_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/predictions/",)
@@ -238,7 +238,7 @@ class Evaluator:
         )
 
         fig, ax = plt.subplots()
-        ax.set_title("Predicted vs. Experimental PCE (%)")
+        ax.set_title("Predicted vs. Experimental PCE_percent")
         ax.set_xlabel("Experimental_PCE_(%)")
         ax.set_ylabel("Predicted_PCE_(%)")
         ax.scatter(

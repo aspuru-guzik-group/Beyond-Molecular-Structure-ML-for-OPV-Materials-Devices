@@ -13,7 +13,7 @@ import copy
 # IPythonConsole.ipython_useSVG = True
 pd.set_option("display.max_colwidth", None)
 
-IMAGE_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/postprocess/")
+IMAGE_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/input_representation/")
 
 CLEAN_DONOR_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/clean_min_donors.csv"
@@ -24,7 +24,7 @@ CLEAN_ACCEPTOR_DATA = pkg_resources.resource_filename(
 )
 
 NUM_FRAG_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/num_of_frag.csv"
+    "ml_for_opvs", "data/input_representation/num_of_frag.csv"
 )
 
 

@@ -16,7 +16,7 @@ def parity_plot(y_test, yhat, y_max):
     rmse = np.sqrt(mean_squared_error(y_test, yhat,))
 
     fig, ax = plt.subplots()
-    # ax.set_title("Predicted vs. Experimental PCE (%)", fontsize=22)
+    # ax.set_title("Predicted vs. Experimental PCE_percent", fontsize=22)
     ax.set_xlabel("Experimental_PCE_(%)", fontsize=18)
     ax.set_ylabel("Predicted_PCE_(%)", fontsize=18)
     ax.scatter(

@@ -34,23 +34,23 @@ DATA_DIR = pkg_resources.resource_filename(
 )
 
 FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/train_frag_master.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/train_frag_master.csv"
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 CHECKPOINT_DIR = pkg_resources.resource_filename("ml_for_opvs", "model_checkpoints/NN")

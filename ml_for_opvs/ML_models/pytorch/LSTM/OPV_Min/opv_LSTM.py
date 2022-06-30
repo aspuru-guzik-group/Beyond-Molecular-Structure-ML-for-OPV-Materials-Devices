@@ -24,7 +24,7 @@ DATA_DIR = pkg_resources.resource_filename(
 )
 
 TRAIN_FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/train_frag_master.csv"
+    "ml_for_opvs", "data/input_representation/train_frag_master.csv"
 )
 
 TRAIN_AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
@@ -36,11 +36,11 @@ MANUAL_MASTER_DATA = pkg_resources.resource_filename(
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/input_representation/BRICS/master_brics_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/input_representation/fingerprint/opv_fingerprint.csv"
 )
 
 CHECKPOINT_DIR = pkg_resources.resource_filename(

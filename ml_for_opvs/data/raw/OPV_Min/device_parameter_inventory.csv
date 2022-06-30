@@ -1,4 +1,4 @@
-Name,Parameter_Type,IUPAC,SMILES,BP,Density,Dielectric,Dipole,Hansen Disp,Hansen H-Bond,Hansen Polar,log Pow,MP
+Name,Parameter_Type,IUPAC,SMILES,BP,Density,Dielectric,Dipole,Hansen_Disp,Hansen_H_Bond,Hansen_Polar,log_Pow,MP
 CN,['Solvent_Additive'],,,,,,,,,,,
 DIO,['Solvent_Additive'],,,,,,,,,,,
 DPE,['Solvent_Additive'],,,,,,,,,,,

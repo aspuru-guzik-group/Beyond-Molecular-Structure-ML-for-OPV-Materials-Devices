@@ -9,19 +9,19 @@ DATA_DIR = pkg_resources.resource_filename(
 )
 
 FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/hw_frag/train_frag_master.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 

@@ -19,18 +19,18 @@ MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
-IMAGE_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/postprocess/OPV_Min/")
+IMAGE_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/input_representation/OPV_Min/")
 
 FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/frag_master_ml_for_opvs_from_min.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/frag_master_ml_for_opvs_from_min.csv"
 )
 
 NUM_FRAG_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/num_of_frag.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/num_of_frag.csv"
 )
 
 TRAIN_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/train_frag_master.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/train_frag_master.csv"
 )
 
 

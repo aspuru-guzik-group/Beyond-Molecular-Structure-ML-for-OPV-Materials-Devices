@@ -87,9 +87,9 @@ class MissingParameters:
             missing_df: Dataframe with Donor | HOMO_D | LUMO_D or Acceptor | HOMO_A | LUMO_A
         """
         if mol_type == "D":
-            column_names = ["Donor", "HOMO_D (eV)", "LUMO_D (eV)"]
+            column_names = ["Donor", "HOMO_D_eV", "LUMO_D_eV"]
         elif mol_type == "A":
-            column_names = ["Acceptor", "HOMO_A (eV)", "LUMO_A (eV)"]
+            column_names = ["Acceptor", "HOMO_A_eV", "LUMO_A_eV"]
         missing_df = pd.DataFrame(columns=column_names)
         missing_idx = 0
         duplicate_df = self.data.duplicated(

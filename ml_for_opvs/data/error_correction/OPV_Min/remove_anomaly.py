@@ -10,19 +10,19 @@ MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
 )
 # All postprocessing data too!
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 
@@ -53,9 +53,9 @@ class Anomaly:
                 delete_index.append(index)
             elif "TiO2:TOPD" in row.values:
                 delete_index.append(index)
-            elif self.data.at[index, "hole mobility blend (cm^2 V^-1 s^-1)"] > 0.02:
+            elif self.data.at[index, "hole_mobility_blend"] > 0.02:
                 delete_index.append(index)
-            elif self.data.at[index, "electron mobility blend (cm^2 V^-1 s^-1)"] > 0.1:
+            elif self.data.at[index, "electron_mobility_blend"] > 0.1:
                 delete_index.append(index)
 
         self.data = self.data.drop(self.data.index[delete_index])
@@ -75,8 +75,8 @@ class Anomaly:
                 self.data.at[index, "solvent"] = "o-DCB"
             if self.data.at[index, "solvent"] == "CF:DCB (80:20)":
                 self.data.at[index, "solvent"] = "o-DCB:CF (4:1)"
-            if self.data.at[index, "hole contact layer"] == "MoO3":
-                self.data.at[index, "hole contact layer"] = "MoOx"
+            if self.data.at[index, "hole_contact_layer"] == "MoO3":
+                self.data.at[index, "hole_contact_layer"] = "MoOx"
 
         self.data.to_csv(master_data_path, index=False)
 

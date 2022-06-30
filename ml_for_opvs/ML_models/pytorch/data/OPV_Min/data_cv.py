@@ -22,40 +22,40 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
 
 # for token2idx dictionary
-from ml_for_opvs.data.postprocess.OPV_Min.BRICS.brics_frag import BRIC_FRAGS
-from ml_for_opvs.data.postprocess.OPV_Min.manual_frag.manual_frag import manual_frag
+from ml_for_opvs.data.input_representation.OPV_Min.BRICS.brics_frag import BRIC_FRAGS
+from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag import manual_frag
 
 TRAIN_MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 FRAG_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/hw_frag/train_frag_master.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/hw_frag/train_frag_master.csv"
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/augmentation/train_aug_master4.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/augmentation/train_aug_master4.csv"
 )
 
 BRICS_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/BRICS/master_brics_frag.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/BRICS/master_brics_frag.csv"
 )
 
 MANUAL_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/master_manual_frag.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
 FP_MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/opv_fingerprint.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/fingerprint/opv_fingerprint.csv"
 )
 
 # For Manual Fragments!
 MANUAL_DONOR_CSV = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/donor_frags.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/manual_frag/donor_frags.csv"
 )
 
 MANUAL_ACCEPTOR_CSV = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/manual_frag/acceptor_frags.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/manual_frag/acceptor_frags.csv"
 )
 
 SEED_VAL = 4
@@ -298,9 +298,9 @@ class OPVDataModule(pl.LightningDataModule):
         """
         # convert other columns into numpy arrays
         if self.shuffled:
-            pce_array = self.data["PCE (%)_shuffled"].to_numpy().astype("float32")
+            pce_array = self.data["PCE_percent_shuffled"].to_numpy().astype("float32")
         else:
-            pce_array = self.data["PCE (%)"].to_numpy().astype("float32")
+            pce_array = self.data["PCE_percent"].to_numpy().astype("float32")
 
         # minimize range of pce between 0-1
         # find max of pce_array
@@ -485,39 +485,39 @@ class OPVDataModule(pl.LightningDataModule):
         index = 0
         while index < len(da_pair_list):
             if parameter == "electronic":
-                homo_d = self.data["HOMO_D (eV)"].to_numpy().astype("float32")
-                lumo_d = self.data["LUMO_D (eV)"].to_numpy().astype("float32")
-                homo_a = self.data["HOMO_A (eV)"].to_numpy().astype("float32")
-                lumo_a = self.data["LUMO_A (eV)"].to_numpy().astype("float32")
+                homo_d = self.data["HOMO_D_eV"].to_numpy().astype("float32")
+                lumo_d = self.data["LUMO_D_eV"].to_numpy().astype("float32")
+                homo_a = self.data["HOMO_A_eV"].to_numpy().astype("float32")
+                lumo_a = self.data["LUMO_A_eV"].to_numpy().astype("float32")
                 da_pair_list[index].append(homo_d[index])
                 da_pair_list[index].append(lumo_d[index])
                 da_pair_list[index].append(homo_a[index])
                 da_pair_list[index].append(lumo_a[index])
             elif parameter == "device":
-                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                d_a_ratio = self.data["D_A_ratio_m_m"].to_numpy().astype("float32")
                 total_solids_conc = (
-                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                    self.data["total_solids_conc_mg_mL"].to_numpy().astype("float32")
                 )
                 solvent_add_conc = (
-                    self.data["solvent additive conc. (%v/v)"]
+                    self.data["solvent_additive_conc_v_v_percent"]
                     .to_numpy()
                     .astype("float32")
                 )
                 active_layer_thickness = (
-                    self.data["active layer thickness (nm)"]
+                    self.data["active_layer_thickness_nm"]
                     .to_numpy()
                     .astype("float32")
                 )
                 annealing_temp = (
-                    self.data["annealing temperature"].to_numpy().astype("float32")
+                    self.data["annealing_temperature"].to_numpy().astype("float32")
                 )
                 hole_mobility_blend = (
-                    self.data["hole mobility blend (cm^2 V^-1 s^-1)"]
+                    self.data["hole_mobility_blend"]
                     .to_numpy()
                     .astype("float32")
                 )
                 electron_mobility_blend = (
-                    self.data["electron mobility blend (cm^2 V^-1 s^-1)"]
+                    self.data["electron_mobility_blend"]
                     .to_numpy()
                     .astype("float32")
                 )
@@ -537,15 +537,15 @@ class OPVDataModule(pl.LightningDataModule):
                     if input not in token_dict:
                         token_dict[input] = dict_idx
                         dict_idx += 1
-                hole_contact_layer = self.data["hole contact layer"]
+                hole_contact_layer = self.data["hole_contact_layer"]
                 for input in hole_contact_layer:
-                    # unique hole contact layer
+                    # unique hole_contact_layer
                     if input not in token_dict:
                         token_dict[input] = dict_idx
                         dict_idx += 1
-                electron_contact_layer = self.data["electron contact layer"]
+                electron_contact_layer = self.data["electron_contact_layer"]
                 for input in electron_contact_layer:
-                    # unique electron contact layer
+                    # unique electron_contact_layer
                     if input not in token_dict:
                         token_dict[input] = dict_idx
                         dict_idx += 1
@@ -563,22 +563,22 @@ class OPVDataModule(pl.LightningDataModule):
                 da_pair_list[index].append(electron_contact_layer[index])
 
             elif parameter == "fabrication":
-                d_a_ratio = self.data["D:A ratio (m/m)"].to_numpy().astype("float32")
+                d_a_ratio = self.data["D_A_ratio_m_m"].to_numpy().astype("float32")
                 total_solids_conc = (
-                    self.data["total solids conc. (mg/mL)"].to_numpy().astype("float32")
+                    self.data["total_solids_conc_mg_mL"].to_numpy().astype("float32")
                 )
                 solvent_add_conc = (
-                    self.data["solvent additive conc. (%v/v)"]
+                    self.data["solvent_additive_conc_v_v_percent"]
                     .to_numpy()
                     .astype("float32")
                 )
                 active_layer_thickness = (
-                    self.data["active layer thickness (nm)"]
+                    self.data["active_layer_thickness_nm"]
                     .to_numpy()
                     .astype("float32")
                 )
                 annealing_temp = (
-                    self.data["annealing temperature"].to_numpy().astype("float32")
+                    self.data["annealing_temperature"].to_numpy().astype("float32")
                 )
 
                 # tokenize non-numerical variables
@@ -697,7 +697,7 @@ class OPVDataModule(pl.LightningDataModule):
 
 def distribution_plot(data_dir):
     df = pd.read_csv(data_dir)
-    pce_array = df["PCE (%)"].to_numpy().astype("float32")
+    pce_array = df["PCE_percent"].to_numpy().astype("float32")
     # minimize range of pce between 0-1
     # find max of pce_array
     max_pce = pce_array.max()

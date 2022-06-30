@@ -522,26 +522,26 @@ class DAPairs:
             "Acceptor_SMILES",
             "Acceptor_Big_SMILES",
             "Acceptor_SELFIES",
-            "HOMO_D (eV)",
-            "LUMO_D (eV)",
-            "HOMO_A (eV)",
-            "LUMO_A (eV)",
-            "D:A ratio (m/m)",
+            "HOMO_D_eV",
+            "LUMO_D_eV",
+            "HOMO_A_eV",
+            "LUMO_A_eV",
+            "D_A_ratio_m_m",
             "solvent",
-            "total solids conc. (mg/mL)",
+            "total_solids_conc_mg_mL",
             "solvent additive",
-            "solvent additive conc. (%v/v)",
-            "active layer thickness (nm)",
-            "annealing temperature",
-            "hole contact layer",
-            "electron contact layer",
-            "hole mobility blend (cm^2 V^-1 s^-1)",
-            "electron mobility blend (cm^2 V^-1 s^-1)",
-            "PCE (%)",
-            "calc_PCE (%)",
-            "Voc (V)",
-            "Jsc (mA cm^-2)",
-            "FF (%)",
+            "solvent_additive_conc_v_v_percent",
+            "active_layer_thickness_nm",
+            "annealing_temperature",
+            "hole_contact_layer",
+            "electron_contact_layer",
+            "hole_mobility_blend",
+            "electron_mobility_blend",
+            "PCE_percent",
+            "calc_PCE_percent",
+            "Voc_V",
+            "Jsc_mA_cm_pow_neg_2",
+            "FF_percent",
         ]
         master_df = pd.DataFrame(columns=headers)
         donor_avail = list(self.donors["Donor"])
@@ -587,9 +587,9 @@ class DAPairs:
                 if isinstance(row["solvent"], str):
                     solvent = solvent.strip()
 
-                # strip whitespace of hole contact layer
-                hole_contact_layer = row["hole contact layer"]
-                if isinstance(row["hole contact layer"], str):
+                # strip whitespace of hole_contact_layer
+                hole_contact_layer = row["hole_contact_layer"]
+                if isinstance(row["hole_contact_layer"], str):
                     hole_contact_layer = hole_contact_layer.strip()
 
                 # append new donor-acceptor pair to masters dataframe
@@ -603,36 +603,36 @@ class DAPairs:
                         "Acceptor_SMILES": acceptor_smile,
                         "Acceptor_Big_SMILES": acceptor_bigsmile,
                         "Acceptor_SELFIES": acceptor_selfies,
-                        "HOMO_D (eV)": row["HOMO_D (eV)"],
-                        "LUMO_D (eV)": row["LUMO_D (eV)"],
-                        "HOMO_A (eV)": row["HOMO_A (eV)"],
-                        "LUMO_A (eV)": row["LUMO_A (eV)"],
-                        "D:A ratio (m/m)": row["D:A ratio (m/m)"],
+                        "HOMO_D_eV": row["HOMO_D_eV"],
+                        "LUMO_D_eV": row["LUMO_D_eV"],
+                        "HOMO_A_eV": row["HOMO_A_eV"],
+                        "LUMO_A_eV": row["LUMO_A_eV"],
+                        "D_A_ratio_m_m": row["D_A_ratio_m_m"],
                         "solvent": solvent,
-                        "total solids conc. (mg/mL)": row["total solids conc. (mg/mL)"],
+                        "total_solids_conc_mg_mL": row["total_solids_conc_mg_mL"],
                         "solvent additive": row["solvent additive"],
-                        "solvent additive conc. (%v/v)": row[
+                        "solvent_additive_conc_v_v_percent": row[
                             "solvent additive conc. (% v/v)"
                         ],
-                        "active layer thickness (nm)": row[
-                            "active layer thickness (nm)"
+                        "active_layer_thickness_nm": row[
+                            "active_layer_thickness_nm"
                         ],
-                        "annealing temperature": row[
+                        "annealing_temperature": row[
                             "temperature of thermal annealing (leave gap if not annealed)"
                         ],
-                        "hole contact layer": hole_contact_layer,
-                        "electron contact layer": row["electron contact layer"],
-                        "hole mobility blend (cm^2 V^-1 s^-1)": row[
-                            "hole mobility blend (cm^2 V^-1 s^-1)"
+                        "hole_contact_layer": hole_contact_layer,
+                        "electron_contact_layer": row["electron_contact_layer"],
+                        "hole_mobility_blend": row[
+                            "hole_mobility_blend"
                         ],
-                        "electron mobility blend (cm^2 V^-1 s^-1)": row[
+                        "electron_mobility_blend": row[
                             "electron mobility blend"
                         ],
-                        "PCE (%)": row["PCE (%)"],
-                        "calc_PCE (%)": row["calc_PCE"],
-                        "Voc (V)": row["Voc (V)"],
-                        "Jsc (mA cm^-2)": row["Jsc (mA cm^-2)"],
-                        "FF (%)": row["FF (%)"],
+                        "PCE_percent": row["PCE_percent"],
+                        "calc_PCE_percent": row["calc_PCE"],
+                        "Voc_V": row["Voc_V"],
+                        "Jsc_mA_cm_pow_neg_2": row["Jsc_mA_cm_pow_neg_2"],
+                        "FF_percent": row["FF_percent"],
                     },
                     ignore_index=True,
                 )
@@ -715,9 +715,9 @@ class DAPairs:
         """
         master_data = pd.read_csv(master_csv_path)
         for index, row in master_data.iterrows():
-            ratio_data = master_data.at[index, "D:A ratio (m/m)"]
+            ratio_data = master_data.at[index, "D_A_ratio_m_m"]
             solvent_add_conc_data = master_data.at[
-                index, "solvent additive conc. (%v/v)"
+                index, "solvent_additive_conc_v_v_percent"
             ]
             # ratio data
             if isinstance(ratio_data, str):
@@ -725,10 +725,10 @@ class DAPairs:
                 donor_ratio = float(ratio_list[0])
                 acceptor_ratio = float(ratio_list[1])
                 float_ratio_data = donor_ratio / acceptor_ratio
-                master_data.at[index, "D:A ratio (m/m)"] = round(float_ratio_data, 3)
+                master_data.at[index, "D_A_ratio_m_m"] = round(float_ratio_data, 3)
 
             # solvent additive conc. data
-            master_data.at[index, "solvent additive conc. (%v/v)"] = float(
+            master_data.at[index, "solvent_additive_conc_v_v_percent"] = float(
                 solvent_add_conc_data
             )
 

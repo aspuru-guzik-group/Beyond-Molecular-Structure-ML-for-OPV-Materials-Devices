@@ -12,7 +12,7 @@ import numpy as np
 import copy
 import itertools
 
-IMAGE_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/postprocess/test/")
+IMAGE_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/input_representation/test/")
 
 # Learn ReactionFromSmarts
 # print(rxn.RunReactants((Chem.MolFromSmiles("CCC(CC=O)CCC=O"),)))

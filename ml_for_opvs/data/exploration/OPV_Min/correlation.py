@@ -264,10 +264,10 @@ class Correlation:
         self.data["Density"] = ""
         self.data["Dielectric"] = ""
         self.data["Dipole"] = ""
-        self.data["log Pow"] = ""
-        self.data["Hansen Disp"] = ""
-        self.data["Hansen H-Bond"] = ""
-        self.data["Hansen Polar"] = ""
+        self.data["log_Pow"] = ""
+        self.data["Hansen_Disp"] = ""
+        self.data["Hansen_H_Bond"] = ""
+        self.data["Hansen_Polar"] = ""
         solvent_df = pd.read_csv(solvent_inventory)
         options = ["['Solvent']", "['Solvent', 'Solvent_Additive']"]
 
@@ -291,15 +291,15 @@ class Correlation:
                     "Dielectric"
                 ].values[0]
                 self.data.at[index, "Dipole"] = curr_solvent_df["Dipole"].values[0]
-                self.data.at[index, "log Pow"] = curr_solvent_df["log Pow"].values[0]
-                self.data.at[index, "Hansen Disp"] = curr_solvent_df[
-                    "Hansen Disp"
+                self.data.at[index, "log_Pow"] = curr_solvent_df["log_Pow"].values[0]
+                self.data.at[index, "Hansen_Disp"] = curr_solvent_df[
+                    "Hansen_Disp"
                 ].values[0]
-                self.data.at[index, "Hansen H-Bond"] = curr_solvent_df[
-                    "Hansen H-Bond"
+                self.data.at[index, "Hansen_H_Bond"] = curr_solvent_df[
+                    "Hansen_H_Bond"
                 ].values[0]
-                self.data.at[index, "Hansen Polar"] = curr_solvent_df[
-                    "Hansen Polar"
+                self.data.at[index, "Hansen_Polar"] = curr_solvent_df[
+                    "Hansen_Polar"
                 ].values[0]
         self.data.to_csv(master_ml_data_path, index=False)
 
