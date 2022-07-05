@@ -26,29 +26,33 @@ def main(config):
     data_df = pd.read_csv(config["dataset_path"])
     num_of_folds = config["num_of_folds"]
     seed = config["random_seed"]
-    fold_path = data_dir / Path(data_filename) / Path(config["type_of_crossval"]) 
+    fold_path = data_dir / Path(data_filename) / Path(config["type_of_crossval"])
     fold_path.mkdir(parents=True, exist_ok=True)
     if config["type_of_crossval"] == "KFold":
         kf = KFold(n_splits=num_of_folds, shuffle=True, random_state=seed)
-        for i in range(num_of_folds):
-            result = next(kf.split(data_df), None)
-            train = data_df.iloc[result[0]]
-            valid = data_df.iloc[result[1]]
+        i = 0
+        for train_index, test_index in kf.split(data_df):
+            train = data_df.iloc[train_index]
+            valid = data_df.iloc[test_index]
             train_dir = fold_path / f"input_train_{i}.csv"
             valid_dir = fold_path / f"input_valid_{i}.csv"
             train.to_csv(train_dir, index=False)
             valid.to_csv(valid_dir, index=False)
+            i += 1
 
     elif config["type_of_crossval"] == "StratifiedKFold":
         kf = StratifiedKFold(n_splits=num_of_folds, shuffle=True, random_state=seed)
-        for i in range(num_of_folds):
-            result = next(kf.split(data_df, data_df[config["stratified_label"]]), None)
-            train = data_df.iloc[result[0]]
-            valid = data_df.iloc[result[1]]
+        i = 0
+        for train_index, test_index in kf.split(
+            data_df, data_df[config["stratified_label"]]
+        ):
+            train = data_df.iloc[train_index]
+            valid = data_df.iloc[test_index]
             train_dir = fold_path / f"input_train_{i}.csv"
             valid_dir = fold_path / f"input_valid_{i}.csv"
             train.to_csv(train_dir, index=False)
             valid.to_csv(valid_dir, index=False)
+            i += 1
     else:
         raise ValueError(
             "Wrong KFold operation. Choose between KFold or StratifiedKFold."
@@ -92,5 +96,5 @@ if __name__ == "__main__":
 
 ### EXAMPLE USE
 """
-python ../../cross_validation.py --dataset_path ~/Research/Repos/da_for_polymers/da_for_polymers/data/input_representation/PV_Wang/SMILES/master_smiles.csv --num_of_folds 5 --type_of_crossval StratifiedKFold --stratified_label Solvent
+python ../../cross_validation.py --dataset_path ~/Research/Repos/ml_for_opvs/ml_for_opvs/data/input_representation/OPV_Min/aug_SMILES/train_aug_master5.csv --num_of_folds 5 --type_of_crossval KFold
 """
