@@ -12,6 +12,10 @@ MASTER_ML_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
+MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
+)
+
 HOMO_D_DISTRIBUTION = pkg_resources.resource_filename(
     "ml_for_opvs", "data/error_correction/OPV_Min/homo_donor_distribution_plot.png"
 )
@@ -26,6 +30,22 @@ HOMO_A_DISTRIBUTION = pkg_resources.resource_filename(
 
 LUMO_A_DISTRIBUTION = pkg_resources.resource_filename(
     "ml_for_opvs", "data/error_correction/OPV_Min/lumo_acceptor_distribution_plot.png"
+)
+
+HOMO_D_DISTRIBUTION_APPROX = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/homo_approx_donor_distribution_plot.png"
+)
+
+LUMO_D_DISTRIBUTION_APPROX = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/lumo_approx_donor_distribution_plot.png"
+)
+
+HOMO_A_DISTRIBUTION_APPROX = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/homo_approx_acceptor_distribution_plot.png"
+)
+
+LUMO_A_DISTRIBUTION_APPROX = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/error_correction/OPV_Min/lumo_approx_acceptor_distribution_plot.png"
 )
 
 STATS_D_HOMO = pkg_resources.resource_filename(
@@ -284,12 +304,19 @@ class MissingParameters:
         stats_lumo_df.to_csv(stats_lumo_path, index=False)
 
 
+# missing = MissingParameters(MASTER_ML_DATA_PLOT)
+
+# donor_dup = missing.search_duplicate("D")
+# missing.plot_all(donor_dup, HOMO_D_DISTRIBUTION, LUMO_D_DISTRIBUTION)
+# acceptor_dup = missing.search_duplicate("A")
+# missing.plot_all(acceptor_dup, HOMO_A_DISTRIBUTION, LUMO_A_DISTRIBUTION)
+
+# missing.avg_stdev_for_homolumo(donor_dup, STATS_D_HOMO, STATS_D_LUMO)
+# missing.avg_stdev_for_homolumo(acceptor_dup, STATS_A_HOMO, STATS_A_LUMO)
+
 missing = MissingParameters(MASTER_ML_DATA)
 
 donor_dup = missing.search_duplicate("D")
-# missing.plot_all(donor_dup, HOMO_D_DISTRIBUTION, LUMO_D_DISTRIBUTION)
+missing.plot_all(donor_dup, HOMO_D_DISTRIBUTION_APPROX, LUMO_D_DISTRIBUTION_APPROX)
 acceptor_dup = missing.search_duplicate("A")
-# missing.plot_all(acceptor_dup, HOMO_A_DISTRIBUTION, LUMO_A_DISTRIBUTION)
-
-missing.avg_stdev_for_homolumo(donor_dup, STATS_D_HOMO, STATS_D_LUMO)
-missing.avg_stdev_for_homolumo(acceptor_dup, STATS_A_HOMO, STATS_A_LUMO)
+missing.plot_all(acceptor_dup, HOMO_A_DISTRIBUTION_APPROX, LUMO_A_DISTRIBUTION_APPROX)
