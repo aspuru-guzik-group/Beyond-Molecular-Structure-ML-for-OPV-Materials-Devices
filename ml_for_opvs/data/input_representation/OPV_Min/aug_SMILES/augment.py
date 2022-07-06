@@ -5,14 +5,17 @@ import pkg_resources
 import random
 from rdkit import Chem
 
-from ml_for_opvs.ML_models.sklearn.data.OPV_Min.tokenizer import Tokenizer
+from ml_for_opvs.ML_models.sklearn.tokenizer import Tokenizer
 
 MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/input_representation/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/input_representation/OPV_Min/aug_SMILES/train_aug_master5.csv")
+    "ml_for_opvs", "data/input_representation/OPV_Min/aug_SMILES/train_aug_master.csv")
+
+# AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
+#     "ml_for_opvs", "data/input_representation/OPV_Min/aug_SMILES/train_aug_master.parquet")
 
 
 def pad_input(tokenized_array, seq_len):
@@ -50,7 +53,7 @@ def aug_smi_doRandom(smiles_data, augment_smiles_data, num_of_augment):
     random.seed(1)
     train_aug_df = pd.read_csv(smiles_data)
     train_aug_df["DA_pair_aug"] = ""
-
+    total_aug = 0
     for i in range(len(train_aug_df["Donor"])):
         augmented_da_list = []
         augmented_ad_list = []
@@ -80,9 +83,13 @@ def aug_smi_doRandom(smiles_data, augment_smiles_data, num_of_augment):
                 augmented_da_list.append(donor_aug_smi + "." + acceptor_aug_smi)
                 augmented_ad_list.append(acceptor_aug_smi + "." + donor_aug_smi)
                 augmented += 1
+                total_aug += 1
 
         train_aug_df.at[i, "DA_pair_aug"] = augmented_da_list
+    
+    print("TOTAL AUGMENTED: ", total_aug)
 
+    # train_aug_df.to_parquet(augment_smiles_data, index=False, engine="fastparquet")
     train_aug_df.to_csv(augment_smiles_data, index=False)
 
 def aug_smi_tokenize(train_aug_data):
@@ -96,6 +103,8 @@ def aug_smi_tokenize(train_aug_data):
         new columns to train_aug_master.csv: DA_pair_tokenized_aug, AD_pair_tokenized_aug 
     """
     aug_smi_data = pd.read_csv(train_aug_data)
+    # aug_smi_data = pd.read_parquet(train_aug_data, engine="fastparquet")
+    # print(aug_smi_data.head())
 
     # initialize new columns
     aug_smi_data["DA_pair_tokenized_aug"] = " "
@@ -115,7 +124,7 @@ def aug_smi_tokenize(train_aug_data):
 
     for i in range(len(da_aug_list)):
         tokenized_list = []
-        da_list = ast.literal_eval(da_aug_list[i])
+        da_list = da_aug_list[i]
         for da in da_list:
             tokenized_smi = [
                 token2idx[token] if token in token2idx else 0 for token in da
@@ -128,7 +137,7 @@ def aug_smi_tokenize(train_aug_data):
     # TODO: add padding in a systematic way (only at beginning)
     for i in range(len(da_aug_list)):
         tokenized_list = []
-        da_list = ast.literal_eval(da_aug_list[i])
+        da_list = da_aug_list[i]
         for da in da_list:
             tokenized_smi = [
                 token2idx[token] if token in token2idx else 1 for token in da
@@ -137,7 +146,8 @@ def aug_smi_tokenize(train_aug_data):
             tokenized_list.append(tokenized_smi)
         aug_smi_data.at[i, "DA_pair_tokenized_aug"] = tokenized_list
 
-
+    # aug_smi_data.fillna(np.NaN, inplace=True)
+    # aug_smi_data.to_parquet(train_aug_data, index=False, engine="fastparquet")
     aug_smi_data.to_csv(train_aug_data, index=False)
 
 
