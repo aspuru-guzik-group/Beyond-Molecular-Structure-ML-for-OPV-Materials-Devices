@@ -1,4 +1,4 @@
-"""File that contains all functions to go from .xlsx, to preprocessed data and postprocessed data ready for training.
+"""File that contains all functions to go from .xlsx, to preprocessed data and input_representationed data ready for training.
 """
 
 from ml_for_opvs.data.preprocess.clean_donors_acceptors import (
@@ -100,8 +100,10 @@ anomaly.remove_anomaly(MASTER_ML_DATA_PLOT)
 anomaly.correct_anomaly(MASTER_ML_DATA)
 anomaly.correct_anomaly(MASTER_ML_DATA_PLOT)
 
-# # Step 4c - Fill empty values for Thermal Annealing, and Solvent Additives
+# # Step 4c - Fill empty values for Thermal Annealing, and solvent_additives
 pairings.fill_empty_values(MASTER_ML_DATA)
+
+# TODO: Add HOMO/LUMO approximation.
 
 # Step 5
 # Add solvents
@@ -111,7 +113,7 @@ corr_plot = Correlation(MASTER_ML_DATA)
 corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA)
 
 # Step 6
-# Postprocessing!!!
+# input_representationing!!!
 frag_dict = bric_frag(MASTER_ML_DATA)
 
 aug_smi_doRandom(MASTER_ML_DATA, AUGMENT_SMILES_DATA, 5)
