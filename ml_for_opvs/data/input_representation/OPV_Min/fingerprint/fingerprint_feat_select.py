@@ -5,20 +5,20 @@ from cmath import nan
 
 # OPV data after pre-processing
 FP_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/postprocess/OPV_Min/fingerprint/master_fingerprint.csv"
+    "ml_for_opvs", "data/input_representation/OPV_Min/fingerprint/master_fingerprint.csv"
 )
 
 # create lists of groups of selected features
-none = ['Unnamed: 0', 'Donor', 'Acceptor', 'PCE (%)', 'calc_PCE (%)', 'Voc (V)', 'Jsc (mA cm^-2)', 'FF (%)','DA_FP_radius_3_nbits_512']
-electronic = ['Unnamed: 0', 'Donor', 'Acceptor', 'HOMO_D (eV)', 'LUMO_D (eV)', 'HOMO_A (eV)', 'LUMO_A (eV)', 'PCE (%)', 'calc_PCE (%)', 'Voc (V)', 'Jsc (mA cm^-2)', 'FF (%)', 'DA_FP_radius_3_nbits_512']
-electronic_only = ['Unnamed: 0', 'HOMO_D (eV)', 'LUMO_D (eV)', 'HOMO_A (eV)', 'LUMO_A (eV)', 'PCE (%)', 'calc_PCE (%)', 'Voc (V)', 'Jsc (mA cm^-2)', 'FF (%)']
-device = ['Unnamed: 0', 'Donor', 'Acceptor', 'D:A ratio (m/m)', 'solvent', 'total solids conc. (mg/mL)', 'solvent additive', 'solvent additive conc. (%v/v)', 'active layer thickness (nm)', 'annealing temperature', 'hole contact layer', 'electron contact layer', 'hole mobility blend (cm^2 V^-1 s^-1)', 'electron mobility blend (cm^2 V^-1 s^-1)', 'PCE (%)', 'calc_PCE (%)', 'Voc (V)', 'Jsc (mA cm^-2)', 'FF (%)', 'DA_FP_radius_3_nbits_512']
-device_solvent = ['Unnamed: 0', 'Donor', 'Acceptor', 'D:A ratio (m/m)', 'total solids conc. (mg/mL)', 'solvent additive', 'solvent additive conc. (%v/v)', 'active layer thickness (nm)', 'annealing temperature', 'hole contact layer', 'electron contact layer', 'hole mobility blend (cm^2 V^-1 s^-1)', 'electron mobility blend (cm^2 V^-1 s^-1)', 'PCE (%)', 'calc_PCE (%)', 'Voc (V)', 'Jsc (mA cm^-2)', 'FF (%)', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar', 'DA_FP_radius_3_nbits_512']
-fabrication = ['Unnamed: 0', 'Donor', 'Acceptor', 'D:A ratio (m/m)', 'solvent', 'total solids conc. (mg/mL)', 'solvent additive', 'solvent additive conc. (%v/v)', 'active layer thickness (nm)', 'annealing temperature', 'PCE (%)', 'calc_PCE (%)', 'Voc (V)', 'Jsc (mA cm^-2)', 'FF (%)', 'DA_FP_radius_3_nbits_512']
-fabrication_solvent = ['Unnamed: 0', 'Donor', 'Acceptor', 'D:A ratio (m/m)', 'total solids conc. (mg/mL)', 'solvent additive', 'solvent additive conc. (%v/v)', 'active layer thickness (nm)', 'annealing temperature', 'PCE (%)', 'calc_PCE (%)', 'Voc (V)', 'Jsc (mA cm^-2)', 'FF (%)', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar', 'DA_FP_radius_3_nbits_512']
-device_solvent_only = ['Unnamed: 0', 'Donor', 'Acceptor', 'D:A ratio (m/m)', 'total solids conc. (mg/mL)', 'solvent additive', 'solvent additive conc. (%v/v)', 'active layer thickness (nm)', 'annealing temperature', 'hole contact layer', 'electron contact layer', 'hole mobility blend (cm^2 V^-1 s^-1)', 'electron mobility blend (cm^2 V^-1 s^-1)', 'PCE (%)', 'calc_PCE (%)', 'Voc (V)', 'Jsc (mA cm^-2)', 'FF (%)', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar']
-fabrication_solvent_only = ['Unnamed: 0', 'Donor', 'Acceptor', 'D:A ratio (m/m)', 'total solids conc. (mg/mL)', 'solvent additive', 'solvent additive conc. (%v/v)', 'active layer thickness (nm)', 'annealing temperature', 'PCE (%)', 'calc_PCE (%)', 'Voc (V)', 'Jsc (mA cm^-2)', 'FF (%)', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar']
-fabrication_solvent_minus_active_layer = ['Unnamed: 0', 'Donor', 'Acceptor', 'D:A ratio (m/m)', 'total solids conc. (mg/mL)', 'solvent additive', 'solvent additive conc. (%v/v)', 'annealing temperature', 'PCE (%)', 'calc_PCE (%)', 'Voc (V)', 'Jsc (mA cm^-2)', 'FF (%)', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar', 'DA_FP_radius_3_nbits_512']
+none = ['Unnamed: 0', 'Donor', 'Acceptor', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent','DA_FP_radius_3_nbits_512']
+electronic = ['Unnamed: 0', 'Donor', 'Acceptor', 'HOMO_D_eV', 'LUMO_D_eV', 'HOMO_A_eV', 'LUMO_A_eV', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'DA_FP_radius_3_nbits_512']
+electronic_only = ['Unnamed: 0', 'HOMO_D_eV', 'LUMO_D_eV', 'HOMO_A_eV', 'LUMO_A_eV', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent']
+device = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'solvent', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'hole_contact_layer', 'electron_contact_layer', 'hole_mobility_blend_cm_2_V_neg1_s_neg1', 'electron_mobility_blend_cm_2_V_neg1_s_neg1', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'DA_FP_radius_3_nbits_512']
+device_solvent = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'hole_contact_layer', 'electron_contact_layer', 'hole_mobility_blend_cm_2_V_neg1_s_neg1', 'electron_mobility_blend_cm_2_V_neg1_s_neg1', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log_Pow', 'Hansen_Disp', 'Hansen_H_Bond', 'Hansen_Polar',  'DA_FP_radius_3_nbits_512']
+fabrication = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'solvent', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'DA_FP_radius_3_nbits_512']
+fabrication_solvent = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log_Pow', 'Hansen_Disp', 'Hansen_H_Bond', 'Hansen_Polar',  'DA_FP_radius_3_nbits_512']
+device_solvent_only = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'hole_contact_layer', 'electron_contact_layer', 'hole_mobility_blend_cm_2_V_neg1_s_neg1', 'electron_mobility_blend_cm_2_V_neg1_s_neg1', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar']
+fabrication_solvent_only = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar']
+fabrication_solvent_minus_active_layer = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'annealing_temperature', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log_Pow', 'Hansen_Disp', 'Hansen_H_Bond', 'Hansen_Polar',  'DA_FP_radius_3_nbits_512']
 
 # create a dictionary with feature group's name as the key and the feature list as the value 
 feature_dict = {'none' : none,'electronic': electronic,'electronic_only': electronic_only, 'device': device, 'device_solvent': device_solvent, 'fabrication': fabrication, 'fabrication_solvent': fabrication_solvent, 'device_solvent_only': device_solvent_only, 'fabrication_solvent_only': fabrication_solvent_only, 'fabrication_solvent_minus_active_layer': fabrication_solvent_minus_active_layer}
@@ -49,7 +49,7 @@ class FeatureSelection:
         # create a list of all features' names
         feat_full = self.data.columns.tolist()
         # create a list of features that will not be included in training
-        feat_to_drop = list(set(feat_full ) - set(feature_dict[feat_list]))
+        feat_to_drop = list(set(feat_full) - set(feature_dict[feat_list]))
         # create a dataframe where unselected features are dropped
         df_full = self.data.drop(columns = feat_to_drop)
         # delete all rows that have at least 1 empty entry
@@ -60,4 +60,3 @@ class FeatureSelection:
 fs = FeatureSelection(FP_DATA)
 
 fs.feat_select('electronic')
-

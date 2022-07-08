@@ -1,4 +1,4 @@
-"""File that contains all functions to go from .xlsx, to preprocessed data and input_representationed data ready for training.
+"""File that contains all functions to go from .csv, to preprocessed data and input_representation data ready for training.
 """
 
 from ml_for_opvs.data.preprocess.clean_donors_acceptors import (
@@ -27,6 +27,7 @@ from ml_for_opvs.data.error_correction.OPV_Min.unique_opvs import (
 )
 
 from ml_for_opvs.data.error_correction.OPV_Min.remove_anomaly import Anomaly
+from ml_for_opvs.data.error_correction.OPV_Min.approximate_homo_lumo import approximate_value
 
 from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import aug_smi_doRandom, aug_smi_tokenize
 from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.morgan_fingerprints import create_master_fp
@@ -103,7 +104,8 @@ anomaly.correct_anomaly(MASTER_ML_DATA_PLOT)
 # # Step 4c - Fill empty values for Thermal Annealing, and solvent_additives
 pairings.fill_empty_values(MASTER_ML_DATA)
 
-# TODO: Add HOMO/LUMO approximation.
+# Add HOMO/LUMO approximation.
+approximate_value(MASTER_ML_DATA)
 
 # Step 5
 # Add solvents

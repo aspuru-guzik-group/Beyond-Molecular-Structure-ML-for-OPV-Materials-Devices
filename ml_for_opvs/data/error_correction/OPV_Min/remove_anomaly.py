@@ -8,7 +8,7 @@ MASTER_ML_DATA = pkg_resources.resource_filename(
 MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
 )
-# All postprocessing data too!
+# All input_representationing data too!
 AUG_SMI_MASTER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/input_representation/OPV_Min/augmentation/train_aug_master4.csv"
 )

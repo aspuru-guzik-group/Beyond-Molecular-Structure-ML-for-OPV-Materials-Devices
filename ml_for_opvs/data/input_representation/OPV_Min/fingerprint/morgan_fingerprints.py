@@ -6,9 +6,8 @@ import pandas as pd
 import numpy as np
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/input_representation/OPV_Min/master_ml_for_opvs_from_min.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
-
 FP_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/input_representation/OPV_Min/fingerprint/master_fingerprint.csv"
 )
@@ -63,4 +62,4 @@ def create_master_fp(master_data, fp_path, radius: int, nbits: int):
 
 
 # put master_ml_data first, and then when you create more fingerprints, use fp_data
-# create_master_fp(MASTER_ML_DATA, FP_DATA, 3, 512)
+create_master_fp(MASTER_ML_DATA, FP_DATA, 3, 512)

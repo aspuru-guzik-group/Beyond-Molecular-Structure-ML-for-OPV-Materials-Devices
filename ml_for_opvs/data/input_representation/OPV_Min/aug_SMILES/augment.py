@@ -8,7 +8,7 @@ from rdkit import Chem
 from ml_for_opvs.ML_models.sklearn.tokenizer import Tokenizer
 
 MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/input_representation/OPV_Min/master_ml_for_opvs_from_min.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(

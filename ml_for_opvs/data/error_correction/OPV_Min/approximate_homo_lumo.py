@@ -78,8 +78,11 @@ def approximate_value(data_path: str):
                 # plt.show()
                 unique_dict[mol_key] = [mu, std]
     
+    
     # update DataFrame with Gaussian Fit homo/lumo energies
     for index, row in data.iterrows():
+        if data.at[index, "Donor"] == "J71" and data.at[index, "Acceptor"] == "ITC6-IC":
+            print(row)
         try:
             data.at[index, "HOMO_D_eV"] = d_unique_homo_dict[row["Donor"]][0]
         except:
@@ -96,9 +99,11 @@ def approximate_value(data_path: str):
             data.at[index,"LUMO_A_eV"] = a_unique_lumo_dict[row["Acceptor"]][0]
         except:
             print("No value for this molecule", row["Acceptor"])
-    
+    # print(d_unique_homo_dict, a_unique_homo_dict, d_unique_lumo_dict, a_unique_lumo_dict)
+    # print(data)
     data.to_csv(data_path, index=False)
                 
 
 if __name__ == "__main__":
     approximate_value(MASTER_ML_DATA)
+    pass

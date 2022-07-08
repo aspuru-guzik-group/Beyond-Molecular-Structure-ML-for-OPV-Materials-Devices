@@ -308,36 +308,36 @@ class UniqueOPVs:
 # run functions to create missing DONOR/ACCEPTORS.
 # WARNING: Do not run these unless you want to restart.
 # WARNING: The correct structures have been manually input for the missing DONORS/ACCEPTORS.
-unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_CLEAN)
+# unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_CLEAN)
 
-# min_unique_donors = unique_opvs.unique_list("D", "min")
-# min_unique_acceptors = unique_opvs.unique_list("A", "min")
+# # min_unique_donors = unique_opvs.unique_list("D", "min")
+# # min_unique_acceptors = unique_opvs.unique_list("A", "min")
 
-# clean_unique_donors = unique_opvs.unique_list("D", "clean")
-# clean_unique_acceptors = unique_opvs.unique_list("A", "clean")
+# # clean_unique_donors = unique_opvs.unique_list("D", "clean")
+# # clean_unique_acceptors = unique_opvs.unique_list("A", "clean")
 
-# missing_donors = unique_opvs.filter(min_unique_donors, clean_unique_donors)
-# missing_acceptors = unique_opvs.filter(min_unique_acceptors, clean_unique_acceptors)
+# # missing_donors = unique_opvs.filter(min_unique_donors, clean_unique_donors)
+# # missing_acceptors = unique_opvs.filter(min_unique_acceptors, clean_unique_acceptors)
 
-# missing_smi_donors = unique_opvs.filter_SMILES(missing_donors, "D")
-# missing_smi_acceptors = unique_opvs.filter_SMILES(missing_acceptors, "A")
+# # missing_smi_donors = unique_opvs.filter_SMILES(missing_donors, "D")
+# # missing_smi_acceptors = unique_opvs.filter_SMILES(missing_acceptors, "A")
 
-# print("NUM_missing_donors: ", len(missing_donors))
-# print("NUM_missing_acceptors: ", len(missing_acceptors))
+# # print("NUM_missing_donors: ", len(missing_donors))
+# # print("NUM_missing_acceptors: ", len(missing_acceptors))
 
-# print("NUM_missing_smi_donors: ", len(missing_smi_donors))
-# print("NUM_missing_smi_acceptors: ", len(missing_smi_acceptors))
+# # print("NUM_missing_smi_donors: ", len(missing_smi_donors))
+# # print("NUM_missing_smi_acceptors: ", len(missing_smi_acceptors))
 
-# unique_opvs.create_missing_csv(missing_smi_donors, "D")
+# # unique_opvs.create_missing_csv(missing_smi_donors, "D")
 
-unique_opvs.clean_up_missing()
+# unique_opvs.clean_up_missing()
 
-# STEP 2 - takes place here
-# concatenate for donors
-unique_opvs.concat_missing_and_clean(MISSING_SMI_DONOR, CLEAN_DONOR, "D")
+# # STEP 2 - takes place here
+# # concatenate for donors
+# unique_opvs.concat_missing_and_clean(MISSING_SMI_DONOR, CLEAN_DONOR, "D")
 
-# concatenate for acceptors
-unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
+# # concatenate for acceptors
+# unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
 
 # compare Google Sheets and ChemDraw file
 # unique_opvs.compare(COMPARE_PATH, CHEMDRAW_DONOR, CHEMDRAW_ACCEPTOR)

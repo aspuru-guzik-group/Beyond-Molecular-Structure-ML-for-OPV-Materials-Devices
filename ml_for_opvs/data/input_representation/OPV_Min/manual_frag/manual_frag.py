@@ -41,7 +41,7 @@ OPV_DATA = pkg_resources.resource_filename(
 )
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/input_representation/OPV_Min/master_ml_for_opvs_from_min.csv",
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv",
 )
 
 
@@ -359,7 +359,7 @@ def tokenize_frag(list_of_frag, frag_dict, max_seq_length):
 
     return tokenized_list
 
-def create_manual_json(donor_data_path, acceptor_data_path, opv_data_path, frag_dict, master_manual_path):
+def create_manual_csv(donor_data_path, acceptor_data_path, opv_data_path, frag_dict, master_manual_path):
     """
     Creates master data file for manual frags
 
@@ -557,7 +557,7 @@ def export_manual_frag():
     print(frag_dict)
     # # print(len(frag_dict))
     bigsmiles_from_frag(FRAG_DONOR_DIR, FRAG_ACCEPTOR_DIR)
-    create_manual_json(FRAG_DONOR_DIR, FRAG_ACCEPTOR_DIR, MASTER_ML_DATA, frag_dict, MASTER_MANUAL_DATA)
+    create_manual_csv(FRAG_DONOR_DIR, FRAG_ACCEPTOR_DIR, MASTER_ML_DATA, frag_dict, MASTER_MANUAL_DATA)
 
 
 if __name__ == "__main__":

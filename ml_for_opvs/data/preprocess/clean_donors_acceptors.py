@@ -529,7 +529,7 @@ class DAPairs:
             "D_A_ratio_m_m",
             "solvent",
             "total_solids_conc_mg_mL",
-            "solvent additive",
+            "solvent_additive",
             "solvent_additive_conc_v_v_percent",
             "active_layer_thickness_nm",
             "annealing_temperature",
@@ -540,7 +540,7 @@ class DAPairs:
             "PCE_percent",
             "calc_PCE_percent",
             "Voc_V",
-            "Jsc_mA_cm_pow_neg_2",
+            "Jsc_mA_cm_pow_neg2",
             "FF_percent",
         ]
         master_df = pd.DataFrame(columns=headers)
@@ -610,9 +610,9 @@ class DAPairs:
                         "D_A_ratio_m_m": row["D_A_ratio_m_m"],
                         "solvent": solvent,
                         "total_solids_conc_mg_mL": row["total_solids_conc_mg_mL"],
-                        "solvent additive": row["solvent additive"],
+                        "solvent_additive": row["solvent_additive"],
                         "solvent_additive_conc_v_v_percent": row[
-                            "solvent additive conc. (% v/v)"
+                            "solvent_additive_conc (% v/v)"
                         ],
                         "active_layer_thickness_nm": row[
                             "active_layer_thickness_nm"
@@ -626,12 +626,12 @@ class DAPairs:
                             "hole_mobility_blend"
                         ],
                         "electron_mobility_blend": row[
-                            "electron mobility blend"
+                            "electron_mobility_blend"
                         ],
                         "PCE_percent": row["PCE_percent"],
                         "calc_PCE_percent": row["calc_PCE"],
                         "Voc_V": row["Voc_V"],
-                        "Jsc_mA_cm_pow_neg_2": row["Jsc_mA_cm_pow_neg_2"],
+                        "Jsc_mA_cm_pow_neg2": row["Jsc_mA_cm_pow_neg2"],
                         "FF_percent": row["FF_percent"],
                     },
                     ignore_index=True,
@@ -641,7 +641,7 @@ class DAPairs:
     def fill_empty_values(self, master_csv_path):
         """
         Function that fills in NaN values because it is reasonable.
-        Ex. Solvent additive does not have to be present. Therefore, "N/A" should replace NaN        
+        Ex. solvent_additive does not have to be present. Therefore, "N/A" should replace NaN        
         
         Args:
             master_csv_path: path to the processed master file for future data representation modifications
@@ -711,7 +711,7 @@ class DAPairs:
 
     def convert_str_to_float(self, master_csv_path):
         """
-        Converts D:A ratio and solvent additive conc. string representation to float
+        Converts D_A_ratio and solvent_additive_conc string representation to float
         """
         master_data = pd.read_csv(master_csv_path)
         for index, row in master_data.iterrows():
@@ -727,7 +727,7 @@ class DAPairs:
                 float_ratio_data = donor_ratio / acceptor_ratio
                 master_data.at[index, "D_A_ratio_m_m"] = round(float_ratio_data, 3)
 
-            # solvent additive conc. data
+            # solvent_additive_conc data
             master_data.at[index, "solvent_additive_conc_v_v_percent"] = float(
                 solvent_add_conc_data
             )
@@ -758,15 +758,15 @@ class DAPairs:
 # # # # # Step 1d - canonSMILES to remove %10-%100
 # acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
 
-# Step 1e - Fragmentation
+# # Step 1e - Fragmentation
 # donors.delete_r(CLEAN_DONOR_CSV)
 # acceptors.delete_r(CLEAN_ACCEPTOR_CSV)
 
-# Step 2 - ERROR CORRECTION (fill in missing D/A)
+# # Step 2 - ERROR CORRECTION (fill in missing D/A)
 
-# Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
+# # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 
-# Step 4
+# # Step 4
 # pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 # pairings.create_master_csv(MASTER_ML_DATA)
 # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
@@ -775,7 +775,7 @@ class DAPairs:
 # pairings.convert_str_to_float(MASTER_ML_DATA)
 # pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
 
-# # Step 4c - Fill empty values for Thermal Annealing, and Solvent Additives
+# # Step 4c - Fill empty values for Thermal Annealing, and solvent_additives
 # pairings.fill_empty_values(MASTER_ML_DATA)
 
 # Step 4d - Remove anomalies!

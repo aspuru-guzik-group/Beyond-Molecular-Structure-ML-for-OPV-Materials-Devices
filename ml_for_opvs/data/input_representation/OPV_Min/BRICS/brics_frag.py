@@ -12,7 +12,7 @@ import copy
 import ast
 
 MASTER_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/input_representation/OPV_Min/master_ml_for_opvs_from_min.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 BRICS_FRAG_DATA = pkg_resources.resource_filename(
@@ -158,6 +158,6 @@ def frag_visualization(frag_dict):
     display(img)
 
 
-frag_dict = bric_frag(MASTER_DATA)
+# frag_dict = bric_frag(MASTER_DATA)
 # print(frag_dict)
 # b_frag.frag_visualization(frag_dict)
