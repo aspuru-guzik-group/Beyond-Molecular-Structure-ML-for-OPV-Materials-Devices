@@ -192,7 +192,7 @@ def main(config: dict):
         # save model, outputs, generates new directory based on training/dataset/model/features/target
         results_path: Path = Path(os.path.abspath(config["results_path"]))
         model_dir_path: Path = results_path / "{}".format(config["model_type"])
-        feature_dir_path: Path = model_dir_path / "{}".format(config["feature_names"])
+        feature_dir_path: Path = model_dir_path / "{}".format(str(column_names))
         target_dir_path: Path = feature_dir_path / "{}".format(config["target_name"])
         # create folders if not present
         try:
