@@ -1,4 +1,5 @@
 import copy
+from ctypes import Union
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -81,8 +82,8 @@ def approximate_value(data_path: str):
     
     # update DataFrame with Gaussian Fit homo/lumo energies
     for index, row in data.iterrows():
-        if data.at[index, "Donor"] == "J71" and data.at[index, "Acceptor"] == "ITC6-IC":
-            print(row)
+        # if data.at[index, "Donor"] == "J71" and data.at[index, "Acceptor"] == "ITC6-IC":
+        #     print(row)
         try:
             data.at[index, "HOMO_D_eV"] = d_unique_homo_dict[row["Donor"]][0]
         except:
@@ -102,8 +103,38 @@ def approximate_value(data_path: str):
     # print(d_unique_homo_dict, a_unique_homo_dict, d_unique_lumo_dict, a_unique_lumo_dict)
     # print(data)
     data.to_csv(data_path, index=False)
-                
+
+def find_missing_homo_lumo(data_path:str) -> list:
+    """
+
+    Args:
+        data_path (str): Filepath to .csv
+
+    Returns:
+         missing_d: list of donors with missing homo or lumo
+         missing_a: list of acceptors with missing homo or lumo
+    """
+    data: pd.DataFrame = pd.read_csv(data_path)
+    bool_homo_d_series = pd.isnull(data["HOMO_D_eV"])
+    bool_lumo_d_series = pd.isnull(data["LUMO_D_eV"])
+    bool_homo_a_series = pd.isnull(data["HOMO_A_eV"])
+    bool_lumo_a_series = pd.isnull(data["LUMO_A_eV"])
+    missing_homo_d = data[bool_homo_d_series]["Donor"]
+    missing_lumo_d = data[bool_lumo_d_series]["Donor"]
+    missing_homo_a = data[bool_homo_a_series]["Acceptor"]
+    missing_lumo_a = data[bool_lumo_a_series]["Acceptor"]
+    missing_d = set(missing_homo_d) | set(missing_lumo_d)
+    missing_a = set(missing_homo_a) | set(missing_lumo_a)
+    print("missing_homo_d", missing_homo_d, "missing_lumo_d", missing_lumo_d)
+    print("missing_homo_a", missing_homo_a, "missing_lumo_a", missing_lumo_a)
+    print(missing_d)
+    print(missing_a)
+    print(len(missing_d), len(missing_a))
+    return missing_d, missing_a
+
+            
 
 if __name__ == "__main__":
-    approximate_value(MASTER_ML_DATA)
+    # approximate_value(MASTER_ML_DATA)
+    find_missing_homo_lumo(MASTER_ML_DATA)
     pass
