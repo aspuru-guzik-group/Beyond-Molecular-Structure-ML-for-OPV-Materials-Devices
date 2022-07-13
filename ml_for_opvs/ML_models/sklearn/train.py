@@ -293,12 +293,12 @@ if __name__ == "__main__":
         "--feature_names",
         type=str,
         default=None,
-        help="Choose input features. Format is: ex. T_K,P_Mpa.",
+        help="Choose input features. Format is: ex. D_A_ratio_m_m,solvent",
     )
     parser.add_argument(
         "--target_name",
         type=str,
-        help="Choose target value. Format is ex. a_separation_factor",
+        help="Choose target value. Format is ex. calc_PCE_percent",
     )
     parser.add_argument("--model_type", type=str, help="Choose model type. (RF, BRT)")
     parser.add_argument(
