@@ -10,7 +10,7 @@ from ml_for_opvs.data.preprocess.clean_donors_acceptors import (
 
 OPV_MIN = pkg_resources.resource_filename(
     "ml_for_opvs",
-    "data/raw/OPV_Min/Machine Learning OPV Parameters - device_params.csv",
+    "data/raw/OPV_Min/FINAL Machine Learning OPV Parameters - ML Training Data.csv",
 )
 
 # OPV data after pre-processing

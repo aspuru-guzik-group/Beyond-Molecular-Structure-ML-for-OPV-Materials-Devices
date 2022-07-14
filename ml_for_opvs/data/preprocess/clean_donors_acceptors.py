@@ -26,7 +26,7 @@ CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
 # From OPV Google Drive
 OPV_DATA = pkg_resources.resource_filename(
     "ml_for_opvs",
-    "data/raw/OPV_Min/Machine Learning OPV Parameters - device_params.csv",
+    "data/raw/OPV_Min/FINAL Machine Learning OPV Parameters - ML Training Data.csv",
 )
 OPV_DONOR_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/raw/OPV_Min/Machine Learning OPV Parameters - Donors.csv"
@@ -588,8 +588,8 @@ class DAPairs:
                     solvent = solvent.strip()
 
                 # strip whitespace of hole_contact_layer
-                hole_contact_layer = row["hole_contact_layer"]
-                if isinstance(row["hole_contact_layer"], str):
+                hole_contact_layer = row["hole contact layer"]
+                if isinstance(row["hole contact layer"], str):
                     hole_contact_layer = hole_contact_layer.strip()
 
                 # append new donor-acceptor pair to masters dataframe
@@ -603,36 +603,36 @@ class DAPairs:
                         "Acceptor_SMILES": acceptor_smile,
                         "Acceptor_Big_SMILES": acceptor_bigsmile,
                         "Acceptor_SELFIES": acceptor_selfies,
-                        "HOMO_D_eV": row["HOMO_D_eV"],
-                        "LUMO_D_eV": row["LUMO_D_eV"],
-                        "HOMO_A_eV": row["HOMO_A_eV"],
-                        "LUMO_A_eV": row["LUMO_A_eV"],
-                        "D_A_ratio_m_m": row["D_A_ratio_m_m"],
+                        "HOMO_D_eV": row["HOMO_D (eV)"],
+                        "LUMO_D_eV": row["LUMO_D (eV)"],
+                        "HOMO_A_eV": row["HOMO_A (eV)"],
+                        "LUMO_A_eV": row["LUMO_A (eV)"],
+                        "D_A_ratio_m_m": row["D:A ratio (m/m)"],
                         "solvent": solvent,
-                        "total_solids_conc_mg_mL": row["total_solids_conc_mg_mL"],
-                        "solvent_additive": row["solvent_additive"],
+                         "total_solids_conc_mg_mL": row["total solids conc. (mg/mL)"],
+                        "solvent_additive": row["solvent additive"],
                         "solvent_additive_conc_v_v_percent": row[
-                            "solvent_additive_conc (% v/v)"
+                            "solvent additive conc. (% v/v)"
                         ],
                         "active_layer_thickness_nm": row[
-                            "active_layer_thickness_nm"
+                            "active layer thickness (nm)"
                         ],
                         "annealing_temperature": row[
-                            "temperature of thermal annealing (leave gap if not annealed)"
+                            "temperature of thermal annealing"
                         ],
                         "hole_contact_layer": hole_contact_layer,
-                        "electron_contact_layer": row["electron_contact_layer"],
+                        "electron_contact_layer": row["electron contact layer"],
                         "hole_mobility_blend": row[
-                            "hole_mobility_blend"
+                            "hole mobility blend (cm^2 V^-1 s^-1)"
                         ],
                         "electron_mobility_blend": row[
-                            "electron_mobility_blend"
+                            "electron mobility blend (cm^2 V^-1 s^-1)"
                         ],
-                        "PCE_percent": row["PCE_percent"],
+                        "PCE_percent": row["PCE (%)"],
                         "calc_PCE_percent": row["calc_PCE"],
-                        "Voc_V": row["Voc_V"],
-                        "Jsc_mA_cm_pow_neg2": row["Jsc_mA_cm_pow_neg2"],
-                        "FF_percent": row["FF_percent"],
+                        "Voc_V": row["Voc (V)"],
+                        "Jsc_mA_cm_pow_neg2": row["Jsc (mA cm^-2)"],
+                        "FF_percent": row["FF (%)"],
                     },
                     ignore_index=True,
                 )
@@ -728,9 +728,12 @@ class DAPairs:
                 master_data.at[index, "D_A_ratio_m_m"] = round(float_ratio_data, 3)
 
             # solvent_additive_conc data
-            master_data.at[index, "solvent_additive_conc_v_v_percent"] = float(
-                solvent_add_conc_data
-            )
+            try:
+                master_data.at[index, "solvent_additive_conc_v_v_percent"] = float(
+                    solvent_add_conc_data
+                )
+            except:
+                master_data.at[index, "solvent_additive_conc_v_v_percent"] = 0.0
 
         master_data.to_csv(master_csv_path, index=False)
 
