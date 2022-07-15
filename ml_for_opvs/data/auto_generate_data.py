@@ -52,6 +52,8 @@ from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.morgan_fingerprin
     FP_DATA,
 )
 
+from ml_for_opvs.data.preprocess.OPV_Min.clean_device_params import ParameterClean
+
 # Step 1
 donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
 donors.clean_donor(CLEAN_DONOR_CSV)
@@ -108,13 +110,18 @@ pairings.fill_empty_values(MASTER_ML_DATA)
 approximate_value(MASTER_ML_DATA)
 
 # Step 5
+# TODO: Clean parameters
+params = ParameterClean(MASTER_ML_DATA)
+# TODO: params.thermalfunction()
+
+# Step 6
 # Add solvents
 corr_plot = Correlation(MASTER_ML_DATA_PLOT)
 corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA_PLOT)
 corr_plot = Correlation(MASTER_ML_DATA)
 corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA)
 
-# Step 6
+# Step 7
 # input_representationing!!!
 frag_dict = bric_frag(MASTER_ML_DATA)
 

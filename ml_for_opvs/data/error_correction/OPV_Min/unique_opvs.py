@@ -50,7 +50,7 @@ class UniqueOPVs:
     """
     Class that contains functions to: 
     i) find unique donors and acceptors
-    ii) filter for difference in lists from min and clean data
+    ii) filter for difference in lists from Google Sheets and available data
     iii) filter for donors and acceptors without SMILES
     iv) produce .csv file with missing donor and acceptors
     

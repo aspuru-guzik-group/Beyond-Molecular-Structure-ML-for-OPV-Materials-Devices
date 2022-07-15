@@ -17,22 +17,22 @@ labels_molecules: set = {'Donor Molecule', 'Acceptor Molecule'}
 labels_fabrication: set = {'D:A ratio (m/m)',
                            'solvent',
                            'total solids conc. (mg/mL)',
-                           'solvent additive (_ if not applicable)',
-                           'solvent additive conc. (% v/v)  (_ if not applicable)',
-                           'temperature of thermal annealing  (_ if not applicable)'}
-labels_device: set = {'active layer thickness (nm)  (_ if not applicable)',
-                      'hole contact layer (_ if not applicable)',
-                      'electron contact layer  (_ if not applicable)'}
+                           'solvent additive',
+                           'solvent additive conc. (% v/v)',
+                           'temperature of thermal annealing'}
+labels_device: set = {'active layer thickness (nm) ',
+                      'hole contact layer',
+                      'electron contact layer'}
 labels_electrical: set = {'hole mobility blend (cm^2 V^-1 s^-1)',
                           'electron mobility blend'}
 
 labels_fabrication_wo_solids: set = {'D:A ratio (m/m)',
                                      'solvent',
-                                     'solvent additive (_ if not applicable)',
-                                     'solvent additive conc. (% v/v)  (_ if not applicable)',
-                                     'temperature of thermal annealing  (_ if not applicable)'}
-labels_device_wo_thickness: set = {'hole contact layer (_ if not applicable)',
-                                   'electron contact layer  (_ if not applicable)'}
+                                     'solvent additive',
+                                     'solvent additive conc. (% v/v) ',
+                                     'temperature of thermal annealing '}
+labels_device_wo_thickness: set = {'hole contact layer',
+                                   'electron contact layer'}
 
 filters: Dict[str, set] = {'fabrication': (refs | outputs | labels_molecules | labels_fabrication),
                            'device': (refs | outputs | labels_molecules | labels_fabrication | labels_device),
@@ -53,9 +53,9 @@ for key in available.keys():
 unique: Dict[str, set] = {'donors': set(opv_data['Donor Molecule']),
                           'acceptors': set(opv_data['Acceptor Molecule']),
                           'solvents': set(opv_data['solvent']),
-                          'additives': set(opv_data['solvent additive (_ if not applicable)']),
-                          'hole contact layers': set(opv_data['hole contact layer (_ if not applicable)']),
-                          'electron contact layers': set(opv_data['electron contact layer  (_ if not applicable)'])}
+                          'additives': set(opv_data['solvent additive']),
+                          'hole contact layers': set(opv_data['hole contact layer']),
+                          'electron contact layers': set(opv_data['electron contact layer'])}
 for key in unique.keys():
     pd.DataFrame(data=unique[key]).dropna().to_csv((output / f'unique_{key}.csv'), index=False)
 

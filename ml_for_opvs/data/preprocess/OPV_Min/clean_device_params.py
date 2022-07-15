@@ -118,6 +118,9 @@ class ParameterClean:
         inventory_df["SMILES"] = ""
 
         inventory_df.to_csv(parameter_csv_path, index=False)
+    
+    # TODO: clean up thermal annealing and solvent additive conc.
+    # TODO: add this to auto_generate_data.py
 
 
 param_clean = ParameterClean(MASTER_ML_DATA)
