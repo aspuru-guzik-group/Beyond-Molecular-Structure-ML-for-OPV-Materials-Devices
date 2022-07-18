@@ -112,7 +112,7 @@ approximate_value(MASTER_ML_DATA)
 # Step 5
 # TODO: Clean parameters
 params = ParameterClean(MASTER_ML_DATA)
-# TODO: params.thermalfunction()
+params.clean_thermal_anneal(MASTER_ML_DATA)
 
 # Step 6
 # Add solvents
