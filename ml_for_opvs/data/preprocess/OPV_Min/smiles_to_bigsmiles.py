@@ -32,7 +32,6 @@ def smile_to_bigsmile(donor_data, acceptor_data):
 
     for index, row in donor_df.iterrows():
         smile = row["SMILES"]
-        print(index, smile)
         if smile[0] == "C":
             smile = smile[1:]
             smile = (
