@@ -25,5 +25,7 @@ PTFBDT-BZS,CCCCCCCCCCCCOc1c(OCCCCCCCCCCCC)c(-c2ccc(-c3cc4c(-c5cc(F)c(CC(CC)CCCC)
 PBDTS-TzBI,CCCCCCCCCN1C(=O)c2c(c(-c3ccc(-c4cc5c(-c6ccc(SCC(CC)CCCC)s6)c6sc(C)cc6c(-c6ccc(SCC(CC)CCCC)s6)c5s4)s3)c3nn(CCCCCCCC)nc3c2-c2ccc(C)s2)C1=O
 PBTA-TF,CCCCCCCCCC(CCCCCC)n1nc2c(-c3ccc(C)s3)c(F)c(F)c(-c3ccc(-c4cc5c(-c6cc(F)c(C(CC)CCCCCC)s6)c6sc(C)cc6c(-c6cc(F)c(C(CC)CCCCCC)s6)c5s4)s3)c2n1
 P2F-Ehp,CCCCCCCCN1C(=O)c2c(c(-c3ccc(-c4cc5c(-c6cc(F)c(CC(CC)CCCC)c(F)c6)c6sc(C)cc6c(-c6cc(F)c(CC(CC)CCCC)c(F)c6)c5s4)s3)c3nn(CCC(CC)CCCC)nc3c2-c2ccc(C)s2)C1=O
-P,CCCCCCCC[Si]1(CCCCCCCC)c2cc(-c3cc(F)c(C)c4nn(CCCCCC)nc34)sc2-c2sc(-c3cc(F)c(-c4cc5c(s4)-c4sc(C)cc4[Si]5(CCCCCCCC)CCCCCCCC)c4nn(CCCCCC)nc34)cc21
+P_TBTT-BTT,CCCCCCCCc1ccc(c2sc(c3sc(CCCCCCCC)cc3)c3c4cc(C)sc4c4sc(c5sc(c6c7nsnc7c(c7sc(C)cc7)cc6)cc5)cc4c32)s1
 P_dFBT-DTS,Cc1c(F)cc(c2cc3c(c4sc(c5cc(F)c(c6cc7c(c8sc(C)cc8[Si]7(CCCCCCCC)CCCCCCCC)s6)c6c5nn(CCCCCC)n6)cc4[Si]3(CCCCCCCC)CCCCCCCC)s2)c2c1nn(CCCCCC)n2
+P1_BDT-TBT,Cc1sc2c(OSCCCCCCCCCCCC)c3cc(c4ccc(c5c6nsnc6c(c6ccc(C)s6)cc5)s4)sc3c(OSCCCCCCCCCCCC)c2c1
+P1_PDTB-EF-T,Cc1sc2c(c3sc(CCCCCCCC)c(CCCCCCCC)c3)c3cc(c4ccc(c5c(F)c(F)c(C)c6c5nsn6)s4)sc3c(c3sc(CCCCCCCC)c(CCCCCCCC)c3)c2c1
