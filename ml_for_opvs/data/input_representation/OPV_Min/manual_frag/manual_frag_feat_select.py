@@ -9,19 +9,36 @@ MASTER_MANUAL_DATA = pkg_resources.resource_filename(
 )
 
 # create lists of groups of selected features
-none = ['Unnamed: 0', 'Donor', 'Acceptor', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'DA_manual_tokenized', 'DA_manual_tokenized_aug']
-electronic = ['Unnamed: 0', 'Donor', 'Acceptor', 'HOMO_D_eV', 'LUMO_D_eV', 'HOMO_A_eV', 'LUMO_A_eV', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'DA_manual_tokenized', 'DA_manual_tokenized_aug']
-electronic_only = ['Unnamed: 0', 'HOMO_D_eV', 'LUMO_D_eV', 'HOMO_A_eV', 'LUMO_A_eV', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent']
-device = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'solvent', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'hole_contact_layer', 'electron_contact_layer', 'hole_mobility_blend_cm_2_V_neg1_s_neg1', 'electron_mobility_blend_cm_2_V_neg1_s_neg1', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'DA_manual_tokenized', 'DA_manual_tokenized_aug']
-device_solvent = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'hole_contact_layer', 'electron_contact_layer', 'hole_mobility_blend_cm_2_V_neg1_s_neg1', 'electron_mobility_blend_cm_2_V_neg1_s_neg1', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log_Pow', 'Hansen_Disp', 'Hansen_H_Bond', 'Hansen_Polar',  'DA_manual_tokenized', 'DA_manual_tokenized_aug']
-fabrication = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'solvent', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'DA_manual_tokenized', 'DA_manual_tokenized_aug']
-fabrication_solvent = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log_Pow', 'Hansen_Disp', 'Hansen_H_Bond', 'Hansen_Polar',  'DA_manual_tokenized', 'DA_manual_tokenized_aug']
-device_solvent_only = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'hole_contact_layer', 'electron_contact_layer', 'hole_mobility_blend_cm_2_V_neg1_s_neg1', 'electron_mobility_blend_cm_2_V_neg1_s_neg1', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar']
-fabrication_solvent_only = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'active_layer_thickness_nm', 'annealing_temperature', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar']
-fabrication_solvent_minus_active_layer = ['Unnamed: 0', 'Donor', 'Acceptor', 'D_A_ratio_m_m', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v', 'annealing_temperature', 'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent', 'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log_Pow', 'Hansen_Disp', 'Hansen_H_Bond', 'Hansen_Polar',  'DA_manual_tokenized', 'DA_manual_tokenized_aug']
+output = {'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent'}
+
+molecules = {'Donor', 'Acceptor', 'DA_manual_tokenized', 'DA_manual_tokenized_aug'}
+
+properties = {'HOMO_D_eV', 'LUMO_D_eV', 'HOMO_A_eV', 'LUMO_A_eV'}
+
+electrical = {'hole_mobility_blend_cm_2_V_neg1_s_neg1', 'electron_mobility_blend_cm_2_V_neg1_s_neg1'}
+
+fabrication = {'D_A_ratio_m_m', 'solvent', 'total_solids_conc_mg_mL', 'solvent_additive', 'solvent_additive_conc_percent_v_v','annealing_temperature'}
+
+fabrication_wo_solid = {'D_A_ratio_m_m', 'solvent', 'solvent_additive', 'solvent_additive_conc_percent_v_v','annealing_temperature'}
+
+device = {'active_layer_thickness_nm', 'hole_contact_layer', 'electron_contact_layer'}
+
+device_wo_thickness = {'hole_contact_layer', 'electron_contact_layer'}
+
+solvent = {'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar'}
+
 
 # create a dictionary with feature group's name as the key and the feature list as the value 
-feature_dict = {'none' : none,'electronic': electronic,'electronic_only': electronic_only, 'device': device, 'device_solvent': device_solvent, 'fabrication': fabrication, 'fabrication_solvent': fabrication_solvent, 'device_solvent_only': device_solvent_only, 'fabrication_solvent_only': fabrication_solvent_only, 'fabrication_solvent_minus_active_layer': fabrication_solvent_minus_active_layer}
+feature_dict = {
+'molecules_only' : list(molecules | output) ,
+'molecules' : list(molecules | properties | output)  ,
+'fabrication' : list(molecules | properties | fabrication | output),
+'device' : list(molecules | properties | fabrication | device | output),
+'electrical' : list(molecules | properties | fabrication | device | electrical | output),
+'fabrication_wo_solid' : list(molecules | properties | fabrication_wo_solid | output),
+'device_wo_thickness' : list(molecules | properties | fabrication | device_wo_thickness | output) ,
+'full' : list(molecules | properties | fabrication | device | electrical | output),
+}
 
 class FeatureSelection:
     """
@@ -59,5 +76,5 @@ class FeatureSelection:
 
 fs = FeatureSelection(MASTER_MANUAL_DATA)
 
-fs.feat_select('electronic')
+fs.feat_select('device_wo_thickness')
 
