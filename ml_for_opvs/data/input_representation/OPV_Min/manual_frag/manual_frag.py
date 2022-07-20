@@ -104,7 +104,7 @@ class manual_frag:
 
         return smi
 
-    def fragmenter(smi: str, mol_type: str):
+    def fragmenter(self, smi: str, mol_type: str):
         """
         Function that asks user how to fragment molecule
 
@@ -561,6 +561,6 @@ def export_manual_frag():
 
 
 if __name__ == "__main__":
-    # fragment_files("acceptor")
-    # export_manual_frag()
+    # fragment_files("donor")
+    export_manual_frag()
     pass
