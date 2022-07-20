@@ -7,11 +7,11 @@ import csv
 import pandas as pd
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/master_ml_for_opvs_from_min.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 PARAMETER_INVENTORY = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/process/OPV_Min/device_parameter_inventory.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/device_parameter_inventory.csv"
 )
 
 
@@ -119,9 +119,11 @@ class ParameterClean:
 
         inventory_df.to_csv(parameter_csv_path, index=False)
     
-    # TODO: clean up thermal annealing and solvent additive conc.
-    # TODO: add this to auto_generate_data.py
-
+    # clean up thermal annealing and solvent additive conc
+    def clean_thermal_anneal(self, master_data_path):
+        df = pd.read_csv(master_data_path)
+        df.loc[df["annealing_temperature"] == "_", "annealing_temperature"] = 25
+        df.to_csv(master_data_path, index = False)
 
 param_clean = ParameterClean(MASTER_ML_DATA)
 param_clean.create_inventory(PARAMETER_INVENTORY)
