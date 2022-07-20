@@ -144,7 +144,7 @@ def main(config: dict):
             model = KernelRidge(alpha=0.05, kernel=kernel, gamma=1)
         elif config["model_type"] == "LR" and not config["hyperparameter_optimization"]:
             assert (
-                config["hyperparameter_optimization"] == False
+                config["hyperparameter_optimization"] is None
             ), "LR cannot be paired with HPO"
             model = LinearRegression()
         elif config["model_type"] == "SVM":
