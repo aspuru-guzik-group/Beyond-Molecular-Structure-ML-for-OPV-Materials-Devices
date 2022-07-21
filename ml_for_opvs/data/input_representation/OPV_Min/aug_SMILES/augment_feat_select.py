@@ -5,7 +5,7 @@ from cmath import nan
 
 # OPV data after pre-processing
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/input_representation/OPV_Min/aug_SMILES/train_aug_master5.csv")
+    "ml_for_opvs", "data/input_representation/OPV_Min/aug_SMILES/train_aug_master.csv")
 
 
 # create lists of groups of selected features
@@ -77,5 +77,12 @@ class FeatureSelection:
 
 fs = FeatureSelection(AUGMENT_SMILES_DATA)
 
+fs.feat_select('molecules_only')
+fs.feat_select('molecules')
+fs.feat_select('fabrication_wo_solid')
+fs.feat_select('device_wo_thickness')
+fs.feat_select('full')
+fs.feat_select('fabrication')
+fs.feat_select('device')
 fs.feat_select('electrical')
 
