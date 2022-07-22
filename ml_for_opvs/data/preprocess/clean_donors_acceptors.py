@@ -44,6 +44,7 @@ MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
 )
 
+MISSING_DATA = pkg_resources.resource_filename("ml_for_opvs", "data/preprocess/OPV_Min/missing_pairs.csv")
 
 class DonorClean:
     """
@@ -514,6 +515,7 @@ class DAPairs:
             .csv file with columns: | Donor | Donor Input Representations | Acceptor | Acceptor Input Representations | PCE(%) | Voc(V) | Jsc(mA cm^-2) | FF(%) |
         """
         headers = [
+            "ref",
             "Donor",
             "Donor_SMILES",
             "Donor_Big_SMILES",
@@ -595,6 +597,7 @@ class DAPairs:
                 # append new donor-acceptor pair to masters dataframe
                 master_df = master_df.append(
                     {
+                        "ref": row["ref"],
                         "Donor": row["Donor Molecule"],
                         "Donor_SMILES": donor_smile,
                         "Donor_Big_SMILES": donor_bigsmile,
@@ -636,7 +639,7 @@ class DAPairs:
                     },
                     ignore_index=True,
                 )
-        master_df.to_csv(master_csv_path)
+        master_df.to_csv(master_csv_path, index=False)
 
     def fill_empty_values(self, master_csv_path):
         """
@@ -736,6 +739,22 @@ class DAPairs:
                 master_data.at[index, "solvent_additive_conc_v_v_percent"] = 0.0
 
         master_data.to_csv(master_csv_path, index=False)
+    
+    def lookup_missing(self, master_data:str):
+        """There are missing D-A pairs. Compare the preprocessed (training-ready) file and the Google Sheets file. Find them by index.
+
+        Args:
+            master_data (str): filepath to preprocessed data.
+        """
+        master_df: pd.DataFrame = pd.read_csv(master_data)
+        missing: pd.DataFrame = pd.DataFrame(columns=self.opv_data.columns)
+        missing_list = []
+        for index, row in self.opv_data.iterrows():
+            if self.opv_data.at[index, "ref"] not in list(master_df["ref"]):
+                missing_list.append(self.opv_data.at[index, "ref"])
+                missing = missing.append(row)
+        missing.to_csv(MISSING_DATA)
+
 
 
 # Step 1
@@ -786,3 +805,7 @@ class DAPairs:
 
 # Step 5
 # Go to rdkit_frag.py (if needed)
+
+# Lookup missing OPVs from preprocessed vs. Google Sheets
+pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+pairings.lookup_missing(MASTER_ML_DATA)
