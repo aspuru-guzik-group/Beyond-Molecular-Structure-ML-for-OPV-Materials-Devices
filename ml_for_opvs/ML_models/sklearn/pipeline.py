@@ -1,6 +1,6 @@
 import ast
 import json
-from multiprocessing.sharedctypes import testue
+from multiprocessing.sharedctypes import value
 from tokenize import Token
 from typing import Tuple, Union
 import pandas as pd
@@ -12,29 +12,29 @@ from ml_for_opvs.ML_models.sklearn.tokenizer import Tokenizer
 np.set_printoptions(suppress=True)
 
 
-def tokenize_from_dict(token2idx: dict, input_testue: Union[list, str]) -> list:
+def tokenize_from_dict(token2idx: dict, input_value: Union[list, str]) -> list:
     """
 
     Args:
         token2idx (dict): dictionary of unique tokens with corresponding indices.
-        input_testue (list, str): input_testue with tokens that match the token2idx.
+        input_value (list, str): input_value with tokens that match the token2idx.
 
     Returns:
         tokenized_list (list): list of tokenized inputs
     """
     tokenized_list: list = []
-    for token in input_testue:
+    for token in input_value:
         tokenized_list.append(token2idx[token])
 
     return tokenized_list
 
 
 def pad_input(input_list_of_list, max_input_length) -> list:
-    """Pad the input_testue (pre-padding) with 0's until max_length is met.
+    """Pad the input_value (pre-padding) with 0's until max_length is met.
 
     Args:
         input_list_of_list (list): list of inputs.
-        max_length (int): max length of any input_testue in the entire dataset.
+        max_length (int): max length of any input_value in the entire dataset.
 
     Returns:
         input_list_of_list (list): list of inputs with pre-padding.
@@ -53,12 +53,12 @@ def feature_scale(feature_series: pd.Series) -> np.array:
         feature_series: a pd.Series of a feature
     Returns:
         scaled_feature: a np.array (same index) of feature that is min-max scaled
-        max_testue: maximum testue from the entire feature array
+        max_value: maximum value from the entire feature array
     """
     feature_array = feature_series.to_numpy().astype("float64")
-    max_testue = np.nanmax(feature_array)
-    min_testue = np.nanmin(feature_array)
-    return max_testue, min_testue
+    max_value = np.nanmax(feature_array)
+    min_value = np.nanmin(feature_array)
+    return max_value, min_value
 
 
 def filter_nan(df_to_filter):
@@ -111,17 +111,17 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
     # must loop through entire dataframe for token2idx
     input_instance = None
     try:
-        input_testue = ast.literal_etest(concat_df[input_representation][1])
-        if isinstance(input_testue[0], list):
+        input_value = ast.literal_eval(concat_df[input_representation][1])
+        if isinstance(input_value[0], list):
             input_instance = "list_of_list"
-            # print("input_testue is a list of list")
+            # print("input_value is a list of list")
         else:
             input_instance = "list"
-            # print("input_testue is a list which could be: 1) fragments or 2) SMILES")
-    except:  # The input_testue was not a list, so ast.literal_etest will raise testueError.
+            # print("input_value is a list which could be: 1) fragments or 2) SMILES")
+    except:  # The input_value was not a list, so ast.literal_eval will raise valueError.
         input_instance = "str"
-        input_testue = concat_df[input_representation][1]
-        # print("input_testue is a string")
+        input_value = concat_df[input_representation][1]
+        # print("input_value is a string")
 
     if (
         input_instance == "list"
@@ -130,9 +130,9 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
         if "Augmented_SMILES" == input_representation:
             augmented_smi_list: list = []
             for index, row in concat_df.iterrows():
-                input_testue = ast.literal_etest(row[input_representation])
-                for aug_testue in input_testue:
-                    augmented_smi_list.append(aug_testue)
+                input_value = ast.literal_eval(row[input_representation])
+                for aug_value in input_value:
+                    augmented_smi_list.append(aug_value)
             augmented_smi_series: pd.Series = pd.Series(augmented_smi_list)
             (
                 tokenized_array,
@@ -144,8 +144,8 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
             token2idx = {}
             token_idx = 0
             for index, row in concat_df.iterrows():
-                input_testue = ast.literal_etest(row[input_representation])
-                for frag in input_testue:
+                input_value = ast.literal_eval(row[input_representation])
+                for frag in input_value:
                     if frag not in list(token2idx.keys()):
                         token2idx[frag] = token_idx
                         token_idx += 1
@@ -153,9 +153,9 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
         token2idx: dict = {}
         token_idx: int = 0
         for index, row in concat_df.iterrows():
-            input_testue = ast.literal_etest(row[input_representation])
-            for aug_testue in input_testue:
-                for frag in aug_testue:
+            input_value = ast.literal_eval(row[input_representation])
+            for aug_value in input_value:
+                for frag in aug_value:
                     if frag not in list(token2idx.keys()):
                         token2idx[frag] = token_idx
                         token_idx += 1
@@ -172,7 +172,7 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
                 concat_df[input_representation]
             )
     else:
-        raise TypeError("input_testue is neither str or list. Fix it!")
+        raise TypeError("input_value is neither str or list. Fix it!")
 
     # Tokenize string features
     for index, row in concat_df.iterrows():
@@ -197,42 +197,42 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
             feature_list = []
             for column in column_headers:
                 try:
-                    input_testue = ast.literal_etest(row[column])
+                    input_value = ast.literal_eval(row[column])
                 except:
-                    input_testue = row[column]
+                    input_value = row[column]
                 if any(
                     [
-                        isinstance(input_testue, np.float64),
-                        isinstance(input_testue, float),
-                        isinstance(input_testue, np.int64),
-                        isinstance(input_testue, int),
+                        isinstance(input_value, np.float64),
+                        isinstance(input_value, float),
+                        isinstance(input_value, np.int64),
+                        isinstance(input_value, int),
                     ]
                 ):
                     # feature scaling (min-max)
-                    input_testue = row[column]
+                    input_value = row[column]
                     column_max = column + "_max"
                     column_min = column + "_min"
                     input_column_max = feature_scale_dict[column_max]
                     input_column_min = feature_scale_dict[column_min]
-                    input_testue = (input_testue - input_column_min) / (
+                    input_value = (input_value - input_column_min) / (
                         input_column_max - input_column_min
                     )
-                    feature_list.append(input_testue)
-                elif isinstance(input_testue, str):
-                    str_feature = tokenize_from_dict(token2idx, input_testue)
+                    feature_list.append(input_value)
+                elif isinstance(input_value, str):
+                    str_feature = tokenize_from_dict(token2idx, input_value)
                     feature_list.extend(str_feature)
 
             # process augmented input representations
-            input_testue = ast.literal_etest(row[input_representation])
-            for aug_testue in input_testue:
+            input_value = ast.literal_eval(row[input_representation])
+            for aug_value in input_value:
                 tokenized_list = []
                 if "Augmented_SMILES" == input_representation:
                     tokenized_list.extend(
-                        Tokenizer().tokenize_from_dict(token2idx, aug_testue)
+                        Tokenizer().tokenize_from_dict(token2idx, aug_value)
                     )  # SMILES
                 else:
                     tokenized_list.extend(
-                        tokenize_from_dict(token2idx, aug_testue)
+                        tokenize_from_dict(token2idx, aug_value)
                     )  # fragments
                 tokenized_list.extend(feature_list)
                 input_train_list.append(tokenized_list)
@@ -243,45 +243,45 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
             tokenized_list = []
             feature_list = []
             for column in column_headers:
-                # input_testue type can be (list, str, float, int)
+                # input_value type can be (list, str, float, int)
                 try:
-                    input_testue = ast.literal_etest(row[column])
+                    input_value = ast.literal_eval(row[column])
                 except:
-                    input_testue = row[column]
+                    input_value = row[column]
                 # tokenization
-                if isinstance(input_testue, list):
+                if isinstance(input_value, list):
                     tokenized_list.extend(
-                        tokenize_from_dict(token2idx, input_testue)
+                        tokenize_from_dict(token2idx, input_value)
                     )  # fragments
-                elif isinstance(input_testue, str) and column == input_representation: #input_representation
+                elif isinstance(input_value, str) and column == input_representation: #input_representation
                     tokenized_list.extend(
-                        Tokenizer().tokenize_from_dict(token2idx, input_testue)
+                        Tokenizer().tokenize_from_dict(token2idx, input_value)
                     )  # SMILES
-                elif isinstance(input_testue, str) and column != input_representation: # string feature
+                elif isinstance(input_value, str) and column != input_representation: # string feature
                     feature_list.extend(
-                        tokenize_from_dict(token2idx, [input_testue])
+                        tokenize_from_dict(token2idx, [input_value])
                     )
                 elif any(
                     [
-                        isinstance(input_testue, np.float64),
-                        isinstance(input_testue, float),
-                        isinstance(input_testue, np.int64),
-                        isinstance(input_testue, int),
+                        isinstance(input_value, np.float64),
+                        isinstance(input_value, float),
+                        isinstance(input_value, np.int64),
+                        isinstance(input_value, int),
                     ]
                 ):
                     # feature scaling (min-max)
-                    input_testue = row[column]
+                    input_value = row[column]
                     column_max = column + "_max"
                     column_min = column + "_min"
                     input_column_max = feature_scale_dict[column_max]
                     input_column_min = feature_scale_dict[column_min]
-                    input_testue = (input_testue - input_column_min) / (
+                    input_value = (input_value - input_column_min) / (
                         input_column_max - input_column_min
                     )
-                    feature_list.append(input_testue)
+                    feature_list.append(input_value)
                 else:
-                    print(type(input_testue))
-                    raise testueError("Missing testue. Cannot be null testue in dataset!")
+                    print(type(input_value))
+                    raise ValueError("Missing value. Cannot be null value in dataset!")
             if len(tokenized_list) > max_input_length:  # for padding
                 max_input_length = len(tokenized_list)
             # add features
@@ -302,42 +302,42 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
             feature_list = []
             for column in column_headers:
                 try:
-                    input_testue = ast.literal_etest(row[column])
+                    input_value = ast.literal_eval(row[column])
                 except:
-                    input_testue = row[column]
+                    input_value = row[column]
                 if any(
                     [
-                        isinstance(input_testue, np.float64),
-                        isinstance(input_testue, float),
-                        isinstance(input_testue, np.int64),
-                        isinstance(input_testue, int),
+                        isinstance(input_value, np.float64),
+                        isinstance(input_value, float),
+                        isinstance(input_value, np.int64),
+                        isinstance(input_value, int),
                     ]
                 ):
                     # feature scaling (min-max)
-                    input_testue = row[column]
+                    input_value = row[column]
                     column_max = column + "_max"
                     column_min = column + "_min"
                     input_column_max = feature_scale_dict[column_max]
                     input_column_min = feature_scale_dict[column_min]
-                    input_testue = (input_testue - input_column_min) / (
+                    input_value = (input_value - input_column_min) / (
                         input_column_max - input_column_min
                     )
-                    feature_list.append(input_testue)
-                elif isinstance(input_testue, str):
-                    str_feature = tokenize_from_dict(token2idx, input_testue)
+                    feature_list.append(input_value)
+                elif isinstance(input_value, str):
+                    str_feature = tokenize_from_dict(token2idx, input_value)
                     feature_list.extend(str_feature)
 
             # process augmented input representations
-            input_testue = ast.literal_etest(row[input_representation])
-            for aug_testue in input_testue:
+            input_value = ast.literal_eval(row[input_representation])
+            for aug_value in input_value:
                 tokenized_list = []
                 if "Augmented_SMILES" == input_representation:
                     tokenized_list.extend(
-                        Tokenizer().tokenize_from_dict(token2idx, aug_testue)
+                        Tokenizer().tokenize_from_dict(token2idx, aug_value)
                     )  # SMILES
                 else:
                     tokenized_list.extend(
-                        tokenize_from_dict(token2idx, aug_testue)
+                        tokenize_from_dict(token2idx, aug_value)
                     )  # fragments
                 tokenized_list.extend(feature_list)
                 input_test_list.append(tokenized_list)
@@ -348,45 +348,45 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
             tokenized_list = []
             feature_list = []
             for column in column_headers:
-                # input_testue type can be (list, str, float, int)
+                # input_value type can be (list, str, float, int)
                 try:
-                    input_testue = ast.literal_etest(row[column])
+                    input_value = ast.literal_eval(row[column])
                 except:
-                    input_testue = row[column]
+                    input_value = row[column]
                 # tokenization
-                if isinstance(input_testue, list):
+                if isinstance(input_value, list):
                     tokenized_list.extend(
-                        tokenize_from_dict(token2idx, input_testue)
+                        tokenize_from_dict(token2idx, input_value)
                     )  # fragments
-                elif isinstance(input_testue, str) and column == input_representation: #input_representation
+                elif isinstance(input_value, str) and column == input_representation: #input_representation
                     tokenized_list.extend(
-                        Tokenizer().tokenize_from_dict(token2idx, input_testue)
+                        Tokenizer().tokenize_from_dict(token2idx, input_value)
                     )  # SMILES
-                elif isinstance(input_testue, str) and column != input_representation: # string feature
+                elif isinstance(input_value, str) and column != input_representation: # string feature
                     feature_list.extend(
-                        tokenize_from_dict(token2idx, [input_testue])
+                        tokenize_from_dict(token2idx, [input_value])
                     )
                 elif any(
                     [
-                        isinstance(input_testue, np.float64),
-                        isinstance(input_testue, float),
-                        isinstance(input_testue, np.int64),
-                        isinstance(input_testue, int),
+                        isinstance(input_value, np.float64),
+                        isinstance(input_value, float),
+                        isinstance(input_value, np.int64),
+                        isinstance(input_value, int),
                     ]
                 ):
                     # feature scaling (min-max)
-                    input_testue = row[column]
+                    input_value = row[column]
                     column_max = column + "_max"
                     column_min = column + "_min"
                     input_column_max = feature_scale_dict[column_max]
                     input_column_min = feature_scale_dict[column_min]
-                    input_testue = (input_testue - input_column_min) / (
+                    input_value = (input_value - input_column_min) / (
                         input_column_max - input_column_min
                     )
-                    feature_list.append(input_testue)
+                    feature_list.append(input_value)
                 else:
-                    print(type(input_testue))
-                    raise testueError("Missing testue. Cannot be null testue in dataset!")
+                    print(type(input_value))
+                    raise ValueError("Missing value. Cannot be null value in dataset!")
             if len(tokenized_list) > max_input_length:  # for padding
                 max_input_length = len(tokenized_list)
             # add features
@@ -407,24 +407,24 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
 def process_target(
     train_target_df, test_target_df
 ) -> Tuple[np.ndarray, np.ndarray, float, float]:
-    """Processes one target testue through the following steps:
+    """Processes one target value through the following steps:
     1) min-max scaling
     2) return as array
 
     Args:
-        train_target_df (pd.DataFrame): target testues for training dataframe
-        test_target_df (pd.DataFrame): target testues for test dataframe
+        train_target_df (pd.DataFrame): target values for training dataframe
+        test_target_df (pd.DataFrame): target values for test dataframe
     Returns:
         target_train_array (np.array): array of training targets
         target_test_array (np.array): array of test targets
-        target_max (float): maximum testue in dataset
-        target_min (float): minimum testue in dataset
+        target_max (float): maximum value in dataset
+        target_min (float): minimum value in dataset
     """
     assert len(train_target_df) > 1, train_target_df
     assert len(test_target_df) > 1, test_target_df
     concat_df = pd.concat([train_target_df, test_target_df], ignore_index=True)
     # first column will always be the target column
-    target_max, target_min = feature_scale(concat_df[concat_df.columns[0]])
+    target_max, target_min = feature_scale(train_target_df[train_target_df.columns[0]])
 
      # First in column_headers will always be input_representation
     column_headers = train_target_df.columns
@@ -433,31 +433,31 @@ def process_target(
     # additional data points for targets if data is augmented
     input_instance = None
     try:
-        input_testue = ast.literal_etest(concat_df[input_representation][1])
-        if isinstance(input_testue[0], list):
+        input_value = ast.literal_eval(concat_df[input_representation][1])
+        if isinstance(input_value[0], list):
             input_instance = "list_of_list"
-            # print("input_testue is a list of list")
+            # print("input_value is a list of list")
         else:
             input_instance = "list"
-            # print("input_testue is a list which could be: 1) fragments or 2) SMILES")
-    except:  # The input_testue was not a list, so ast.literal_etest will raise testueError.
+            # print("input_value is a list which could be: 1) fragments or 2) SMILES")
+    except:  # The input_value was not a list, so ast.literal_eval will raise valueError.
         input_instance = "str"
-        # print("input_testue is a string")
+        # print("input_value is a string")
 
-    # duplicate number of target testues with the number of augmented data points
+    # duplicate number of target test with the number of augmented data points
     if any(
         ["Augmented_SMILES" == input_representation, input_instance == "list_of_list"]
     ):
         target_train_list = []
         for index, row in train_target_df.iterrows():
-            input_testue = ast.literal_etest(row[input_representation])
-            for i in range(len(input_testue)):
+            input_value = ast.literal_eval(row[input_representation])
+            for i in range(len(input_value)):
                 target_train_list.append(row[train_target_df.columns[0]])
 
         target_test_list = []
         for index, row in test_target_df.iterrows():
-            input_testue = ast.literal_etest(row[input_representation])
-            for i in range(len(input_testue)):
+            input_value = ast.literal_eval(row[input_representation])
+            for i in range(len(input_value)):
                 target_test_list.append(row[test_target_df.columns[0]])
 
         target_train_array = np.array(target_train_list)
