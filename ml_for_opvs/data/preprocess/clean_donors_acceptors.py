@@ -789,8 +789,8 @@ class DAPairs:
 # # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 
 # # Step 4
-# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-# pairings.create_master_csv(MASTER_ML_DATA)
+pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+pairings.create_master_csv(MASTER_ML_DATA)
 # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 
 # # # # Step 4b - Convert STR -> FLOAT
@@ -807,5 +807,5 @@ class DAPairs:
 # Go to rdkit_frag.py (if needed)
 
 # Lookup missing OPVs from preprocessed vs. Google Sheets
-pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-pairings.lookup_missing(MASTER_ML_DATA)
+# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# pairings.lookup_missing(MASTER_ML_DATA)
