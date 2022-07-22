@@ -14,7 +14,7 @@ from pathlib import Path
 from numpy import mean, std
 from skopt import BayesSearchCV
 from sklearn.model_selection import KFold
-from sklearn.metrics import make_scorer, mean_absolute_error, mean_squared_error
+from sklearn.metrics import make_scorer, mean_absolute_error, mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.gaussian_process.kernels import RBF, PairwiseKernel
 from sklearn.linear_model import LinearRegression
@@ -67,7 +67,7 @@ def main(config: dict):
 
     # process multiple data files
     train_paths: str = config["train_paths"]
-    validation_paths: str = config["validation_paths"]
+    test_paths: str = config["test_paths"]
 
     # column names
     column_names = [config["input_representation"]]
@@ -76,16 +76,18 @@ def main(config: dict):
     except:
         print("No Additional Features")
 
-    # if multiple train and validation paths, X-Fold Cross-Validation occurs here.
+    # if multiple train and test paths, X-Fold Cross-test occurs here.
     fold: int = 0
     outer_r: list = []
     outer_r2: list = []
     outer_rmse: list = []
     outer_mae: list = []
     progress_dict: dict = {"fold": [], "r": [], "r2": [], "rmse": [], "mae": []}
-    for train_path, validation_path in zip(train_paths, validation_paths):
+    for train_path, test_path in zip(train_paths, test_paths):
+        # print training config
+        print(config)
         train_df: pd.DataFrame = pd.read_csv(train_path)
-        val_df: pd.DataFrame = pd.read_csv(validation_path)
+        val_df: pd.DataFrame = pd.read_csv(test_path)
         # process SMILES vs. Fragments vs. Fingerprints. How to handle that? handle this and tokenization in pipeline
         (
             input_train_array,
@@ -224,7 +226,7 @@ def main(config: dict):
 
         # evaluate the model
         r: float = np.corrcoef(y_test, yhat)[0, 1]
-        r2: float = (r) ** 2
+        r2: float = r2_score(y_test, yhat)
         rmse: float = np.sqrt(mean_squared_error(y_test, yhat))
         mae: float = mean_absolute_error(y_test, yhat)
         # report progress (best training score)
@@ -276,13 +278,13 @@ if __name__ == "__main__":
         "--train_paths",
         type=str,
         nargs="+",
-        help="Path to training data. If multiple training data: format is 'train_0.csv, train_1.csv, train_2.csv', required that multiple validation paths are provided.",
+        help="Path to training data. If multiple training data: format is 'train_0.csv, train_1.csv, train_2.csv', required that multiple test paths are provided.",
     )
     parser.add_argument(
-        "--validation_paths",
+        "--test_paths",
         type=str,
         nargs="+",
-        help="Path to validation data. If multiple validation data: format is 'val_0.csv, val_1.csv, val_2.csv', required that multiple training paths are provided.",
+        help="Path to test data. If multiple test data: format is 'val_0.csv, val_1.csv, val_2.csv', required that multiple training paths are provided.",
     )
     parser.add_argument(
         "--input_representation",
