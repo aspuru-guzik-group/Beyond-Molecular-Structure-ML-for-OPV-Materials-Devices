@@ -1,0 +1,16 @@
+{
+    "OPV_Min": {
+        "datasets": [
+            "OPV_Min"
+        ],
+        "models": [
+            "RF",
+            "BRT",
+            "SVM"
+        ],
+        "input_representations": [],
+        "feature_names": [],
+        "target_names": [],
+        "metrics": "r_mean"
+    }
+}

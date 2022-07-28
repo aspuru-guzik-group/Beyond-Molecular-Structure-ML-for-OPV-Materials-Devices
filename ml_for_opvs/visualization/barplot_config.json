@@ -1,0 +1,18 @@
+{
+    "OPV_Min": {
+        "datasets": [
+            "OPV_Min"
+        ],
+        "models": [
+            "RF",
+            "BRT",
+            "SVM"
+        ],
+        "input_representations": [],
+        "x": "Features",
+        "hue": "Model",
+        "feature_names": [],
+        "target_names": [],
+        "metrics": "r"
+    }
+}

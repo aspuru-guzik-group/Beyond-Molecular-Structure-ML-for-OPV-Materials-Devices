@@ -1,6 +1,7 @@
 """File that contains all functions to go from .csv, to preprocessed data and input_representation data ready for training.
 """
 
+from ml_for_opvs.data.input_representation.OPV_Min.smiles.smiles import MASTER_SMI_DATA, create_smi_csv
 from ml_for_opvs.data.preprocess.clean_donors_acceptors import (
     MASTER_DONOR_CSV,
     OPV_DONOR_DATA,
@@ -97,11 +98,11 @@ pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
 
 # Step 4c - Remove anomalies!
 # Go to ml_for_opvs > data > error_correction > remove_anomaly.py
-anomaly = Anomaly(MASTER_ML_DATA)
-anomaly.remove_anomaly(MASTER_ML_DATA)
-anomaly.remove_anomaly(MASTER_ML_DATA_PLOT)
-anomaly.correct_anomaly(MASTER_ML_DATA)
-anomaly.correct_anomaly(MASTER_ML_DATA_PLOT)
+# anomaly = Anomaly(MASTER_ML_DATA)
+# anomaly.remove_anomaly(MASTER_ML_DATA)
+# anomaly.remove_anomaly(MASTER_ML_DATA_PLOT)
+# anomaly.correct_anomaly(MASTER_ML_DATA)
+# anomaly.correct_anomaly(MASTER_ML_DATA_PLOT)
 
 # # Step 4c - Fill empty values for Thermal Annealing, and solvent_additives
 pairings.fill_empty_values(MASTER_ML_DATA)
@@ -131,3 +132,5 @@ aug_smi_tokenize(AUGMENT_SMILES_DATA)
 create_master_fp(MASTER_ML_DATA, FP_DATA, 3, 512)
 
 export_manual_frag()
+
+create_smi_csv(MASTER_ML_DATA, MASTER_SMI_DATA)
