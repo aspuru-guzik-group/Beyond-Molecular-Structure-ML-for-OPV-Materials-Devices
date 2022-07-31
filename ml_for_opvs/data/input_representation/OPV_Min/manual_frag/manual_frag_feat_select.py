@@ -36,7 +36,7 @@ feature_dict = {
 'device' : list(molecules | properties | fabrication | device | output),
 'electrical' : list(molecules | properties | fabrication | device | electrical | output),
 'fabrication_wo_solid' : list(molecules | properties | fabrication_wo_solid | output),
-'device_wo_thickness' : list(molecules | properties | fabrication | device_wo_thickness | output) ,
+'device_wo_thickness' : list(molecules | properties | fabrication_wo_solid | device_wo_thickness | output) ,
 'full' : list(molecules | properties | fabrication | device | electrical | output),
 }
 
