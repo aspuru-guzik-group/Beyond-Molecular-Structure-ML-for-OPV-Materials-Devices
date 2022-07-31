@@ -1,0 +1,28 @@
+
+Lmod is automatically replacing "intel/2020.1.217" with "gcc/9.3.0".
+
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) openmpi/4.0.3
+
+INFO: Pandarallel will run on 40 workers.
+INFO: Pandarallel will use Memory file system to transfer data between the main process and workers.
+Looking at fp
+     Donor features made.
+     Acceptor features made.
+Looking at mordred
+     Donor features made.
+     Acceptor features made.
+Predicting model on fp
+Mean R2: 0.4726088494299404
+Std R2: 0.07783510615719452
+Mean R: 0.7099972124262898
+Std R: 0.05601308504562311
+Traceback (most recent call last):
+  File "main.py", line 93, in <module>
+    fig, ax = plt.subplots()
+NameError: name 'plt' is not defined
+
+real	117m5.282s
+user	4529m54.034s
+sys	1m39.534s
