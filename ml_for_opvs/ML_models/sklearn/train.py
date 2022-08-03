@@ -139,15 +139,9 @@ def main(config: dict):
         # KRR and LR do not require HPO, they do not have space parameters
         # MUST be paired with hyperparameter_optimization == False
         elif config["model_type"] == "KRR":
-            assert (
-                config["hyperparameter_optimization"] == False
-            ), "KRR cannot be paired with HPO"
             kernel = PairwiseKernel(gamma=1, gamma_bounds="fixed", metric="laplacian")
             model = KernelRidge(alpha=0.05, kernel=kernel, gamma=1)
-        elif config["model_type"] == "LR" and not config["hyperparameter_optimization"]:
-            assert (
-                config["hyperparameter_optimization"] is None
-            ), "LR cannot be paired with HPO"
+        elif config["model_type"] == "LR":
             model = LinearRegression()
         elif config["model_type"] == "SVM":
             model = SVR(kernel="rbf", degree="3")
@@ -155,7 +149,7 @@ def main(config: dict):
             raise NameError("Model not found. Please use RF, BRT, LR, KRR")
 
         # run hyperparameter optimization
-        if config["hyperparameter_optimization"]:
+        if config["hyperparameter_optimization"] and config["model_type"] in ("RF","BRT","SVM"):
             # setup HPO space
             space = get_space_dict(
                 config["hyperparameter_space_path"], config["model_type"]
@@ -205,7 +199,7 @@ def main(config: dict):
         model_path: Path = target_dir_path / "model_{}.pkl".format(fold)
         pickle.dump(model, open(model_path, "wb"))  # difficult to maintain
         # save best hyperparams for the best model from each fold
-        if config["hyperparameter_optimization"]:
+        if config["hyperparameter_optimization"] and config["model_type"] in ("RF","BRT","SVM"):
             hyperparam_path: Path = (
                 target_dir_path / "hyperparameter_optimization_{}.csv".format(fold)
             )
