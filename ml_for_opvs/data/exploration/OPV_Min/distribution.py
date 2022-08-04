@@ -201,3 +201,5 @@ class Distribution:
 
 # dist.x_y_heatmap("Donor", "Acceptor", DONOR_ACCEPTOR_PATH)
 
+# df = pd.read_csv(MASTER_ML_DATA_PLOT)
+# print(max(df["hole_mobility_blend"]))
