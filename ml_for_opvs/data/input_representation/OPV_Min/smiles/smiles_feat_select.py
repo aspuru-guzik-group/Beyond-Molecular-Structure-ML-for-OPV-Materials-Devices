@@ -9,7 +9,7 @@ MASTER_SMI_DATA = pkg_resources.resource_filename(
 )
 
 # create lists of groups of selected features
-output = {'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent'}
+output = {'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_pow_neg2', 'FF_percent'}
 
 molecules = {'Donor', 'Acceptor', 'DA_SMILES', 'DA_SELFIES', "DA_BigSMILES"}
 

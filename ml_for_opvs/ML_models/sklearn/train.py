@@ -139,9 +139,15 @@ def main(config: dict):
         # KRR and LR do not require HPO, they do not have space parameters
         # MUST be paired with hyperparameter_optimization == False
         elif config["model_type"] == "KRR":
+            assert (
+                config["hyperparameter_optimization"] == "False"
+            ), "KRR cannot be paired with HPO"
             kernel = PairwiseKernel(gamma=1, gamma_bounds="fixed", metric="laplacian")
             model = KernelRidge(alpha=0.05, kernel=kernel, gamma=1)
         elif config["model_type"] == "LR":
+            assert (
+                config["hyperparameter_optimization"] == "False"
+            ), "LR cannot be paired with HPO"
             model = LinearRegression()
         elif config["model_type"] == "SVM":
             model = SVR(kernel="rbf", degree="3")
@@ -149,7 +155,7 @@ def main(config: dict):
             raise NameError("Model not found. Please use RF, BRT, LR, KRR")
 
         # run hyperparameter optimization
-        if config["hyperparameter_optimization"] and config["model_type"] in ("RF","BRT","SVM"):
+        if config["hyperparameter_optimization"] == "True":
             # setup HPO space
             space = get_space_dict(
                 config["hyperparameter_space_path"], config["model_type"]
@@ -199,7 +205,7 @@ def main(config: dict):
         model_path: Path = target_dir_path / "model_{}.pkl".format(fold)
         pickle.dump(model, open(model_path, "wb"))  # difficult to maintain
         # save best hyperparams for the best model from each fold
-        if config["hyperparameter_optimization"] and config["model_type"] in ("RF","BRT","SVM"):
+        if config["hyperparameter_optimization"] == "True":
             hyperparam_path: Path = (
                 target_dir_path / "hyperparameter_optimization_{}.csv".format(fold)
             )
@@ -296,10 +302,10 @@ if __name__ == "__main__":
         type=str,
         help="Choose target value. Format is ex. calc_PCE_percent",
     )
-    parser.add_argument("--model_type", type=str, help="Choose model type. (RF, BRT)")
+    parser.add_argument("--model_type", type=str, help="Choose model type. (RF, BRT, SVM, KRR, LR)")
     parser.add_argument(
         "--hyperparameter_optimization",
-        type=bool,
+        type=str,
         help="Enable hyperparameter optimization. BayesSearchCV over a default space.",
     )
     parser.add_argument(
