@@ -1,2 +1,0 @@
-Dataset,num_of_folds,Features,Targets,Model,r_mean,r_std,r2_mean,r2_std,rmse_mean,rmse_std,mae_mean,mae_std,num_of_data
-OPV_Min,5,"HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,D_A_ratio_m_m,solvent,total_solids_conc_mg_mL,solvent_additive,annealing_temperature,hole_contact_layer,electron_contact_layer",calc_PCE_percent,LR,0.1366534883964447,0.08607841834898977,0.026083669996380954,0.025268322937344382,35144548617.34457,70289097216.63615,19674866859.30233,39349733706.559845,426

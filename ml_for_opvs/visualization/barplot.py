@@ -12,7 +12,7 @@ import seaborn as sns
 import pandas as pd
 import textwrap
 
-from da_for_polymers.visualization.path_utils import (
+from ml_for_opvs.visualization.path_utils import (
     gather_results,
     path_to_result,
 )
