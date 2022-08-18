@@ -18,7 +18,7 @@ feat_select_group=("fabrication_wo_solid" "device_wo_thickness")
 declare -a input_rep_features
 
 # 4
-declare -a feature_name_dict
+declare -A feature_name_dict
 
 # 5
 target_name=("calc_PCE_percent")
