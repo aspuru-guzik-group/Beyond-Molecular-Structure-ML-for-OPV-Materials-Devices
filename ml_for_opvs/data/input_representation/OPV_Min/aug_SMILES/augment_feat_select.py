@@ -7,6 +7,8 @@ from cmath import nan
 AUGMENT_SMILES_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/input_representation/OPV_Min/aug_SMILES/train_aug_master.csv")
 
+DATA_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/input_representation/OPV_Min/aug_SMILES/")
+
 
 # create lists of groups of selected features
  
@@ -73,7 +75,7 @@ class FeatureSelection:
         # delete all rows that have at least 1 empty entry
         df = df_full.dropna(how = 'any')
         # save the processed dataframe to a new csv file whose name includes the group of features that are included
-        df.to_csv('processed_augment_{x}.csv'.format(x = feat_list), index = False)
+        df.to_csv(DATA_PATH + 'processed_augment_{x}.csv'.format(x = feat_list), index = False)
 
 fs = FeatureSelection(AUGMENT_SMILES_DATA)
 

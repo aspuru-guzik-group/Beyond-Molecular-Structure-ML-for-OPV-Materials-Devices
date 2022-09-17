@@ -128,6 +128,69 @@ class DonorClean:
         )
         clean_df.to_csv(clean_donor, index=False)
 
+    def replace_r_with_arbitrary(self, clean_donor):
+        """
+        Replace R group in the clean_min_acceptors.csv
+
+        Args:
+            clean_donor: path to processed acceptors
+
+        Returns:
+            SMILES column contains acceptors with replaced R groups
+        """
+        patts = {
+            "[R1]": "CC(CCCCCC)CCCCCCCC",
+            "[R2]": "CCCCCCCC",
+            "[R3]": "[Si](CCC)(CCC)(CCC)",
+            "[R4]": "CC(CC)CCCC",
+            "[R5]": "SCCCCCCCCCCCC",
+            "[R6]": "CC(CCCCCCCC)CCCCCCCCCC",
+            "[R7]": "SCC(CCCCCC)CCCC",
+            "[R8]": "[Si](CC)(CC)(CC)",
+            "[R9]": "[Si](C(C)C)(C(C)C)C(C)C",
+            "[R10]": "[Si](CCCC)(CCCC)(CCCC)",
+            "[R11]": "[Si](C)(C)CCCCCCCC",
+            "[R12]": "SCCCCC=C",
+            "[R13]": "SCC4CCCCC4",
+            "[R14]": "CCCCCC",
+            "[R15]": "CCCCCCCCCC",
+            "[R18]": "CCCCC",
+            "[R19]": "CCCCCCCCCCCCCCCC",
+            "[R20]": "CCCCCCCCCCC",
+            "[R21]": "C(CCCCCCCCC)CCCCCCC",
+            "[R23]": "CC(CCCCCCCCCCCC)CCCCCCCCCC",
+            "[R24]": "COCCOC",
+            "[R25]": "CC(CCCCCCCCCCC)CCCCCCCCC",
+            "[R26]": "CCC",
+            "[R27]": "CCCC",
+            "[R28]": "CCC(CC)CCCC",
+            "[R29]": "CCCC(CC)CCCC",
+        }
+        
+        # New R group substitution pattern
+        new_patts = {}
+        atomic_num = 21
+        for k, v in patts.items():
+            # Only provides the transition metals and lanthanides
+            if atomic_num == 31:
+                atomic_num = 39
+            elif atomic_num == 49:
+                atomic_num = 57
+            elif atomic_num == 81:
+                atomic_num = 89
+            mol = Chem.MolFromSmarts("[#{}]".format(atomic_num))
+            smi = Chem.MolToSmiles(mol)
+            new_patts[smi] = k
+            atomic_num += 1
+
+        clean_df = pd.read_csv(clean_donor)
+        for index, row in clean_df.iterrows():
+            smi = clean_df.at[index, "SMILES"]
+            for key in new_patts.keys():
+                smi = smi.replace(new_patts[key], key)
+            clean_df.at[index, "SMILES"] = smi
+        clean_df.to_csv(clean_donor, index=False)
+
     def replace_r(self, clean_donor):
         """Replace R group in the clean_min_donors.csv
 
@@ -165,15 +228,41 @@ class DonorClean:
             "[R28]": "CCC(CC)CCCC",
             "[R29]": "CCCC(CC)CCCC",
         }
+        # New R group substitution pattern
+        new_patts = {}
+        atomic_num = 21
+        for k, v in patts.items():
+            # Only provides the transition metals and lanthanides
+            if atomic_num == 31:
+                atomic_num = 39
+            elif atomic_num == 49:
+                atomic_num = 57
+            elif atomic_num == 81:
+                atomic_num = 89
+            mol = Chem.MolFromSmarts("[#{}]".format(atomic_num))
+            smi = Chem.MolToSmiles(mol)
+            new_patts[smi] = v
+            atomic_num += 1
+
         clean_df = pd.read_csv(clean_donor)
         donor_smi_list = clean_df["SMILES"]
+
         index = 0
         for smi in donor_smi_list:
-            for r in patts:
-                smi = smi.replace(r, patts[r])
-            smi = Chem.CanonSmiles(smi)
+            mol = Chem.MolFromSmarts(smi)
+            # Sanitize SMARTS
+            mol.UpdatePropertyCache()
+            Chem.GetSymmSSSR(mol)
+            mol.GetRingInfo().NumRings()
+
+            for r in new_patts:
+                if r in smi:
+                    products = AllChem.ReplaceSubstructs(mol, Chem.MolFromSmarts(r), Chem.MolFromSmarts(new_patts[r]), replaceAll=True)
+                    mol = products[0]
+            smi = Chem.CanonSmiles(Chem.MolToSmiles(mol))
             clean_df.at[index, "SMILES"] = smi
             index += 1
+    
         clean_df.to_csv(clean_donor, index=False)
 
     def delete_r(self, clean_donor):
@@ -339,7 +428,11 @@ class AcceptorClean:
                 clean_df = clean_df.append(
                     {
                         "Acceptor": row["Name_Stanley"],
-                        "SMILES": row["SMILE"],
+                        "SMILES": row["R_grp_SMILES"],
+                        "SMILES w/o R_group replacement": row["R_grp_SMILES"],
+                        "SMILES w/o R_group": " ",
+                        "Big_SMILES": " ",
+                        "SELFIES": " ",
                     },
                     ignore_index=True,
                 )
@@ -358,6 +451,69 @@ class AcceptorClean:
             "total: ",
             total_acceptors,
         )
+        clean_df.to_csv(clean_acceptor, index=False)
+    
+    def replace_r_with_arbitrary(self, clean_acceptor):
+        """
+        Replace R group in the clean_min_acceptors.csv
+
+        Args:
+            clean_donor: path to processed acceptors
+
+        Returns:
+            SMILES column contains acceptors with replaced R groups
+        """
+        patts = {
+            "[R1]": "CC(CCCCCC)CCCCCCCC",
+            "[R2]": "CCCCCCCC",
+            "[R3]": "[Si](CCC)(CCC)(CCC)",
+            "[R4]": "CC(CC)CCCC",
+            "[R5]": "SCCCCCCCCCCCC",
+            "[R6]": "CC(CCCCCCCC)CCCCCCCCCC",
+            "[R7]": "SCC(CCCCCC)CCCC",
+            "[R8]": "[Si](CC)(CC)(CC)",
+            "[R9]": "[Si](C(C)C)(C(C)C)C(C)C",
+            "[R10]": "[Si](CCCC)(CCCC)(CCCC)",
+            "[R11]": "[Si](C)(C)CCCCCCCC",
+            "[R12]": "SCCCCC=C",
+            "[R13]": "SCC4CCCCC4",
+            "[R14]": "CCCCCC",
+            "[R15]": "CCCCCCCCCC",
+            "[R18]": "CCCCC",
+            "[R19]": "CCCCCCCCCCCCCCCC",
+            "[R20]": "CCCCCCCCCCC",
+            "[R21]": "C(CCCCCCCCC)CCCCCCC",
+            "[R23]": "CC(CCCCCCCCCCCC)CCCCCCCCCC",
+            "[R24]": "COCCOC",
+            "[R25]": "CC(CCCCCCCCCCC)CCCCCCCCC",
+            "[R26]": "CCC",
+            "[R27]": "CCCC",
+            "[R28]": "CCC(CC)CCCC",
+            "[R29]": "CCCC(CC)CCCC",
+        }
+        
+        # New R group substitution pattern
+        new_patts = {}
+        atomic_num = 21
+        for k, v in patts.items():
+            # Only provides the transition metals and lanthanides
+            if atomic_num == 31:
+                atomic_num = 39
+            elif atomic_num == 49:
+                atomic_num = 57
+            elif atomic_num == 81:
+                atomic_num = 89
+            mol = Chem.MolFromSmarts("[#{}]".format(atomic_num))
+            smi = Chem.MolToSmiles(mol)
+            new_patts[smi] = k
+            atomic_num += 1
+
+        clean_df = pd.read_csv(clean_acceptor)
+        for index, row in clean_df.iterrows():
+            smi = clean_df.at[index, "SMILES"]
+            for key in new_patts.keys():
+                smi = smi.replace(new_patts[key], key)
+            clean_df.at[index, "SMILES"] = smi
         clean_df.to_csv(clean_acceptor, index=False)
 
     def replace_r(self, clean_acceptor):
@@ -398,15 +554,41 @@ class AcceptorClean:
             "[R28]": "CCC(CC)CCCC",
             "[R29]": "CCCC(CC)CCCC",
         }
+        
+        # New R group substitution pattern
+        new_patts = {}
+        atomic_num = 21
+        for k, v in patts.items():
+            # Only provides the transition metals and lanthanides
+            if atomic_num == 31:
+                atomic_num = 39
+            elif atomic_num == 49:
+                atomic_num = 57
+            elif atomic_num == 81:
+                atomic_num = 89
+            mol = Chem.MolFromSmarts("[#{}]".format(atomic_num))
+            smi = Chem.MolToSmiles(mol)
+            new_patts[smi] = v
+            atomic_num += 1
+
         clean_df = pd.read_csv(clean_acceptor)
         acceptor_smi_list = clean_df["SMILES"]
         index = 0
         for smi in acceptor_smi_list:
-            for r in patts:
-                smi = smi.replace(r, patts[r])
-            smi = Chem.CanonSmiles(smi)
+            mol = Chem.MolFromSmarts(smi)
+            # Sanitize SMARTS
+            mol.UpdatePropertyCache()
+            Chem.GetSymmSSSR(mol)
+            mol.GetRingInfo().NumRings()
+
+            for r in new_patts:
+                if r in smi:
+                    products = AllChem.ReplaceSubstructs(mol, Chem.MolFromSmarts(r), Chem.MolFromSmarts(new_patts[r]), replaceAll=True)
+                    mol = products[0]
+            smi = Chem.CanonSmiles(Chem.MolToSmiles(mol))
             clean_df.at[index, "SMILES"] = smi
             index += 1
+
         clean_df.to_csv(clean_acceptor, index=False)
 
     def delete_r(self, clean_acceptor):
@@ -447,6 +629,7 @@ class AcceptorClean:
             "[R28]": "CCC(CC)CCCC",
             "[R29]": "CCCC(CC)CCCC",
         }
+        
         clean_df = pd.read_csv(clean_acceptor)
         acceptor_smi_r_list = clean_df["SMILES w/o R_group replacement"]
         index = 0
@@ -758,27 +941,29 @@ class DAPairs:
 
 
 # Step 1
-# donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
-# donors.clean_donor(CLEAN_DONOR_CSV)
+donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
+donors.clean_donor(CLEAN_DONOR_CSV)
 
 # # # # Step 1b
-# donors.replace_r(CLEAN_DONOR_CSV)
+donors.replace_r_with_arbitrary(CLEAN_DONOR_CSV)
+donors.replace_r(CLEAN_DONOR_CSV)
 
 # # # # # # # Step 1c - do not include for fragmentation
 # # # # # donors.remove_methyl(CLEAN_DONOR_CSV)
 
 # # # # # # Step 1d - canonSMILES to remove %10-%100
-# donors.canon_smi(CLEAN_DONOR_CSV)
+donors.canon_smi(CLEAN_DONOR_CSV)
 
 # # # # # Step 1
-# acceptors = AcceptorClean(MASTER_ACCEPTOR_CSV, OPV_ACCEPTOR_DATA)
-# acceptors.clean_acceptor(CLEAN_ACCEPTOR_CSV)
+acceptors = AcceptorClean(MASTER_ACCEPTOR_CSV, OPV_ACCEPTOR_DATA)
+acceptors.clean_acceptor(CLEAN_ACCEPTOR_CSV)
 
 # # Step 1b
-# acceptors.replace_r(CLEAN_ACCEPTOR_CSV)
+acceptors.replace_r_with_arbitrary(CLEAN_ACCEPTOR_CSV)
+acceptors.replace_r(CLEAN_ACCEPTOR_CSV)
 
 # # # # # Step 1d - canonSMILES to remove %10-%100
-# acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
+acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
 
 # # Step 1e - Fragmentation
 # donors.delete_r(CLEAN_DONOR_CSV)

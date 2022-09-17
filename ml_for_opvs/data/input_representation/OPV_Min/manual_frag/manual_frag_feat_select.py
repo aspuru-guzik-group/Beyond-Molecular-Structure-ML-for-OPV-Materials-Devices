@@ -8,6 +8,8 @@ MASTER_MANUAL_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/input_representation/OPV_Min/manual_frag/master_manual_frag.csv"
 )
 
+DATA_PATH = pkg_resources.resource_filename("ml_for_opvs", "data/input_representation/OPV_Min/manual_frag/")
+
 # create lists of groups of selected features
 output = {'PCE_percent', 'calc_PCE_percent', 'Voc_V', 'Jsc_mA_cm_neg2', 'FF_percent'}
 
@@ -72,7 +74,7 @@ class FeatureSelection:
         # delete all rows that have at least 1 empty entry
         df = df_full.dropna(how = 'any')
         # save the processed dataframe to a new csv file whose name includes the group of features that are included
-        df.to_csv('processed_manual_frag_{x}.csv'.format(x = feat_list), index = False)
+        df.to_csv(DATA_PATH + 'processed_manual_frag_{x}.csv'.format(x = feat_list), index = False)
 
 fs = FeatureSelection(MASTER_MANUAL_DATA)
 
