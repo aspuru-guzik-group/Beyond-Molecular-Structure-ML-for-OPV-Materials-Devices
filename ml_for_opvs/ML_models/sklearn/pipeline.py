@@ -404,7 +404,7 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
 
 
 def process_target(
-    train_target_df, test_target_df
+    train_target_df, test_target_df, train_df
 ) -> Tuple[np.ndarray, np.ndarray, float, float]:
     """Processes one target value through the following steps:
     1) min-max scaling
@@ -413,6 +413,7 @@ def process_target(
     Args:
         train_target_df (pd.DataFrame): target values for training dataframe
         test_target_df (pd.DataFrame): target values for test dataframe
+        train_df (pd.DataFrame): training dataframe for recovering input_representation
     Returns:
         target_train_array (np.array): array of training targets
         target_test_array (np.array): array of test targets
@@ -421,18 +422,19 @@ def process_target(
     """
     assert len(train_target_df) > 1, train_target_df
     assert len(test_target_df) > 1, test_target_df
-    concat_df = pd.concat([train_target_df, test_target_df], ignore_index=True)
     # first column will always be the target column
     target_max, target_min = feature_scale(train_target_df[train_target_df.columns[0]])
 
      # First in column_headers will always be input_representation
-    column_headers = train_target_df.columns
-    input_representation = column_headers[0]
+    column_headers = train_df.columns
+    for column in column_headers:
+        if type(train_df[column][1]) == str:
+            input_representation = column
 
     # additional data points for targets if data is augmented
     input_instance = None
     try:
-        input_value = ast.literal_eval(concat_df[input_representation][1])
+        input_value = ast.literal_eval(train_df[input_representation][1])
         if isinstance(input_value[0], list):
             input_instance = "list_of_list"
             # print("input_value is a list of list")

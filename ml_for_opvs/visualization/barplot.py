@@ -70,7 +70,7 @@ def barplot(config: dict):
 
     # Combine 2 dictionaries together
     config.update(plot_config)
-    print(config)
+    # print(config)
 
     progress_paths: list[Path] = path_to_result(config, "progress_report")
 
@@ -78,19 +78,20 @@ def barplot(config: dict):
     summary: pd.DataFrame = summary.sort_values(config["hue"])
 
     # Plot Axis
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(6, 8))
     # Title
     ax.set_title(
-        "Barplot of {} for {}".format(config["config_name"])  # config["models"][0])
+        "Barplot of {}".format(config["config_name"])  # config["models"][0])
     )
     # Barplot
     sns.set_style("whitegrid")
+    print(summary)
 
     if "data" in config["config_name"]:
         print("True")
         sns.barplot(
-            x=summary[config["x"]],
-            y=summary[config["metrics"]],
+            y=summary[config["x"]],
+            x=summary[config["metrics"]],
             ax=ax,
             hue=summary[config["hue"]],
         )
@@ -98,20 +99,23 @@ def barplot(config: dict):
             ax.bar_label(container)
     else:
         sns.barplot(
-            x=summary[config["x"]],
-            y=summary[config["metrics"]],
+            y=summary[config["x"]],
+            x=summary[config["metrics"]],
             ci="sd",
             ax=ax,
             hue=summary[config["hue"]],
             capsize=0.08,
         )
         # Y-axis Limits
-        min_yval: float = min(summary[config["metrics"]])
+        min_xval: float = min(summary[config["metrics"]])
         # min_idx_yval: int = np.argmin(summary[config["metrics"]])
         # min_yval: float = min_yval - list(summary["r_std"])[min_idx_yval]
         # min_yval: float = min_yval * 0.9
-        ax.set_ylim(min_yval, 1)
+        ax.set_xlim(min_xval, 1)
 
+    # annotations on bars
+    for container in ax.containers:
+        ax.bar_label(container,fmt='%.3f',padding=30)
     # for plotting/saving
     plt.tight_layout()
     plot_path: Path = Path(config["plot_path"])

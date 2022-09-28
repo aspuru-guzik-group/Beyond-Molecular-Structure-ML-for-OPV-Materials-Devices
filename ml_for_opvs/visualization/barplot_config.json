@@ -1,17 +1,17 @@
 {
-    "OPV_Min": {
+    "representation_comparison": {
         "datasets": [
             "OPV_Min"
         ],
         "models": [
             "RF",
-            "BRT",
-            "SVM"
+            "BRT"
         ],
         "input_representations": [],
-        "x": "Features",
+        "features": [],
+        "x": "Input_Representation",
         "hue": "Model",
-        "feature_names": [],
+        "input_names": [],
         "target_names": [],
         "metrics": "r"
     }

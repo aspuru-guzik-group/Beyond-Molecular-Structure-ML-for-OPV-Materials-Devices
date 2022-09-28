@@ -8,12 +8,19 @@ virtualenv --no-download ~/env/opv
 source ~/env/opv/bin/activate
 
 pip install --no-index --upgrade pip
-# pip install tensorflow tensorflow-probability
 pip install scipy pandas matplotlib
 pip install seaborn scikit-learn
 pip install pandarallel
 pip install mordred
 
+pip install torch==1.12.1
+pip install torch-scatter -f https://data.pyg.org/whl/torch-1.12.1+cu114.html 
+pip install torch-sparse -f https://data.pyg.org/whl/torch-1.12.1+cu114.html 
+pip install torch-cluster -f https://data.pyg.org/whl/torch-1.12.1+cu114.html 
+pip install torch-spline-conv -f https://data.pyg.org/whl/torch-1.12.1+cu114.html 
+pip install torch-geometric 
+
+# pip install tensorflow tensorflow-probability
 # pip install dm-sonnet ml_collections graph_nets tf-models-official
 # pip install tensorflow==2.9.0
 # pip install ngboost gpflow

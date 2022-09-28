@@ -98,10 +98,10 @@ def main(config: dict):
         )
         # process target values
         target_df_columns = config["target_name"].split(",")
-        try:
-            target_df_columns.extend(config["feature_names"].split(","))
-        except:
-            print("No Additional Features")
+        # try:
+        #     target_df_columns.extend(config["feature_names"].split(","))
+        # except:
+        #     print("No Additional Features")
         (
             target_train_array,
             target_val_array,
@@ -110,6 +110,7 @@ def main(config: dict):
         ) = process_target(
             train_df[target_df_columns],
             val_df[target_df_columns],
+            train_df[config["input_representation"].split(",")]
         )
         # print("target_train", len(target_train_array))
         # print("target_val", len(target_val_array))
@@ -194,7 +195,7 @@ def main(config: dict):
         # save model, outputs, generates new directory based on training/dataset/model/features/target
         results_path: Path = Path(os.path.abspath(config["results_path"]))
         model_dir_path: Path = results_path / "{}".format(config["model_type"])
-        feature_dir_path: Path = model_dir_path / "{}".format(str(column_names))
+        feature_dir_path: Path = model_dir_path / "{}".format(config["feature_names"])
         target_dir_path: Path = feature_dir_path / "{}".format(config["target_name"])
         # create folders if not present
         try:
