@@ -1,53 +1,13 @@
-import pandas as pd
 import numpy as np
-import seaborn as sns
+import pandas as pd
 
-import mordred
-import mordred.descriptors
 import rdkit.Chem.AllChem as Chem
-from torch_geometric.utils import from_smiles
-
-import multiprocessing
 from pandarallel import pandarallel
-
-import sklearn 
-from sklearn.model_selection import KFold
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import r2_score
 
 import pickle
 from argparse import ArgumentParser
 
-
-
-def get_features(smi, feature_type = 'fp'):
-    # get desired feature
-    mol = Chem.MolFromSmiles(smi)
-    if feature_type == 'fp':
-        feat = np.array(Chem.GetMorganFingerprintAsBitVect(mol, radius=3))
-    elif feature_type == 'mordred':
-        calc = mordred.Calculator(mordred.descriptors, ignore_3D=True)
-        vals = calc(mol)._values
-        feat = np.array([float(v) for v in vals])
-    elif feature_type == 'graph':
-        feat = from_smiles(Chem.MolToSmiles(mol))
-    else:
-        raise NotImplementedError('No such feature.')
-    return feat
-
-def get_cv_splits(x, y):
-    results = {'split': [], 'train': [], 'test': []}
-    indices = range(len(x))
-    splitter = KFold(n_splits=5)
-    # print(split_ind)
-    for i, (train_ind, test_ind) in enumerate(splitter.split(indices)):
-        results['split'].append(i)
-        results['train'].append((x[train_ind], y[train_ind]))
-        results['test'].append((x[test_ind], y[test_ind]))
-    return results
-
-def r_score(x, y):
-    return np.corrcoef(x,y)[0,1]
+from ml_for_opvs.utils import get_features
 
 
 if __name__ == '__main__':

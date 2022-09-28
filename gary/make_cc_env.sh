@@ -12,8 +12,11 @@ pip install scipy pandas matplotlib
 pip install seaborn scikit-learn
 pip install pandarallel
 pip install mordred
+pip install optuna # if we use it
 
 pip install torch==1.12.1
+pip install gpytorch
+pip install ngboost
 pip install torch-scatter -f https://data.pyg.org/whl/torch-1.12.1+cu114.html 
 pip install torch-sparse -f https://data.pyg.org/whl/torch-1.12.1+cu114.html 
 pip install torch-cluster -f https://data.pyg.org/whl/torch-1.12.1+cu114.html 

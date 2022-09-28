@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --account=rrg-aspuru
 #SBATCH --nodes=1
-#SBATCH --ntasks=64        # CPU cores/threads
+#SBATCH --ntasks=32        # CPU cores/threads
 #SBATCH --mem=92000M              # memory per node
-#SBATCH --time=0-02:00            # time (DD-HH:MM)
+#SBATCH --time=0-01:00            # time (DD-HH:MM)
 #SBATCH -J ml_opv
 
 module load python/3.8
@@ -21,9 +21,7 @@ source ~/env/opv/bin/activate
 # note that the arguments
 # $1 = model
 # $2 = feature
-python train.py --model=$1 --feature=$2
-
-
+python optimize.py --model=$1 --feature=$2 --dataset=min --num_workers=$SLURM_NTASKS
 
 deactivate
 
