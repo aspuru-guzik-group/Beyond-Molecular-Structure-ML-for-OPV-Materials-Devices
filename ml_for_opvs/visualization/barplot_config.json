@@ -9,7 +9,7 @@
         ],
         "input_representations": [],
         "features": [],
-        "x": "Input_Representation",
+        "x": "Features",
         "hue": "Model",
         "input_names": [],
         "target_names": [],

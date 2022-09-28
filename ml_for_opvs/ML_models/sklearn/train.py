@@ -70,11 +70,7 @@ def main(config: dict):
     test_paths: str = config["test_paths"]
 
     # column names
-    column_names = [config["input_representation"]]
-    try:
-        column_names.extend(config["feature_names"].split(","))
-    except:
-        print("No Additional Features")
+    column_names = config["feature_names"].split(",")
 
     # if multiple train and test paths, X-Fold Cross-test occurs here.
     fold: int = 0
@@ -110,7 +106,7 @@ def main(config: dict):
         ) = process_target(
             train_df[target_df_columns],
             val_df[target_df_columns],
-            train_df[config["input_representation"].split(",")]
+            train_df[column_names]
         )
         # print("target_train", len(target_train_array))
         # print("target_val", len(target_val_array))
@@ -203,8 +199,8 @@ def main(config: dict):
         except:
             print("Folder already exists.")
         # save model
-        model_path: Path = target_dir_path / "model_{}.pkl".format(fold)
-        pickle.dump(model, open(model_path, "wb"))  # difficult to maintain
+        # model_path: Path = target_dir_path / "model_{}.pkl".format(fold)
+        # pickle.dump(model, open(model_path, "wb"))  # difficult to maintain
         # save best hyperparams for the best model from each fold
         if config["hyperparameter_optimization"] == "True":
             hyperparam_path: Path = (

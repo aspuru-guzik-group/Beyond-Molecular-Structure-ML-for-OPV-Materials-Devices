@@ -10,4 +10,4 @@
 
 module load python/3.9.6
 source /project/6025683/stanlo/opv_project/bin/activate
-python ../train.py --train_path $1/input_train_[0-9].csv  --test_path $2/input_test_[0-9].csv --input_representation $7 --feature_names $3 --target_name $4 --model_type $5 --model_config_path ../$5/model_config.json --results_path ../../../training/OPV_Min/$6/processed_$8_$9 --random_state 22
+python ../train.py --train_path $1/input_train_[0-9].csv  --test_path $2/input_test_[0-9].csv --input_representation $7 --feature_names $3 --target_name $4 --model_type $5 --model_config_path ../$5/model_config.json --results_path ../../../training/OPV_Min/$6/result_$8_$9 --random_state 22

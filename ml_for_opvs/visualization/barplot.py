@@ -41,22 +41,6 @@ def wrap_labels(ax, width: int = 10):
     ax.set_xticklabels(labels, rotation=0)
 
 
-def rename_features(filtered_summary: pd.DataFrame, input_representation: str):
-    """Rename features to eliminate differences between datasets.
-
-    Args:
-        filtered_summary (pd.DataFrame): _description_
-        input_representation (str):
-    """
-    for index, row in filtered_summary.iterrows():
-        if "aug" in filtered_summary.at[index, "Features"]:
-            filtered_summary.at[index, "Features"] = "Augmented Manual Fragments"
-        else:
-            filtered_summary.at[index, "Features"] = "Manual Fragments"
-
-    return filtered_summary
-
-
 def barplot(config: dict):
     """Creates a bar plot of the model performance from several configurations.
     Args:

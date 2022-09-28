@@ -1,8 +1,6 @@
 #!/bin/bash
-model_types=("RF") # "BRT" "SVM"
-
 # 1
-input_rep=("fingerprint")
+input_rep=("fingerprint" "BRICS" "manual_frag" "aug_SMILES" "smiles")
 
 # 1.1
 declare -A input_rep_filename_dict
@@ -10,7 +8,7 @@ declare -A input_rep_filename_dict
 input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["manual_frag"]="manual_frag" ["aug_SMILES"]="augment" ["smiles"]="smiles")
 
 # 2
-feat_select_group=("full" "fabrication_wo_solid" "device_wo_thickness")
+feat_select_group=("molecules_only")
 
 # 3
 declare -a input_rep_features
@@ -22,12 +20,12 @@ declare -a feature_name_dict
 target_name=("calc_PCE_percent")
 
 # 6
-model_type=("RF")
+model_type=("RF" "BRT")
 
 for ir in ${input_rep[@]}; do
 	for fsg in ${feat_select_group[@]}; do
 		case "$fsg" in
-			"full") feature_name_dict=("''" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV")
+			"molecules_only") feature_name_dict=("''")
 			;;
 			"fabrication_wo_solid") feature_name_dict=("''" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature")
 			;;
@@ -60,8 +58,8 @@ for ir in ${input_rep[@]}; do
 							feature_clause+=",$fnd"
 						fi
 						# echo $train_path  $test_path $feature_clause $tn $mt $ir $irf ${input_rep_filename_dict[$ir]} $fsg
-						# python ../train.py --train_path $train_path --test_path $test_path --input_representation $irf --feature_name $feature_clause --target_name $tn --model_type $mt --hyperparameter_optimization True --hyperparameter_space_path ./opv_hpo_space.json --results_path ../../../training/OPV_Min/$ir/result_${input_rep_filename_dict[$ir]}_$fsg --random_state 22
-						sbatch opv_train_submit.sh $train_path  $test_path $feature_clause $tn $mt $ir $irf ${input_rep_filename_dict[$ir]} $fsg
+						python ../train.py --train_path $train_path/input_train_[0-9].csv --test_path $test_path/input_test_[0-9].csv --input_representation $irf --feature_name $feature_clause --target_name $tn --model_type $mt --hyperparameter_optimization True --hyperparameter_space_path ./opv_hpo_space.json --results_path ../../../training/OPV_Min/$ir/result_${input_rep_filename_dict[$ir]}_$fsg --random_state 22
+						# sbatch opv_train_submit.sh $train_path  $test_path $feature_clause $tn $mt $ir $irf ${input_rep_filename_dict[$ir]} $fsg
 					done
 				done
 			done

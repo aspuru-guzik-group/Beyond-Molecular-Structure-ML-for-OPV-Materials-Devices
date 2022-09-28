@@ -229,6 +229,11 @@ def main(config: dict):
             p.numel() for p in model.parameters() if p.requires_grad
         )
         print("MODEL_PARAMETERS: {}".format(pytorch_total_params))
+        # Early stopping
+        # last_loss = 100
+        # patience = 10
+        # trigger_times = 0
+        # early_stop = False
         for epoch in range(config["num_of_epochs"]):
             ## TRAINING LOOP
             ## Make sure gradient tracking is on
@@ -291,12 +296,34 @@ def main(config: dict):
                 valid_outputs = model(valid_inputs)
                 # Compute the loss
                 valid_loss = loss_fn(valid_outputs, valid_targets)
+
+                # Early Stopping
+                # current_loss = valid_loss
+                # if current_loss > last_loss:
+                #     trigger_times += 1
+                #     # print('Trigger Times:', trigger_times)
+
+                #     if trigger_times >= patience:
+                #         print('Early stopping!\nStart to test process.')
+                #         early_stop = True
+                #         break
+                # else:
+                #     # print('trigger times: 0')
+                #     trigger_times = 0
+
+                # last_loss = current_loss
+
                 # Gather data and report
                 running_valid_loss += float(valid_loss)
                 # Gather number of examples trained
                 n_examples += len(valid_inputs)
                 # Gather number of iterations (batches) trained
                 n_valid_iter += 1
+
+            # Early Stopping
+            # if early_stop:
+            #     break
+
             valid_writer.add_scalar("loss_batch", valid_loss, n_examples)
             valid_writer.add_scalar(
                 "loss_avg", running_valid_loss / n_valid_iter, n_examples

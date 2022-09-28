@@ -152,7 +152,7 @@ def gather_results(progress_report_paths: list[Path]) -> pd.DataFrame:
         progress: pd.DataFrame = pd.read_csv(progress_path)
         progress["Dataset"] = missing_columns[-7]
         progress["Input_Representation"] = missing_columns[-6]
-        progress["Features"] = missing_columns[-5]
+        progress["Features"] = missing_columns[-3]
         progress["Model"] = missing_columns[-4]
         progress["Target"] = missing_columns[-2]
         if progress_path.name == "progress_report.csv":
