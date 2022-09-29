@@ -1,6 +1,6 @@
 #!/bin/bash
 # 1
-input_rep=("fingerprint" "BRICS" "manual_frag" "aug_SMILES" "smiles")
+input_rep=("fingerprint")
 
 # 1.1
 declare -A input_rep_filename_dict
@@ -8,7 +8,7 @@ declare -A input_rep_filename_dict
 input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["manual_frag"]="manual_frag" ["aug_SMILES"]="augment" ["smiles"]="smiles")
 
 # 2
-feat_select_group=("molecules_only")
+feat_select_group=("fabrication_wo_solid" "device_wo_thickness")
 
 # 3
 declare -a input_rep_features
