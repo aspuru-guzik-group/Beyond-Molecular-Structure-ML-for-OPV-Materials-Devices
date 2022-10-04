@@ -1,5 +1,7 @@
+import glob
 import numpy as np
 import random
+import scipy.stats
 
 import rdkit.Chem.AllChem as Chem
 import mordred
@@ -22,6 +24,7 @@ def get_features(smi, feature_type = 'fp'):
         calc = mordred.Calculator(mordred.descriptors, ignore_3D=True)
         vals = calc(mol)._values
         feat = np.array([float(v) for v in vals])
+        feat = np.delete(feat, np.isnan(feat).any(axis=0), axis=1)  # remove the invalid features
     elif feature_type == 'graph':
         feat = from_smiles(Chem.MolToSmiles(mol))
     else:
@@ -30,23 +33,27 @@ def get_features(smi, feature_type = 'fp'):
 
 def set_seed(seed = 22):
     # set random seed for all used modules
-    print(f'Random seed set to {seed}')
+    # print(f'Random seed set to {seed}')
     np.random.seed(seed)
     torch.manual_seed(seed)
     random.seed(seed)
 
 def get_cv_splits(x, n_splits=5, val_split = 0.2):
     # return dictionary with the indices of tvt splits
-    test, train = [], []
+    test, train, val = [], [], []
     indices = range(len(x))
     splitter = KFold(n_splits=n_splits)
     for i, (train_ind, test_ind) in enumerate(splitter.split(indices)):
         test.append(test_ind)      
+        train_ind, val_ind = train_test_split(train_ind, test_size=0.2)
         train.append(train_ind)
-    return train, test
+        val.append(val_ind)
+    return train, val, test
 
 def r_score(x, y):
-    return np.corrcoef(x,y)[0,1]
+    # return np.corrcoef(x,y)[0,1]
+    pearson_r = scipy.stats.pearsonr(x, y)[0]
+    return pearson_r
 
 def remove_zero_variance(features):
     # return features without 0 variance columns
@@ -69,3 +76,11 @@ def pca_features(features, threshold = 0.99999):
     red_features = red_features[:, :i+1]
     return red_features
 
+
+def read_split_files(dataset, data_dir = 'data'):
+    fnames = glob.glob(f'{data_dir}/{dataset}_splits*.npz')
+    splits = []
+    for f in fnames:
+        splits.append(np.load(f))
+        
+    return splits
