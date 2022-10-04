@@ -12,7 +12,11 @@ pip install scipy pandas matplotlib
 pip install seaborn scikit-learn
 pip install pandarallel
 pip install mordred
+
 pip install optuna # if we use it
+pip install plotly
+pip install kaleido
+
 
 pip install torch==1.12.1
 pip install gpytorch

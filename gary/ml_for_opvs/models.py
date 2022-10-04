@@ -65,6 +65,7 @@ class BitDistance(torch.nn.Module):
 
 class TanimotoKernel(gpytorch.kernels.Kernel):
     ''' Tanimoto kernel from FlowMO and GAUCHE
+    (https://github.com/leojklarner/gauche/blob/main/gprotorch/kernels/fingerprint_kernels/tanimoto_kernel.py)
     '''
     def __init__(self, metric="tanimoto", **kwargs):
         super(TanimotoKernel, self).__init__(**kwargs)

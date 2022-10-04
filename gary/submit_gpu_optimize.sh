@@ -3,7 +3,8 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=32        # CPU cores/threads
 #SBATCH --mem=92000M              # memory per node
-#SBATCH --time=0-02:00            # time (DD-HH:MM)
+#SBATCH --time=0-05:00            # time (DD-HH:MM)
+#SBATCH --gres=gpu:1
 #SBATCH -J ml_opv
 
 module load python/3.8

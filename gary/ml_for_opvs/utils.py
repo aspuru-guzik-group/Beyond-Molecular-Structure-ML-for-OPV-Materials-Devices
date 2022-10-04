@@ -55,6 +55,11 @@ def r_score(x, y):
     pearson_r = scipy.stats.pearsonr(x, y)[0]
     return pearson_r
 
+def spearman_score(x, y):
+    spearman_r = scipy.stats.spearmanr(x, y)[0]
+    return spearman_r
+
+
 def remove_zero_variance(features):
     # return features without 0 variance columns
     features = np.delete(features, np.isnan(features).any(axis=0), axis=1)
