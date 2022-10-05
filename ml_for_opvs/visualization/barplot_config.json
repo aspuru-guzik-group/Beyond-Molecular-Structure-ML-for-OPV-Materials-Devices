@@ -9,8 +9,23 @@
         ],
         "input_representations": [],
         "features": [],
-        "x": "Features",
+        "x": "Feature_Names",
         "hue": "Model",
+        "input_names": [],
+        "target_names": [],
+        "metrics": "r"
+    },
+    "feature_comparison": {
+        "datasets": [
+            "OPV_Min"
+        ],
+        "models": [
+            "RF"
+        ],
+        "input_representations": ["fingerprint"],
+        "features": [],
+        "x": "Feature_Names",
+        "hue": "Features",
         "input_names": [],
         "target_names": [],
         "metrics": "r"

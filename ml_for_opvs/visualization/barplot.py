@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import pandas as pd
+from textwrap import wrap
 import textwrap
 
 from ml_for_opvs.visualization.path_utils import (
@@ -62,11 +63,12 @@ def barplot(config: dict):
     summary: pd.DataFrame = summary.sort_values(config["hue"])
 
     # Plot Axis
-    fig, ax = plt.subplots(figsize=(6, 8))
+    size: list[str] = config["size"].split(",")
+    size: list[int] = [int(x) for x in size]
+    size: tuple = tuple(size)
+    fig, ax = plt.subplots(figsize=size)
     # Title
-    ax.set_title(
-        "Barplot of {}".format(config["config_name"])  # config["models"][0])
-    )
+    ax.set_title("Barplot of {}".format(config["config_name"]))  # config["models"][0])
     # Barplot
     sns.set_style("whitegrid")
     print(summary)
@@ -74,8 +76,8 @@ def barplot(config: dict):
     if "data" in config["config_name"]:
         print("True")
         sns.barplot(
-            y=summary[config["x"]],
-            x=summary[config["metrics"]],
+            x=summary[config["x"]],
+            y=summary[config["metrics"]],
             ax=ax,
             hue=summary[config["hue"]],
         )
@@ -83,23 +85,35 @@ def barplot(config: dict):
             ax.bar_label(container)
     else:
         sns.barplot(
-            y=summary[config["x"]],
-            x=summary[config["metrics"]],
+            x=summary[config["x"]],
+            y=summary[config["metrics"]],
             ci="sd",
             ax=ax,
             hue=summary[config["hue"]],
             capsize=0.08,
+            errwidth=0.8,
         )
         # Y-axis Limits
-        min_xval: float = min(summary[config["metrics"]])
+        min_yval: float = min(summary[config["metrics"]])
         # min_idx_yval: int = np.argmin(summary[config["metrics"]])
         # min_yval: float = min_yval - list(summary["r_std"])[min_idx_yval]
         # min_yval: float = min_yval * 0.9
-        ax.set_xlim(min_xval, 1)
+        max_yval: float = max(summary[config["metrics"]])
+        ax.set_ylim(min_yval, max_yval + 0.1)
+
+    # extract labels
+    labels = ax.get_xticklabels()
+    # fix the labels
+    for v in labels:
+        text = v.get_text()
+        text = "\n".join(wrap(text, 25))
+        v.set_text(text)
+
+    ax.set_xticklabels(labels)
 
     # annotations on bars
     for container in ax.containers:
-        ax.bar_label(container,fmt='%.3f',padding=30)
+        ax.bar_label(container, fmt="%.3f", padding=10)
     # for plotting/saving
     plt.tight_layout()
     plot_path: Path = Path(config["plot_path"])
@@ -130,6 +144,11 @@ if __name__ == "__main__":
         "--plot_path",
         type=str,
         help="Directory path to location of plotting.",
+    )
+    parser.add_argument(
+        "--size",
+        type=str,
+        help="Size of barplot. Please specify only two numbers separated by a comma.",
     )
     args = parser.parse_args()
     config = vars(args)

@@ -10,17 +10,24 @@ import pandas as pd
 import pickle  # for saving scikit-learn models
 import numpy as np
 import json
+import matplotlib.pyplot as plt
 from pathlib import Path
 from numpy import mean, std
 from skopt import BayesSearchCV
 from sklearn.model_selection import KFold
-from sklearn.metrics import make_scorer, mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import (
+    make_scorer,
+    mean_absolute_error,
+    mean_squared_error,
+    r2_score,
+)
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.gaussian_process.kernels import RBF, PairwiseKernel
 from sklearn.linear_model import LinearRegression
 from sklearn.svm import SVR
 from sklearn.kernel_ridge import KernelRidge
 import xgboost
+import shap
 
 from ml_for_opvs.ML_models.sklearn.pipeline import (
     process_features,
@@ -69,6 +76,16 @@ def main(config: dict):
     train_paths: str = config["train_paths"]
     test_paths: str = config["test_paths"]
 
+    # NOTE: ATTENTION! Folds have different number of training / validation folds. YUCK!
+    # calculate minimum number of examples, and cut it short
+    min_val_len: list = []
+    for train_path, test_path in zip(train_paths, test_paths):
+        train_df: pd.DataFrame = pd.read_csv(train_path)
+        val_df: pd.DataFrame = pd.read_csv(test_path)
+        min_val_len.append(len(val_df))
+
+    min_val: int = min(min_val_len)
+
     # column names
     column_names = config["feature_names"].split(",")
 
@@ -79,11 +96,14 @@ def main(config: dict):
     outer_rmse: list = []
     outer_mae: list = []
     progress_dict: dict = {"fold": [], "r": [], "r2": [], "rmse": [], "mae": []}
+    # Stores shapley values across folds
+    shapley_total: list = []
     for train_path, test_path in zip(train_paths, test_paths):
         # print training config
-        print(config)
+        # print(config)
         train_df: pd.DataFrame = pd.read_csv(train_path)
         val_df: pd.DataFrame = pd.read_csv(test_path)
+        val_df: pd.DataFrame = val_df[0:min_val]
         # process SMILES vs. Fragments vs. Fingerprints. How to handle that? handle this and tokenization in pipeline
         (
             input_train_array,
@@ -106,7 +126,7 @@ def main(config: dict):
         ) = process_target(
             train_df[target_df_columns],
             val_df[target_df_columns],
-            train_df[column_names]
+            train_df[column_names],
         )
         # print("target_train", len(target_train_array))
         # print("target_val", len(target_val_array))
@@ -183,6 +203,12 @@ def main(config: dict):
             # inference on hold out set
             yhat: np.ndarray = model.predict(input_val_array)
 
+        # Feature Importance
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(input_val_array)
+        print(f"{shap_values.shape=}")
+        shapley_total.append(list(shap_values))
+
         # reverse min-max scaling
         yhat: np.ndarray = (yhat * (target_max - target_min)) + target_min
         y_test: np.ndarray = (target_val_array * (target_max - target_min)) + target_min
@@ -198,6 +224,12 @@ def main(config: dict):
             target_dir_path.mkdir(parents=True, exist_ok=True)
         except:
             print("Folder already exists.")
+
+        # Feature Importance Plots
+        shap.summary_plot(shap_values, input_val_array, show=False)
+        plt.savefig(target_dir_path / "shapley_{}.png".format(fold))
+        plt.clf()
+
         # save model
         # model_path: Path = target_dir_path / "model_{}.pkl".format(fold)
         # pickle.dump(model, open(model_path, "wb"))  # difficult to maintain
@@ -239,6 +271,15 @@ def main(config: dict):
         outer_rmse.append(rmse)
         outer_mae.append(mae)
 
+    # After Cross-Validation Training, Summarize Results!
+    # Save Feature Importance Plots
+    shapley_total: np.ndarray = np.array(shapley_total)
+    print(f"{shapley_total.shape=}")
+    shapley_total_avg: np.ndarray = np.mean(shapley_total, axis=0)
+    print(f"{shapley_total_avg.shape=}")
+    shap.summary_plot(shapley_total_avg, input_val_array, show=False)
+    plt.savefig(target_dir_path / "shapley_avg.png")
+    assert False
     # make new file
     # summarize results
     progress_path: Path = target_dir_path / "progress_report.csv"
@@ -299,7 +340,9 @@ if __name__ == "__main__":
         type=str,
         help="Choose target value. Format is ex. calc_PCE_percent",
     )
-    parser.add_argument("--model_type", type=str, help="Choose model type. (RF, BRT, SVM, KRR, LR)")
+    parser.add_argument(
+        "--model_type", type=str, help="Choose model type. (RF, BRT, SVM, KRR, LR)"
+    )
     parser.add_argument(
         "--hyperparameter_optimization",
         type=str,

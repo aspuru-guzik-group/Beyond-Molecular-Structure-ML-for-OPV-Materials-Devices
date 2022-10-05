@@ -71,7 +71,9 @@ def filter_nan(df_to_filter):
     pass
 
 
-def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.ndarray]:
+def process_features(
+    train_feature_df, test_feature_df
+) -> Tuple[np.ndarray, np.ndarray]:
     """Processes various types of features (str, float, list) and returns "training ready" arrays.
 
     Args:
@@ -139,7 +141,7 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
                 vocab_length,
                 token2idx,
             ) = Tokenizer().tokenize_data(augmented_smi_series)
-        else: # fragments or fingerprints
+        else:  # fragments or fingerprints
             token2idx = {}
             token_idx = 0
             for index, row in concat_df.iterrows():
@@ -252,14 +254,16 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
-                elif isinstance(input_value, str) and column == input_representation: #input_representation
+                elif (
+                    isinstance(input_value, str) and column == input_representation
+                ):  # input_representation
                     tokenized_list.extend(
                         Tokenizer().tokenize_from_dict(token2idx, input_value)
                     )  # SMILES
-                elif isinstance(input_value, str) and column != input_representation: # string feature
-                    feature_list.extend(
-                        tokenize_from_dict(token2idx, [input_value])
-                    )
+                elif (
+                    isinstance(input_value, str) and column != input_representation
+                ):  # string feature
+                    feature_list.extend(tokenize_from_dict(token2idx, [input_value]))
                 elif any(
                     [
                         isinstance(input_value, np.float64),
@@ -357,14 +361,16 @@ def process_features(train_feature_df, test_feature_df) -> Tuple[np.ndarray, np.
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
-                elif isinstance(input_value, str) and column == input_representation: #input_representation
+                elif (
+                    isinstance(input_value, str) and column == input_representation
+                ):  # input_representation
                     tokenized_list.extend(
                         Tokenizer().tokenize_from_dict(token2idx, input_value)
                     )  # SMILES
-                elif isinstance(input_value, str) and column != input_representation: # string feature
-                    feature_list.extend(
-                        tokenize_from_dict(token2idx, [input_value])
-                    )
+                elif (
+                    isinstance(input_value, str) and column != input_representation
+                ):  # string feature
+                    feature_list.extend(tokenize_from_dict(token2idx, [input_value]))
                 elif any(
                     [
                         isinstance(input_value, np.float64),
@@ -423,9 +429,10 @@ def process_target(
     assert len(train_target_df) > 1, train_target_df
     assert len(test_target_df) > 1, test_target_df
     # first column will always be the target column
+    # NOTE: Max and Min values are found from training set -> prevents data leakage
     target_max, target_min = feature_scale(train_target_df[train_target_df.columns[0]])
 
-     # First in column_headers will always be input_representation
+    # First in column_headers will always be input_representation
     column_headers = train_df.columns
     for column in column_headers:
         if type(train_df[column][1]) == str:

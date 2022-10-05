@@ -64,11 +64,15 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                 features: list[str] = config["features"]
                 if len(features) == 0:
                     raise ValueError
+                else:
+                    feature_paths: list[Path] = handle_paths(input_rep_path, config, "features")
             except:
                 print("All features will be plotted.")
                 feature_paths: list[Path] = input_rep_path.iterdir()
                 # print("feature_paths")
                 # print(list(feature_paths))
+            finally:
+                # print(f"{list(feature_paths)=}")
                 for feature_path in feature_paths:
                     # print(feature_path)
                     model_paths: generator = handle_paths(feature_path, config, "models")
@@ -80,6 +84,8 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                             inputs: list[str] = config["input_names"]
                             if len(inputs) == 0:
                                 raise ValueError
+                            else:
+                                input_paths: list[Path] = handle_paths(model_path, config, "input_names")
                         except:
                             print("All inputs will be plotted.")
                             input_paths: list[Path] = model_path.iterdir()
@@ -97,7 +103,6 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                                     )
                                     result_paths.append(result_path)
                         else:
-                            input_paths: list[Path] = model_path.iterdir()
                             # print("feature_paths")
                             # print(feature_paths)
                             for input_path in input_paths:
@@ -114,7 +119,7 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                                         result_file
                                     )
                                     result_paths.append(result_path)
-
+    print(f"{result_paths=}")
     return result_paths
 
 def gather_results(progress_report_paths: list[Path]) -> pd.DataFrame:
@@ -128,6 +133,7 @@ def gather_results(progress_report_paths: list[Path]) -> pd.DataFrame:
             "Dataset",
             "Input_Representation",
             "Features",
+            "Feature_Names",
             "Model",
             "Target",
             "fold",
@@ -152,7 +158,8 @@ def gather_results(progress_report_paths: list[Path]) -> pd.DataFrame:
         progress: pd.DataFrame = pd.read_csv(progress_path)
         progress["Dataset"] = missing_columns[-7]
         progress["Input_Representation"] = missing_columns[-6]
-        progress["Features"] = missing_columns[-3]
+        progress["Features"] = missing_columns[-5]
+        progress["Feature_Names"] = missing_columns[-3]
         progress["Model"] = missing_columns[-4]
         progress["Target"] = missing_columns[-2]
         if progress_path.name == "progress_report.csv":
