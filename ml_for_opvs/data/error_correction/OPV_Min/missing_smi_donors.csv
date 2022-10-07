@@ -29,3 +29,4 @@ P_TBTT-BTT,CCCCCCCCc1ccc(c2sc(c3sc(CCCCCCCC)cc3)c3c4cc(C)sc4c4sc(c5sc(c6c7nsnc7c
 P_dFBT-DTS,Cc1c(F)cc(c2cc3c(c4sc(c5cc(F)c(c6cc7c(c8sc(C)cc8[Si]7(CCCCCCCC)CCCCCCCC)s6)c6c5nn(CCCCCC)n6)cc4[Si]3(CCCCCCCC)CCCCCCCC)s2)c2c1nn(CCCCCC)n2
 P1_BDT-TBT,Cc1sc2c(OSCCCCCCCCCCCC)c3cc(c4ccc(c5c6nsnc6c(c6ccc(C)s6)cc5)s4)sc3c(OSCCCCCCCCCCCC)c2c1
 P1_PDTB-EF-T,Cc1sc2c(c3sc(CCCCCCCC)c(CCCCCCCC)c3)c3cc(c4ccc(c5c(F)c(F)c(C)c6c5nsn6)s4)sc3c(c3sc(CCCCCCCC)c(CCCCCCCC)c3)c2c1
+PTZ1,CCCCC(CCCCCC)Cc1sc(c2c(sc(C)c3)c3c(c4sc(CC(CCCC)CCCCCC)cc4)c5sc(c6sc(C7=NC([S]=C(c8sc(C)c(CC(CCCC)CC)c8)[N]9)=C9S7)c(CC(CCCC)CC)c6)cc25)cc1

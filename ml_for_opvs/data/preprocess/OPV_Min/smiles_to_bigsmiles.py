@@ -14,15 +14,15 @@ CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
 def smile_to_bigsmile(donor_data, acceptor_data):
 
     """Function that will convert SMILES to BigSMILES in the acceptor/donor dataframe.
-        - replaces any methyl group with ([$]) which is the bonding descriptor for polymers
+    - replaces any methyl group with ([$]) which is the bonding descriptor for polymers
 
-        Args:
-            donor_data: contains labels and various Cheminformatic Representations for donor molecules
-            acceptor_data: contains labels and various Cheminformatic Representations for acceptor molecules
+    Args:
+        donor_data: contains labels and various Cheminformatic Representations for donor molecules
+        acceptor_data: contains labels and various Cheminformatic Representations for acceptor molecules
 
-        Returns:
-            updates donor_data and acceptor_data
-        """
+    Returns:
+        updates donor_data and acceptor_data
+    """
     donor_df = pd.read_csv(donor_data)
     acceptor_df = pd.read_csv(acceptor_data)
 
@@ -52,37 +52,36 @@ def smile_to_bigsmile(donor_data, acceptor_data):
 
     for index, row in acceptor_df.iterrows():
         smile = row["SMILES"]
-        if smile[0] == "C":
-            smile = smile[1:]
-            smile = (
-                "[$]" + smile
-            )  # NOTE: check how we want to format this, in OPV sheets it's $ only
-            smile = smile.replace("(C)", "[$]")
-        # type 2
-        else:
-            smile = smile.replace(
-                "(C)", "[$]"
-            )  # NOTE: check how we want to format this, in OPV sheets it's ($)
+        # if smile[0] == "C":
+        #     smile = smile[1:]
+        #     smile = (
+        #         "[$]" + smile
+        #     )  # NOTE: check how we want to format this, in OPV sheets it's $ only
+        #     smile = smile.replace("(C)", "[$]")
+        # # type 2
+        # else:
+        #     smile = smile.replace(
+        #         "(C)", "[$]"
+        #     )  # NOTE: check how we want to format this, in OPV sheets it's ($)
 
-        smile = "{" + smile + "}"
+        # smile = "{" + smile + "}"
         acceptor_df.at[index, "Big_SMILES"] = smile
 
-    print(acceptor_df.head())
     acceptor_df.to_csv(acceptor_data, index=False)
 
 
 def cata_smile_to_bigsmile(catalysis_data):
 
     """Function that will convert SMILES to BigSMILES in the acceptor/donor dataframe.
-        - replaces any methyl group with ([$]) which is the bonding descriptor for polymers
+    - replaces any methyl group with ([$]) which is the bonding descriptor for polymers
 
-        Args:
-            donor_data: contains labels and various Cheminformatic Representations for donor molecules
-            acceptor_data: contains labels and various Cheminformatic Representations for acceptor molecules
+    Args:
+        donor_data: contains labels and various Cheminformatic Representations for donor molecules
+        acceptor_data: contains labels and various Cheminformatic Representations for acceptor molecules
 
-        Returns:
-            updates donor_data and acceptor_data
-        """
+    Returns:
+        updates donor_data and acceptor_data
+    """
     cata_df = pd.read_csv(catalysis_data)
     # NOTE: two types of SMILES strings
     # 1. Starts with one of the methyl groups, so one of them is "Cc", and the other is "(C)"

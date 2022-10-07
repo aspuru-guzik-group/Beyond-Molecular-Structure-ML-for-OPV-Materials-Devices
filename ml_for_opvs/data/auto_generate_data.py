@@ -1,7 +1,10 @@
 """File that contains all functions to go from .csv, to preprocessed data and input_representation data ready for training.
 """
 
-from ml_for_opvs.data.input_representation.OPV_Min.smiles.smiles import MASTER_SMI_DATA, create_smi_csv
+from ml_for_opvs.data.input_representation.OPV_Min.smiles.smiles import (
+    MASTER_SMI_DATA,
+    create_smi_csv,
+)
 from ml_for_opvs.data.preprocess.clean_donors_acceptors import (
     MASTER_DONOR_CSV,
     OPV_DONOR_DATA,
@@ -28,12 +31,22 @@ from ml_for_opvs.data.error_correction.OPV_Min.unique_opvs import (
 )
 
 from ml_for_opvs.data.error_correction.OPV_Min.remove_anomaly import Anomaly
-from ml_for_opvs.data.error_correction.OPV_Min.approximate_homo_lumo import approximate_value
+from ml_for_opvs.data.error_correction.OPV_Min.approximate_homo_lumo import (
+    approximate_value,
+)
 
-from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import aug_smi_doRandom, aug_smi_tokenize
-from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.morgan_fingerprints import create_master_fp
+from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import (
+    aug_smi_doRandom,
+    aug_smi_tokenize,
+)
+from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.morgan_fingerprints import (
+    create_master_fp,
+)
 from ml_for_opvs.data.input_representation.OPV_Min.BRICS.brics_frag import bric_frag
-from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag import export_manual_frag, fragment_files
+from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag import (
+    export_manual_frag,
+    fragment_files,
+)
 from ml_for_opvs.data.preprocess.OPV_Min.smiles_to_bigsmiles import smile_to_bigsmile
 from ml_for_opvs.data.preprocess.OPV_Min.smiles_to_selfies import opv_smiles_to_selfies
 
@@ -107,7 +120,7 @@ pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
 # anomaly.correct_anomaly(MASTER_ML_DATA_PLOT)
 
 # # Step 4c - Fill empty values for Thermal Annealing, and solvent_additives
-pairings.fill_empty_values(MASTER_ML_DATA)
+# pairings.fill_empty_values(MASTER_ML_DATA)
 
 # Add HOMO/LUMO approximation.
 approximate_value(MASTER_ML_DATA)
@@ -123,17 +136,18 @@ corr_plot = Correlation(MASTER_ML_DATA_PLOT)
 corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA_PLOT)
 corr_plot = Correlation(MASTER_ML_DATA)
 corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA)
+# TODO:? Solvent additives
 
 # Step 7
 # input_representationing!!!
 frag_dict = bric_frag(MASTER_ML_DATA)
 
-aug_smi_doRandom(MASTER_ML_DATA, AUGMENT_SMILES_DATA, 5)
-aug_smi_tokenize(AUGMENT_SMILES_DATA)
+# aug_smi_doRandom(MASTER_ML_DATA, AUGMENT_SMILES_DATA, 5)
+# aug_smi_tokenize(AUGMENT_SMILES_DATA)
 
 create_master_fp(MASTER_ML_DATA, FP_DATA, 3, 512)
 
-export_manual_frag()
+# export_manual_frag()
 
 create_smi_csv(MASTER_ML_DATA, MASTER_SMI_DATA)
 
@@ -155,60 +169,66 @@ device_wo_thickness = {'hole_contact_layer', 'electron_contact_layer'}
 
 solvent = {'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar'}
 """
-from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment_feat_select import fs
+from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment_feat_select import (
+    fs,
+)
 
-fs.feat_select('molecules_only')
-fs.feat_select('molecules')
-fs.feat_select('fabrication_wo_solid')
-fs.feat_select('device_wo_thickness')
-fs.feat_select('full')
-fs.feat_select('fabrication')
-fs.feat_select('device')
-fs.feat_select('electrical')
+fs.feat_select("molecules_only")
+fs.feat_select("molecules")
+fs.feat_select("fabrication_wo_solid")
+fs.feat_select("device_wo_thickness")
+fs.feat_select("full")
+fs.feat_select("fabrication")
+fs.feat_select("device")
+fs.feat_select("electrical")
 
 from ml_for_opvs.data.input_representation.OPV_Min.BRICS.brics_feat_select import fs
 
-fs.feat_select('molecules_only')
-fs.feat_select('molecules')
-fs.feat_select('fabrication_wo_solid')
-fs.feat_select('device_wo_thickness')
-fs.feat_select('full')
-fs.feat_select('fabrication')
-fs.feat_select('device')
-fs.feat_select('electrical')
+fs.feat_select("molecules_only")
+fs.feat_select("molecules")
+fs.feat_select("fabrication_wo_solid")
+fs.feat_select("device_wo_thickness")
+fs.feat_select("full")
+fs.feat_select("fabrication")
+fs.feat_select("device")
+fs.feat_select("electrical")
 
-from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.fingerprint_feat_select import fs
+from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.fingerprint_feat_select import (
+    fs,
+)
 
-fs.feat_select('molecules_only')
-fs.feat_select('molecules')
-fs.feat_select('fabrication_wo_solid')
-fs.feat_select('device_wo_thickness')
-fs.feat_select('full')
-fs.feat_select('fabrication')
-fs.feat_select('device')
-fs.feat_select('electrical')
+fs.feat_select("molecules_only")
+fs.feat_select("molecules")
+fs.feat_select("fabrication_wo_solid")
+fs.feat_select("device_wo_thickness")
+fs.feat_select("full")
+fs.feat_select("fabrication")
+fs.feat_select("device")
+fs.feat_select("electrical")
 
-from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag_feat_select import fs
+from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag_feat_select import (
+    fs,
+)
 
-fs.feat_select('molecules_only')
-fs.feat_select('molecules')
-fs.feat_select('fabrication_wo_solid')
-fs.feat_select('device_wo_thickness')
-fs.feat_select('full')
-fs.feat_select('fabrication')
-fs.feat_select('device')
-fs.feat_select('electrical')
+fs.feat_select("molecules_only")
+fs.feat_select("molecules")
+fs.feat_select("fabrication_wo_solid")
+fs.feat_select("device_wo_thickness")
+fs.feat_select("full")
+fs.feat_select("fabrication")
+fs.feat_select("device")
+fs.feat_select("electrical")
 
 from ml_for_opvs.data.input_representation.OPV_Min.smiles.smiles_feat_select import fs
 
-fs.feat_select('molecules_only')
-fs.feat_select('molecules')
-fs.feat_select('fabrication_wo_solid')
-fs.feat_select('device_wo_thickness')
-fs.feat_select('full')
-fs.feat_select('fabrication')
-fs.feat_select('device')
-fs.feat_select('electrical')
+fs.feat_select("molecules_only")
+fs.feat_select("molecules")
+fs.feat_select("fabrication_wo_solid")
+fs.feat_select("device_wo_thickness")
+fs.feat_select("full")
+fs.feat_select("fabrication")
+fs.feat_select("device")
+fs.feat_select("electrical")
 
 # Cross-Validation
 # Run cross_valid_data_generate.sh in cmd line

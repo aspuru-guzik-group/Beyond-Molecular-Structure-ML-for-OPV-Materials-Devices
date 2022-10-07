@@ -9,11 +9,13 @@ MASTER_ML_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 FP_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/input_representation/OPV_Min/fingerprint/master_fingerprint.csv"
+    "ml_for_opvs",
+    "data/input_representation/OPV_Min/fingerprint/master_fingerprint.csv",
 )
 
 
 np.set_printoptions(threshold=np.inf)
+
 
 def create_master_fp(master_data, fp_path, radius: int, nbits: int):
     """
@@ -43,10 +45,9 @@ def create_master_fp(master_data, fp_path, radius: int, nbits: int):
     new_column_da_pair = "DA_FP" + "_radius_" + str(radius) + "_nbits_" + str(nbits)
     fp_df[new_column_da_pair] = " "
     for index, row in fp_df.iterrows():
+        # TODO: do not concatenate when fingerprinting.
         da_pair = (
-            fp_df.at[index, "Donor_SMILES"]
-            + "."
-            + fp_df.at[index, "Acceptor_SMILES"]
+            fp_df.at[index, "Donor_SMILES"] + "." + fp_df.at[index, "Acceptor_SMILES"]
         )
         da_pair_mol = Chem.MolFromSmiles(da_pair)
         bitvector_da = AllChem.GetMorganFingerprintAsBitVect(
