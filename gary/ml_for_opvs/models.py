@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import NNConv, global_add_pool, global_mean_pool
+from torch_geometric.nn import GraphSAGE
+from torch_geometric.nn.aggr import GraphMultisetTransformer
 
 import gpytorch
 from gpytorch.kernels.kernel import default_postprocess_script
@@ -164,19 +166,52 @@ class GPRegressor(gpytorch.models.ExactGP):
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
 
-### NGBoost ###
-
-# class NGB()
 
 ### GNN ###
 
 class GNNEmbedder(torch.nn.Module):
     def __init__(
+            self,
+            num_layers,
+            gnn_hidden_dim, 
+            pool_hidden_dim,
+            embed_dim
+        ):
+        super().__init__()
+
+        self.num_layers = num_layers
+        self.gnn_hidden_dim = gnn_hidden_dim
+        self.pool_hidden_dim = pool_hidden_dim
+        self.embed_dim = embed_dim
+
+        self.gnn = GraphSAGE(
+            in_channels = -1,
+            hidden_channels = gnn_hidden_dim,
+            num_layers = num_layers,
+        ) 
+        self.pool = GraphMultisetTransformer(
+            in_channels = gnn_hidden_dim,
+            hidden_channels = pool_hidden_dim, 
+            out_channels = embed_dim
+        )
+
+    def forward(self, data):
+        batch, x, edge_index, edge_attr = (
+            data.batch, data.x, data.edge_index, data.edge_attr)
+
+        x = x.to(torch.float)
+        res = self.gnn(x, edge_index)
+        res = self.pool(res, batch, edge_index=edge_index)  # batch x embed_dim
+
+        return res
+    
+
+class GNNEmbedder_Conv(torch.nn.Module):
+    def __init__(
             self, 
             num_node_features, 
             num_edge_features, 
             latent_dim,
-            # latent_2,
             embed_dim
         ):
         super().__init__()
@@ -235,5 +270,5 @@ class GNNPredictor(torch.nn.Module):
         donor = self.embed_donor(donor)
         acceptor = self.embed_acceptor(acceptor)
         combined = torch.cat((donor, acceptor), -1)
-        output = self.fc(F.relu(combined))
+        output = self.fc(combined)
         return output

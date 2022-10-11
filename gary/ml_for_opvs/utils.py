@@ -25,6 +25,12 @@ def get_features(smi, feature_type = 'fp'):
         vals = calc(mol)._values
         feat = np.array([float(v) for v in vals])
         feat = np.delete(feat, np.isnan(feat).any(axis=0), axis=1)  # remove the invalid features
+    elif feature_type == 'pca_mordred':
+        calc = mordred.Calculator(mordred.descriptors, ignore_3D=True)
+        vals = calc(mol)._values
+        feat = np.array([float(v) for v in vals])
+        feat = np.delete(feat, np.isnan(feat).any(axis=0), axis=1)  # remove the invalid features
+        feat = pca_features(feat)
     elif feature_type == 'graph':
         feat = from_smiles(Chem.MolToSmiles(mol))
     else:

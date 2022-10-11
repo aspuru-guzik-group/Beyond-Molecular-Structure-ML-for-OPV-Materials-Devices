@@ -62,7 +62,7 @@ def objective(trial, x, y, model, feature, out_dir='models', detail=False):
             'max_depth': trial.suggest_int('max_depth', 3, 7),
             'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 6),
             'min_samples_split': trial.suggest_int('min_samples_split', 2, 6),
-            'n_estimators': trial.suggest_int('n_estimators', 100, 1500, step=50)
+            'n_estimators': trial.suggest_int('n_estimators', 1000, 2000, step=50)
         }
 
         for i, tr_, va_, te_ in zip(range(len(train)), train, val, test):
@@ -102,7 +102,7 @@ def objective(trial, x, y, model, feature, out_dir='models', detail=False):
             # 'lr': trial.suggest_float('lr', 1e-3, 1e-1, log=True)
             'lr': 0.05
         }
-        n_epoch = 1500
+        n_epoch = 1000
 
         # set priors
         if hp['kernel'] == 'rbf':
@@ -139,7 +139,7 @@ def objective(trial, x, y, model, feature, out_dir='models', detail=False):
 
             m.train()
             ll.train()
-            for i in range(n_epoch):
+            for _ in range(n_epoch):
                 optimizer.zero_grad()
                 y_pred = m(x_train)
                 loss = -mll(y_pred, y_train.ravel())
@@ -168,7 +168,7 @@ def objective(trial, x, y, model, feature, out_dir='models', detail=False):
     elif model == 'gnn':
         hp = {
             'latent_dim': trial.suggest_int('latent_dim', 10, 30),
-            'embed_dim': trial.suggest_int('embed_dim', 10, 150),   
+            'embed_dim': trial.suggest_int('embed_dim', 10, 100),   
             # 'batch_size': 64,
             # 'batch_size': trial.suggest_int('batch_size', 5, 7),     # exponent of 2
             # 'lr': trial.suggest_float('lr', 1e-4, 1e-2, log=True)
@@ -177,8 +177,8 @@ def objective(trial, x, y, model, feature, out_dir='models', detail=False):
         batch_size = 100 # hp['batch_size']
 
         # model settings
-        n_epoch = 2000
-        patience = 100
+        n_epoch = 1000
+        patience = 70
         num_node_features = x[0][0].x.shape[-1]
         num_edge_features = x[0][0].edge_attr.shape[-1]
         output_dim = y.shape[-1]
@@ -360,8 +360,11 @@ if __name__ == '__main__':
     os.makedirs(f'models/{study.study_name}' , exist_ok=True)
     fig = plot_contour(study)
     fig.write_image(f'models/{study.study_name}/opt.png')
-    # fig = plot_param_importances(study)
-    # fig.write_image(f'models/{study.study_name}/opt_hp_importance.png')
+    try:
+        fig = plot_param_importances(study)
+        fig.write_image(f'models/{study.study_name}/opt_hp_importance.png')
+    except:
+        print('Hparam importance plot failed.')
     pickle.dump(trial.params, open(f'models/{study.study_name}/best_params.pkl', 'wb'))
 
     # get the test metrics
