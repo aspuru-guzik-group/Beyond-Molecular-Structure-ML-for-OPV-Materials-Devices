@@ -1,16 +1,17 @@
 {
-    "OPV_Min": {
+    "grid_search": {
         "datasets": [
             "OPV_Min"
         ],
-        "models": [
-            "RF",
-            "BRT",
-            "SVM"
-        ],
+        "models": [],
         "input_representations": [],
+        "features": [
+            "result_molecules_only"
+        ],
         "feature_names": [],
-        "target_names": [],
+        "target_names": [
+            "calc_PCE_percent"
+        ],
         "metrics": "r_mean"
     }
 }

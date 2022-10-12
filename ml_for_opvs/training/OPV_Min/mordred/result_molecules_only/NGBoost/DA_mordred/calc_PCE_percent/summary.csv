@@ -1,0 +1,2 @@
+Dataset,num_of_folds,Features,Targets,Model,r_mean,r_std,r2_mean,r2_std,rmse_mean,rmse_std,mse_mean,mse_std,num_of_data
+OPV_Min,5,DA_mordred,calc_PCE_percent,NGBoost,0.7002341364805652,0.058857943449597216,0.4735486043595424,0.07325842878404729,2.189365583080046,0.20127835704542618,4.833834633390334,0.8422341270517354,559

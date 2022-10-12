@@ -65,7 +65,9 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                 if len(features) == 0:
                     raise ValueError
                 else:
-                    feature_paths: list[Path] = handle_paths(input_rep_path, config, "features")
+                    feature_paths: list[Path] = handle_paths(
+                        input_rep_path, config, "features"
+                    )
             except:
                 print("All features will be plotted.")
                 feature_paths: list[Path] = input_rep_path.iterdir()
@@ -75,7 +77,9 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                 # print(f"{list(feature_paths)=}")
                 for feature_path in feature_paths:
                     # print(feature_path)
-                    model_paths: generator = handle_paths(feature_path, config, "models")
+                    model_paths: generator = handle_paths(
+                        feature_path, config, "models"
+                    )
                     # print("model_paths")
                     # print(list(model_paths))
                     for model_path in model_paths:
@@ -85,7 +89,9 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                             if len(inputs) == 0:
                                 raise ValueError
                             else:
-                                input_paths: list[Path] = handle_paths(model_path, config, "input_names")
+                                input_paths: list[Path] = handle_paths(
+                                    model_path, config, "input_names"
+                                )
                         except:
                             print("All inputs will be plotted.")
                             input_paths: list[Path] = model_path.iterdir()
@@ -107,7 +113,9 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                             # print(feature_paths)
                             for input_path in input_paths:
                                 # print(feature_path)
-                                input_path_split: list[str] = str(feature_path).split(",")
+                                input_path_split: list[str] = str(feature_path).split(
+                                    ","
+                                )
                                 if inputs == input_path_split[1:]:
                                     target_paths: generator = handle_paths(
                                         input_path, config, "target_names"
@@ -121,6 +129,7 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                                     result_paths.append(result_path)
     print(f"{result_paths=}")
     return result_paths
+
 
 def gather_results(progress_report_paths: list[Path]) -> pd.DataFrame:
     """
@@ -169,6 +178,7 @@ def gather_results(progress_report_paths: list[Path]) -> pd.DataFrame:
             [progress, progress_full], ignore_index=True
         )
     return progress_full
+
 
 def path_to_results_recursive(root_dir: str):
     for dirpath, dirnames, filenames in os.walk(root_dir):

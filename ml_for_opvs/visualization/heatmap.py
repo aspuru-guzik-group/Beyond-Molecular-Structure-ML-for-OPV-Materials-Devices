@@ -38,13 +38,21 @@ def heatmap(config: dict):
     fig, ax = plt.subplots()
     # Title
     ax.set_title("Heatmap of {}".format(config["datasets"][0]))
-
+    with pd.option_context(
+        "display.max_rows",
+        None,
+        "display.max_columns",
+        None,
+        "display.precision",
+        3,
+    ):
+        print(summary)
     # Heatmap
-    summary: pd.DataFrame = summary.pivot("Features", "Model", config["metrics"])
+    summary: pd.DataFrame = summary.pivot("Feature_Names", "Model", config["metrics"])
     sns.heatmap(
         summary,
         annot=True,
-        cmap="mako",
+        cmap="rocket_r",
         fmt=".4f",
         cbar_kws={"label": "{}".format(config["metrics"])},
     )
