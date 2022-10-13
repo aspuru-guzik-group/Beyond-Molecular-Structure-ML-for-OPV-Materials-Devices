@@ -1070,8 +1070,18 @@ pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 # pairings.create_master_csv(MASTER_ML_DATA)
 # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 
-pairings.unique_donors(OPV_DATA, CLEAN_DONOR_CSV)
-pairings.unique_acceptors(OPV_DATA, CLEAN_ACCEPTOR_CSV)
+# Check canonicalization of donors and acceptors.
+# master_df = pd.read_csv(MASTER_ML_DATA)
+# for index, row in master_df.iterrows():
+#     donor_smi = master_df.at[index, "Donor_SMILES"]
+#     acceptor_smi = master_df.at[index, "Acceptor_SMILES"]
+#     if Chem.CanonSmiles(donor_smi) != donor_smi:
+#         print(master_df.at[index, "Donor"])
+#     if Chem.CanonSmiles(acceptor_smi) != acceptor_smi:
+#         print(master_df.at[index, "Acceptor"])
+
+# pairings.unique_donors(OPV_DATA, CLEAN_DONOR_CSV)
+# pairings.unique_acceptors(OPV_DATA, CLEAN_ACCEPTOR_CSV)
 # pairings.find_missing_from_opv_data(OPV_DATA, MASTER_ML_DATA)
 # # # # Step 4b - Convert STR -> FLOAT
 # pairings.convert_str_to_float(MASTER_ML_DATA)
