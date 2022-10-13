@@ -94,9 +94,11 @@ acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
 unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_CLEAN)
 # concatenate for donors
 unique_opvs.concat_missing_and_clean(MISSING_SMI_DONOR, CLEAN_DONOR, "D")
+donors.canon_smi(CLEAN_DONOR_CSV)
 
 # concatenate for acceptors
 unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
+acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
 
 # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
