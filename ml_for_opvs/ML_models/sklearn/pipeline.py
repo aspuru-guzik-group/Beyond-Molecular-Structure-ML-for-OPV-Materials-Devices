@@ -515,6 +515,12 @@ def get_space_dict(space_json_path, model_type):
         pass
     elif model_type == "SVM":
         space_keys = ["kernel", "degree"]
+    elif model_type == "MLR":
+        # TODO:
+        pass
+    elif model_type == "KNN":
+        # TODO:
+        pass
     for key in space_keys:
         assert key in space_json.keys(), key
         space[key] = space_json[key]

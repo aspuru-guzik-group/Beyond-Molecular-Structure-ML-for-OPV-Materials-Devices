@@ -109,11 +109,13 @@ def bric_frag(data):
         donor_brics_smi = []
         for frag in donor_brics:
             # frag_smi = remove_dummy(frag)  # remove dummy atoms
+            frag = Chem.MolToSmiles(frag)
             donor_brics_smi.append(frag)
         acceptor_brics_smi = []
         acceptor_brics = list(BRICS.BRICSDecompose(acceptor_mol, returnMols=True))
         for frag in acceptor_brics:
             # frag_smi = remove_dummy(frag)  # remove dummy atoms
+            frag = Chem.MolToSmiles(frag)
             acceptor_brics_smi.append(frag)
 
         brics_df.at[index, "Donor_BRICS"] = donor_brics_smi

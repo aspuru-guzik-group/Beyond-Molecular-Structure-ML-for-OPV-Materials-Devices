@@ -35,18 +35,19 @@ from ml_for_opvs.data.error_correction.OPV_Min.approximate_homo_lumo import (
     approximate_value,
 )
 
-from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import (
-    aug_smi_doRandom,
-    aug_smi_tokenize,
-)
+# from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import (
+#     aug_smi_doRandom,
+#     aug_smi_tokenize,
+# )
 from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.morgan_fingerprints import (
     create_master_fp,
 )
 from ml_for_opvs.data.input_representation.OPV_Min.BRICS.brics_frag import bric_frag
-from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag import (
-    export_manual_frag,
-    fragment_files,
-)
+
+# from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag import (
+#     export_manual_frag,
+#     fragment_files,
+# )
 from ml_for_opvs.data.preprocess.OPV_Min.smiles_to_bigsmiles import smile_to_bigsmile
 from ml_for_opvs.data.preprocess.OPV_Min.smiles_to_selfies import opv_smiles_to_selfies
 
@@ -55,13 +56,13 @@ from ml_for_opvs.data.exploration.OPV_Min.correlation import (
     PARAMETER_INVENTORY,
 )
 
-from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import (
-    AUGMENT_SMILES_DATA,
-)
-from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag import (
-    manual_frag,
-    MASTER_MANUAL_DATA,
-)
+# from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import (
+#     AUGMENT_SMILES_DATA,
+# )
+# from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag import (
+#     manual_frag,
+#     MASTER_MANUAL_DATA,
+# )
 from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.morgan_fingerprints import (
     FP_DATA,
 )
@@ -171,18 +172,18 @@ device_wo_thickness = {'hole_contact_layer', 'electron_contact_layer'}
 
 solvent = {'BP', 'MP', 'Density', 'Dielectric', 'Dipole', 'log Pow', 'Hansen Disp', 'Hansen H-Bond', 'Hansen Polar'}
 """
-from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment_feat_select import (
-    fs,
-)
+# from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment_feat_select import (
+#     fs,
+# )
 
-fs.feat_select("molecules_only")
-fs.feat_select("molecules")
-fs.feat_select("fabrication_wo_solid")
-fs.feat_select("device_wo_thickness")
-fs.feat_select("full")
-fs.feat_select("fabrication")
-fs.feat_select("device")
-fs.feat_select("electrical")
+# fs.feat_select("molecules_only")
+# fs.feat_select("molecules")
+# fs.feat_select("fabrication_wo_solid")
+# fs.feat_select("device_wo_thickness")
+# fs.feat_select("full")
+# fs.feat_select("fabrication")
+# fs.feat_select("device")
+# fs.feat_select("electrical")
 
 from ml_for_opvs.data.input_representation.OPV_Min.BRICS.brics_feat_select import fs
 
@@ -208,18 +209,18 @@ fs.feat_select("fabrication")
 fs.feat_select("device")
 fs.feat_select("electrical")
 
-from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag_feat_select import (
-    fs,
-)
+# from ml_for_opvs.data.input_representation.OPV_Min.manual_frag.manual_frag_feat_select import (
+#     fs,
+# )
 
-fs.feat_select("molecules_only")
-fs.feat_select("molecules")
-fs.feat_select("fabrication_wo_solid")
-fs.feat_select("device_wo_thickness")
-fs.feat_select("full")
-fs.feat_select("fabrication")
-fs.feat_select("device")
-fs.feat_select("electrical")
+# fs.feat_select("molecules_only")
+# fs.feat_select("molecules")
+# fs.feat_select("fabrication_wo_solid")
+# fs.feat_select("device_wo_thickness")
+# fs.feat_select("full")
+# fs.feat_select("fabrication")
+# fs.feat_select("device")
+# fs.feat_select("electrical")
 
 from ml_for_opvs.data.input_representation.OPV_Min.smiles.smiles_feat_select import fs
 
