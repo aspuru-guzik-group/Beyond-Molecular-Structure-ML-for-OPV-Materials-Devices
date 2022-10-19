@@ -48,7 +48,10 @@ from ml_for_opvs.data.input_representation.OPV_Min.BRICS.brics_frag import bric_
 #     export_manual_frag,
 #     fragment_files,
 # )
-from ml_for_opvs.data.preprocess.OPV_Min.smiles_to_bigsmiles import smile_to_bigsmile
+from ml_for_opvs.data.preprocess.OPV_Min.smiles_to_bigsmiles import (
+    sanity_check_bigsmiles,
+    smile_to_bigsmile,
+)
 from ml_for_opvs.data.preprocess.OPV_Min.smiles_to_selfies import opv_smiles_to_selfies
 
 from ml_for_opvs.data.exploration.OPV_Min.correlation import (
@@ -70,39 +73,40 @@ from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.morgan_fingerprin
 from ml_for_opvs.data.preprocess.OPV_Min.clean_device_params import ParameterClean
 
 # Step 1
-donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
-donors.clean_donor(CLEAN_DONOR_CSV)
+# donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
+# donors.clean_donor(CLEAN_DONOR_CSV)
 
-# # # # Step 1b
-donors.replace_r_with_arbitrary(CLEAN_DONOR_CSV)
-donors.replace_r(CLEAN_DONOR_CSV)
+# # # # # Step 1b
+# donors.replace_r_with_arbitrary(CLEAN_DONOR_CSV)
+# donors.replace_r(CLEAN_DONOR_CSV)
+
+# # # # # # # Step 1d - canonSMILES to remove %10-%100
+# donors.canon_smi(CLEAN_DONOR_CSV)
+
+# # # # # # Step 1
+# acceptors = AcceptorClean(MASTER_ACCEPTOR_CSV, OPV_ACCEPTOR_DATA)
+# acceptors.clean_acceptor(CLEAN_ACCEPTOR_CSV)
+
+# # # Step 1b
+# acceptors.replace_r_with_arbitrary(CLEAN_ACCEPTOR_CSV)
+# acceptors.replace_r(CLEAN_ACCEPTOR_CSV)
 
 # # # # # # Step 1d - canonSMILES to remove %10-%100
-donors.canon_smi(CLEAN_DONOR_CSV)
+# acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
 
-# # # # # Step 1
-acceptors = AcceptorClean(MASTER_ACCEPTOR_CSV, OPV_ACCEPTOR_DATA)
-acceptors.clean_acceptor(CLEAN_ACCEPTOR_CSV)
+# # Step 2 - ERROR CORRECTION (fill in missing D/A)
+# unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_CLEAN)
+# # concatenate for donors
+# unique_opvs.concat_missing_and_clean(MISSING_SMI_DONOR, CLEAN_DONOR, "D")
+# donors.canon_smi(CLEAN_DONOR_CSV)
 
-# # Step 1b
-acceptors.replace_r_with_arbitrary(CLEAN_ACCEPTOR_CSV)
-acceptors.replace_r(CLEAN_ACCEPTOR_CSV)
-
-# # # # # Step 1d - canonSMILES to remove %10-%100
-acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
-
-# Step 2 - ERROR CORRECTION (fill in missing D/A)
-unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_CLEAN)
-# concatenate for donors
-unique_opvs.concat_missing_and_clean(MISSING_SMI_DONOR, CLEAN_DONOR, "D")
-donors.canon_smi(CLEAN_DONOR_CSV)
-
-# concatenate for acceptors
-unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
-acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
+# # concatenate for acceptors
+# unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
+# acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
 
 # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
-smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV) # DO NOT RUN, BigSMILES was partially automated and manually done.
+sanity_check_bigsmiles(CLEAN_DONOR_CSV)
 opv_smiles_to_selfies(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 
 # Step 4

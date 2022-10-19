@@ -940,7 +940,7 @@ class DAPairs:
                 master_data.at[index, "solvent_additive_conc_v_v_percent"] = float(
                     solvent_add_conc_data
                 )
-            except:
+            except TypeError:
                 master_data.at[index, "solvent_additive_conc_v_v_percent"] = 0.0
 
         master_data.to_csv(master_csv_path, index=False)
