@@ -23,8 +23,9 @@ from sklearn.metrics import (
 )
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.gaussian_process.kernels import RBF, PairwiseKernel
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.svm import SVR
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.kernel_ridge import KernelRidge
 import xgboost
 import shap
@@ -142,7 +143,7 @@ def main(config: dict):
                 bootstrap=True,
                 n_jobs=-1,
             )
-        elif config["model_type"] == "BRT":
+        elif config["model_type"] == "XGBoost":
             model = xgboost.XGBRegressor(
                 objective="reg:squarederror",
                 alpha=0.9,
@@ -153,23 +154,23 @@ def main(config: dict):
                 max_depth=10,
                 subsample=1,
             )
-        # KRR and LR do not require HPO, they do not have space parameters
+        # KRR and MLR do not require HPO, they do not have space parameters
         # MUST be paired with hyperparameter_optimization == False
         elif config["model_type"] == "KRR":
-            assert (
-                config["hyperparameter_optimization"] == "False"
-            ), "KRR cannot be paired with HPO"
             kernel = PairwiseKernel(gamma=1, gamma_bounds="fixed", metric="laplacian")
             model = KernelRidge(alpha=0.05, kernel=kernel, gamma=1)
-        elif config["model_type"] == "LR":
-            assert (
-                config["hyperparameter_optimization"] == "False"
-            ), "LR cannot be paired with HPO"
+        elif config["model_type"] == "MLR":
             model = LinearRegression()
         elif config["model_type"] == "SVM":
             model = SVR(kernel="rbf", degree="3")
+        elif config["model_type"] == "KNN":
+            model = KNeighborsRegressor()
+        elif config["model_type"] == "Lasso":
+            model = Lasso(alpha=1.0)
         else:
-            raise NameError("Model not found. Please use RF, BRT, LR, KRR")
+            raise NameError(
+                "Model not found. Please use RF, XGBoost, SVM, KRR, MLR, KNN, Lasso"
+            )
 
         # run hyperparameter optimization
         if config["hyperparameter_optimization"] == "True":
@@ -204,10 +205,10 @@ def main(config: dict):
             yhat: np.ndarray = model.predict(input_val_array)
 
         # Feature Importance
-        explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(input_val_array)
-        print(f"{shap_values.shape=}")
-        shapley_total.append(list(shap_values))
+        # explainer = shap.TreeExplainer(model)
+        # shap_values = explainer.shap_values(input_val_array)
+        # print(f"{shap_values.shape=}")
+        # shapley_total.append(list(shap_values))
 
         # reverse min-max scaling
         yhat: np.ndarray = (yhat * (target_max - target_min)) + target_min
@@ -226,9 +227,9 @@ def main(config: dict):
             print("Folder already exists.")
 
         # Feature Importance Plots
-        shap.summary_plot(shap_values, input_val_array, show=False)
-        plt.savefig(target_dir_path / "shapley_{}.png".format(fold))
-        plt.clf()
+        # shap.summary_plot(shap_values, input_val_array, show=False)
+        # plt.savefig(target_dir_path / "shapley_{}.png".format(fold))
+        # plt.clf()
 
         # save model
         # model_path: Path = target_dir_path / "model_{}.pkl".format(fold)
@@ -273,13 +274,14 @@ def main(config: dict):
 
     # After Cross-Validation Training, Summarize Results!
     # Save Feature Importance Plots
-    shapley_total: np.ndarray = np.array(shapley_total)
-    print(f"{shapley_total.shape=}")
-    shapley_total_avg: np.ndarray = np.mean(shapley_total, axis=0)
-    print(f"{shapley_total_avg.shape=}")
-    shap.summary_plot(shapley_total_avg, input_val_array, show=False)
-    plt.savefig(target_dir_path / "shapley_avg.png")
-    assert False
+    # shapley_total: np.ndarray = np.array(shapley_total)
+    # print(f"{shapley_total.shape=}")
+    # shapley_total_avg: np.ndarray = np.mean(shapley_total, axis=0)
+    # print(f"{shapley_total_avg.shape=}")
+    # shap.summary_plot(shapley_total_avg, input_val_array, show=False)
+    # plt.savefig(target_dir_path / "shapley_avg.png")
+    # assert False
+
     # make new file
     # summarize results
     progress_path: Path = target_dir_path / "progress_report.csv"
@@ -341,7 +343,7 @@ if __name__ == "__main__":
         help="Choose target value. Format is ex. calc_PCE_percent",
     )
     parser.add_argument(
-        "--model_type", type=str, help="Choose model type. (RF, BRT, SVM, KRR, LR)"
+        "--model_type", type=str, help="Choose model type. (RF, XGBoost, SVM, KRR, MLR)"
     )
     parser.add_argument(
         "--hyperparameter_optimization",

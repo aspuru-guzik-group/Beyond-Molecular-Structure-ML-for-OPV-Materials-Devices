@@ -38,3 +38,30 @@ python cross_validation.py --dataset_path ./OPV_Min/smiles/processed_smiles_full
 python cross_validation.py --dataset_path ./OPV_Min/smiles/processed_smiles_fabrication.csv --num_of_folds 5 --type_of_crossval KFold
 python cross_validation.py --dataset_path ./OPV_Min/smiles/processed_smiles_device.csv --num_of_folds 5 --type_of_crossval KFold
 python cross_validation.py --dataset_path ./OPV_Min/smiles/processed_smiles_electrical.csv --num_of_folds 5 --type_of_crossval KFold
+
+python cross_validation.py --dataset_path ./OPV_Min/graphembed/processed_graphembed_molecules_only.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/graphembed/processed_graphembed_molecules.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/graphembed/processed_graphembed_fabrication_wo_solid.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/graphembed/processed_graphembed_device_wo_thickness.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/graphembed/processed_graphembed_full.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/graphembed/processed_graphembed_fabrication.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/graphembed/processed_graphembed_device.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/graphembed/processed_graphembed_electrical.csv --num_of_folds 5 --type_of_crossval KFold
+
+python cross_validation.py --dataset_path ./OPV_Min/mordred/processed_mordred_molecules_only.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred/processed_mordred_molecules.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred/processed_mordred_fabrication_wo_solid.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred/processed_mordred_device_wo_thickness.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred/processed_mordred_full.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred/processed_mordred_fabrication.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred/processed_mordred_device.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred/processed_mordred_electrical.csv --num_of_folds 5 --type_of_crossval KFold
+
+python cross_validation.py --dataset_path ./OPV_Min/mordred_pca/processed_mordred_pca_molecules_only.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred_pca/processed_mordred_pca_molecules.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred_pca/processed_mordred_pca_fabrication_wo_solid.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred_pca/processed_mordred_pca_device_wo_thickness.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred_pca/processed_mordred_pca_full.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred_pca/processed_mordred_pca_fabrication.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred_pca/processed_mordred_pca_device.csv --num_of_folds 5 --type_of_crossval KFold
+python cross_validation.py --dataset_path ./OPV_Min/mordred_pca/processed_mordred_pca_electrical.csv --num_of_folds 5 --type_of_crossval KFold

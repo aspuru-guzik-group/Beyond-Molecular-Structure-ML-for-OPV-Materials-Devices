@@ -1,2 +1,2 @@
 max_depth,min_samples_leaf,min_samples_split,n_estimators
-14,2,3,500
+19,2,4,300

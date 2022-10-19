@@ -501,7 +501,7 @@ def get_space_dict(space_json_path, model_type):
             "min_samples_split",
             "max_depth",
         ]
-    elif model_type == "BRT":
+    elif model_type == "XGBoost":
         space_keys = [
             "alpha",
             "n_estimators",
@@ -510,17 +510,16 @@ def get_space_dict(space_json_path, model_type):
             "min_child_weight",
         ]
     elif model_type == "KRR":
-        pass
-    elif model_type == "LR":
-        pass
+        space_keys = ["alpha"]
     elif model_type == "SVM":
         space_keys = ["kernel", "degree"]
     elif model_type == "MLR":
-        # TODO:
-        pass
+        space_keys = ["fit_intercept"]
     elif model_type == "KNN":
-        # TODO:
-        pass
+        space_keys = ["n_neighbors", "leaf_size"]
+    elif model_type == "Lasso":
+        space_keys = ["alpha"]
+
     for key in space_keys:
         assert key in space_json.keys(), key
         space[key] = space_json[key]

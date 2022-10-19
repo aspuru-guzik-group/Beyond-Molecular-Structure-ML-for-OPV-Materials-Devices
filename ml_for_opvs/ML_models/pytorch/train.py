@@ -79,7 +79,6 @@ def main(config: dict):
     # column names
     column_names = config["feature_names"].split(",")
 
-
     # if multiple train and test paths, X-Fold Cross-Validation occurs here.
     outer_r: list = []
     outer_r2: list = []
@@ -103,7 +102,7 @@ def main(config: dict):
         ) = process_target(
             train_df[target_df_columns],
             test_df[target_df_columns],
-            train_df[column_names]
+            train_df[column_names],
         )
         config["output_size"] = len(config["target_name"].split(","))
 

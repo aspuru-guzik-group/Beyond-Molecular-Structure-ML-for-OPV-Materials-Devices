@@ -1,2 +1,2 @@
 Dataset,num_of_folds,Features,Targets,Model,r_mean,r_std,r2_mean,r2_std,rmse_mean,rmse_std,mae_mean,mae_std,num_of_data
-OPV_Min,5,"DA_FP_radius_3_nbits_512,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature",calc_PCE_percent,BRT,0.7347586210482951,0.04816060223066954,0.5271623732956713,0.0708509068325535,2.1427601194459167,0.250709504398333,1.6192891570036998,0.1318812457766427,529
+OPV_Min,5,"DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature",calc_PCE_percent,XGBoost,0.7347586210482951,0.04816060223066954,0.5271623732956713,0.0708509068325535,2.1427601194459167,0.250709504398333,1.6192891570036998,0.1318812457766427,529

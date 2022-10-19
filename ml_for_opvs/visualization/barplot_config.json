@@ -5,7 +5,7 @@
         ],
         "models": [
             "RF",
-            "BRT"
+            "XGBoost"
         ],
         "input_representations": [],
         "features": [],
