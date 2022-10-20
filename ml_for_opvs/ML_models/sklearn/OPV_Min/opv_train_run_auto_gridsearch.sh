@@ -1,12 +1,12 @@
 #!/bin/bash
 # runs molecules only
 # 1
-input_rep=("fingerprint" "BRICS" "smiles")
+input_rep=("mordred" "mordred_pca")
 
 # 1.1
 declare -A input_rep_filename_dict
 
-input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["smiles"]="smiles")
+input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["smiles"]="smiles" ["mordred"]="mordred" ["mordred_pca"]="mordred_pca")
 
 # 2
 feat_select_group=("molecules_only") # "fabrication_wo_solid" "device_wo_thickness"
@@ -29,6 +29,10 @@ for ir in ${input_rep[@]}; do
                 "BRICS") input_rep_features=("DA_tokenized_BRICS")
                 ;;
                 "smiles") input_rep_features=("DA_SMILES" "DA_SELFIES" "DA_BigSMILES" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV")
+                ;;
+                "mordred") input_rep_features("DA_mordred")
+                ;;
+                "mordred_pca") input_rep_features("DA_mordred_pca")
                 ;;
             esac
             # initialize train and test data paths as empty strings

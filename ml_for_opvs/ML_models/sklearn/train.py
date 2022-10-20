@@ -106,12 +106,16 @@ def main(config: dict):
         val_df: pd.DataFrame = pd.read_csv(test_path)
         val_df: pd.DataFrame = val_df[0:min_val]
         # process SMILES vs. Fragments vs. Fingerprints. How to handle that? handle this and tokenization in pipeline
+        # No input representation, only features
+        if config["input_representation"] == "None":
+            input_rep_bool = False
+        else:
+            input_rep_bool = True
         (
             input_train_array,
             input_val_array,
         ) = process_features(  # additional features are added at the end of array
-            train_df[column_names],
-            val_df[column_names],
+            train_df[column_names], val_df[column_names], input_rep_bool
         )
         # process target values
         target_df_columns = config["target_name"].split(",")
@@ -119,6 +123,10 @@ def main(config: dict):
         #     target_df_columns.extend(config["feature_names"].split(","))
         # except:
         #     print("No Additional Features")
+        if config["input_representation"] == "None":
+            input_rep_bool = False
+        else:
+            input_rep_bool = True
         (
             target_train_array,
             target_val_array,
@@ -128,10 +136,10 @@ def main(config: dict):
             train_df[target_df_columns],
             val_df[target_df_columns],
             train_df[column_names],
+            input_rep_bool,
         )
         # print("target_train", len(target_train_array))
         # print("target_val", len(target_val_array))
-
         # choose model
         # TODO: factory pattern
         # setup model with default parameters

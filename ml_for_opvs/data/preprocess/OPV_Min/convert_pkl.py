@@ -29,7 +29,7 @@ GRAPH_PREPROCESSED = pkg_resources.resource_filename(
 )
 
 
-def convert_pkl_to_data(path: str, master_path: str, preprocessed_path: str):
+def convert_pkl_to_data(path: str, master_path: str, preprocessed_path: str, name: str):
     """Read ORDERED pickle into pandas DataFrame, and add all the parameters from the master file.
 
     Args:
@@ -44,9 +44,13 @@ def convert_pkl_to_data(path: str, master_path: str, preprocessed_path: str):
     except:
         data: dict = pd.read_pickle(path)
         data: pd.DataFrame = pd.DataFrame({k: list(v) for k, v in data.items()})
+        data["DA_{}".format(name)] = ""
         for index, row in data.iterrows():
             data.at[index, "donor"] = list(data.at[index, "donor"])
             data.at[index, "acceptor"] = list(data.at[index, "acceptor"])
+            concatenated = data.at[index, "donor"]
+            concatenated.append(data.at[index, "acceptor"])
+            data.at[index, "DA_{}".format(name)] = concatenated
 
     master_data: pd.DataFrame = pd.read_csv(master_path)
     # select only parameters
@@ -56,6 +60,8 @@ def convert_pkl_to_data(path: str, master_path: str, preprocessed_path: str):
     concat_data.to_csv(preprocessed_path, index=False)
 
 
-convert_pkl_to_data(GRAPH_PKL, MASTER_ML_DATA, GRAPH_PREPROCESSED)
-# convert_pkl_to_data(MORDRED_PKL, MASTER_ML_DATA, MORDRED_PREPROCESSED)
-# convert_pkl_to_data(PCA_MORDRED_PKL, MASTER_ML_DATA, PCA_MORDRED_PREPROCESSED)
+# convert_pkl_to_data(GRAPH_PKL, MASTER_ML_DATA, GRAPH_PREPROCESSED)
+convert_pkl_to_data(MORDRED_PKL, MASTER_ML_DATA, MORDRED_PREPROCESSED, "mordred")
+convert_pkl_to_data(
+    PCA_MORDRED_PKL, MASTER_ML_DATA, PCA_MORDRED_PREPROCESSED, "mordred_pca"
+)

@@ -21,7 +21,7 @@ output = {
     "FF_percent",
 }
 
-molecules = {"donor", "acceptor"}
+molecules = {"donor_acceptor"}
 
 properties = {"HOMO_D_eV", "LUMO_D_eV", "HOMO_A_eV", "LUMO_A_eV"}
 
@@ -117,7 +117,7 @@ class FeatureSelection:
         df = df_full.dropna(how="any")
         # save the processed dataframe to a new csv file whose name includes the group of features that are included
         df.to_csv(
-            DATA_PATH + "processed_smiles_{x}.csv".format(x=feat_list), index=False
+            DATA_PATH + "processed_graphembed_{x}.csv".format(x=feat_list), index=False
         )
 
 

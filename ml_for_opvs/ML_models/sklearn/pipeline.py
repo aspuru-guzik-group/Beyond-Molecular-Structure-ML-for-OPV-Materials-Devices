@@ -72,13 +72,14 @@ def filter_nan(df_to_filter):
 
 
 def process_features(
-    train_feature_df, test_feature_df
+    train_feature_df, test_feature_df, input_rep_bool
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Processes various types of features (str, float, list) and returns "training ready" arrays.
 
     Args:
         train_feature_df (pd.DataFrame): subset of train_df with selected features.
         test_feature_df (pd.DataFrame): subset of test_df with selected features.
+        input_rep_bool (bool): True = presence of input_representation. False = absence of input_representation (only use features).
 
     Returns:
         input_train_array (np.array): tokenized, padded array ready for training
@@ -88,7 +89,10 @@ def process_features(
     assert len(test_feature_df) > 1, test_feature_df
     # First in column_headers will always be input_representation
     column_headers = train_feature_df.columns
-    input_representation = column_headers[0]
+    if input_rep_bool:
+        input_representation = column_headers[0]
+    else:
+        input_representation = None
 
     # calculate feature scale dict
     feature_scale_dict: dict = {}
@@ -111,77 +115,78 @@ def process_features(
     # TOKENIZATION
     # must loop through entire dataframe for token2idx
     input_instance = None
-    try:
-        input_value = ast.literal_eval(concat_df[input_representation][1])
-        if isinstance(input_value[0], list):
-            input_instance = "list_of_list"
-            # print("input_value is a list of list")
-        else:
-            input_instance = "list"
-            # print("input_value is a list which could be: 1) fragments or 2) SMILES")
-    except:  # The input_value was not a list, so ast.literal_eval will raise valueError.
-        input_instance = "str"
-        input_value = concat_df[input_representation][1]
-        # print("input_value is a string")
+    if input_rep_bool:
+        try:
+            input_value = ast.literal_eval(concat_df[input_representation][1])
+            if isinstance(input_value[0], list):
+                input_instance = "list_of_list"
+                # print("input_value is a list of list")
+            else:
+                input_instance = "list"
+                # print("input_value is a list which could be: 1) fragments or 2) SMILES")
+        except:  # The input_value was not a list, so ast.literal_eval will raise valueError.
+            input_instance = "str"
+            input_value = concat_df[input_representation][1]
+            # print("input_value is a string")
 
-    if (
-        input_instance == "list"
-    ):  # could be list of fragments or list of (augmented) SMILES.
-        # check if list of: 1) fragments or 2) SMILES or 3) fingerprints
-        if "Augmented_SMILES" == input_representation:
-            augmented_smi_list: list = []
+        if (
+            input_instance == "list"
+        ):  # could be list of fragments or list of (augmented) SMILES.
+            # check if list of: 1) fragments or 2) SMILES or 3) fingerprints
+            if "Augmented_SMILES" == input_representation:
+                augmented_smi_list: list = []
+                for index, row in concat_df.iterrows():
+                    input_value = ast.literal_eval(row[input_representation])
+                    for aug_value in input_value:
+                        augmented_smi_list.append(aug_value)
+                augmented_smi_series: pd.Series = pd.Series(augmented_smi_list)
+                (
+                    tokenized_array,
+                    max_length,
+                    vocab_length,
+                    token2idx,
+                ) = Tokenizer().tokenize_data(augmented_smi_series)
+            else:  # fragments or fingerprints
+                token2idx = {}
+                token_idx = 0
+                for index, row in concat_df.iterrows():
+                    input_value = ast.literal_eval(row[input_representation])
+                    for frag in input_value:
+                        if frag not in list(token2idx.keys()):
+                            token2idx[frag] = token_idx
+                            token_idx += 1
+        elif input_instance == "list_of_list":  # list of list of augmented fragments
+            token2idx: dict = {}
+            token_idx: int = 0
             for index, row in concat_df.iterrows():
                 input_value = ast.literal_eval(row[input_representation])
                 for aug_value in input_value:
-                    augmented_smi_list.append(aug_value)
-            augmented_smi_series: pd.Series = pd.Series(augmented_smi_list)
-            (
-                tokenized_array,
-                max_length,
-                vocab_length,
-                token2idx,
-            ) = Tokenizer().tokenize_data(augmented_smi_series)
-        else:  # fragments or fingerprints
-            token2idx = {}
-            token_idx = 0
-            for index, row in concat_df.iterrows():
-                input_value = ast.literal_eval(row[input_representation])
-                for frag in input_value:
-                    if frag not in list(token2idx.keys()):
-                        token2idx[frag] = token_idx
-                        token_idx += 1
-    elif input_instance == "list_of_list":  # list of list of augmented fragments
-        token2idx: dict = {}
-        token_idx: int = 0
-        for index, row in concat_df.iterrows():
-            input_value = ast.literal_eval(row[input_representation])
-            for aug_value in input_value:
-                for frag in aug_value:
-                    if frag not in list(token2idx.keys()):
-                        token2idx[frag] = token_idx
-                        token_idx += 1
-    elif input_instance == "str":
-        if "SMILES" in input_representation:
-            (
-                tokenized_array,
-                max_length,
-                vocab_length,
-                token2idx,
-            ) = Tokenizer().tokenize_data(concat_df[input_representation])
-        elif "SELFIES" in input_representation:
-            token2idx, max_length = Tokenizer().tokenize_selfies(
-                concat_df[input_representation]
-            )
-    else:
-        raise TypeError("input_value is neither str or list. Fix it!")
+                    for frag in aug_value:
+                        if frag not in list(token2idx.keys()):
+                            token2idx[frag] = token_idx
+                            token_idx += 1
+        elif input_instance == "str":
+            if "SMILES" in input_representation:
+                (
+                    tokenized_array,
+                    max_length,
+                    vocab_length,
+                    token2idx,
+                ) = Tokenizer().tokenize_data(concat_df[input_representation])
+            elif "SELFIES" in input_representation:
+                token2idx, max_length = Tokenizer().tokenize_selfies(
+                    concat_df[input_representation]
+                )
+        else:
+            raise TypeError("input_value is neither str or list. Fix it!")
 
-    # Tokenize string features
-    for index, row in concat_df.iterrows():
-        for column in column_headers:
-            if column != input_representation and isinstance(row[column], str):
-                if row[column] not in list(token2idx.keys()):
-                    token_idx = len(token2idx)
-                    token2idx[row[column]] = token_idx
+        # Tokenize string features
+        for index, row in concat_df.iterrows():
+            for column in column_headers:
+                if column != input_representation and isinstance(row[column], str):
+                    if row[column] not in list(token2idx.keys()):
+                        token_idx = len(token2idx)
+                        token2idx[row[column]] = token_idx
 
     max_input_length = 0  # for padding
     # processing training data
@@ -410,7 +415,7 @@ def process_features(
 
 
 def process_target(
-    train_target_df, test_target_df, train_df
+    train_target_df, test_target_df, train_df, input_rep_bool
 ) -> Tuple[np.ndarray, np.ndarray, float, float]:
     """Processes one target value through the following steps:
     1) min-max scaling
@@ -420,6 +425,7 @@ def process_target(
         train_target_df (pd.DataFrame): target values for training dataframe
         test_target_df (pd.DataFrame): target values for test dataframe
         train_df (pd.DataFrame): training dataframe for recovering input_representation
+        input_rep_bool (bool): True = presence of input_representation. False = absence of input_representation (only use features).
     Returns:
         target_train_array (np.array): array of training targets
         target_test_array (np.array): array of test targets
@@ -453,23 +459,32 @@ def process_target(
         # print("input_value is a string")
 
     # duplicate number of target test with the number of augmented data points
-    if any(
-        ["Augmented_SMILES" == input_representation, input_instance == "list_of_list"]
-    ):
-        target_train_list = []
-        for index, row in train_target_df.iterrows():
-            input_value = ast.literal_eval(row[input_representation])
-            for i in range(len(input_value)):
-                target_train_list.append(row[train_target_df.columns[0]])
+    if input_rep_bool:
+        if any(
+            [
+                "Augmented_SMILES" == input_representation,
+                input_instance == "list_of_list",
+            ]
+        ):
+            target_train_list = []
+            for index, row in train_target_df.iterrows():
+                input_value = ast.literal_eval(row[input_representation])
+                for i in range(len(input_value)):
+                    target_train_list.append(row[train_target_df.columns[0]])
 
-        target_test_list = []
-        for index, row in test_target_df.iterrows():
-            input_value = ast.literal_eval(row[input_representation])
-            for i in range(len(input_value)):
-                target_test_list.append(row[test_target_df.columns[0]])
+            target_test_list = []
+            for index, row in test_target_df.iterrows():
+                input_value = ast.literal_eval(row[input_representation])
+                for i in range(len(input_value)):
+                    target_test_list.append(row[test_target_df.columns[0]])
 
-        target_train_array = np.array(target_train_list)
-        target_test_array = np.array(target_test_list)
+            target_train_array = np.array(target_train_list)
+            target_test_array = np.array(target_test_list)
+        else:
+            target_train_array = train_target_df[train_target_df.columns[0]].to_numpy()
+            target_train_array = np.ravel(target_train_array)
+            target_test_array = test_target_df[test_target_df.columns[0]].to_numpy()
+            target_test_array = np.ravel(target_test_array)
     else:
         target_train_array = train_target_df[train_target_df.columns[0]].to_numpy()
         target_train_array = np.ravel(target_train_array)

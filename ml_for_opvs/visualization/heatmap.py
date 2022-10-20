@@ -35,7 +35,7 @@ def heatmap(config: dict):
 
     summary: pd.DataFrame = gather_results(summary_paths)
     # Plot Axis
-    fig, ax = plt.subplots(figsize=(9, 9))
+    fig, ax = plt.subplots(figsize=(12, 9))
     # Title
     ax.set_title("Heatmap of {}".format(config["datasets"][0]))
     # display all the rows and columns in pandas
@@ -53,7 +53,7 @@ def heatmap(config: dict):
     sns.heatmap(
         summary,
         annot=True,
-        cmap="rocket",
+        cmap="plasma",
         fmt=".4f",
         cbar_kws={"label": "{}".format(config["metrics"])},
     )
