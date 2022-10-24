@@ -1,19 +1,11 @@
-import pickle
-import copy
-import pandas as pd
-import numpy as np
-
-import torch
-from torch_geometric.loader import DataLoader
-
-from sklearn.preprocessing import StandardScaler
-
-import matplotlib.pyplot as plt
-
 import os, sys
+sys.path.append('../ml_for_opvs')
+from ML_models.sklearn.tokenizer import Tokenizer
+
 import pickle
 import time
 import copy
+import ast
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -33,26 +25,13 @@ from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import r2_score
 from sklearn.preprocessing import StandardScaler, QuantileTransformer, MinMaxScaler, FunctionTransformer
 
+import selfies as sf
+
 from ml_for_opvs import utils
 from ml_for_opvs.models import GPRegressor, GNNEmbedder, GNNPredictor
 from ml_for_opvs.graphs import PairDataset, pair_collate, get_graphs
 
-ALL_METRICS = ['r', 'r2', 'spearman', 'mse', 'rmse']
-
-def calculate_metric(metric, y_pred, y_true):
-    if metric == 'rmse':
-        return np.sqrt(mse(y_true.ravel(), y_pred.ravel()))
-    elif metric == 'r':
-        return utils.r_score(y_true.ravel(), y_pred.ravel())
-    elif metric == 'r2':
-        return r2_score(y_true.ravel(), y_pred.ravel())
-    elif metric == 'spearman':
-        return utils.spearman_score(y_true.ravel(), y_pred.ravel())
-    elif metric == 'mse':
-        return mse(y_true.ravel(), y_pred.ravel())
-    else:
-        raise ValueError('Invalid metric')
-
+ALL_METRICS = ['rmse', 'r', 'r2', 'spearman', 'mse', 'mae']
 
 
 def run_training(x, y, model, feature, out_dir='trained_results'):
@@ -106,7 +85,7 @@ def run_training(x, y, model, feature, out_dir='trained_results'):
             results['y_true'].extend(y_test.ravel().tolist())
             results['split'].extend([i]*len(y_test))
             for metric in test_metrics.keys():
-                test_metrics[metric].append(calculate_metric(metric, y_pred, y_test))
+                test_metrics[metric].append(utils.calculate_metric(metric, y_pred, y_test))
 
 
     elif model == 'gp':
@@ -114,7 +93,7 @@ def run_training(x, y, model, feature, out_dir='trained_results'):
         hp = {
             'kernel': 'tanimoto' if feature == 'fp' else 'rbf',
             'lengthscale': 1.0,
-            'lr': 0.01
+            'lr': 0.05
         }
         n_epoch = 2000
 
@@ -175,7 +154,7 @@ def run_training(x, y, model, feature, out_dir='trained_results'):
                 results['y_true'].extend(y_test.ravel().tolist())
                 results['split'].extend([i]*len(y_test))
                 for metric in test_metrics.keys():
-                    test_metrics[metric].append(calculate_metric(metric, y_pred, y_test))
+                    test_metrics[metric].append(utils.calculate_metric(metric, y_pred, y_test))
 
     elif model == 'gnn':
         hp = {
@@ -270,7 +249,6 @@ def run_training(x, y, model, feature, out_dir='trained_results'):
                     break
 
             val_metric.append(best_loss)
-
             
             # also get the embeddings
             with torch.no_grad():
@@ -305,7 +283,7 @@ def run_training(x, y, model, feature, out_dir='trained_results'):
                 pickle.dump(embeds, open(f'{out_dir}/graphembed_split{i}.pkl', 'wb'))
 
                 for metric in test_metrics.keys():
-                    test_metrics[metric].append(calculate_metric(metric, y_pred, y_test))
+                    test_metrics[metric].append(utils.calculate_metric(metric, y_pred, y_test))
     else:
         raise ValueError('Invalid model.')
 
@@ -323,8 +301,6 @@ if __name__ == '__main__':
     FLAGS = parser.parse_args()
     
     df = pd.read_csv(f'data/{FLAGS.dataset}.csv')
-    with open(f'data/{FLAGS.dataset}_{FLAGS.feature}.pkl', 'rb') as f:
-        data = pickle.load(f)
 
     study_name=f'{FLAGS.dataset}_{FLAGS.model}_{FLAGS.feature}'
     os.makedirs(f'trained_results/' , exist_ok=True)
@@ -332,18 +308,90 @@ if __name__ == '__main__':
     # get the features
     if FLAGS.feature in ['mordred', 'fp', 'pca_mordred']:
         # remove zero variance and concatentate if vector features
-        x_donor = utils.remove_zero_variance(data['donor'])
-        x_acceptor = utils.remove_zero_variance(data['acceptor'])
+        with open(f'data/{FLAGS.dataset}_{FLAGS.feature}.pkl', 'rb') as f:
+            data = pickle.load(f)
+        x_donor = data['donor']
+        x_acceptor = data['acceptor']
         x = np.concatenate((x_donor, x_acceptor), axis=-1)
+    
+    elif FLAGS.feature == 'selfies':
+        f_df = pd.read_csv('../ml_for_opvs/data/input_representation/OPV_Min/smiles/master_smiles.csv')
+        tk = Tokenizer()
+        token2idx, max_len = tk.tokenize_selfies(f_df['DA_SELFIES'])
+        x = f_df['DA_SELFIES'].apply(lambda r: tk.tokenize_from_dict(token2idx, r)).tolist()
+        x = np.array(tk.pad_input(x, max_len))
+    
+    elif FLAGS.feature == 'smiles':
+        f_df = pd.read_csv('../ml_for_opvs/data/input_representation/OPV_Min/smiles/master_smiles.csv')
+        x, max_length, vocab_length, token2idx = Tokenizer().tokenize_data(f_df['DA_SMILES'])
+        x = np.array(x)
+    
+    elif FLAGS.feature == 'bigsmiles':
+        f_df = pd.read_csv('../ml_for_opvs/data/input_representation/OPV_Min/smiles/master_smiles.csv')
+        x, max_length, vocab_length, token2idx = Tokenizer().tokenize_data(f_df['DA_BigSMILES'])
+        x = np.array(x)
+        
+    elif FLAGS.feature == 'brics':      # label encoding of brics fragments
+        f_df = pd.read_csv('../ml_for_opvs/data/input_representation/OPV_Min/BRICS/master_brics_frag.csv')
+        x = np.array(f_df['DA_tokenized_BRICS'].apply(ast.literal_eval).tolist())
+    
+    elif FLAGS.feature == 'homolumo':
+        f_df = pd.read_csv('../ml_for_opvs/data/input_representation/OPV_Min/smiles/master_smiles.csv')
+        x = f_df[['HOMO_D_eV', 'LUMO_D_eV', 'HOMO_A_eV', 'LUMO_A_eV']].to_numpy()
+    
     elif FLAGS.feature in ['graph', 'simple_graph']:
+        with open(f'data/{FLAGS.dataset}_{FLAGS.feature}.pkl', 'rb') as f:
+            data = pickle.load(f)
         x = [data['donor'], data['acceptor']]
+        
     else:
         raise ValueError('No such feature')
     
     # get the targets
     y = df[['calc_PCE_percent']].to_numpy()
+    
+    # remove invalids
+    if FLAGS.feature not in ['graph', 'simple_graph']:
+        valid_idx = ~np.isnan(x).any(axis=1)
+        x = x[valid_idx]
+        y = y[valid_idx]
 
     # perform training and get statistics on training set
     metrics_df = run_training(x, y, FLAGS.model, FLAGS.feature)
     metrics_df.to_csv(f'trained_results/{study_name}.csv', index=False)
+    
+    vmap = {
+        'min': 'OPV_Min',
+        'fp': 'DA_FP_radius_3_nbits_512',
+        'brics': 'DA_tokenized_BRICS',
+        'selfies': 'DA_SELFIES',
+        'smiles': 'DA_SMILES',
+        'bigsmiles': 'DA_BigSMILES',
+        'graph': 'DA_gnn',
+        'mordred': 'mordred',
+        'pca_mordred': 'pca_mordred',
+        'homolumo': 'HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV'
+    }
+    
+    summary_df = pd.DataFrame(
+        {
+            'Dataset': vmap[FLAGS.dataset],
+            'num_of_folds': 5,
+            'Features': vmap[FLAGS.feature],
+            'Targets Model': 'calc_PCE_percent',
+            'r_mean': metrics_df['r'].mean(),
+            'r_std': metrics_df['r'].std(),
+            'r2_mean': metrics_df['r2'].mean(),
+            'r2_std': metrics_df['r2'].std(),
+            'rmse_mean': metrics_df['rmse'].mean(),
+            'rmse_std': metrics_df['rmse'].std(),
+            'mae_mean': metrics_df['mae'].mean(),
+            'mae_std': metrics_df['mae'].std(),
+            'num_of_data': len(metrics_df)
+        }, index=[0]
+    )
+    
+    summary_df.to_csv(f'trained_results/{study_name}_summary.csv', index=False)
+    
+ 
 

@@ -41,22 +41,7 @@ from ml_for_opvs import utils
 from ml_for_opvs.models import GPRegressor, GNNEmbedder, GNNPredictor
 from ml_for_opvs.graphs import PairDataset, pair_collate, get_graphs
 
-ALL_METRICS = ['rmse', 'r', 'r2', 'spearman', 'mse']
-
-def calculate_metric(metric, y_pred, y_true):
-    if metric == 'rmse':
-        return np.sqrt(mse(y_true.ravel(), y_pred.ravel()))
-    elif metric == 'r':
-        return utils.r_score(y_true.ravel(), y_pred.ravel())
-    elif metric == 'r2':
-        return r2_score(y_true.ravel(), y_pred.ravel())
-    elif metric == 'spearman':
-        return utils.spearman_score(y_true.ravel(), y_pred.ravel())
-    elif metric == 'mse':
-        return mse(y_true.ravel(), y_pred.ravel())
-    else:
-        raise ValueError('Invalid metric')
-
+ALL_METRICS = ['rmse', 'r', 'r2', 'spearman', 'mse', 'mae']
 
 
 def run_training(model, out_dir='trained_results', n_splits=5):
@@ -71,18 +56,18 @@ def run_training(model, out_dir='trained_results', n_splits=5):
         
         train, valid, test = data['train'], data['valid'], data['test']
 
-        x_donor = utils.remove_zero_variance(np.array(train['donor']))
-        x_acceptor = utils.remove_zero_variance(np.array(train['acceptor']))
+        x_donor = np.array(train['donor'])
+        x_acceptor = np.array(train['acceptor'])
         x_train = np.concatenate((x_donor, x_acceptor), axis=-1)
         y_train = np.array(train['target'])
         
-        x_donor = utils.remove_zero_variance(np.array(valid['donor']))
-        x_acceptor = utils.remove_zero_variance(np.array(valid['acceptor']))
+        x_donor = np.array(valid['donor'])
+        x_acceptor = np.array(valid['acceptor'])
         x_val = np.concatenate((x_donor, x_acceptor), axis=-1)
         y_val = np.array(valid['target'])
 
-        x_donor = utils.remove_zero_variance(np.array(test['donor']))
-        x_acceptor = utils.remove_zero_variance(np.array(test['acceptor']))
+        x_donor = np.array(test['donor'])
+        x_acceptor = np.array(test['acceptor'])
         x_test = np.concatenate((x_donor, x_acceptor), axis=-1)
         y_test = np.array(test['target'])
 
@@ -113,7 +98,7 @@ def run_training(model, out_dir='trained_results', n_splits=5):
             results['y_true'].extend(y_test.ravel().tolist())
             results['split'].extend([i]*len(y_test))
             for metric in test_metrics.keys():
-                test_metrics[metric].append(calculate_metric(metric, y_pred, y_test))
+                test_metrics[metric].append(utils.calculate_metric(metric, y_pred, y_test))
 
 
         elif model == 'gp':
@@ -170,7 +155,7 @@ def run_training(model, out_dir='trained_results', n_splits=5):
                 results['y_true'].extend(y_test.ravel().tolist())
                 results['split'].extend([i]*len(y_test))
                 for metric in test_metrics.keys():
-                    test_metrics[metric].append(calculate_metric(metric, y_pred, y_test))
+                    test_metrics[metric].append(utils.calculate_metric(metric, y_pred, y_test))
 
         else:
             raise ValueError('Invalid model.')
@@ -199,3 +184,35 @@ if __name__ == '__main__':
     metrics_df = run_training(FLAGS.model)
     metrics_df.to_csv(f'trained_results/{study_name}.csv', index=False)
 
+    vmap = {
+        'min': 'OPV_Min',
+        'fp': 'DA_FP_radius_3_nbits_512',
+        'brics': 'DA_tokenized_BRICS',
+        'selfies': 'DA_SELFIES',
+        'smiles': 'DA_SMILES',
+        'bigsmiles': 'DA_BigSMILES',
+        'graph': 'DA_gnn',
+        'homolumo': 'HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV',
+        'mordred': 'mordred',
+        'pca_mordred': 'pca_mordred'
+    }
+    
+    summary_df = pd.DataFrame(
+        {
+            'Dataset': vmap[FLAGS.dataset],
+            'num_of_folds': 5,
+            'Features': 'graphembed',
+            'Targets Model': 'calc_PCE_percent',
+            'r_mean': metrics_df['r'].mean(),
+            'r_std': metrics_df['r'].std(),
+            'r2_mean': metrics_df['r2'].mean(),
+            'r2_std': metrics_df['r2'].std(),
+            'rmse_mean': metrics_df['rmse'].mean(),
+            'rmse_std': metrics_df['rmse'].std(),
+            'mae_mean': metrics_df['mae'].mean(),
+            'mae_std': metrics_df['mae'].std(),
+            'num_of_data': len(metrics_df)
+        }, index=[0]
+    )
+    
+    summary_df.to_csv(f'trained_results/{study_name}_summary.csv', index=False)
