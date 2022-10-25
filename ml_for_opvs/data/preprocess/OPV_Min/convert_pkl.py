@@ -49,7 +49,7 @@ def convert_pkl_to_data(path: str, master_path: str, preprocessed_path: str, nam
             data.at[index, "donor"] = list(data.at[index, "donor"])
             data.at[index, "acceptor"] = list(data.at[index, "acceptor"])
             concatenated = data.at[index, "donor"]
-            concatenated.append(data.at[index, "acceptor"])
+            concatenated.extend(data.at[index, "acceptor"])
             data.at[index, "DA_{}".format(name)] = concatenated
 
     master_data: pd.DataFrame = pd.read_csv(master_path)

@@ -20,7 +20,7 @@ declare -a feature_name_dict
 target_name=("calc_PCE_percent")
 
 # 6
-model_type=("RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN") # "RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN"
+model_type=("SVM") # "RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN"
 
 for ir in ${input_rep[@]}; do
     for fsg in ${feat_select_group[@]}; do

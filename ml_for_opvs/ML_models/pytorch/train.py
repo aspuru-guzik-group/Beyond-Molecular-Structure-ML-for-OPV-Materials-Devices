@@ -94,6 +94,10 @@ def main(config: dict):
 
         # process target values
         # target_df_columns.extend(config["feature_names"].split(","))
+        if config["input_representation"] == "None":
+            input_rep_bool = False
+        else:
+            input_rep_bool = True
         (
             target_train_array,
             target_test_array,
@@ -103,12 +107,17 @@ def main(config: dict):
             train_df[target_df_columns],
             test_df[target_df_columns],
             train_df[column_names],
+            input_rep_bool,
         )
         config["output_size"] = len(config["target_name"].split(","))
 
         # Choose PyTorch Model
         if config["model_type"] == "NN":
             # process SMILES vs. Fragments vs. Fingerprints. How to handle that? handle this and tokenization in pipeline
+            if config["input_representation"] == "None":
+                input_rep_bool = False
+            else:
+                input_rep_bool = True
             (
                 input_train_array,
                 input_test_array,
@@ -116,11 +125,16 @@ def main(config: dict):
             ) = process_features(  # additional features are added at the end of array
                 train_df[column_names],
                 test_df[column_names],
+                input_rep_bool
             )
             config["input_size"] = max_input_length
             model = NNModel(config)
         elif config["model_type"] == "LSTM":
             # process SMILES vs. Fragments vs. Fingerprints. How to handle that? handle this and tokenization in pipeline
+            if config["input_representation"] == "None":
+                input_rep_bool = False
+            else:
+                input_rep_bool = True
             (
                 input_train_array,
                 input_test_array,
@@ -128,6 +142,7 @@ def main(config: dict):
             ) = process_features_LM(  # additional features are added at the end of array
                 train_df[column_names],
                 test_df[column_names],
+                input_rep_bool
             )
             config["vocab_size"] = max_input_length
             model = LSTMModel(config)

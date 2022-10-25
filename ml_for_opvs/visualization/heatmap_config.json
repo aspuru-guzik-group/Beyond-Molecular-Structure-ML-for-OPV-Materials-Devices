@@ -12,6 +12,6 @@
         "target_names": [
             "calc_PCE_percent"
         ],
-        "metrics": "r_mean"
+        "metrics": "r"
     }
 }

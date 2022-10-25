@@ -1,2 +1,2 @@
-Dataset,num_of_folds,Features,Targets,Model,r_mean,r_std,r2_mean,r2_std,rmse_mean,rmse_std,mse_mean,mse_std,num_of_data
-OPV_Min,5,DA_graphembed,calc_PCE_percent,NGBoost,0.6377397747277272,0.02718316757998669,0.37800126685851654,0.052744891616491166,2.380621680040867,0.15498994731460805,5.691381467249185,0.7483691561090454,559
+Dataset,num_of_folds,Features,Targets Model,r_mean,r_std,r2_mean,r2_std,rmse_mean,rmse_std,mae_mean,mae_std,num_of_data
+OPV_Min,5,graphembed,calc_PCE_percent,0.649296321806009,0.046410895275169506,0.40035850096996883,0.046387242819381135,2.3424674708032853,0.250881210521471,1.8088110885113906,0.17696441707379384,5

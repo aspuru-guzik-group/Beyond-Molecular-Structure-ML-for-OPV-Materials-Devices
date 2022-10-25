@@ -1,4 +1,4 @@
-model_type=("RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN")
+model_type=("SVM")
 for mt in ${model_type[@]}; do
-    python ../train.py --train_path ../../../data/input_representation/OPV_Min/smiles/processed_smiles_molecules/KFold/input_train_[0-9].csv --test_path ../../../data/input_representation/OPV_Min/smiles/processed_smiles_molecules/KFold/input_test_[0-9].csv --input_representation None --feature_names HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV --target_name calc_PCE_percent --model_type $mt --hyperparameter_optimization True --hyperparameter_space_path ./opv_hpo_space.json --results_path ../../../training/OPV_Min/homo_lumo/result_molecules --random_state 22
+    python ../train.py --train_path ../../../data/input_representation/OPV_Min/smiles/processed_smiles_molecules/KFold/input_train_[0-9].csv --test_path ../../../data/input_representation/OPV_Min/smiles/processed_smiles_molecules/KFold/input_test_[0-9].csv --input_representation None --feature_names HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV --target_name calc_PCE_percent --model_type $mt --hyperparameter_optimization False --hyperparameter_space_path ./opv_hpo_space.json --results_path ../../../training/OPV_Min/homo_lumo/result_molecules --random_state 22
 done

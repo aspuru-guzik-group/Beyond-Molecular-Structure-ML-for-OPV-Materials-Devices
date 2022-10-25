@@ -170,7 +170,7 @@ def main(config: dict):
         elif config["model_type"] == "MLR":
             model = LinearRegression()
         elif config["model_type"] == "SVM":
-            model = SVR(kernel="rbf", degree="3")
+            model = SVR(kernel="rbf", degree=3, cache_size=16000)
         elif config["model_type"] == "KNN":
             model = KNeighborsRegressor()
         elif config["model_type"] == "Lasso":
@@ -195,7 +195,7 @@ def main(config: dict):
                 refit=True,
                 n_jobs=-1,
                 verbose=0,
-                n_iter=25,
+                n_iter=10,
             )
             # train
             # execute search

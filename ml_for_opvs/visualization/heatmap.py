@@ -35,7 +35,7 @@ def heatmap(config: dict):
 
     summary: pd.DataFrame = gather_results(summary_paths)
     # Plot Axis
-    fig, ax = plt.subplots(figsize=(12, 9))
+    fig, ax = plt.subplots(figsize=(14, 9))
     # Title
     ax.set_title("Heatmap of {}".format(config["datasets"][0]))
     # display all the rows and columns in pandas
@@ -47,16 +47,71 @@ def heatmap(config: dict):
         "display.precision",
         3,
     ):
-        print(summary)
+        # print(summary)
+        pass
+
+    mean_metric: str = config["metrics"] + "_mean"
+    std_metric: str = config["metrics"] + "_std"
+
+    # Order of X/Y-axes
+    x = [
+        "MLR",
+        "Lasso",
+        "KRR",
+        "KNN",
+        "SVM",
+        "RF",
+        "XGBoost",
+        "NGBoost",
+        "GP",
+        "NN",
+        "GNN",
+    ]
+    y = [
+        "DA_gnn",
+        "DA_graphembed",
+        "DA_mordred_pca",
+        "DA_mordred",
+        "DA_FP_radius_3_nbits_1024",
+        "DA_tokenized_BRICS",
+        "DA_SELFIES",
+        "DA_BigSMILES",
+        "DA_SMILES",
+    ]
+
     # Heatmap
-    summary: pd.DataFrame = summary.pivot("Feature_Names", "Model", config["metrics"])
-    sns.heatmap(
-        summary,
-        annot=True,
-        cmap="plasma",
-        fmt=".4f",
-        cbar_kws={"label": "{}".format(config["metrics"])},
+    mean_summary: pd.DataFrame = summary.pivot("Feature_Names", "Model", mean_metric)
+    mean_summary: pd.DataFrame = mean_summary.reindex(index=y, columns=x)
+    summary_annotated: pd.DataFrame = deepcopy(summary)
+    with pd.option_context(
+        "display.max_rows",
+        None,
+        "display.max_columns",
+        None,
+        "display.precision",
+        3,
+    ):
+        print(summary)
+    for index, row in summary.iterrows():
+        m: float = round(summary.at[index, mean_metric], 2)
+        s: float = round(summary.at[index, std_metric], 2)
+        annotate_label: str = str(m) + "\n" + "(±" + str(s) + ")"
+        summary_annotated.at[index, "annotate_label"] = annotate_label
+
+    summary_annotated: pd.DataFrame = summary_annotated.pivot(
+        "Feature_Names", "Model", "annotate_label"
     )
+    summary_annotated: pd.DataFrame = summary_annotated.reindex(index=y, columns=x)
+    summary_annotated: np.ndarray = summary_annotated.to_numpy()
+
+    sns.heatmap(
+        mean_summary,
+        annot=summary_annotated,
+        cmap="viridis",
+        fmt="",
+        cbar_kws={"label": "{} (±{})".format(mean_metric, std_metric)},
+    )
+
     # for plotting/saving
     plt.tight_layout()
     plot_path: Path = Path(config["plot_path"])

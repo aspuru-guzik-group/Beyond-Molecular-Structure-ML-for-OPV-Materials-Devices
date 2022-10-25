@@ -146,6 +146,8 @@ def process_features(
                     vocab_length,
                     token2idx,
                 ) = Tokenizer().tokenize_data(augmented_smi_series)
+            elif "mordred" in input_representation:
+                pass
             else:  # fragments or fingerprints
                 token2idx = {}
                 token_idx = 0
@@ -255,10 +257,14 @@ def process_features(
                 except:
                     input_value = row[column]
                 # tokenization
-                if isinstance(input_value, list):
+                if isinstance(input_value, list) and "mordred" not in column:
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
+                elif (
+                    isinstance(input_value, list) and "mordred" in column
+                ):  # mordred descriptors
+                    tokenized_list = input_value  # it is not tokenized, but for the sake of naming, we'll keep it the same.
                 elif (
                     isinstance(input_value, str) and column == input_representation
                 ):  # input_representation
@@ -362,10 +368,14 @@ def process_features(
                 except:
                     input_value = row[column]
                 # tokenization
-                if isinstance(input_value, list):
+                if isinstance(input_value, list) and "mordred" not in column:
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
+                elif (
+                    isinstance(input_value, list) and "mordred" in column
+                ):  # mordred descriptors
+                    tokenized_list = input_value  # it is not tokenized, but for the sake of naming, we'll keep it the same.
                 elif (
                     isinstance(input_value, str) and column == input_representation
                 ):  # input_representation

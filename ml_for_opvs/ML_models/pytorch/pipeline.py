@@ -73,12 +73,13 @@ def filter_nan(df_to_filter):
     pass
 
 
-def process_features(train_feature_df, test_feature_df):
+def process_features(train_feature_df, test_feature_df, input_rep_bool):
     """Processes various types of features (str, float, list) and returns "training ready" arrays.
 
     Args:
         train_feature_df (pd.DataFrame): subset of train_df with selected features.
         test_feature_df (pd.DataFrame): subset of test_df with selected features.
+        input_rep_bool (bool): True = presence of input_representation. False = absence of input_representation (only use features).
 
     Returns:
         input_train_array (np.array): tokenized, padded array ready for training
@@ -89,9 +90,12 @@ def process_features(train_feature_df, test_feature_df):
     # Cannot have more than 1 input_value representation, so the only str type value will be the input_value representation.
     column_headers = train_feature_df.columns
     for column in column_headers:
-        if type(train_feature_df[column][1]) == str:
-            input_representation = column
-    
+        if input_rep_bool:
+            if type(train_feature_df[column][1]) == str:
+                input_representation = column
+        else:
+            input_representation = None
+
     # calculate feature dict
     feature_scale_dict = {}
     concat_df = pd.concat([train_feature_df, test_feature_df], ignore_index=True)
@@ -110,74 +114,106 @@ def process_features(train_feature_df, test_feature_df):
             feature_scale_dict[feature_column_max] = feature_max
             feature_scale_dict[feature_column_min] = feature_min
 
+    # custom feature scaling for mordred descriptors
+    max_mordred_scale: dict = {}  # max for each descriptor
+    min_mordred_scale: dict = {}  # min for each descriptor
+    if "mordred" in input_representation:
+        # Find max and min values for each descriptor
+        for index, row in concat_df.iterrows():
+            mordred_idx = 0
+            input_value = ast.literal_eval(row[input_representation])
+            for descriptor in input_value:
+                if mordred_idx not in max_mordred_scale:
+                    max_mordred_scale[mordred_idx] = descriptor
+                elif descriptor > max_mordred_scale[mordred_idx]:
+                    max_mordred_scale[mordred_idx] = descriptor
+
+                if mordred_idx not in min_mordred_scale:
+                    min_mordred_scale[mordred_idx] = descriptor
+                elif descriptor < min_mordred_scale[mordred_idx]:
+                    min_mordred_scale[mordred_idx] = descriptor
+                mordred_idx += 1
+        # Min-max scaling
+        for index, row in concat_df.iterrows():
+            mordred_idx = 0
+            input_value = ast.literal_eval(row[input_representation])
+            for i in range(0, len(input_value)):
+                input_value[i] = (input_value[i] - min_mordred_scale[i]) / (
+                    max_mordred_scale[i] - min_mordred_scale[i]
+                )
+            concat_df.at[index, input_representation] = input_value
+
     # TOKENIZATION
     # must loop through entire dataframe for token2idx
     input_instance = None
-    try:
-        input_value = ast.literal_eval(concat_df[input_representation][1])
-        if isinstance(input_value[0], list):
-            input_instance = "list_of_list"
-            # print("input_value is a list of list")
-        else:
-            input_instance = "list"
-            # print("input_value is a list which could be: 1) fragments or 2) SMILES")
-    except:  # The input_value was not a list, so ast.literal_eval will raise ValueError.
-        input_instance = "str"
-        input_value = concat_df[input_representation][1]
-        # print("input_value is a string")
-    if (
-        input_instance == "list"
-    ):  # could be list of fragments or list of (augmented) SMILES or list of (augmented) manual frag strings.
-        # check if list of: 1) fragments or 2) SMILES
+    if input_rep_bool:
+        try:
+            input_value = ast.literal_eval(concat_df[input_representation][1])
+            if isinstance(input_value[0], list):
+                input_instance = "list_of_list"
+                # print("input_value is a list of list")
+            else:
+                input_instance = "list"
+                # print("input_value is a list which could be: 1) fragments or 2) SMILES")
+        except:  # The input_value was not a list, so ast.literal_eval will raise ValueError.
+            input_instance = "str"
+            input_value = concat_df[input_representation][1]
+            # print("input_value is a string")
         if (
-            "Augmented" in input_representation
-            or "aug_SMILES" in input_representation
-        ):
-            augmented_smi_list: list = []
+            input_instance == "list"
+        ):  # could be list of fragments or list of (augmented) SMILES or list of (augmented) manual frag strings.
+            # check if list of: 1) fragments or 2) SMILES
+            if (
+                "Augmented_SMILES" == input_representation
+                or "aug_SMILES" == input_representation
+            ):
+                augmented_smi_list: list = []
+                for index, row in concat_df.iterrows():
+                    input_value = ast.literal_eval(row[input_representation])
+                    for aug_value in input_value:
+                        augmented_smi_list.append(aug_value)
+                augmented_smi_series: pd.Series = pd.Series(augmented_smi_list)
+                (
+                    tokenized_array,
+                    max_length,
+                    vocab_length,
+                    token2idx,
+                ) = Tokenizer().tokenize_data(augmented_smi_series)
+            elif "mordred" in input_representation:
+                pass
+            else:
+                token2idx = {}
+                token_idx = 0
+                for index, row in concat_df.iterrows():
+                    input_value = ast.literal_eval(row[input_representation])
+                    for frag in input_value:
+                        if frag not in list(token2idx.keys()):
+                            token2idx[frag] = token_idx
+                            token_idx += 1
+        elif input_instance == "list_of_list":  # list of list of augmented fragments
+            token2idx: dict = {}
+            token_idx: int = 0
             for index, row in concat_df.iterrows():
                 input_value = ast.literal_eval(row[input_representation])
                 for aug_value in input_value:
-                    augmented_smi_list.append(aug_value)
-            augmented_smi_series: pd.Series = pd.Series(augmented_smi_list)
-            (
-                tokenized_array,
-                max_length,
-                vocab_length,
-                token2idx,
-            ) = Tokenizer().tokenize_data(augmented_smi_series)
+                    for frag in aug_value:
+                        if frag not in list(token2idx.keys()):
+                            token2idx[frag] = token_idx
+                            token_idx += 1
+        elif input_instance == "str":
+            if "SMILES" in input_representation or "manual_str" in input_representation:
+                (
+                    tokenized_array,
+                    max_length,
+                    vocab_length,
+                    token2idx,
+                ) = Tokenizer().tokenize_data(concat_df[input_representation])
+            elif "SELFIES" in input_representation:
+                token2idx, max_length = Tokenizer().tokenize_selfies(
+                    concat_df[input_representation]
+                )
         else:
-            token2idx = {}
-            token_idx = 0
-            for index, row in concat_df.iterrows():
-                input_value = ast.literal_eval(row[input_representation])
-                for frag in input_value:
-                    if frag not in list(token2idx.keys()):
-                        token2idx[frag] = token_idx
-                        token_idx += 1
-    elif input_instance == "list_of_list":  # list of list of augmented fragments
-        token2idx: dict = {}
-        token_idx: int = 0
-        for index, row in concat_df.iterrows():
-            input_value = ast.literal_eval(row[input_representation])
-            for aug_value in input_value:
-                for frag in aug_value:
-                    if frag not in list(token2idx.keys()):
-                        token2idx[frag] = token_idx
-                        token_idx += 1
-    elif input_instance == "str":
-        if "SMILES" in input_representation or "manual_str" in input_representation:
-            (
-                tokenized_array,
-                max_length,
-                vocab_length,
-                token2idx,
-            ) = Tokenizer().tokenize_data(concat_df[input_representation])
-        elif "SELFIES" in input_representation:
-            token2idx, max_length = Tokenizer().tokenize_selfies(
-                concat_df[input_representation]
-            )
-    else:
-        raise TypeError("input_value is neither str or list. Fix it!")
+            raise TypeError("input_value is neither str or list. Fix it!")
 
     max_input_length = 0  # for padding and dimension for first layer of NN
     # processing training data
@@ -186,8 +222,8 @@ def process_features(train_feature_df, test_feature_df):
         # augmented data needs to be processed differently.
         if any(
             [
-                "Augmented" in input_representation,
-                "aug_SMILES" in input_representation,
+                "Augmented_SMILES" == input_representation,
+                "aug_SMILES" == input_representation,
                 input_instance == "list_of_list",
             ]
         ):
@@ -221,8 +257,8 @@ def process_features(train_feature_df, test_feature_df):
             for aug_value in input_value:
                 tokenized_list = []
                 if (
-                    "Augmented" in input_representation
-                    or "aug_SMILES" in input_representation
+                    "Augmented_SMILES" == input_representation
+                    or "aug_SMILES" == input_representation
                 ):
                     tokenized_list.extend(
                         Tokenizer().tokenize_from_dict(token2idx, aug_value)
@@ -245,11 +281,15 @@ def process_features(train_feature_df, test_feature_df):
                 except:
                     input_value = row[column]
                 # tokenization
-                if isinstance(input_value, list):
+                if isinstance(input_value, list) and "mordred" not in column:
                     input_value = ast.literal_eval(row[column])
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
+                if (
+                    isinstance(input_value, list) and "mordred" in column
+                ):  # mordred descriptors
+                    tokenized_list = input_value  # it is not tokenized, but for the sake of naming, we'll keep it the same.
                 elif isinstance(input_value, str):
                     input_value = row[column]
                     tokenized_list.extend(
@@ -287,8 +327,8 @@ def process_features(train_feature_df, test_feature_df):
         # augmented data needs to be processed differently.
         if any(
             [
-                "Augmented" in input_representation,
-                "aug_SMILES" in input_representation,
+                "Augmented_SMILES" == input_representation,
+                "aug_SMILES" == input_representation,
                 input_instance == "list_of_list",
             ]
         ):
@@ -323,8 +363,8 @@ def process_features(train_feature_df, test_feature_df):
             aug_value = input_value[0]
             tokenized_list = []
             if (
-                "Augmented" in input_representation
-                or "aug_SMILES" in input_representation
+                "Augmented_SMILES" == input_representation
+                or "aug_SMILES" == input_representation
             ):
                 tokenized_list.extend(
                     Tokenizer().tokenize_from_dict(token2idx, aug_value)
@@ -347,11 +387,14 @@ def process_features(train_feature_df, test_feature_df):
                 except:
                     input_value = row[column]
                 # tokenization
-                if isinstance(input_value, list):
-                    input_value = ast.literal_eval(row[column])
+                if isinstance(input_value, list) and "mordred" not in column:
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
+                elif (
+                    isinstance(input_value, list) and "mordred" in column
+                ):  # mordred descriptors
+                    tokenized_list = input_value  # it is not tokenized, but for the sake of naming, we'll keep it the same.
                 elif isinstance(input_value, str):
                     input_value = row[column]
                     tokenized_list.extend(
@@ -395,13 +438,14 @@ def process_features(train_feature_df, test_feature_df):
 
 
 def process_features_LM(
-    train_feature_df, test_feature_df
+    train_feature_df, test_feature_df, input_rep_bool
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Processes various types of features (str, float, list) and returns "training ready" arrays for language models (LM).
 
     Args:
         train_feature_df (pd.DataFrame): subset of train_df with selected features.
         test_feature_df (pd.DataFrame): subset of test_df with selected features.
+        input_rep_bool (bool): True = presence of input_representation. False = absence of input_representation (only use features).
 
     Returns:
         input_train_array (np.array): tokenized, padded array ready for training
@@ -412,8 +456,11 @@ def process_features_LM(
     # Cannot have more than 1 input_value representation, so the only str type value will be the input_value representation.
     column_headers = train_feature_df.columns
     for column in column_headers:
-        if type(train_feature_df[column][1]) == str:
-            input_representation = column
+        if input_rep_bool:
+            if type(train_feature_df[column][1]) == str:
+                input_representation = column
+        else:
+            input_representation = None
 
     # calculate feature dict
     feature_scale_dict = {}
@@ -475,8 +522,8 @@ def process_features_LM(
     ):  # could be list of fragments or list of (augmented) SMILES.
         # check if list of: 1) fragments or 2) SMILES
         if (
-            "Augmented" in input_representation
-            or "aug_SMILES" in input_representation
+            "Augmented_SMILES" == input_representation
+            or "aug_SMILES" == input_representation
         ):
             augmented_smi_list: list = []
             for index, row in concat_df.iterrows():
@@ -536,8 +583,8 @@ def process_features_LM(
         # augmented data needs to be processed differently.
         if any(
             [
-                "Augmented" in input_representation,
-                "aug_SMILES" in input_representation,
+                "Augmented_SMILES" == input_representation,
+                "aug_SMILES" == input_representation,
                 input_instance == "list_of_list",
             ]
         ):
@@ -576,8 +623,8 @@ def process_features_LM(
             for aug_value in input_value:
                 tokenized_list = []
                 if (
-                    "Augmented" in input_representation
-                    or "aug_SMILES" in input_representation
+                    "Augmented_SMILES" == input_representation
+                    or "aug_SMILES" == input_representation
                 ):
                     tokenized_list.extend(
                         Tokenizer().tokenize_from_dict(token2idx, aug_value)
@@ -600,11 +647,14 @@ def process_features_LM(
                 except:
                     input_value = row[column]
                 # tokenization
-                if isinstance(input_value, list):
-                    input_value = ast.literal_eval(row[column])
+                if isinstance(input_value, list) and "mordred" not in column:
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
+                elif (
+                    isinstance(input_value, list) and "mordred" in column
+                ):  # mordred descriptors
+                    tokenized_list = input_value  # it is not tokenized, but for the sake of naming, we'll keep it the same.
                 elif isinstance(input_value, str):
                     input_value = row[column]
                     tokenized_list.extend(
@@ -646,8 +696,8 @@ def process_features_LM(
         # augmented data needs to be processed differently.
         if any(
             [
-                "Augmented" in input_representation,
-                "aug_SMILES" in input_representation,
+                "Augmented_SMILES" == input_representation,
+                "aug_SMILES" == input_representation,
                 input_instance == "list_of_list",
             ]
         ):
@@ -686,8 +736,8 @@ def process_features_LM(
             aug_value = input_value[0]
             tokenized_list = []
             if (
-                "Augmented" in input_representation
-                or "aug_SMILES" in input_representation
+                "Augmented_SMILES" == input_representation
+                or "aug_SMILES" == input_representation
             ):
                 tokenized_list.extend(
                     Tokenizer().tokenize_from_dict(token2idx, aug_value)
@@ -710,11 +760,14 @@ def process_features_LM(
                 except:
                     input_value = row[column]
                 # tokenization
-                if isinstance(input_value, list):
-                    input_value = ast.literal_eval(row[column])
+                if isinstance(input_value, list) and "mordred" not in column:
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
+                elif (
+                    isinstance(input_value, list) and "mordred" in column
+                ):  # mordred descriptors
+                    tokenized_list = input_value  # it is not tokenized, but for the sake of naming, we'll keep it the same.
                 elif isinstance(input_value, str):
                     input_value = row[column]
                     tokenized_list.extend(
@@ -763,7 +816,7 @@ def process_features_LM(
 
 
 def process_target(
-    train_target_df, test_target_df, train_df
+    train_target_df, test_target_df, train_df, input_rep_bool
 ) -> Tuple[np.ndarray, np.ndarray, float, float]:
     """Processes one target value through the following steps:
     1) min-max scaling
@@ -804,27 +857,33 @@ def process_target(
         input_instance = "str"
         # print("input_value is a string")
     # duplicate number of target values with the number of augmented data points
-    if any(
-        [
-            "Augmented" in input_representation,
-            "aug_SMILES" in input_representation,
-            input_instance == "list_of_list",
-        ]
-    ):
-        target_train_list = []
-        for index, row in train_target_df.iterrows():
-            input_value = ast.literal_eval(row[input_representation])
-            for i in range(len(input_value)):
-                target_train_list.append(row[train_target_df.columns[0]])
+    if input_rep_bool:
+        if any(
+            [
+                "Augmented_SMILES" == input_representation,
+                "aug_SMILES" == input_representation,
+                input_instance == "list_of_list",
+            ]
+        ):
+            target_train_list = []
+            for index, row in train_target_df.iterrows():
+                input_value = ast.literal_eval(row[input_representation])
+                for i in range(len(input_value)):
+                    target_train_list.append(row[train_target_df.columns[0]])
 
-        target_test_list = []
-        for index, row in test_target_df.iterrows():
-            input_value = ast.literal_eval(row[input_representation])
-            # NOTE: In the validation set, only the first augmented value is taken. We do not want to perform predictions on augmented data.
-            target_test_list.append(row[test_target_df.columns[0]])
+            target_test_list = []
+            for index, row in test_target_df.iterrows():
+                input_value = ast.literal_eval(row[input_representation])
+                # NOTE: In the validation set, only the first augmented value is taken. We do not want to perform predictions on augmented data.
+                target_test_list.append(row[test_target_df.columns[0]])
 
-        target_train_array = np.array(target_train_list)
-        target_test_array = np.array(target_test_list)
+            target_train_array = np.array(target_train_list)
+            target_test_array = np.array(target_test_list)
+        else:
+            target_train_array = train_target_df[train_target_df.columns[0]].to_numpy()
+            target_train_array = np.ravel(target_train_array)
+            target_test_array = test_target_df[test_target_df.columns[0]].to_numpy()
+            target_test_array = np.ravel(target_test_array)
     else:
         target_train_array = train_target_df[train_target_df.columns[0]].to_numpy()
         target_train_array = np.ravel(target_train_array)
