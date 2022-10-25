@@ -77,6 +77,7 @@ def heatmap(config: dict):
         "DA_SELFIES",
         "DA_BigSMILES",
         "DA_SMILES",
+        "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV",
     ]
 
     # Heatmap
