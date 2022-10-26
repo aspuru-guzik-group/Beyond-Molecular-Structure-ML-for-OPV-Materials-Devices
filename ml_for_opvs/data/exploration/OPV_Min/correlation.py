@@ -181,37 +181,45 @@ class Correlation:
         print(columns_dict)
         # select which columns you want to plot
         column_idx_first = 9
-        column_idx_last = 28 + 1
+        column_idx_last = 37 + 1
 
-        x_columns = column_idx_last - column_idx_first - 3
-        y_rows = column_idx_last - column_idx_first - 3
+        # x_columns = column_idx_last - column_idx_first - 3
+        # y_rows = column_idx_last - column_idx_first - 3
 
-        column_range: list = list(range(column_idx_first, 22))
-        # skip e- and h+ mobilities
-        # skip PCE_percent
-        column_range.extend(list(range(25, column_idx_last)))
+        column_range: list = list(range(column_idx_first, column_idx_last))
 
         select_df: pd.DataFrame = self.data.iloc[:, column_range]
         # reorder dataframe
         columns = [
-            "HOMO_D_eV",
-            "LUMO_D_eV",
-            "HOMO_A_eV",
-            "LUMO_A_eV",
-            "D_A_ratio_m_m",
-            "solvent",
-            "total_solids_conc_mg_mL",
-            "solvent_additive",
-            "solvent_additive_conc_v_v_percent",
-            "active_layer_thickness_nm",
-            "annealing_temperature",
-            "hole_contact_layer",
-            "electron_contact_layer",
+            # "HOMO_D_eV",
+            # "LUMO_D_eV",
+            # "HOMO_A_eV",
+            # "LUMO_A_eV",
+            # "D_A_ratio_m_m",
+            # "solvent",
+            # "total_solids_conc_mg_mL",
+            # "solvent_additive",
+            # "solvent_additive_conc_v_v_percent",
+            # "active_layer_thickness_nm",
+            # "annealing_temperature",
+            # "hole_contact_layer",
+            # "electron_contact_layer",
+            "BP",
+            "MP",
+            "Density",
+            "Dielectric",
+            "Dipole",
+            "log_Pow",
+            "Hansen_Disp",
+            "Hansen_H_Bond",
+            "Hansen_Polar",
             "Voc_V",
             "Jsc_mA_cm_pow_neg2",
             "FF_percent",
             "calc_PCE_percent",
         ]
+        x_columns: int = len(columns)
+        y_rows: int = len(columns)
         select_df: pd.DataFrame = select_df.reindex(columns=columns)
         column_name_list: list = list(select_df.columns)
         columns = select_df.columns
