@@ -163,20 +163,22 @@ def gather_results(progress_report_paths: list[Path]) -> pd.DataFrame:
             parent_path: Path = progress_path.parent
             summary_path: Path = parent_path / "summary.csv"
             summary: pd.DataFrame = pd.read_csv(summary_path)
-
-        progress: pd.DataFrame = pd.read_csv(progress_path)
-        progress["Dataset"] = missing_columns[-7]
-        progress["Input_Representation"] = missing_columns[-6]
-        progress["Features"] = missing_columns[-5]
-        progress["Feature_Names"] = missing_columns[-3]
-        progress["Model"] = missing_columns[-4]
-        progress["Target"] = missing_columns[-2]
-        if progress_path.name == "progress_report.csv":
-            # progress["feature_length"] = summary["feature_length"].values[0]
-            progress["num_of_data"] = summary["num_of_data"].values[0]
-        progress_full: pd.DataFrame = pd.concat(
-            [progress, progress_full], ignore_index=True
-        )
+        try:
+            progress: pd.DataFrame = pd.read_csv(progress_path)
+            progress["Dataset"] = missing_columns[-7]
+            progress["Input_Representation"] = missing_columns[-6]
+            progress["Features"] = missing_columns[-5]
+            progress["Feature_Names"] = missing_columns[-3]
+            progress["Model"] = missing_columns[-4]
+            progress["Target"] = missing_columns[-2]
+            if progress_path.name == "progress_report.csv":
+                # progress["feature_length"] = summary["feature_length"].values[0]
+                progress["num_of_data"] = summary["num_of_data"].values[0]
+            progress_full: pd.DataFrame = pd.concat(
+                [progress, progress_full], ignore_index=True
+            )
+        except FileNotFoundError:
+            print("missing summary file.")
     return progress_full
 
 

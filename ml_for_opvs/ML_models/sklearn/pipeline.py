@@ -426,7 +426,7 @@ def process_features(
 
 def process_target(
     train_target_df, test_target_df, train_df, input_rep_bool
-) -> Tuple[np.ndarray, np.ndarray, float, float]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Processes one target value through the following steps:
     1) min-max scaling
     2) return as array
@@ -444,9 +444,18 @@ def process_target(
     """
     assert len(train_target_df) > 1, train_target_df
     assert len(test_target_df) > 1, test_target_df
-    # first column will always be the target column
-    # NOTE: Max and Min values are found from training set -> prevents data leakage
-    target_max, target_min = feature_scale(train_target_df[train_target_df.columns[0]])
+    # NOTE: Max and Min values are found from ONLY the training set -> prevents data leakage
+    targets_max: list = []
+    targets_min: list = []
+    for i in range(train_target_df.shape[1]):
+        target_max, target_min = feature_scale(
+            train_target_df[train_target_df.columns[i]]
+        )
+        targets_max.append(target_max)
+        targets_min.append(target_min)
+
+    targets_max: np.ndarray = np.array(targets_max)
+    targets_min: np.ndarray = np.array(targets_min)
 
     # First in column_headers will always be input_representation
     column_headers = train_df.columns
@@ -480,31 +489,29 @@ def process_target(
             for index, row in train_target_df.iterrows():
                 input_value = ast.literal_eval(row[input_representation])
                 for i in range(len(input_value)):
-                    target_train_list.append(row[train_target_df.columns[0]])
+                    target_train_list.append(row[train_target_df.columns])
 
             target_test_list = []
             for index, row in test_target_df.iterrows():
                 input_value = ast.literal_eval(row[input_representation])
                 for i in range(len(input_value)):
-                    target_test_list.append(row[test_target_df.columns[0]])
+                    target_test_list.append(row[test_target_df.columns])
 
             target_train_array = np.array(target_train_list)
             target_test_array = np.array(target_test_list)
         else:
-            target_train_array = train_target_df[train_target_df.columns[0]].to_numpy()
-            target_train_array = np.ravel(target_train_array)
-            target_test_array = test_target_df[test_target_df.columns[0]].to_numpy()
-            target_test_array = np.ravel(target_test_array)
+            target_train_array = train_target_df[train_target_df.columns].to_numpy()
+            target_test_array = test_target_df[test_target_df.columns].to_numpy()
     else:
-        target_train_array = train_target_df[train_target_df.columns[0]].to_numpy()
-        target_train_array = np.ravel(target_train_array)
-        target_test_array = test_target_df[test_target_df.columns[0]].to_numpy()
-        target_test_array = np.ravel(target_test_array)
+        target_train_array = train_target_df[train_target_df.columns].to_numpy()
+        target_test_array = test_target_df[test_target_df.columns].to_numpy()
 
-    target_train_array = (target_train_array - target_min) / (target_max - target_min)
-    target_test_array = (target_test_array - target_min) / (target_max - target_min)
+    target_train_array = (target_train_array - targets_min) / (
+        targets_max - targets_min
+    )
+    target_test_array = (target_test_array - targets_min) / (targets_max - targets_min)
 
-    return target_train_array, target_test_array, target_max, target_min
+    return target_train_array, target_test_array, targets_max, targets_min
 
 
 def get_space_dict(space_json_path, model_type):
@@ -544,6 +551,51 @@ def get_space_dict(space_json_path, model_type):
         space_keys = ["n_neighbors", "leaf_size"]
     elif model_type == "Lasso":
         space_keys = ["alpha"]
+
+    for key in space_keys:
+        assert key in space_json.keys(), key
+        space[key] = space_json[key]
+
+    return space
+
+
+def get_space_multi_dict(space_json_path, model_type):
+    """Opens json file and returns a dictionary of the space.
+
+    Args:
+        space_json_path (str): filepath to json containing search space of hyperparameters
+
+    Returns:
+        space (dict): dictionary of necessary hyperparameters
+    """
+    space = {}
+    with open(space_json_path) as json_file:
+        space_json = json.load(json_file)
+    if model_type == "RF":
+        space_keys = [
+            "estimator__n_estimators",
+            "estimator__min_samples_leaf",
+            "estimator__min_samples_split",
+            "estimator__max_depth",
+        ]
+    elif model_type == "XGBoost":
+        space_keys = [
+            "estimator__alpha",
+            "estimator__n_estimators",
+            "estimator__max_depth",
+            "estimator__subsample",
+            "estimator__min_child_weight",
+        ]
+    elif model_type == "KRR":
+        space_keys = ["estimator__alpha"]
+    elif model_type == "SVM":
+        space_keys = ["estimator__kernel", "estimator__degree"]
+    elif model_type == "MLR":
+        space_keys = ["estimator__fit_intercept"]
+    elif model_type == "KNN":
+        space_keys = ["estimator__n_neighbors", "estimator__leaf_size"]
+    elif model_type == "Lasso":
+        space_keys = ["estimator__alpha"]
 
     for key in space_keys:
         assert key in space_json.keys(), key

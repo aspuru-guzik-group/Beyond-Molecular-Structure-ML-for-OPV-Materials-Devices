@@ -10,10 +10,12 @@ import pandas as pd
 import pickle  # for saving scikit-learn models
 import numpy as np
 import json
+from copy import deepcopy
 import matplotlib.pyplot as plt
 from pathlib import Path
 from numpy import mean, std
 from skopt import BayesSearchCV
+from sklearn.multioutput import MultiOutputRegressor
 from sklearn.model_selection import KFold
 from sklearn.metrics import (
     make_scorer,
@@ -34,6 +36,7 @@ from ml_for_opvs.ML_models.sklearn.pipeline import (
     process_features,
     process_target,
     get_space_dict,
+    get_space_multi_dict,
 )
 
 
@@ -127,6 +130,7 @@ def main(config: dict):
             input_rep_bool = False
         else:
             input_rep_bool = True
+
         (
             target_train_array,
             target_val_array,
@@ -138,94 +142,243 @@ def main(config: dict):
             train_df[column_names],
             input_rep_bool,
         )
-        # print("target_train", len(target_train_array))
-        # print("target_val", len(target_val_array))
-        # choose model
+        # target_train_array: [num_of_train, num_of_targets]
         # TODO: factory pattern
         # setup model with default parameters
-        if config["model_type"] == "RF":
-            model = RandomForestRegressor(
-                criterion="squared_error",
-                max_features=1.0,
-                random_state=config["random_state"],
-                bootstrap=True,
-                n_jobs=-1,
-            )
-        elif config["model_type"] == "XGBoost":
-            model = xgboost.XGBRegressor(
-                objective="reg:squarederror",
-                alpha=0.9,
-                random_state=config["random_state"],
-                n_jobs=-1,
-                learning_rate=0.2,
-                n_estimators=100,
-                max_depth=10,
-                subsample=1,
-            )
-        # KRR and MLR do not require HPO, they do not have space parameters
-        # MUST be paired with hyperparameter_optimization == False
-        elif config["model_type"] == "KRR":
-            kernel = PairwiseKernel(gamma=1, gamma_bounds="fixed", metric="laplacian")
-            model = KernelRidge(alpha=0.05, kernel=kernel, gamma=1)
-        elif config["model_type"] == "MLR":
-            model = LinearRegression()
-        elif config["model_type"] == "SVM":
-            model = SVR(kernel="rbf", degree=3, cache_size=16000)
-        elif config["model_type"] == "KNN":
-            model = KNeighborsRegressor()
-        elif config["model_type"] == "Lasso":
-            model = Lasso(alpha=1.0)
+        if config["multi_output_type"] == "ensemble":
+            ensemble_results: list = []
+            for i in range(1, len(target_df_columns)):
+                target_train_select: np.ndarray = target_train_array[:, i]
+                target_val_select: np.ndarray = target_val_array[:, i]
+                target_max_select: float = target_max[i]
+                target_min_select: float = target_min[i]
+                # print(f"{target_train_select.shape=}")
+                # print(f"{target_val_select.shape=}")
+                # print(f"{target_max_select=}")
+                # print(f"{target_min_select=}")
+                if config["model_type"] == "RF":
+                    model = RandomForestRegressor(
+                        criterion="squared_error",
+                        max_features=1.0,
+                        random_state=config["random_state"],
+                        bootstrap=True,
+                        n_jobs=-1,
+                    )
+                elif config["model_type"] == "XGBoost":
+                    model = xgboost.XGBRegressor(
+                        objective="reg:squarederror",
+                        alpha=0.9,
+                        random_state=config["random_state"],
+                        n_jobs=-1,
+                        learning_rate=0.2,
+                        n_estimators=100,
+                        max_depth=10,
+                        subsample=1,
+                    )
+                # KRR and MLR do not require HPO, they do not have space parameters
+                # MUST be paired with hyperparameter_optimization == False
+                elif config["model_type"] == "KRR":
+                    kernel = PairwiseKernel(
+                        gamma=1, gamma_bounds="fixed", metric="laplacian"
+                    )
+                    model = KernelRidge(alpha=0.05, kernel=kernel, gamma=1)
+                elif config["model_type"] == "MLR":
+                    model = LinearRegression()
+                elif config["model_type"] == "SVM":
+                    model = SVR(kernel="rbf", degree=3, cache_size=16000)
+                elif config["model_type"] == "KNN":
+                    model = KNeighborsRegressor()
+                elif config["model_type"] == "Lasso":
+                    model = Lasso(alpha=1.0)
+                else:
+                    raise NameError(
+                        "Model not found. Please use RF, XGBoost, SVM, KRR, MLR, KNN, Lasso"
+                    )
+
+                # run hyperparameter optimization
+                if config["hyperparameter_optimization"] == "True":
+                    # setup HPO space
+                    space = get_space_dict(
+                        config["hyperparameter_space_path"], config["model_type"]
+                    )
+                    # define search
+                    search = BayesSearchCV(
+                        estimator=model,
+                        search_spaces=space,
+                        scoring=score_func,
+                        cv=KFold(n_splits=5, shuffle=False),
+                        refit=True,
+                        n_jobs=-1,
+                        verbose=0,
+                        n_iter=10,
+                    )
+                    # train
+                    # execute search
+                    result = search.fit(input_train_array, target_train_select)
+                    # save best hyperparams for the best model from each fold
+                    best_params: dict = result.best_params_
+                    # get the best performing model fit on the whole training set
+                    model = result.best_estimator_
+                    # inference on hold out set
+                    yhat: np.ndarray = model.predict(input_val_array)
+                else:
+                    # train
+                    model.fit(input_train_array, target_train_select)
+                    # inference on hold out set
+                    yhat: np.ndarray = model.predict(input_val_array)
+
+                # Feature Importance
+                # explainer = shap.TreeExplainer(model)
+                # shap_values = explainer.shap_values(input_val_array)
+                # print(f"{shap_values.shape=}")
+                # shapley_total.append(list(shap_values))
+                # print(f"{yhat.shape=}")
+                # reverse min-max scaling
+                yhat: np.ndarray = (
+                    yhat * (target_max_select - target_min_select)
+                ) + target_min_select
+                # print(f"{yhat.shape=}")
+                # print(f"{yhat=}")
+                ensemble_results.append(yhat)
+            yhat: np.ndarray = np.array(ensemble_results)
+            yhat: np.ndarray = yhat.T
         else:
-            raise NameError(
-                "Model not found. Please use RF, XGBoost, SVM, KRR, MLR, KNN, Lasso"
-            )
+            if config["model_type"] == "RF":
+                model = RandomForestRegressor(
+                    criterion="squared_error",
+                    max_features=1.0,
+                    random_state=config["random_state"],
+                    bootstrap=True,
+                    n_jobs=-1,
+                )
+            elif config["model_type"] == "XGBoost":
+                model = xgboost.XGBRegressor(
+                    objective="reg:squarederror",
+                    alpha=0.9,
+                    random_state=config["random_state"],
+                    n_jobs=-1,
+                    learning_rate=0.2,
+                    n_estimators=100,
+                    max_depth=10,
+                    subsample=1,
+                )
+            # KRR and MLR do not require HPO, they do not have space parameters
+            # MUST be paired with hyperparameter_optimization == False
+            elif config["model_type"] == "KRR":
+                kernel = PairwiseKernel(
+                    gamma=1, gamma_bounds="fixed", metric="laplacian"
+                )
+                model = KernelRidge(alpha=0.05, kernel=kernel, gamma=1)
+            elif config["model_type"] == "MLR":
+                model = LinearRegression()
+            elif config["model_type"] == "SVM":
+                model = SVR(kernel="rbf", degree=3, cache_size=16000)
+            elif config["model_type"] == "KNN":
+                model = KNeighborsRegressor()
+            elif config["model_type"] == "Lasso":
+                model = Lasso(alpha=1.0)
+            else:
+                raise NameError(
+                    "Model not found. Please use RF, XGBoost, SVM, KRR, MLR, KNN, Lasso"
+                )
 
-        # run hyperparameter optimization
-        if config["hyperparameter_optimization"] == "True":
-            # setup HPO space
-            space = get_space_dict(
-                config["hyperparameter_space_path"], config["model_type"]
-            )
-            # define search
-            search = BayesSearchCV(
-                estimator=model,
-                search_spaces=space,
-                scoring=score_func,
-                cv=KFold(n_splits=5, shuffle=False),
-                refit=True,
-                n_jobs=-1,
-                verbose=0,
-                n_iter=10,
-            )
-            # train
-            # execute search
-            result = search.fit(input_train_array, target_train_array)
-            # save best hyperparams for the best model from each fold
-            best_params: dict = result.best_params_
-            # get the best performing model fit on the whole training set
-            model = result.best_estimator_
-            # inference on hold out set
-            yhat: np.ndarray = model.predict(input_val_array)
-        else:
-            # train
-            model.fit(input_train_array, target_train_array)
-            # inference on hold out set
-            yhat: np.ndarray = model.predict(input_val_array)
+            # Multi-output configuration
+            if config["multi_output_type"] == "multi":
+                model = MultiOutputRegressor(estimator=model, n_jobs=-1)
+                target_train_select: np.ndarray = target_train_array[:, 1:]
+                target_val_select: np.ndarray = target_val_array[:, 1:]
+                target_max_select: np.ndarray = target_max[1:]
+                target_min_select: np.ndarray = target_min[1:]
+            elif config["multi_output_type"] == "chain":
+                # NOTE: Not suitable because there is data leakage.
+                pass
+            else:
+                target_train_select: np.ndarray = target_train_array
+                target_val_select: np.ndarray = target_val_array
+                target_max_select: np.ndarray = target_max
+                target_min_select: np.ndarray = target_min
 
-        # Feature Importance
-        # explainer = shap.TreeExplainer(model)
-        # shap_values = explainer.shap_values(input_val_array)
-        # print(f"{shap_values.shape=}")
-        # shapley_total.append(list(shap_values))
+            # run hyperparameter optimization
+            if config["hyperparameter_optimization"] == "True":
+                # setup HPO space
+                if config["multi_output_type"] == "multi":
+                    space = get_space_multi_dict(
+                        config["hyperparameter_space_path"], config["model_type"]
+                    )
+                else:
+                    space = get_space_dict(
+                        config["hyperparameter_space_path"], config["model_type"]
+                    )
+                # define search
+                search = BayesSearchCV(
+                    estimator=model,
+                    search_spaces=space,
+                    scoring=score_func,
+                    cv=KFold(n_splits=5, shuffle=False),
+                    refit=True,
+                    n_jobs=-1,
+                    verbose=0,
+                    n_iter=10,
+                )
+                # train
+                # execute search
+                result = search.fit(input_train_array, target_train_select)
+                # save best hyperparams for the best model from each fold
+                best_params: dict = result.best_params_
+                # get the best performing model fit on the whole training set
+                model = result.best_estimator_
+                # inference on hold out set
+                yhat: np.ndarray = model.predict(input_val_array)
+            else:
+                # train
+                model.fit(input_train_array, target_train_select)
+                # inference on hold out set
+                yhat: np.ndarray = model.predict(input_val_array)
 
-        # reverse min-max scaling
-        yhat: np.ndarray = (yhat * (target_max - target_min)) + target_min
-        y_test: np.ndarray = (target_val_array * (target_max - target_min)) + target_min
+            # Feature Importance
+            # explainer = shap.TreeExplainer(model)
+            # shap_values = explainer.shap_values(input_val_array)
+            # print(f"{shap_values.shape=}")
+            # shapley_total.append(list(shap_values))
+
+            # reverse min-max scaling
+            yhat: np.ndarray = (
+                yhat * (target_max_select - target_min_select)
+            ) + target_min_select
+            y_test: np.ndarray = (
+                target_val_select * (target_max_select - target_min_select)
+            ) + target_min_select
+
+        # Convert to PCE and test against that.
+        # Multi-output configuration
+        if (
+            config["multi_output_type"] == "multi"
+            or config["multi_output_type"] == "ensemble"
+        ):
+            yhat_multi: np.ndarray = deepcopy(yhat)
+            # print(f"{yhat_multi=}")
+            # print(f"{yhat_multi.shape=}")
+            yhat: np.ndarray = yhat_multi[:, 0]  # first target
+            # print(f"{yhat.shape=}")
+            for i in range(1, yhat_multi.shape[1]):
+                yhat: np.ndarray = yhat * yhat_multi[:, i]
+                # print(f"{yhat.shape=}")
+            yhat: np.ndarray = yhat / 100
+            y_test: np.ndarray = (
+                target_val_array[:, 0] * (target_max[0] - target_min[0])
+            ) + target_min[
+                0
+            ]  # GET PCE from 1st column
 
         # make new files
         # save model, outputs, generates new directory based on training/dataset/model/features/target
         results_path: Path = Path(os.path.abspath(config["results_path"]))
-        model_dir_path: Path = results_path / "{}".format(config["model_type"])
+        try:
+            model_dir_path: Path = results_path / "{}_{}".format(
+                config["model_type"], config["multi_output_type"]
+            )
+        except:
+            model_dir_path: Path = results_path / "{}".format(config["model_type"])
         feature_dir_path: Path = model_dir_path / "{}".format(config["feature_names"])
         target_dir_path: Path = feature_dir_path / "{}".format(config["target_name"])
         # create folders if not present
@@ -348,7 +501,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--target_name",
         type=str,
-        help="Choose target value. Format is ex. calc_PCE_percent",
+        help="Choose target value. Format is ex. FF_percent,Voc_V,Jsc_mA_cm_pow_neg2,calc_PCE_percent",
+    )
+    parser.add_argument(
+        "--multi_output_type",
+        type=str,
+        help="Choose type of multi-output. Options are: multi, ensemble, chain.",
     )
     parser.add_argument(
         "--model_type", type=str, help="Choose model type. (RF, XGBoost, SVM, KRR, MLR)"

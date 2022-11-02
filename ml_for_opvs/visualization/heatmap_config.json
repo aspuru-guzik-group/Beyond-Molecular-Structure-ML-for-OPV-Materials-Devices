@@ -13,5 +13,23 @@
             "calc_PCE_percent"
         ],
         "metrics": "r"
+    },
+    "grid_search_multi": {
+        "datasets": [
+            "OPV_Min"
+        ],
+        "models": [
+            "RF_ensemble",
+            "RF_multi"
+        ],
+        "input_representations": [],
+        "features": [
+            "result_molecules_only"
+        ],
+        "feature_names": [],
+        "target_names": [
+            "calc_PCE_percent"
+        ],
+        "metrics": "r"
     }
 }

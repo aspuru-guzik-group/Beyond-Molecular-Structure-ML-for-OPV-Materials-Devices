@@ -55,7 +55,7 @@ def heatmap(config: dict):
 
     # Order of X/Y-axes
     x = [
-        "MLR",
+        # "MLR", # ignored for rmse and mae
         "Lasso",
         "KRR",
         "KNN",
