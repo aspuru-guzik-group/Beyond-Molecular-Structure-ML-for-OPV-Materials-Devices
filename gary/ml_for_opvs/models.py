@@ -272,3 +272,6 @@ class GNNPredictor(torch.nn.Module):
         combined = torch.cat((donor, acceptor), -1)
         output = self.fc(combined)
         return output
+
+
+

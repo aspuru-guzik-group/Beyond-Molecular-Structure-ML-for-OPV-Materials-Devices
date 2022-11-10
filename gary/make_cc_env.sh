@@ -17,6 +17,7 @@ pip install optuna # if we use it
 pip install plotly
 pip install kaleido
 
+pip install tensorflow graph_nets
 
 pip install torch==1.12.1
 pip install gpytorch
@@ -26,6 +27,7 @@ pip install torch-sparse -f https://data.pyg.org/whl/torch-1.12.1+cu114.html
 pip install torch-cluster -f https://data.pyg.org/whl/torch-1.12.1+cu114.html 
 pip install torch-spline-conv -f https://data.pyg.org/whl/torch-1.12.1+cu114.html 
 pip install torch-geometric 
+# pip install e3fp
 
 # pip install tensorflow tensorflow-probability
 # pip install dm-sonnet ml_collections graph_nets tf-models-official
