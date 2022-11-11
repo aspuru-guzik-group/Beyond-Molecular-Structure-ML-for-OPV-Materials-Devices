@@ -8,7 +8,8 @@ import pickle
 from argparse import ArgumentParser
 
 from ml_for_opvs.utils import get_features
-from ml_for_opvs.graphs import get_onehot_encoder, from_smiles
+from ml_for_opvs.graphs_tf import MolTensorizer
+# from ml_for_opvs.graphs import get_onehot_encoder, from_smiles
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -40,7 +41,7 @@ if __name__ == "__main__":
         "mordred",
         "pca_mordred",
         "graph",
-        "simple_graph",
+        # "simple_graph",
     ], "Invalid feature."
 
     pandarallel.initialize(progress_bar=False, nb_workers=FLAGS.num_workers)
@@ -57,24 +58,27 @@ if __name__ == "__main__":
     feat = FLAGS.feature
     print(f"Looking at {feat}")
 
-    if feat == "simple_graph":
+    if feat == "graph":
         smi_list = df["d_smi"].tolist()
         smi_list.extend(df["a_smi"].tolist())
-        encoder = get_onehot_encoder(smi_list)
-        d_feat = df["d_smi"].parallel_apply(lambda x: from_smiles(x, encoder))
-        a_feat = df["a_smi"].parallel_apply(lambda x: from_smiles(x, encoder))
+        tensorizer = MolTensorizer(smi_list)
+        # encoder = get_onehot_encoder(smi_list)
+        # d_feat = df["d_smi"].parallel_apply(lambda x: from_smiles(x, encoder))
+        # a_feat = df["a_smi"].parallel_apply(lambda x: from_smiles(x, encoder))
+        d_feat = tensorizer(df['d_smi'].tolist())
+        a_feat = tensorizer(df['a_smi'].tolist())
     else:
         d_feat = df["d_smi"].parallel_apply(lambda x: get_features(x, feat))
         print("     Donor features made.")
         a_feat = df["a_smi"].parallel_apply(lambda x: get_features(x, feat))
         print("     Acceptor features made.")
 
-    d_feat = d_feat.to_list()
-    a_feat = a_feat.to_list()
+        d_feat = d_feat.to_list()
+        a_feat = a_feat.to_list()
 
     if feat not in ["graph", "simple_graph"]:
         # turn lists into arrays
-        features = {"donor": np.array(d_feat), "acceptor": np.array(a_feat)}
+        features = {"donor": d_feat, "acceptor": a_feat}
     else:
         features = {"donor": d_feat, "acceptor": a_feat}
     # features = np.concatenate((d_feat, a_feat), axis=-1)

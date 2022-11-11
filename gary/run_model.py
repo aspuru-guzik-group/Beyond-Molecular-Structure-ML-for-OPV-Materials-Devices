@@ -19,6 +19,11 @@ import gpytorch
 import torch
 from torch_geometric.loader import DataLoader
 
+import tensorflow as tf
+
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import RBF
+
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_squared_error as mse
@@ -28,8 +33,10 @@ from sklearn.preprocessing import StandardScaler, QuantileTransformer, MinMaxSca
 import selfies as sf
 
 from ml_for_opvs import utils
-from ml_for_opvs.models import GPRegressor, GNNEmbedder, GNNPredictor
-from ml_for_opvs.graphs import PairDataset, pair_collate, get_graphs
+from ml_for_opvs.models import GPRegressor #, GNNEmbedder, GNNPredictor
+from ml_for_opvs.gnn import default_hp, GNNEmbedder, GNNPredictor
+from ml_for_opvs.graphs_tf import get_graphs
+# from ml_for_opvs.graphs import PairDataset, pair_collate, get_graphs
 
 ALL_METRICS = ['rmse', 'r', 'r2', 'spearman', 'mse', 'mae']
 
@@ -39,7 +46,7 @@ def run_training(x, y, model, feature, out_dir='trained_results'):
     # split the data with CV
     utils.set_seed()
     if feature in ['graph', 'simple_graph']:
-        train, val, test = utils.get_cv_splits(x[0])
+        train, val, test = utils.get_cv_splits(x[0].globals.numpy())
     else:
         train, val, test = utils.get_cv_splits(x)   # 64%/16%/20%   # just the indices
 
@@ -86,7 +93,6 @@ def run_training(x, y, model, feature, out_dir='trained_results'):
             results['split'].extend([i]*len(y_test))
             for metric in test_metrics.keys():
                 test_metrics[metric].append(utils.calculate_metric(metric, y_pred, y_test))
-
 
     elif model == 'gp':
         # use tanimoto if bit fingerprints
@@ -157,30 +163,25 @@ def run_training(x, y, model, feature, out_dir='trained_results'):
                     test_metrics[metric].append(utils.calculate_metric(metric, y_pred, y_test))
 
     elif model == 'gnn':
-        hp = {
-            # 'latent_dim': 32, # trial.suggest_int('latent_dim', 10, 30),
-            # 'embed_dim': 150, # trial.suggest_int('embed_dim', 10, 100),   
-            # 'batch_size': 64,
-            # 'batch_size': trial.suggest_int('batch_size', 5, 7),     # exponent of 2
-            # 'lr': trial.suggest_float('lr', 1e-4, 1e-2, log=True)
-            'num_layers': 3,
-            'gnn_hidden_dim': 32, 
-            'pool_hidden_dim': 32,
-            'embed_dim': 100,
-        }
-        batch_size = 32 # hp['batch_size']
+        hp = default_hp(output_dim=1)
+        
+        # batch_size = 32
 
         # model settings
-        n_epoch = 2000
+        n_epoch = 1000
         patience = 100
         # num_node_features = x[0][0].x.shape[-1]
         # num_edge_features = x[0][0].edge_attr.shape[-1]
         output_dim = y.shape[-1]
 
         for i, tr_, va_, te_ in zip(range(len(train)), train, val, test):
-            d_tr, a_tr = get_graphs(x, tr_)
-            d_va, a_va = get_graphs(x, va_)
-            d_te, a_te = get_graphs(x, te_)
+            # split into groups
+            d_tr = get_graphs(x[0], tr_)
+            a_tr = get_graphs(x[1], tr_)
+            d_va = get_graphs(x[0], va_)
+            a_va = get_graphs(x[1], va_)
+            d_te = get_graphs(x[0], te_) 
+            a_te = get_graphs(x[1], te_)
             
             # scale the targets
             y_scaler = MinMaxScaler()
@@ -190,54 +191,57 @@ def run_training(x, y, model, feature, out_dir='trained_results'):
             y_val = torch.tensor(y_scaler.transform(y[va_].astype(float)), dtype=torch.float)
             y_test = torch.tensor(y_scaler.transform(y[te_].astype(float)), dtype=torch.float)
 
-            train_dl = DataLoader(PairDataset(d_tr, a_tr, y_train),
-                batch_size=batch_size, shuffle=True, collate_fn=pair_collate)
-            valid_dl = DataLoader(PairDataset(d_va, a_va, y_val),
-                batch_size=batch_size, shuffle=False, collate_fn=pair_collate)
+            # train_dl = DataLoader(PairDataset(d_tr, a_tr, y_train),
+            #     batch_size=batch_size, shuffle=True, collate_fn=pair_collate)
+            # valid_dl = DataLoader(PairDataset(d_va, a_va, y_val),
+            #     batch_size=batch_size, shuffle=False, collate_fn=pair_collate)
 
             # make the models
             # d_gnn = GNNEmbedder(num_layers, num_edge_features, hp['latent_dim'], hp['embed_dim'])
             # a_gnn = GNNEmbedder(num_node_features, num_edge_features, hp['latent_dim'], hp['embed_dim'])
-            d_gnn = GNNEmbedder(**hp)
-            a_gnn = GNNEmbedder(**hp)
-            net = GNNPredictor(d_gnn, a_gnn, hp['embed_dim'], output_dim)
+            d_gnn = GNNEmbedder.from_hparams(hp)
+            a_gnn = GNNEmbedder.from_hparams(hp)
+            net = GNNPredictor(d_gnn, a_gnn, output_dim=hp['output_dim'])
 
-            optimizer = torch.optim.Adam(net.parameters(), lr=1e-4)
-            criterion = torch.nn.MSELoss()
+            optimizer = tf.optimizers.Adam(1e-4)
+            # criterion = torch.nn.MSELoss()
+            criterion = tf.keras.losses.MeanSquaredError()
 
             # early stopping criteria
             best_loss = np.inf
             best_model = None
-            best_epoch = 0
             count = 0 
             for epoch in range(n_epoch):
                 s_time = time.time()
                 epoch_loss = 0
-                net.train()
-                for d_graph, a_graph, target in train_dl:
+                # net.train()
+                # for d_graph, a_graph, target in train_dl:
+                d_graph, a_graph, target = d_tr, a_tr, y_train
+
+                with tf.GradientTape() as tape:
                     output = net(d_graph, a_graph)
                     loss = criterion(output, target)
-                    loss.backward()
-                    torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
-                    epoch_loss += loss.item()
-                    optimizer.step()
-                train_avg_loss = epoch_loss / len(train_dl)
+                grads = tape.gradient(loss, net.trainable_variables)
+                optimizer.apply_gradients(zip(grads, net.trainable_variables))
+
+                epoch_loss += loss.numpy()
+                train_avg_loss = epoch_loss
 
                 # validation
                 epoch_loss = 0
-                with torch.no_grad():
-                    net.eval()
-                    for d_graph, a_graph, target in valid_dl:
-                        output = net(d_graph, a_graph)
-                        loss = criterion(output, target)
-                        epoch_loss += loss.item()
-                val_avg_loss = epoch_loss / len(valid_dl)
+                # with torch.no_grad():
+                # net.eval()
+                # for d_graph, a_graph, target in valid_dl:
+                d_graph, a_graph, target = d_va, a_va, y_val
+                output = net(d_graph, a_graph)
+                loss = criterion(output, target)
+                epoch_loss += loss.numpy()
+                val_avg_loss = epoch_loss
 
                 # check early stopping
                 if val_avg_loss < best_loss:
                     best_loss = val_avg_loss
                     best_model = copy.deepcopy(net)
-                    best_epoch = epoch
                     count = 0
                 else:
                     count += 1
@@ -251,39 +255,42 @@ def run_training(x, y, model, feature, out_dir='trained_results'):
             val_metric.append(best_loss)
             
             # also get the embeddings
-            with torch.no_grad():
+            # with torch.no_grad():
                 # non shuffle the training set
-                train_dl = DataLoader(PairDataset(d_tr, a_tr, y_train),
-                    batch_size=batch_size, shuffle=False, collate_fn=pair_collate)
-                test_dl = DataLoader(PairDataset(d_te, a_te, y_test),
-                    batch_size=len(y_test), shuffle=False, collate_fn=pair_collate)
+                # train_dl = DataLoader(PairDataset(d_tr, a_tr, y_train),
+                #     batch_size=batch_size, shuffle=False, collate_fn=pair_collate)
+                # test_dl = DataLoader(PairDataset(d_te, a_te, y_test),
+                #     batch_size=len(y_test), shuffle=False, collate_fn=pair_collate)
 
-                best_model.eval()
-                embeds = {key: {'acceptor': [], 'donor': [], 'target': []} for key in ['train', 'valid', 'test']}
-                for d_graph, a_graph, target in train_dl:
-                    embeds['train']['acceptor'].extend(best_model.embed_acceptor(a_graph).numpy())
-                    embeds['train']['donor'].extend(best_model.embed_donor(d_graph).numpy())
-                    embeds['train']['target'].extend(y_scaler.inverse_transform(target))
-                for d_graph, a_graph, target in valid_dl:
-                    embeds['valid']['acceptor'].extend(best_model.embed_acceptor(a_graph).numpy())
-                    embeds['valid']['donor'].extend(best_model.embed_donor(d_graph).numpy())
-                    embeds['valid']['target'].extend(y_scaler.inverse_transform(target))
-                for d_graph, a_graph, y_test in test_dl:
-                    y_test = y_scaler.inverse_transform(y_test)
-                    embeds['test']['acceptor'].extend(best_model.embed_acceptor(a_graph).numpy())
-                    embeds['test']['donor'].extend(best_model.embed_donor(d_graph).numpy())
-                    embeds['test']['target'].extend(y_test)
-                    y_pred = y_scaler.inverse_transform(best_model(d_graph, a_graph).numpy())    # not batched
+            # best_model.eval()
+            embeds = {key: {'acceptor': [], 'donor': [], 'target': []} for key in ['train', 'valid', 'test']}
+            # for d_graph, a_graph, target in train_dl:
+            d_graph, a_graph = d_tr, a_tr
+            embeds['train']['acceptor'].extend(best_model.embed_acceptor(a_graph).numpy())
+            embeds['train']['donor'].extend(best_model.embed_donor(d_graph).numpy())
+            embeds['train']['target'].extend(y_scaler.inverse_transform(y_train))
 
-                    # save test results
-                    results['y_pred'].extend(y_pred.ravel().tolist())
-                    results['y_true'].extend(y_test.ravel().tolist())
-                    results['split'].extend([i]*len(y_test))
-                
-                pickle.dump(embeds, open(f'{out_dir}/graphembed_split{i}.pkl', 'wb'))
+            d_graph, a_graph = d_va, a_va
+            embeds['valid']['acceptor'].extend(best_model.embed_acceptor(a_graph).numpy())
+            embeds['valid']['donor'].extend(best_model.embed_donor(d_graph).numpy())
+            embeds['valid']['target'].extend(y_scaler.inverse_transform(y_val))
 
-                for metric in test_metrics.keys():
-                    test_metrics[metric].append(utils.calculate_metric(metric, y_pred, y_test))
+            d_graph, a_graph = d_te, a_te
+            y_test = y_scaler.inverse_transform(y_test)
+            embeds['test']['acceptor'].extend(best_model.embed_acceptor(a_graph).numpy())
+            embeds['test']['donor'].extend(best_model.embed_donor(d_graph).numpy())
+            embeds['test']['target'].extend(y_test)
+            y_pred = y_scaler.inverse_transform(best_model(d_graph, a_graph).numpy())    # not batched
+
+            # save test results
+            results['y_pred'].extend(y_pred.ravel().tolist())
+            results['y_true'].extend(y_test.ravel().tolist())
+            results['split'].extend([i]*len(y_test))
+            
+            pickle.dump(embeds, open(f'{out_dir}/graphembed_split{i}.pkl', 'wb'))
+
+            for metric in test_metrics.keys():
+                test_metrics[metric].append(utils.calculate_metric(metric, y_pred, y_test))
     else:
         raise ValueError('Invalid model.')
 
@@ -352,7 +359,7 @@ if __name__ == '__main__':
     
     # remove invalids
     if FLAGS.feature not in ['graph', 'simple_graph']:
-        valid_idx = ~np.isnan(x).any(axis=1)
+        valid_idx = ~np.isnan(x).any(axis=1)[0]
         x = x[valid_idx]
         y = y[valid_idx]
 

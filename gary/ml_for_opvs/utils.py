@@ -8,7 +8,9 @@ import mordred
 import mordred.descriptors
 
 import torch
-from torch_geometric.utils import from_smiles
+# from torch_geometric.utils import from_smiles
+
+from .graphs_tf import MolTensorizer
 
 import sklearn
 from sklearn.decomposition import PCA 
@@ -26,8 +28,10 @@ def get_features(smi, feature_type = 'fp'):
         calc = mordred.Calculator(mordred.descriptors, ignore_3D=True)
         vals = calc(mol)._values
         feat = np.array([float(v) for v in vals])
-    elif feature_type == 'graph':
-        feat = from_smiles(Chem.MolToSmiles(mol))
+    # elif feature_type == 'graph':
+    #     # feat = from_smiles(Chem.MolToSmiles(mol))
+
+    #     feat = 
     else:
         raise NotImplementedError('No such feature.')
     return feat

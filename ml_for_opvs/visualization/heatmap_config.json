@@ -19,16 +19,22 @@
             "OPV_Min"
         ],
         "models": [
+            "RF",
             "RF_ensemble",
-            "RF_multi"
+            "RF_multi",
+            "XGBoost",
+            "XGBoost_ensemble",
+            "XGBoost_multi",
+            "SVM",
+            "SVM_ensemble",
+            "SVM_multi"
         ],
-        "input_representations": [],
+        "input_representations": ["fingerprint"],
         "features": [
             "result_molecules_only"
         ],
         "feature_names": [],
         "target_names": [
-            "calc_PCE_percent"
         ],
         "metrics": "r"
     }
