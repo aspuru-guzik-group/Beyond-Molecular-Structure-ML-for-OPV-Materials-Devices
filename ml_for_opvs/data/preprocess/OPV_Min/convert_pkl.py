@@ -1,7 +1,9 @@
 import pkg_resources
 import pandas as pd
 
-GRAPH_PKL = pkg_resources.resource_filename("ml_for_opvs", "../gary/data/min_graph.pkl")
+GRAPH_PKL = pkg_resources.resource_filename(
+    "ml_for_opvs", "../gary/trained_results/graphembed_split0.pkl"
+)
 
 MORDRED_PKL = pkg_resources.resource_filename(
     "ml_for_opvs", "../gary/data/min_mordred.pkl"
