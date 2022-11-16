@@ -106,7 +106,7 @@ def process_features(
                 isinstance(concat_df[column][1], int),
             ]
         ):
-            feature_max, feature_min = feature_scale(concat_df[column])
+            feature_max, feature_min = feature_scale(train_feature_df[column])
             feature_column_max = column + "_max"
             feature_column_min = column + "_min"
             feature_scale_dict[feature_column_max] = feature_max
@@ -257,12 +257,14 @@ def process_features(
                 except:
                     input_value = row[column]
                 # tokenization
-                if isinstance(input_value, list) and "mordred" not in column:
+                if isinstance(input_value, list) and (
+                    "mordred" not in column and "graph" not in column
+                ):
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
-                elif (
-                    isinstance(input_value, list) and "mordred" in column
+                elif isinstance(input_value, list) and (
+                    "mordred" in column or "graph" in column
                 ):  # mordred descriptors
                     tokenized_list = input_value  # it is not tokenized, but for the sake of naming, we'll keep it the same.
                 elif (
@@ -368,12 +370,14 @@ def process_features(
                 except:
                     input_value = row[column]
                 # tokenization
-                if isinstance(input_value, list) and "mordred" not in column:
+                if isinstance(input_value, list) and (
+                    "mordred" not in column and "graph" not in column
+                ):
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
-                elif (
-                    isinstance(input_value, list) and "mordred" in column
+                elif isinstance(input_value, list) and (
+                    "mordred" in column or "graph" in column
                 ):  # mordred descriptors
                     tokenized_list = input_value  # it is not tokenized, but for the sake of naming, we'll keep it the same.
                 elif (

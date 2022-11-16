@@ -7,6 +7,12 @@ from typing import Tuple, Union
 import pandas as pd
 import numpy as np
 from xgboost import train
+from sklearn.preprocessing import (
+    StandardScaler,
+    QuantileTransformer,
+    MinMaxScaler,
+    FunctionTransformer,
+)
 
 from ml_for_opvs.ML_models.pytorch.tokenizer import Tokenizer
 
@@ -108,40 +114,36 @@ def process_features(train_feature_df, test_feature_df, input_rep_bool):
                 isinstance(concat_df[column][1], int),
             ]
         ):
-            feature_max, feature_min = feature_scale(concat_df[column])
+            feature_max, feature_min = feature_scale(train_feature_df[column])
             feature_column_max = column + "_max"
             feature_column_min = column + "_min"
             feature_scale_dict[feature_column_max] = feature_max
             feature_scale_dict[feature_column_min] = feature_min
 
-    # custom feature scaling for mordred descriptors
-    max_mordred_scale: dict = {}  # max for each descriptor
-    min_mordred_scale: dict = {}  # min for each descriptor
     if "mordred" in input_representation:
-        # Find max and min values for each descriptor
-        for index, row in concat_df.iterrows():
-            mordred_idx = 0
-            input_value = ast.literal_eval(row[input_representation])
-            for descriptor in input_value:
-                if mordred_idx not in max_mordred_scale:
-                    max_mordred_scale[mordred_idx] = descriptor
-                elif descriptor > max_mordred_scale[mordred_idx]:
-                    max_mordred_scale[mordred_idx] = descriptor
+        # Quantile Scale!
+        x_scaler = QuantileTransformer(
+            n_quantiles=int(train_feature_df[input_representation].shape[0] / 2.0)
+        )
+        index = 0
+        for value in train_feature_df[input_representation]:
+            train_feature_df.at[index, input_representation] = np.array(
+                ast.literal_eval(value)
+            )
+            index += 1
+        x_train: np.ndarray = np.array(train_feature_df[input_representation].tolist())
+        x_train = x_scaler.fit_transform(x_train)
+        train_feature_df[input_representation] = x_train.tolist()
+        index = 0
+        for value in test_feature_df[input_representation]:
+            test_feature_df.at[index, input_representation] = np.array(
+                ast.literal_eval(value)
+            )
+            index += 1
+        x_test: np.ndarray = np.array(test_feature_df[input_representation].tolist())
+        x_test = x_scaler.transform(x_test)
 
-                if mordred_idx not in min_mordred_scale:
-                    min_mordred_scale[mordred_idx] = descriptor
-                elif descriptor < min_mordred_scale[mordred_idx]:
-                    min_mordred_scale[mordred_idx] = descriptor
-                mordred_idx += 1
-        # Min-max scaling
-        for index, row in concat_df.iterrows():
-            mordred_idx = 0
-            input_value = ast.literal_eval(row[input_representation])
-            for i in range(0, len(input_value)):
-                input_value[i] = (input_value[i] - min_mordred_scale[i]) / (
-                    max_mordred_scale[i] - min_mordred_scale[i]
-                )
-            concat_df.at[index, input_representation] = input_value
+        test_feature_df[input_representation] = x_test.tolist()
 
     # TOKENIZATION
     # must loop through entire dataframe for token2idx
@@ -179,7 +181,7 @@ def process_features(train_feature_df, test_feature_df, input_rep_bool):
                     vocab_length,
                     token2idx,
                 ) = Tokenizer().tokenize_data(augmented_smi_series)
-            elif "mordred" in input_representation:
+            elif "mordred" in input_representation or "graph" in input_representation:
                 pass
             else:
                 token2idx = {}
@@ -281,13 +283,15 @@ def process_features(train_feature_df, test_feature_df, input_rep_bool):
                 except:
                     input_value = row[column]
                 # tokenization
-                if isinstance(input_value, list) and "mordred" not in column:
+                if isinstance(input_value, list) and (
+                    "mordred" not in column and "graph" not in column
+                ):
                     input_value = ast.literal_eval(row[column])
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
-                if (
-                    isinstance(input_value, list) and "mordred" in column
+                if isinstance(input_value, list) and (
+                    "mordred" in column or "graph" in column
                 ):  # mordred descriptors
                     tokenized_list = input_value  # it is not tokenized, but for the sake of naming, we'll keep it the same.
                 elif isinstance(input_value, str):
@@ -386,13 +390,16 @@ def process_features(train_feature_df, test_feature_df, input_rep_bool):
                     input_value = ast.literal_eval(row[column])
                 except:
                     input_value = row[column]
+
                 # tokenization
-                if isinstance(input_value, list) and "mordred" not in column:
+                if isinstance(input_value, list) and (
+                    "mordred" not in column and "graph" not in column
+                ):
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
-                elif (
-                    isinstance(input_value, list) and "mordred" in column
+                elif isinstance(input_value, list) and (
+                    "mordred" in column or "graph" in column
                 ):  # mordred descriptors
                     tokenized_list = input_value  # it is not tokenized, but for the sake of naming, we'll keep it the same.
                 elif isinstance(input_value, str):

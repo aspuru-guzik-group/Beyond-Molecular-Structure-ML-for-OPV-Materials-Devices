@@ -293,10 +293,10 @@ def main(config: dict):
                 # NOTE: Not suitable because there is data leakage.
                 pass
             else:
-                target_train_select: np.ndarray = target_train_array
-                target_val_select: np.ndarray = target_val_array
-                target_max_select: np.ndarray = target_max
-                target_min_select: np.ndarray = target_min
+                target_train_select: np.ndarray = target_train_array.squeeze()
+                target_val_select: np.ndarray = target_val_array.squeeze()
+                target_max_select: np.ndarray = target_max.squeeze()
+                target_min_select: np.ndarray = target_min.squeeze()
 
             # run hyperparameter optimization
             if config["hyperparameter_optimization"] == "True":

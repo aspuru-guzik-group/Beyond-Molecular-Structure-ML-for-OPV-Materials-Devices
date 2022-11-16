@@ -54,33 +54,34 @@ def heatmap(config: dict):
     std_metric: str = config["metrics"] + "_std"
 
     # Order of X/Y-axes
-    # x = [
-    #     # "MLR", # ignored for rmse and mae
-    #     "Lasso",
-    #     "KRR",
-    #     "KNN",
-    #     "SVM",
-    #     "RF",
-    #     "XGBoost",
-    #     "NGBoost",
-    #     "GP",
-    #     "NN",
-    #     "GNN",
-    # ]
-    # y = [
-    #     "DA_gnn",
-    #     "DA_graphembed",
-    #     "DA_mordred_pca",
-    #     "DA_mordred",
-    #     "DA_FP_radius_3_nbits_1024",
-    #     "DA_tokenized_BRICS",
-    #     "DA_SELFIES",
-    #     "DA_BigSMILES",
-    #     "DA_SMILES",
-    #     "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV",
-    # ]
-    x= ["RF", "RF_ensemble", "RF_multi", "XGBoost", "XGBoost_ensemble", "XGBoost_multi", "SVM", "SVM_ensemble", "SVM_multi"]
-    y = ["DA_FP_radius_3_nbits_1024"]
+    x = [
+        # "MLR", # ignored for rmse and mae
+        "Lasso",
+        "KRR",
+        "KNN",
+        "SVM",
+        "RF",
+        "XGBoost",
+        "NGBoost",
+        "GP",
+        "NN",
+        "GNN",
+    ]
+    y = [
+        "DA_gnn",
+        "DA_graphembed",
+        "DA_mordred_pca",
+        "DA_mordred",
+        "DA_FP_radius_3_nbits_1024",
+        "DA_tokenized_BRICS",
+        "DA_SELFIES",
+        "DA_BigSMILES",
+        "DA_SMILES",
+        "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV",
+    ]
+    # if multi:
+    # x= ["RF", "RF_ensemble", "RF_multi", "XGBoost", "XGBoost_ensemble", "XGBoost_multi", "SVM", "SVM_ensemble", "SVM_multi"]
+    # y = ["DA_FP_radius_3_nbits_1024"]
 
     # Heatmap
     mean_summary: pd.DataFrame = summary.pivot("Feature_Names", "Model", mean_metric)

@@ -7,7 +7,7 @@ input_rep=("mordred" "mordred_pca")
 # 1.1
 declare -A input_rep_filename_dict
 
-input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["smiles"]="smiles" ["mordred"]="mordred" ["mordred_pca"]="mordred_pca")
+input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["smiles"]="smiles" ["mordred"]="mordred" ["mordred_pca"]="mordred_pca" ["graphembed"]="graphembed")
 
 # 2
 feat_select_group=("molecules_only")
@@ -51,6 +51,8 @@ for ir in ${input_rep[@]}; do
                         "mordred") input_rep_features=("DA_mordred")
                         ;;
                         "mordred_pca") input_rep_features=("DA_mordred_pca")
+                        ;;
+                        "graphembed") input_rep_features=("DA_graphembed")
                         ;;
                     esac
                     # initialize train and test data paths as empty strings
