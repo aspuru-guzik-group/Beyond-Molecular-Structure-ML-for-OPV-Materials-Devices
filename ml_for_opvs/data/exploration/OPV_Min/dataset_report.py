@@ -4,7 +4,7 @@ from typing import Dict, Union
 from pathlib import Path
 
 opv_file: Path = (
-    Path.home() / "Downloads" / "FINAL Machine Learning OPV Parameters.xlsx"
+    Path.home() / "Downloads" / "OPV ML data extraction.xlsx"
 )
 output: Path = Path("__file__").parent.absolute() / "dataset_report"
 output.mkdir(parents=True, exist_ok=True)
@@ -12,57 +12,86 @@ output.mkdir(parents=True, exist_ok=True)
 opv_data: pd.DataFrame = pd.read_excel(opv_file)
 
 # Define subsets
-refs: set = {"index", "ref number from paper"}
+refs: set = {"ref", "ref number from paper"}
 outputs: set = {"Voc (V)", "Jsc (mA cm^-2)", "FF (%)", "PCE (%)"}
 labels_molecules: set = {"Donor Molecule", "Acceptor Molecule"}
-# labels_properties: set = {'HOMO_D (eV)', 'LUMO_D (eV)', 'HOMO_A (eV)', 'LUMO_A (eV)' }
-labels_fabrication: set = {
+labels_properties_A: set = {
+    'HOMO_D (eV)',
+    'LUMO_D (eV)',
+    'Eg_D (eV)',
+    'HOMO_A (eV)',
+    'LUMO_A (eV)',
+    'Eg_A (eV)',
+}
+labels_properties_B: set = {
+    'Donor PDI',
+    'Donor Mn (kDa)',
+    'Donor Mw (kDa',
+}
+labels_fabrication_A: set = {
     "D:A ratio (m/m)",
     "solvent",
-    "total solids conc. (mg/mL)",
     "solvent additive",
     "solvent additive conc. (% v/v)",
     "temperature of thermal annealing",
 }
-labels_device: set = {
-    "active layer thickness (nm) ",
+labels_fabrication_B: set = {
+    'Active layer spin coating speed (rpm)',
+    "total solids conc. (mg/mL)",
+    'annealing time (min)',
+}
+labels_device_A: set = {
     "hole contact layer",
     "electron contact layer",
 }
+labels_device_B: set = {
+    "active layer thickness (nm)",
+    "HTL thickness (nm)",
+    "ETL thickness (nm)",
+}
 labels_electrical: set = {
     "hole mobility blend (cm^2 V^-1 s^-1)",
-    "electron mobility blend",
+    "electron mobility blend (cm^2 V^-1 s^-1)",
 }
-
-labels_fabrication_wo_solids: set = {
-    "D:A ratio (m/m)",
-    "solvent",
-    "solvent additive",
-    "solvent additive conc. (% v/v) ",
-    "temperature of thermal annealing ",
-}
-labels_device_wo_thickness: set = {"hole contact layer", "electron contact layer"}
+# labels_fabrication_wo_solids: set = {
+#     "D:A ratio (m/m)",
+#     "solvent",
+#     "solvent additive",
+#     "solvent additive conc. (% v/v) ",
+#     "temperature of thermal annealing ",
+# }
+# labels_device_wo_thickness: set = {"hole contact layer", "electron contact layer"}
 
 filters: Dict[str, set] = {
-    "fabrication": (refs | outputs | labels_molecules | labels_fabrication),
-    "device": (refs | outputs | labels_molecules | labels_fabrication | labels_device),
+    "fabrication": (refs | outputs | labels_molecules | labels_fabrication_A | labels_fabrication_B),
+    "device": (refs | outputs | labels_molecules | labels_fabrication_A | labels_fabrication_B | labels_device_A | labels_device_B),
     "electrical": (
         refs
         | outputs
         | labels_molecules
-        | labels_fabrication
-        | labels_device
+        | labels_fabrication_A
+        | labels_fabrication_B
+        | labels_device_A
+        | labels_device_B
         | labels_electrical
     ),
-    "fabrication_wo_solids": (
-        refs | outputs | labels_molecules | labels_fabrication_wo_solids
+    "fabrication_noB": (
+        refs | outputs | labels_molecules | labels_fabrication_A
     ),
-    "device_wo_solids_thick": (
+    "device_noB": (
         refs
         | outputs
         | labels_molecules
-        | labels_fabrication_wo_solids
-        | labels_device_wo_thickness
+        | labels_fabrication_A
+        | labels_device_A
+    ),
+    "electrical_noB": (
+        refs
+        | outputs
+        | labels_molecules
+        | labels_fabrication_A
+        | labels_device_A
+        | labels_electrical
     ),
 }
 
@@ -71,8 +100,9 @@ available: Dict[str, pd.DataFrame] = {
     "fabrication": opv_data[filters["fabrication"]].dropna(),
     "device": opv_data[filters["device"]].dropna(),
     "electrical": opv_data[filters["electrical"]].dropna(),
-    "fabrication_wo_solids": opv_data[filters["fabrication_wo_solids"]].dropna(),
-    "device_wo_solids_thick": opv_data[filters["device_wo_solids_thick"]].dropna(),
+    "fabrication_noB": opv_data[filters["fabrication_noB"]].dropna(),
+    "device_noB": opv_data[filters["device_noB"]].dropna(),
+    "electrical_noB": opv_data[filters["electrical_noB"]].dropna(),
 }
 for key in available.keys():
     available[key].to_excel((output / f"available_{key}.xlsx"), index=False)
@@ -92,33 +122,32 @@ for key in unique.keys():
     )
 
 # Data summary
-data_summary: Dict[str, int] = {
+labels_summary: Dict[str, int] = {
     "data points": len(opv_data),
     "donor labels": len(unique["donors"]),
     "acceptor labels": len(unique["acceptors"]),
-    "solvent labels": len(unique["solvents"])
-    - 1,  # Substracting 1 to account for the nan value
+    "solvent labels": len(unique["solvents"]) - 1,  # Substracting 1 to account for the nan value
     "additive labels": len(unique["additives"]) - 1,
     "HCL labels": len(unique["hole contact layers"]) - 1,
     "ECL labels": len(unique["electron contact layers"]) - 1,
 }
-with (output / "data_summary.json").open(mode="w") as f:
-    json.dump(data_summary, f)
+with (output / "labels_summary.json").open(mode="w") as f:
+    json.dump(labels_summary, f)
 
 # Subset sizes + %
 subset_summary: Dict[str, Union[int, float]] = {
     "fabrication (raw)": len(available["fabrication"]),
-    "fabrication (%)": len(available["fabrication"]) / data_summary["data points"],
+    "fabrication (%)":   len(available["fabrication"]) / labels_summary["data points"],
     "device (raw)": len(available["device"]),
-    "device (%)": len(available["device"]) / data_summary["data points"],
+    "device (%)":        len(available["device"]) / labels_summary["data points"],
     "electrical (raw)": len(available["electrical"]),
-    "electrical (%)": len(available["electrical"]) / data_summary["data points"],
-    "fabrication w/o solids (raw)": len(available["fabrication_wo_solids"]),
-    "fabrication w/o solids (%)": len(available["fabrication_wo_solids"])
-    / data_summary["data points"],
-    "device w/o solids or thickness (raw)": len(available["device_wo_solids_thick"]),
-    "device w/o solids or thickness (%)": len(available["device_wo_solids_thick"])
-    / data_summary["data points"],
+    "electrical (%)":    len(available["electrical"]) / labels_summary["data points"],
+    "fabrication no B (raw)": len(available["fabrication_noB"]),
+    "fabrication no B (%)": len(available["fabrication_noB"]) / labels_summary["data points"],
+    "device no B (raw)": len(available["device_noB"]),
+    "device no B (%)": len(available["device_noB"]) / labels_summary["data points"],
+    "electrical no B (raw)": len(available["electrical_noB"]),
+    "electrical no B (%)": len(available["electrical_noB"]) / labels_summary["data points"],
 }
 with (output / "subset_sizes.json").open(mode="w") as f:
     json.dump(subset_summary, f)
