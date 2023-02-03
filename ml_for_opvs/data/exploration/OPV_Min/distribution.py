@@ -59,7 +59,7 @@ class Distribution:
         print(columns_dict)
         # select which columns you want to plot in the histogram
         column_idx_first = 9
-        column_idx_last = 28 + 1
+        column_idx_last = 39 + 1
 
         # prepares the correct number of (x,y) subplots
         # num_columns = column_idx_last - column_idx_first
@@ -69,8 +69,8 @@ class Distribution:
         # elif x_columns == np.ceil(np.sqrt(num_columns)):
         #     y_rows = x_columns
         # print(x_columns, y_rows)
-        y_rows = 3
-        x_columns = 6
+        y_rows = 5
+        x_columns = 7
 
         fig, axs = plt.subplots(y_rows, x_columns, figsize=(y_rows * 6, x_columns * 2))
         column_range: list = list(range(column_idx_first, 22))

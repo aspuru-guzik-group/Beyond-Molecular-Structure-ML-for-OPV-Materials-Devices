@@ -54,10 +54,10 @@ from ml_for_opvs.data.preprocess.OPV_Min.smiles_to_bigsmiles import (
 )
 from ml_for_opvs.data.preprocess.OPV_Min.smiles_to_selfies import opv_smiles_to_selfies
 
-from ml_for_opvs.data.exploration.OPV_Min.correlation import (
-    Correlation,
-    PARAMETER_INVENTORY,
-)
+# from ml_for_opvs.data.exploration.OPV_Min.correlation import (
+#     Correlation,
+#     PARAMETER_INVENTORY,
+# )
 
 # from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import (
 #     AUGMENT_SMILES_DATA,
@@ -139,10 +139,10 @@ params.clean_thermal_anneal(MASTER_ML_DATA)
 
 # Step 6
 # Add solvents
-corr_plot = Correlation(MASTER_ML_DATA_PLOT)
-corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA_PLOT)
-corr_plot = Correlation(MASTER_ML_DATA)
-corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA)
+# corr_plot = Correlation(MASTER_ML_DATA_PLOT)
+# corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA_PLOT)
+# corr_plot = Correlation(MASTER_ML_DATA)
+# corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA)
 # TODO:? Solvent additives
 
 # Step 7
