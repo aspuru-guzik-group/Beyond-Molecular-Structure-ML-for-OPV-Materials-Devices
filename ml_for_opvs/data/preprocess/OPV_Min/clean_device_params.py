@@ -11,7 +11,7 @@ MASTER_ML_DATA = pkg_resources.resource_filename(
 )
 
 PARAMETER_INVENTORY = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/preprocess/OPV_Min/device_parameter_inventory.csv"
+    "ml_for_opvs", "data/preprocess/OPV_Min/solvent_properties.csv"
 )
 
 

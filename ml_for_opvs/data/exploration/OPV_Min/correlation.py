@@ -37,7 +37,7 @@ RMSE_HEATMAP_PLOT = pkg_resources.resource_filename(
 )
 
 PARAMETER_INVENTORY = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/raw/OPV_Min/device_parameter_inventory.csv"
+    "ml_for_opvs", "data/raw/OPV_Min/solvent_properties.csv"
 )
 
 
