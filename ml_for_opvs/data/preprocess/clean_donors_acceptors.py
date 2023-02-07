@@ -736,8 +736,10 @@ class DAPairs:
             "HOMO_D_eV",
             "LUMO_D_eV",
             "Eg_D_eV",
+            "Ehl_D_eV",
             "HOMO_A_eV",
             "LUMO_A_eV",
+            "Ehl_A_eV",
             "Eg_A_eV",
             "D_A_ratio_m_m",
             "solvent",
@@ -828,9 +830,11 @@ class DAPairs:
                         "Donor_Mw_kda": row["Donor Mw (kDa)"],
                         "HOMO_D_eV": row["HOMO_D (eV)"],
                         "LUMO_D_eV": row["LUMO_D (eV)"],
+                        "Ehl_D_eV": row["Ehl_D (eV)"],
                         "Eg_D_eV": row["Eg_D (eV)"],
                         "HOMO_A_eV": row["HOMO_A (eV)"],
                         "LUMO_A_eV": row["LUMO_A (eV)"],
+                        "Ehl_A_eV": row["Ehl_A (eV)"],
                         "Eg_A_eV": row["Eg_A (eV)"],
                         "D_A_ratio_m_m": row["D:A ratio (m/m)"],
                         "solvent": solvent,
@@ -1088,7 +1092,7 @@ class DAPairs:
 # # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 
 # # Step 4
-pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 # pairings.create_master_csv(MASTER_ML_DATA)
 # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 

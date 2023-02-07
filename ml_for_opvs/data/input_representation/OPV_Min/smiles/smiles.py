@@ -30,15 +30,15 @@ def create_smi_csv(master_data: str, filepath: str):
         donor_bigsmi = master_df.at[i, "Donor_Big_SMILES"]
         acceptor_smi = master_df.at[i, "Acceptor_SMILES"]
         acceptor_selfies = master_df.at[i, "Acceptor_SELFIES"]
-        acceptor_bigsmi = master_df.at[i, "Acceptor_Big_SMILES"]
 
         master_df.at[i, "DA_SMILES"] = donor_smi + "." + acceptor_smi
         master_df.at[i, "DA_SELFIES"] = donor_selfies + "." + acceptor_selfies
-        master_df.at[i, "DA_BigSMILES"] = donor_bigsmi + "." + acceptor_bigsmi
+        master_df.at[i, "DA_BigSMILES"] = donor_bigsmi + "." + acceptor_smi
 
 
     master_df.to_csv(filepath, index=False)
 
 
 if __name__ == "__main__":
-    create_csv(MASTER_DATA, MASTER_SMI_DATA)
+    # create_csv(MASTER_DATA, MASTER_SMI_DATA)
+    pass

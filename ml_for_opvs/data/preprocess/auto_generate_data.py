@@ -31,8 +31,8 @@ from ml_for_opvs.data.error_correction.OPV_Min.unique_opvs import (
 )
 
 from ml_for_opvs.data.error_correction.OPV_Min.remove_anomaly import Anomaly
-from ml_for_opvs.data.error_correction.OPV_Min.approximate_homo_lumo import (
-    approximate_value,
+from ml_for_opvs.data.error_correction.OPV_Min.approximate_properties import (
+    approximate_value, DUPLICATE_DONORS, DUPLICATE_ACCEPTORS, calculate_homo_lumo_gap
 )
 
 # from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import (
@@ -93,6 +93,7 @@ from ml_for_opvs.data.preprocess.OPV_Min.clean_device_params import ParameterCle
 
 # # # # # # Step 1d - canonSMILES to remove %10-%100
 # acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
+# print("Finished Step 1")
 
 # # Step 2 - ERROR CORRECTION (fill in missing D/A)
 # unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_CLEAN)
@@ -103,20 +104,22 @@ from ml_for_opvs.data.preprocess.OPV_Min.clean_device_params import ParameterCle
 # # concatenate for acceptors
 # unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
 # acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
+print("Finished Step 2")
 
 # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 # smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV) # DO NOT RUN, BigSMILES was partially automated and manually done.
-sanity_check_bigsmiles(CLEAN_DONOR_CSV)
-opv_smiles_to_selfies(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# sanity_check_bigsmiles(CLEAN_DONOR_CSV)
+# opv_smiles_to_selfies(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+print("Finished Step 3")
 
 # Step 4
-pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-pairings.create_master_csv(MASTER_ML_DATA)
-pairings.create_master_csv(MASTER_ML_DATA_PLOT)
+# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# pairings.create_master_csv(MASTER_ML_DATA)
+# pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 
 # # # # Step 4b - Convert STR -> FLOAT
-pairings.convert_str_to_float(MASTER_ML_DATA)
-pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
+# pairings.convert_str_to_float(MASTER_ML_DATA)
+# pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
 
 # Step 4c - Remove anomalies!
 # Go to ml_for_opvs > data > error_correction > remove_anomaly.py
@@ -130,12 +133,15 @@ pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
 # pairings.fill_empty_values(MASTER_ML_DATA)
 
 # Add HOMO/LUMO approximation.
-approximate_value(MASTER_ML_DATA)
+approximate_value(MASTER_ML_DATA, DUPLICATE_DONORS, DUPLICATE_ACCEPTORS)
+calculate_homo_lumo_gap(MASTER_ML_DATA)
+print("Finished Step 4")
 
 # Step 5
 # TODO: Clean parameters
 params = ParameterClean(MASTER_ML_DATA)
 params.clean_thermal_anneal(MASTER_ML_DATA)
+print("Finished Step 5")
 
 # Step 6
 # Add solvents
@@ -157,6 +163,7 @@ create_master_fp(MASTER_ML_DATA, FP_DATA, 3, 512)
 # export_manual_frag()
 
 create_smi_csv(MASTER_ML_DATA, MASTER_SMI_DATA)
+print("Finished Step 7")
 
 # Run feature filters to create subsets of the dataset
 """
@@ -239,3 +246,4 @@ fs.feat_select("electrical")
 
 # Cross-Validation
 # Run cross_valid_data_generate.sh in cmd line
+print("Finished all pre-processing")

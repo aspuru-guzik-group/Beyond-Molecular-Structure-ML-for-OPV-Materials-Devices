@@ -38,6 +38,9 @@ def smile_to_bigsmile(donor_data, acceptor_data):
                 smile + "[$]"
             )  # NOTE: check how we want to format this, in OPV sheets it's $ only
             # smile = smile.replace("(C)", "[$]")
+        elif smile[0:2] == "Cc":
+            smile = smile[1:]
+            smile = "[$]" + smile
         # # type 2
         smile = smile.replace(
             "(C)", "([$])"
@@ -85,3 +88,4 @@ def sanity_check_bigsmiles(donor_data: str):
 
 # smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 sanity_check_bigsmiles(CLEAN_DONOR_CSV)
+# 

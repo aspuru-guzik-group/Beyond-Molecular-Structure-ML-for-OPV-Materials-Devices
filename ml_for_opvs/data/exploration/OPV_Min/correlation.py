@@ -75,7 +75,7 @@ class Correlation:
         print(columns_dict)
         # select which columns you want to plot
         column_idx_first = 9
-        column_idx_last = 37 + 1
+        column_idx_last = 41 + 1
 
         x_columns = column_idx_last - column_idx_first
         y_rows = column_idx_last - column_idx_first
@@ -181,7 +181,7 @@ class Correlation:
         print(columns_dict)
         # select which columns you want to plot
         column_idx_first = 9
-        column_idx_last = 37 + 1
+        column_idx_last = 41 + 1
 
         # x_columns = column_idx_last - column_idx_first - 3
         # y_rows = column_idx_last - column_idx_first - 3
@@ -191,31 +191,47 @@ class Correlation:
         select_df: pd.DataFrame = self.data.iloc[:, column_range]
         # reorder dataframe
         columns = [
-            # "HOMO_D_eV",
-            # "LUMO_D_eV",
-            # "HOMO_A_eV",
-            # "LUMO_A_eV",
-            # "D_A_ratio_m_m",
+            "Donor_PDI",
+            "Donor_Mn_kda",
+            "Donor_Mw_kda",
+            "HOMO_D_eV",
+            "LUMO_D_eV",
+            "Ehl_D_eV",
+            "Eg_D_eV",
+            "HOMO_A_eV",
+            "LUMO_A_eV",
+            "Ehl_A_eV",
+            "Eg_A_eV",
+            "D_A_ratio_m_m",
             # "solvent",
-            # "total_solids_conc_mg_mL",
+            "spin_coating_rpm",
+            "total_solids_conc_mg_mL",
             # "solvent_additive",
-            # "solvent_additive_conc_v_v_percent",
-            # "active_layer_thickness_nm",
-            # "annealing_temperature",
+            "solvent_additive_conc_v_v_percent",
+            "active_layer_thickness_nm",
+            "annealing_temperature",
+            "annealing_time_min",
             # "hole_contact_layer",
+            "HTL_energy_level_eV",
+            "HTL_thickness_nm",
             # "electron_contact_layer",
-            "BP",
-            "MP",
-            "Density",
-            "Dielectric",
-            "Dipole",
-            "log_Pow",
-            "Hansen_Disp",
-            "Hansen_H_Bond",
-            "Hansen_Polar",
+            "ETL_energy_level_eV",
+            "ETL_thickness_nm",
+            "hole_mobility_blend",
+            "electron_mobility_blend",
+            # "BP",
+            # "MP",
+            # "Density",
+            # "Dielectric",
+            # "Dipole",
+            # "log_Pow",
+            # "Hansen_Disp",
+            # "Hansen_H_Bond",
+            # "Hansen_Polar",
             "Voc_V",
             "Jsc_mA_cm_pow_neg2",
             "FF_percent",
+            "PCE_percent",
             "calc_PCE_percent",
         ]
         x_columns: int = len(columns)
@@ -257,26 +273,29 @@ class Correlation:
             # indexes needed to fill in array appropriately
 
             # handle different data types (str, float)
-            if isinstance(filtered_column_0[0], float) and isinstance(
-                filtered_column_1[0], float
-            ):
-                if option == "r":
-                    # find correlation coefficient
-                    result = np.corrcoef(
-                        filtered_column_1,
-                        filtered_column_0,
-                    )[0, 1]
-                elif option == "rmse":
-                    # find rmse
-                    result = np.sqrt(
-                        mean_squared_error(
+            print(len(filtered_column_0), len(filtered_column_1))
+            print(pair)
+            if len(filtered_column_0) != 0 or len(filtered_column_1) != 0:
+                if isinstance(filtered_column_0[0], float) and isinstance(
+                    filtered_column_1[0], float
+                ):
+                    if option == "r":
+                        # find correlation coefficient
+                        result = np.corrcoef(
                             filtered_column_1,
                             filtered_column_0,
+                        )[0, 1]
+                    elif option == "rmse":
+                        # find rmse
+                        result = np.sqrt(
+                            mean_squared_error(
+                                filtered_column_1,
+                                filtered_column_0,
+                            )
                         )
-                    )
-                heatmap_array[column_idx_0, column_idx_1] = round(result, 2)
-            else:
-                heatmap_array[column_idx_0, column_idx_1] = nan
+                    heatmap_array[column_idx_0, column_idx_1] = round(result, 2)
+                else:
+                    heatmap_array[column_idx_0, column_idx_1] = nan
         custom_colormap = sns.color_palette("icefire", as_cmap=True)
         custom_colormap.set_bad("grey")
 
@@ -354,7 +373,8 @@ class Correlation:
         self.data.to_csv(master_ml_data_path, index=False)
 
 
-corr_plot = Correlation(MASTER_ML_DATA_PLOT)
+# corr_plot = Correlation(MASTER_ML_DATA_PLOT)
+corr_plot = Correlation(MASTER_ML_DATA)
 # corr_plot.parity_plot()
 corr_plot.heatmap_plot("r")
 

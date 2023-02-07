@@ -11,6 +11,11 @@ MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
     "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv",
 )
 
+MASTER_ML_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs",
+    "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv",
+)
+
 DISTRIBUTION_PLOT = pkg_resources.resource_filename(
     "ml_for_opvs", "data/exploration/OPV_Min/distribution_plot.png"
 )
@@ -59,7 +64,7 @@ class Distribution:
         print(columns_dict)
         # select which columns you want to plot in the histogram
         column_idx_first = 9
-        column_idx_last = 39 + 1
+        column_idx_last = 41 + 1
 
         # prepares the correct number of (x,y) subplots
         # num_columns = column_idx_last - column_idx_first
@@ -73,10 +78,10 @@ class Distribution:
         x_columns = 7
 
         fig, axs = plt.subplots(y_rows, x_columns, figsize=(y_rows * 6, x_columns * 2))
-        column_range: list = list(range(column_idx_first, 22))
+        column_range: list = list(range(column_idx_first, column_idx_last))
         # skip e- and h+ mobilities
         # skip PCE_percent
-        column_range.extend(list(range(25, column_idx_last)))
+        # column_range.extend(list(range(25, column_idx_last)))
 
         x_idx = 0
         y_idx = 0
@@ -201,7 +206,8 @@ class Distribution:
         plt.savefig(x_y_path)
 
 
-dist = Distribution(MASTER_ML_DATA_PLOT)
+# dist = Distribution(MASTER_ML_DATA_PLOT)
+dist = Distribution(MASTER_ML_DATA)
 
 dist.histogram()
 

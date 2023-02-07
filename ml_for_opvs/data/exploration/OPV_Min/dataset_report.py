@@ -26,7 +26,7 @@ labels_properties_A: set = {
 labels_properties_B: set = {
     'Donor PDI',
     'Donor Mn (kDa)',
-    'Donor Mw (kDa',
+    'Donor Mw (kDa)',
 }
 labels_fabrication_A: set = {
     "D:A ratio (m/m)",
