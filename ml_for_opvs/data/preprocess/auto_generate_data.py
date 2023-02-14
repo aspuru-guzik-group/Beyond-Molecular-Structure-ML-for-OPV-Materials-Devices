@@ -108,13 +108,13 @@ print("Finished Step 2")
 
 # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 # smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV) # DO NOT RUN, BigSMILES was partially automated and manually done.
-# sanity_check_bigsmiles(CLEAN_DONOR_CSV)
-# opv_smiles_to_selfies(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+sanity_check_bigsmiles(CLEAN_DONOR_CSV)
+opv_smiles_to_selfies(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 print("Finished Step 3")
 
 # Step 4
-# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-# pairings.create_master_csv(MASTER_ML_DATA)
+pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+pairings.create_master_csv(MASTER_ML_DATA)
 # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 
 # # # # Step 4b - Convert STR -> FLOAT
