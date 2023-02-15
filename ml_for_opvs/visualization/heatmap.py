@@ -54,36 +54,56 @@ def heatmap(config: dict):
     std_metric: str = config["metrics"] + "_std"
 
     # Order of X/Y-axes
-    x = [
-        # "MLR", # ignored for rmse and mae
-        "Lasso",
-        "KRR",
-        "KNN",
-        "SVM",
-        "RF",
-        "XGBoost",
-        "NGBoost",
-        "GP",
-        "NN",
-        "GNN",
-    ]
-    y = [
-        "DA_gnn",
-        "DA_graphembed",
-        "DA_mordred_pca",
-        "DA_mordred",
-        "DA_FP_radius_3_nbits_1024",
-        "DA_tokenized_BRICS",
-        "DA_SELFIES",
-        "DA_BigSMILES",
-        "DA_SMILES",
-        "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV",
-    ]
-    # if multi:
-    # x= ["RF", "RF_ensemble", "RF_multi", "XGBoost", "XGBoost_ensemble", "XGBoost_multi", "SVM", "SVM_ensemble", "SVM_multi"]
-    # y = ["DA_FP_radius_3_nbits_1024"]
+    if config["config_name"] == "grid_search":
+        x = [
+            # "MLR", # ignored for rmse and mae
+            "Lasso",
+            "KRR",
+            "KNN",
+            "SVM",
+            "RF",
+            "XGBoost",
+            "NGBoost",
+            "GP",
+            "NN",
+            "GNN",
+        ]
+        y = [
+            "DA_gnn",
+            "DA_graphembed",
+            "DA_mordred_pca",
+            "DA_mordred",
+            "DA_FP_radius_3_nbits_1024",
+            "DA_tokenized_BRICS",
+            "DA_SELFIES",
+            "DA_BigSMILES",
+            "DA_SMILES",
+            "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV",
+            "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV",
+        ]
+    elif config["config_name"] == "grid_search_multi":
+        x = [
+            "RF",
+            "RF_ensemble",
+            "RF_multi",
+            "XGBoost",
+            "XGBoost_ensemble",
+            "XGBoost_multi",
+            "SVM",
+            "SVM_ensemble",
+            "SVM_multi",
+        ]
+        y = ["DA_FP_radius_3_nbits_1024"]
+    elif config["config_name"] == "grid_search_target":
+        x = [
+            "RF",
+            "XGBoost",
+            "SVM",
+        ]
+        y = ["calc_PCE_percent", "FF_percent", "Voc_V", "Jsc_mA_cm_pow_neg2"]
 
     # Heatmap
+    # NOTE: You have to change the pivot columns depending on your plot!
     mean_summary: pd.DataFrame = summary.pivot("Feature_Names", "Model", mean_metric)
     mean_summary: pd.DataFrame = mean_summary.reindex(index=y, columns=x)
     summary_annotated: pd.DataFrame = deepcopy(summary)
@@ -102,6 +122,7 @@ def heatmap(config: dict):
         annotate_label: str = str(m) + "\n" + "(±" + str(s) + ")"
         summary_annotated.at[index, "annotate_label"] = annotate_label
 
+    # NOTE: You have to change the pivot columns depending on your plot!
     summary_annotated: pd.DataFrame = summary_annotated.pivot(
         "Feature_Names", "Model", "annotate_label"
     )

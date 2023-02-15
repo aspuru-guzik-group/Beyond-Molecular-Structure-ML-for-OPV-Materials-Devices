@@ -4,4 +4,5 @@
 # HEATMAP
 python heatmap.py --path ../training/ --config_path ./heatmap_config.json --config_name grid_search --plot_path ./heatmap/
 # python heatmap.py --path ../training/ --config_path ./heatmap_config.json --config_name grid_search_multi --plot_path ./heatmap/
+# python heatmap.py --path ../training/ --config_path ./heatmap_config.json --config_name grid_search_target --plot_path ./heatmap/
 # SCATTERPLOTS

@@ -146,10 +146,10 @@ def gather_results(progress_report_paths: list[Path]) -> pd.DataFrame:
             "Model",
             "Target",
             "fold",
-            "r",
-            "r2",
-            "rmse",
-            "mae",
+            "r_mean",
+            "r2_mean",
+            "rmse_mean",
+            "mae_mean",
             "feature_length",
             "num_of_data",
         ]
@@ -157,6 +157,7 @@ def gather_results(progress_report_paths: list[Path]) -> pd.DataFrame:
     for progress_path in progress_report_paths:
         # find missing columns from path
         missing_columns: list = str(progress_path).split("/")
+        print(missing_columns)
 
         # Get data from summary.csv
         if progress_path.name == "progress_report.csv":
@@ -179,6 +180,7 @@ def gather_results(progress_report_paths: list[Path]) -> pd.DataFrame:
             )
         except FileNotFoundError:
             print("missing summary file.")
+            print(progress_path)
     return progress_full
 
 

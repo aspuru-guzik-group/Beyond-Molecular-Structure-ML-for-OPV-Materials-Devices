@@ -418,7 +418,18 @@ if __name__ == "__main__":
         f_df = pd.read_csv(
             "../ml_for_opvs/data/input_representation/OPV_Min/smiles/master_smiles.csv"
         )
-        x = f_df[["HOMO_D_eV", "LUMO_D_eV", "HOMO_A_eV", "LUMO_A_eV"]].to_numpy()
+        x = f_df[
+            [
+                "HOMO_D_eV",
+                "LUMO_D_eV",
+                "HOMO_A_eV",
+                "LUMO_A_eV",
+                "Eg_D_eV",
+                "Ehl_D_eV",
+                "Eg_A_eV",
+                "Ehl_A_eV",
+            ]
+        ].to_numpy()
 
     elif FLAGS.feature in ["graph", "simple_graph"]:
         with open(f"data/{FLAGS.dataset}_{FLAGS.feature}.pkl", "rb") as f:

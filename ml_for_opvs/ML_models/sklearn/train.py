@@ -373,11 +373,14 @@ def main(config: dict):
         # make new files
         # save model, outputs, generates new directory based on training/dataset/model/features/target
         results_path: Path = Path(os.path.abspath(config["results_path"]))
-        try:
+        if (
+            config["multi_output_type"] == "multi"
+            or config["multi_output_type"] == "ensemble"
+        ):
             model_dir_path: Path = results_path / "{}_{}".format(
                 config["model_type"], config["multi_output_type"]
             )
-        except:
+        else:
             model_dir_path: Path = results_path / "{}".format(config["model_type"])
         feature_dir_path: Path = model_dir_path / "{}".format(config["feature_names"])
         target_dir_path: Path = feature_dir_path / "{}".format(config["target_name"])

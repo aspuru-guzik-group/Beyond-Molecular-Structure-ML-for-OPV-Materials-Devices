@@ -1,0 +1,2 @@
+Dataset,num_of_folds,Features,Targets,Model,r_mean,r_std,r2_mean,r2_std,rmse_mean,rmse_std,mae_mean,mae_std,num_of_data
+OPV_Min,5,"HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV",calc_PCE_percent,SVM,0.581364236270696,0.10148874624618444,0.32438211318320515,0.12877736583792393,2.3363217101715206,0.14076584090581135,1.8044981099944573,0.072769457126873,333

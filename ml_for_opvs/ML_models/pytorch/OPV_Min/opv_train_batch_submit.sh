@@ -2,7 +2,7 @@
 model_types=('NN') # 'LSTM'
 
 # 1
-input_rep=("mordred" "mordred_pca")
+input_rep=("fingerprint")
 
 # 1.1
 declare -A input_rep_filename_dict
@@ -19,7 +19,7 @@ declare -a input_rep_features
 declare -a feature_name_dict
 
 # 5
-target_name=("calc_PCE_percent")
+target_name=("FF_percent" "Jsc_mA_cm_pow_neg2")
 
 # 6
 model_type=("NN")

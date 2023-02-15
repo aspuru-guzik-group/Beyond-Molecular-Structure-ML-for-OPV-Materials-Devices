@@ -24,7 +24,16 @@ output = {
 
 molecules = {"DA_mordred_pca"}
 
-properties = {"HOMO_D_eV", "LUMO_D_eV", "HOMO_A_eV", "LUMO_A_eV"}
+properties = {
+    "HOMO_D_eV",
+    "LUMO_D_eV",
+    "HOMO_A_eV",
+    "LUMO_A_eV",
+    "Eg_D_eV",
+    "Ehl_D_eV",
+    "Eg_A_eV",
+    "Ehl_A_eV",
+}
 
 electrical = {
     "hole_mobility_blend_cm_2_V_neg1_s_neg1",

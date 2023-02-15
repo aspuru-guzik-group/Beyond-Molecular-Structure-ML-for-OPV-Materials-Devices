@@ -290,7 +290,7 @@ def process_features(train_feature_df, test_feature_df, input_rep_bool):
                     tokenized_list.extend(
                         tokenize_from_dict(token2idx, input_value)
                     )  # fragments
-                if isinstance(input_value, list) and (
+                elif isinstance(input_value, list) and (
                     "mordred" in column or "graph" in column
                 ):  # mordred descriptors
                     tokenized_list = input_value  # it is not tokenized, but for the sake of naming, we'll keep it the same.
@@ -319,6 +319,7 @@ def process_features(train_feature_df, test_feature_df, input_rep_bool):
                     tokenized_list.extend([input_value])
                 else:
                     print(type(input_value))
+                    print(input_value)
                     raise ValueError("Missing value. Cannot be null value in dataset!")
             if len(tokenized_list) > max_input_length:  # for padding
                 max_input_length = len(tokenized_list)

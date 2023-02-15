@@ -1,6 +1,6 @@
 #!/bin/bash
 # 1
-input_rep=("graphembed") # "fingerprint" "BRICS" "smiles"
+input_rep=("fingerprint") # "fingerprint" "BRICS" "smiles"
 
 # 1.1
 declare -A input_rep_filename_dict
@@ -8,7 +8,7 @@ declare -A input_rep_filename_dict
 input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["smiles"]="smiles" ["mordred"]="mordred" ["mordred_pca"]="mordred_pca" ["graphembed"]="graphembed")
 
 # 2
-feat_select_group=("molecules_only") # "fabrication_wo_solid" "device_wo_thickness"
+feat_select_group=("materials_only") # "fabrication_wo_solid" "device_wo_thickness"
 
 # 3
 declare -a input_rep_features
@@ -17,10 +17,10 @@ declare -a input_rep_features
 declare -a feature_name_dict
 
 # 5
-target_name=("calc_PCE_percent") #calc_PCE_percent
+target_name=("calc_PCE_percent") #calc_PCE_percent, FF_percent, Jsc_mA_cm_pow_neg2, Voc_V
 
 # 6
-model_type=("KRR") # "RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN"
+model_type=("RF" "XGBoost" "SVM") # "RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN"
 
 #7
 multi_output_type=("''")
@@ -29,6 +29,8 @@ for ir in ${input_rep[@]}; do
     for fsg in ${feat_select_group[@]}; do
         case "$fsg" in
             "molecules_only") feature_name_dict=("''")
+            ;;
+            "materials_only") feature_name_dict=("''" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV")
             ;;
             "fabrication_wo_solid") feature_name_dict=("" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature")
             ;;
