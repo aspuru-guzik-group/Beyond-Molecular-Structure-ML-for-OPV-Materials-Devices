@@ -209,9 +209,9 @@ class Distribution:
 # dist = Distribution(MASTER_ML_DATA_PLOT)
 dist = Distribution(MASTER_ML_DATA)
 
-dist.histogram()
+# dist.histogram()
 
-# dist.x_y_heatmap("Donor", "Acceptor", DONOR_ACCEPTOR_PATH)
+dist.x_y_heatmap("Acceptor", "solvent", ACCEPTOR_SOLVENT_PATH)
 
 # df = pd.read_csv(MASTER_ML_DATA_PLOT)
 # print(max(df["hole_mobility_blend"]))
