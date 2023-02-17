@@ -1,0 +1,68 @@
+{
+    "grid_search": {
+        "datasets": [
+            "OPV_Min"
+        ],
+        "models": [],
+        "input_representations": [],
+        "features": [
+            "result_molecules_only"
+        ],
+        "feature_names": [],
+        "target_names": [
+            "calc_PCE_percent"
+        ],
+        "metrics": "r"
+    },
+    "grid_search_multi": {
+        "datasets": [
+            "OPV_Min"
+        ],
+        "models": [
+            "RF",
+            "RF_ensemble",
+            "RF_multi",
+            "XGBoost",
+            "XGBoost_ensemble",
+            "XGBoost_multi",
+            "SVM",
+            "SVM_ensemble",
+            "SVM_multi"
+        ],
+        "input_representations": [
+            "fingerprint"
+        ],
+        "features": [
+            "result_molecules_only"
+        ],
+        "feature_names": [],
+        "target_names": [
+            "calc_PCE_percent"
+        ],
+        "metrics": "r"
+    },
+    "grid_search_target": {
+        "datasets": [
+            "OPV_Min"
+        ],
+        "models": [
+            "RF",
+            "XGBoost",
+            "SVM"
+        ],
+        "input_representations": [
+            "fingerprint"
+        ],
+        "features": [
+            "result_molecules_only"
+        ],
+        "feature_names": [],
+        "target_names": [
+            "calc_PCE_percent",
+            "Voc_V",
+            "FF_percent",
+            "Jsc_mA_cm_pow_neg2"
+        ],
+        "metrics": "r"
+    }
+}

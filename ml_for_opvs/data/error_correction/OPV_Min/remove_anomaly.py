@@ -45,11 +45,7 @@ class Anomaly:
         """
         delete_index = []
         for index, row in self.data.iterrows():
-            if "CuI" in row.values:
-                delete_index.append(index)
-            elif "BrA" in row.values:
-                delete_index.append(index)
-            elif "F4-TCNQ" in row.values:
+            if "BrA" in row.values:
                 delete_index.append(index)
             elif "TiO2:TOPD" in row.values:
                 delete_index.append(index)

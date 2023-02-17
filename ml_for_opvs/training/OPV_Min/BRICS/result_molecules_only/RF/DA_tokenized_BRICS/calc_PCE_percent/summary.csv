@@ -1,0 +1,2 @@
+Dataset,num_of_folds,Features,Targets,Model,r_mean,r_std,r2_mean,r2_std,rmse_mean,rmse_std,mae_mean,mae_std,num_of_data
+OPV_Min,5,DA_tokenized_BRICS,calc_PCE_percent,RF,0.6778387357635941,0.04973420605864175,0.4417631073157862,0.06548355479091275,2.293591071280049,0.20152286502252834,1.7417149906234417,0.11669627047004758,558

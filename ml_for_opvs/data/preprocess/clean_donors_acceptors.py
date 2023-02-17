@@ -26,7 +26,7 @@ CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
 # From OPV Google Drive
 OPV_DATA = pkg_resources.resource_filename(
     "ml_for_opvs",
-    "data/raw/OPV_Min/Machine Learning OPV Parameters - device_params.csv",
+    "data/raw/OPV_Min/FINAL Machine Learning OPV Parameters - ML Training Data.csv",
 )
 OPV_DONOR_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/raw/OPV_Min/Machine Learning OPV Parameters - Donors.csv"
@@ -41,7 +41,20 @@ MASTER_ML_DATA = pkg_resources.resource_filename(
 )
 
 MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv"
+    "ml_for_opvs",
+    "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv",
+)
+
+MISSING_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/preprocess/OPV_Min/missing_pairs.csv"
+)
+
+UNIQUE_DONOR = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/preprocess/OPV_Min/unique_donors.csv"
+)
+
+UNIQUE_ACCEPTOR = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/preprocess/OPV_Min/unique_acceptors.csv"
 )
 
 
@@ -127,6 +140,70 @@ class DonorClean:
         )
         clean_df.to_csv(clean_donor, index=False)
 
+    def replace_r_with_arbitrary(self, clean_donor):
+        """
+        Replace R group in the clean_min_acceptors.csv
+
+        Args:
+            clean_donor: path to processed acceptors
+
+        Returns:
+            SMILES column contains acceptors with replaced R groups
+        """
+        patts = {
+            "[R1]": "CC(CCCCCC)CCCCCCCC",
+            "[R2]": "CCCCCCCC",
+            "[R3]": "[Si](CCC)(CCC)(CCC)",
+            "[R4]": "CC(CC)CCCC",
+            "[R5]": "SCCCCCCCCCCCC",
+            "[R6]": "CC(CCCCCCCC)CCCCCCCCCC",
+            "[R7]": "SCC(CCCCCC)CCCC",
+            "[R8]": "[Si](CC)(CC)(CC)",
+            "[R9]": "[Si](C(C)C)(C(C)C)C(C)C",
+            "[R10]": "[Si](CCCC)(CCCC)(CCCC)",
+            "[R11]": "[Si](C)(C)CCCCCCCC",
+            "[R12]": "SCCCCC=C",
+            "[R13]": "SCC4CCCCC4",
+            "[R14]": "CCCCCC",
+            "[R15]": "CCCCCCCCCC",
+            "[R18]": "CCCCC",
+            "[R19]": "CCCCCCCCCCCCCCCC",
+            "[R20]": "CCCCCCCCCCC",
+            "[R21]": "C(CCCCCCCCC)CCCCCCC",
+            "[R23]": "CC(CCCCCCCCCCCC)CCCCCCCCCC",
+            "[R24]": "COCCOC",
+            "[R25]": "CC(CCCCCCCCCCC)CCCCCCCCC",
+            "[R26]": "CCC",
+            "[R27]": "CCCC",
+            "[R28]": "CCC(CC)CCCC",
+            "[R29]": "CCCC(CC)CCCC",
+        }
+
+        # New R group substitution pattern
+        new_patts = {}
+        atomic_num = 21
+        for k, v in patts.items():
+            # Only provides the transition metals and lanthanides
+            # Outside of transition metals and lanthanides, valencies were weird, gave explicit Hs.
+            if atomic_num == 31:
+                atomic_num = 39
+            elif atomic_num == 49:
+                atomic_num = 57
+            elif atomic_num == 81:
+                atomic_num = 89
+            mol = Chem.MolFromSmarts("[#{}]".format(atomic_num))
+            smi = Chem.MolToSmiles(mol)
+            new_patts[smi] = k
+            atomic_num += 1
+
+        clean_df = pd.read_csv(clean_donor)
+        for index, row in clean_df.iterrows():
+            smi = clean_df.at[index, "SMILES"]
+            for key in new_patts.keys():
+                smi = smi.replace(new_patts[key], key)
+            clean_df.at[index, "SMILES"] = smi
+        clean_df.to_csv(clean_donor, index=False)
+
     def replace_r(self, clean_donor):
         """Replace R group in the clean_min_donors.csv
 
@@ -164,15 +241,46 @@ class DonorClean:
             "[R28]": "CCC(CC)CCCC",
             "[R29]": "CCCC(CC)CCCC",
         }
+        # New R group substitution pattern
+        new_patts = {}
+        atomic_num = 21
+        for k, v in patts.items():
+            # Only provides the transition metals and lanthanides
+            if atomic_num == 31:
+                atomic_num = 39
+            elif atomic_num == 49:
+                atomic_num = 57
+            elif atomic_num == 81:
+                atomic_num = 89
+            mol = Chem.MolFromSmarts("[#{}]".format(atomic_num))
+            smi = Chem.MolToSmiles(mol)
+            new_patts[smi] = v
+            atomic_num += 1
+
         clean_df = pd.read_csv(clean_donor)
         donor_smi_list = clean_df["SMILES"]
+
         index = 0
         for smi in donor_smi_list:
-            for r in patts:
-                smi = smi.replace(r, patts[r])
-            smi = Chem.CanonSmiles(smi)
+            mol = Chem.MolFromSmarts(smi)
+            # Sanitize SMARTS
+            mol.UpdatePropertyCache()
+            Chem.GetSymmSSSR(mol)
+            mol.GetRingInfo().NumRings()
+
+            for r in new_patts:
+                if r in smi:
+                    products = AllChem.ReplaceSubstructs(
+                        mol,
+                        Chem.MolFromSmarts(r),
+                        Chem.MolFromSmarts(new_patts[r]),
+                        replaceAll=True,
+                    )
+                    mol = products[0]
+            smi = Chem.CanonSmiles(Chem.MolToSmiles(mol))
             clean_df.at[index, "SMILES"] = smi
             index += 1
+
         clean_df.to_csv(clean_donor, index=False)
 
     def delete_r(self, clean_donor):
@@ -338,7 +446,11 @@ class AcceptorClean:
                 clean_df = clean_df.append(
                     {
                         "Acceptor": row["Name_Stanley"],
-                        "SMILES": row["SMILE"],
+                        "SMILES": row["R_grp_SMILES"],
+                        "SMILES w/o R_group replacement": row["R_grp_SMILES"],
+                        "SMILES w/o R_group": " ",
+                        "Big_SMILES": " ",
+                        "SELFIES": " ",
                     },
                     ignore_index=True,
                 )
@@ -357,6 +469,69 @@ class AcceptorClean:
             "total: ",
             total_acceptors,
         )
+        clean_df.to_csv(clean_acceptor, index=False)
+
+    def replace_r_with_arbitrary(self, clean_acceptor):
+        """
+        Replace R group in the clean_min_acceptors.csv
+
+        Args:
+            clean_donor: path to processed acceptors
+
+        Returns:
+            SMILES column contains acceptors with replaced R groups
+        """
+        patts = {
+            "[R1]": "CC(CCCCCC)CCCCCCCC",
+            "[R2]": "CCCCCCCC",
+            "[R3]": "[Si](CCC)(CCC)(CCC)",
+            "[R4]": "CC(CC)CCCC",
+            "[R5]": "SCCCCCCCCCCCC",
+            "[R6]": "CC(CCCCCCCC)CCCCCCCCCC",
+            "[R7]": "SCC(CCCCCC)CCCC",
+            "[R8]": "[Si](CC)(CC)(CC)",
+            "[R9]": "[Si](C(C)C)(C(C)C)C(C)C",
+            "[R10]": "[Si](CCCC)(CCCC)(CCCC)",
+            "[R11]": "[Si](C)(C)CCCCCCCC",
+            "[R12]": "SCCCCC=C",
+            "[R13]": "SCC4CCCCC4",
+            "[R14]": "CCCCCC",
+            "[R15]": "CCCCCCCCCC",
+            "[R18]": "CCCCC",
+            "[R19]": "CCCCCCCCCCCCCCCC",
+            "[R20]": "CCCCCCCCCCC",
+            "[R21]": "C(CCCCCCCCC)CCCCCCC",
+            "[R23]": "CC(CCCCCCCCCCCC)CCCCCCCCCC",
+            "[R24]": "COCCOC",
+            "[R25]": "CC(CCCCCCCCCCC)CCCCCCCCC",
+            "[R26]": "CCC",
+            "[R27]": "CCCC",
+            "[R28]": "CCC(CC)CCCC",
+            "[R29]": "CCCC(CC)CCCC",
+        }
+
+        # New R group substitution pattern
+        new_patts = {}
+        atomic_num = 21
+        for k, v in patts.items():
+            # Only provides the transition metals and lanthanides
+            if atomic_num == 31:
+                atomic_num = 39
+            elif atomic_num == 49:
+                atomic_num = 57
+            elif atomic_num == 81:
+                atomic_num = 89
+            mol = Chem.MolFromSmarts("[#{}]".format(atomic_num))
+            smi = Chem.MolToSmiles(mol)
+            new_patts[smi] = k
+            atomic_num += 1
+
+        clean_df = pd.read_csv(clean_acceptor)
+        for index, row in clean_df.iterrows():
+            smi = clean_df.at[index, "SMILES"]
+            for key in new_patts.keys():
+                smi = smi.replace(new_patts[key], key)
+            clean_df.at[index, "SMILES"] = smi
         clean_df.to_csv(clean_acceptor, index=False)
 
     def replace_r(self, clean_acceptor):
@@ -397,15 +572,46 @@ class AcceptorClean:
             "[R28]": "CCC(CC)CCCC",
             "[R29]": "CCCC(CC)CCCC",
         }
+
+        # New R group substitution pattern
+        new_patts = {}
+        atomic_num = 21
+        for k, v in patts.items():
+            # Only provides the transition metals and lanthanides
+            if atomic_num == 31:
+                atomic_num = 39
+            elif atomic_num == 49:
+                atomic_num = 57
+            elif atomic_num == 81:
+                atomic_num = 89
+            mol = Chem.MolFromSmarts("[#{}]".format(atomic_num))
+            smi = Chem.MolToSmiles(mol)
+            new_patts[smi] = v
+            atomic_num += 1
+
         clean_df = pd.read_csv(clean_acceptor)
         acceptor_smi_list = clean_df["SMILES"]
         index = 0
         for smi in acceptor_smi_list:
-            for r in patts:
-                smi = smi.replace(r, patts[r])
-            smi = Chem.CanonSmiles(smi)
+            mol = Chem.MolFromSmarts(smi)
+            # Sanitize SMARTS
+            mol.UpdatePropertyCache()
+            Chem.GetSymmSSSR(mol)
+            mol.GetRingInfo().NumRings()
+
+            for r in new_patts:
+                if r in smi:
+                    products = AllChem.ReplaceSubstructs(
+                        mol,
+                        Chem.MolFromSmarts(r),
+                        Chem.MolFromSmarts(new_patts[r]),
+                        replaceAll=True,
+                    )
+                    mol = products[0]
+            smi = Chem.CanonSmiles(Chem.MolToSmiles(mol))
             clean_df.at[index, "SMILES"] = smi
             index += 1
+
         clean_df.to_csv(clean_acceptor, index=False)
 
     def delete_r(self, clean_acceptor):
@@ -446,6 +652,7 @@ class AcceptorClean:
             "[R28]": "CCC(CC)CCCC",
             "[R29]": "CCCC(CC)CCCC",
         }
+
         clean_df = pd.read_csv(clean_acceptor)
         acceptor_smi_r_list = clean_df["SMILES w/o R_group replacement"]
         index = 0
@@ -506,7 +713,7 @@ class DAPairs:
     def create_master_csv(self, master_csv_path):
         """
         Function that creates the .csv file used for ML project
-        
+
         Args:
             master_csv_path: path to the processed master file for future data representation modifications
 
@@ -514,6 +721,7 @@ class DAPairs:
             .csv file with columns: | Donor | Donor Input Representations | Acceptor | Acceptor Input Representations | PCE(%) | Voc(V) | Jsc(mA cm^-2) | FF(%) |
         """
         headers = [
+            "ref",
             "Donor",
             "Donor_SMILES",
             "Donor_Big_SMILES",
@@ -522,19 +730,32 @@ class DAPairs:
             "Acceptor_SMILES",
             "Acceptor_Big_SMILES",
             "Acceptor_SELFIES",
+            "Donor_PDI",
+            "Donor_Mn_kda",
+            "Donor_Mw_kda",
             "HOMO_D_eV",
             "LUMO_D_eV",
+            "Eg_D_eV",
+            "Ehl_D_eV",
             "HOMO_A_eV",
             "LUMO_A_eV",
+            "Ehl_A_eV",
+            "Eg_A_eV",
             "D_A_ratio_m_m",
             "solvent",
+            "spin_coating_rpm",
             "total_solids_conc_mg_mL",
             "solvent_additive",
             "solvent_additive_conc_v_v_percent",
             "active_layer_thickness_nm",
             "annealing_temperature",
+            "annealing_time_min",
             "hole_contact_layer",
+            "HTL_energy_level_eV",
+            "HTL_thickness_nm",
             "electron_contact_layer",
+            "ETL_energy_level_eV",
+            "ETL_thickness_nm",
             "hole_mobility_blend",
             "electron_mobility_blend",
             "PCE_percent",
@@ -588,13 +809,14 @@ class DAPairs:
                     solvent = solvent.strip()
 
                 # strip whitespace of hole_contact_layer
-                hole_contact_layer = row["hole_contact_layer"]
-                if isinstance(row["hole_contact_layer"], str):
+                hole_contact_layer = row["hole contact layer"]
+                if isinstance(row["hole contact layer"], str):
                     hole_contact_layer = hole_contact_layer.strip()
 
                 # append new donor-acceptor pair to masters dataframe
                 master_df = master_df.append(
                     {
+                        "ref": row["ref"],
                         "Donor": row["Donor Molecule"],
                         "Donor_SMILES": donor_smile,
                         "Donor_Big_SMILES": donor_bigsmile,
@@ -603,46 +825,57 @@ class DAPairs:
                         "Acceptor_SMILES": acceptor_smile,
                         "Acceptor_Big_SMILES": acceptor_bigsmile,
                         "Acceptor_SELFIES": acceptor_selfies,
-                        "HOMO_D_eV": row["HOMO_D_eV"],
-                        "LUMO_D_eV": row["LUMO_D_eV"],
-                        "HOMO_A_eV": row["HOMO_A_eV"],
-                        "LUMO_A_eV": row["LUMO_A_eV"],
-                        "D_A_ratio_m_m": row["D_A_ratio_m_m"],
+                        "Donor_PDI": row["Donor PDI"],
+                        "Donor_Mn_kda": row["Donor Mn (kDa)"],
+                        "Donor_Mw_kda": row["Donor Mw (kDa)"],
+                        "HOMO_D_eV": row["HOMO_D (eV)"],
+                        "LUMO_D_eV": row["LUMO_D (eV)"],
+                        "Ehl_D_eV": row["Ehl_D (eV)"],
+                        "Eg_D_eV": row["Eg_D (eV)"],
+                        "HOMO_A_eV": row["HOMO_A (eV)"],
+                        "LUMO_A_eV": row["LUMO_A (eV)"],
+                        "Ehl_A_eV": row["Ehl_A (eV)"],
+                        "Eg_A_eV": row["Eg_A (eV)"],
+                        "D_A_ratio_m_m": row["D:A ratio (m/m)"],
                         "solvent": solvent,
-                        "total_solids_conc_mg_mL": row["total_solids_conc_mg_mL"],
-                        "solvent_additive": row["solvent_additive"],
+                        "spin_coating_rpm": row["Active layer spin coating speed (rpm)"],
+                        "total_solids_conc_mg_mL": row["total solids conc. (mg/mL)"],
+                        "solvent_additive": row["solvent additive"],
                         "solvent_additive_conc_v_v_percent": row[
-                            "solvent_additive_conc (% v/v)"
+                            "solvent additive conc. (% v/v)"
                         ],
-                        "active_layer_thickness_nm": row[
-                            "active_layer_thickness_nm"
-                        ],
+                        "active_layer_thickness_nm": row["active layer thickness (nm)"],
                         "annealing_temperature": row[
-                            "temperature of thermal annealing (leave gap if not annealed)"
+                            "temperature of thermal annealing"
                         ],
+                        "annealing_time_min": row["annealing time (min)"],
                         "hole_contact_layer": hole_contact_layer,
-                        "electron_contact_layer": row["electron_contact_layer"],
+                        "HTL_energy_level_eV": row["HTL energy level (eV)"],
+                        "HTL_thickness_nm": row["HTL thickness (nm)"],
+                        "electron_contact_layer": row["electron contact layer"],
+                        "ETL_energy_level_eV": row["ETL enegy level (eV)"],
+                        "ETL_thickness_nm": row["ETL thickness (nm)"],
                         "hole_mobility_blend": row[
-                            "hole_mobility_blend"
+                            "hole mobility blend (cm^2 V^-1 s^-1)"
                         ],
                         "electron_mobility_blend": row[
-                            "electron_mobility_blend"
+                            "electron mobility blend (cm^2 V^-1 s^-1)"
                         ],
-                        "PCE_percent": row["PCE_percent"],
+                        "PCE_percent": row["PCE (%)"],
                         "calc_PCE_percent": row["calc_PCE"],
-                        "Voc_V": row["Voc_V"],
-                        "Jsc_mA_cm_pow_neg2": row["Jsc_mA_cm_pow_neg2"],
-                        "FF_percent": row["FF_percent"],
+                        "Voc_V": row["Voc (V)"],
+                        "Jsc_mA_cm_pow_neg2": row["Jsc (mA cm^-2)"],
+                        "FF_percent": row["FF (%)"],
                     },
                     ignore_index=True,
                 )
-        master_df.to_csv(master_csv_path)
+        master_df.to_csv(master_csv_path, index=False)
 
     def fill_empty_values(self, master_csv_path):
         """
         Function that fills in NaN values because it is reasonable.
-        Ex. solvent_additive does not have to be present. Therefore, "N/A" should replace NaN        
-        
+        Ex. solvent_additive does not have to be present. Therefore, "N/A" should replace NaN
+
         Args:
             master_csv_path: path to the processed master file for future data representation modifications
 
@@ -678,8 +911,8 @@ class DAPairs:
     ):
         """
         Function that filters the .csv file for rows that contain ONLY present values in the important columns:
-        
-        
+
+
         Args:
             master_csv_path: path to the processed master file for future data representation modifications
             filtered_master_csv_path: path to the filtered master file for future data representation modifications
@@ -728,11 +961,101 @@ class DAPairs:
                 master_data.at[index, "D_A_ratio_m_m"] = round(float_ratio_data, 3)
 
             # solvent_additive_conc data
-            master_data.at[index, "solvent_additive_conc_v_v_percent"] = float(
-                solvent_add_conc_data
-            )
+            # TODO:
+            try:
+                master_data.at[index, "solvent_additive_conc_v_v_percent"] = float(
+                    solvent_add_conc_data
+                )
+            except TypeError:
+                master_data.at[index, "solvent_additive_conc_v_v_percent"] = 0.0
 
         master_data.to_csv(master_csv_path, index=False)
+
+    def lookup_missing(self, master_data: str):
+        """There are missing D-A pairs. Compare the preprocessed (training-ready) file and the Google Sheets file. Find them by index.
+
+        Args:
+            master_data (str): filepath to preprocessed data.
+        """
+        master_df: pd.DataFrame = pd.read_csv(master_data)
+        missing: pd.DataFrame = pd.DataFrame(columns=self.opv_data.columns)
+        missing_list = []
+        for index, row in self.opv_data.iterrows():
+            if self.opv_data.at[index, "ref"] not in list(master_df["ref"]):
+                missing_list.append(self.opv_data.at[index, "ref"])
+                missing = missing.append(row)
+        missing.to_csv(MISSING_DATA)
+
+    def unique_donors(self, sheets_data: str, chemdraw_data: str):
+        """_summary_
+
+        Args:
+            sheets_data (str): All data from (raw) downloaded Google Sheets.
+            chemdraw_data (str): All data from cleaned chemdraw files and missing data.
+        """
+        unique_donor: pd.DataFrame = pd.DataFrame(columns=["Donor", "SMILES"])
+        sheets_data: pd.DataFrame = pd.read_csv(sheets_data)
+        chemdraw_data: pd.DataFrame = pd.read_csv(chemdraw_data)
+        idx = 0
+        donor = []
+        for s_idx, row in sheets_data.iterrows():
+            s_mol = sheets_data.at[s_idx, "Donor Molecule"]
+            for c_idx, row in chemdraw_data.iterrows():
+                c_mol = chemdraw_data.at[c_idx, "Donor"]
+                if s_mol == c_mol:
+                    if s_mol not in donor:
+                        unique_donor.at[idx, "Donor"] = s_mol
+                        unique_donor.at[idx, "SMILES"] = chemdraw_data.at[
+                            c_idx, "SMILES"
+                        ]
+                        donor.append(s_mol)
+                        idx += 1
+
+        unique_donor.to_csv(UNIQUE_DONOR, index=False)
+
+    def unique_acceptors(self, sheets_data: str, chemdraw_data: str):
+        """_summary_
+
+        Args:
+            sheets_data (str): All data from (raw) downloaded Google Sheets.
+            chemdraw_data (str): All data from cleaned chemdraw files and missing data.
+        """
+        unique_acceptor: pd.DataFrame = pd.DataFrame(columns=["Acceptor", "SMILES"])
+        sheets_data: pd.DataFrame = pd.read_csv(sheets_data)
+        chemdraw_data: pd.DataFrame = pd.read_csv(chemdraw_data)
+
+        idx = 0
+        acceptor = []
+        for s_idx, row in sheets_data.iterrows():
+            s_mol = sheets_data.at[s_idx, "Acceptor Molecule"]
+            for c_idx, row in chemdraw_data.iterrows():
+                c_mol = chemdraw_data.at[c_idx, "Acceptor"]
+                if s_mol == c_mol:
+                    if s_mol not in acceptor:
+                        unique_acceptor.at[idx, "Acceptor"] = s_mol
+                        unique_acceptor.at[idx, "SMILES"] = chemdraw_data.at[
+                            c_idx, "SMILES"
+                        ]
+                        acceptor.append(s_mol)
+                    idx += 1
+
+        unique_acceptor.to_csv(UNIQUE_ACCEPTOR, index=False)
+
+    def find_missing_from_opv_data(self, sheets_data: str, master_data: str):
+
+        sheets_data = pd.read_csv(sheets_data)
+        master_data = pd.read_csv(master_data)
+
+        sheets_donor = set(sheets_data["Donor Molecule"])
+        sheets_acceptor = set(sheets_data["Acceptor Molecule"])
+
+        master_donor = set(master_data["Donor"])
+        master_acceptor = set(master_data["Acceptor"])
+
+        missing_donor = sheets_donor - master_donor
+        missing_acceptor = sheets_acceptor - master_acceptor
+
+        print(missing_donor, missing_acceptor)
 
 
 # Step 1
@@ -740,6 +1063,7 @@ class DAPairs:
 # donors.clean_donor(CLEAN_DONOR_CSV)
 
 # # # # Step 1b
+# donors.replace_r_with_arbitrary(CLEAN_DONOR_CSV)
 # donors.replace_r(CLEAN_DONOR_CSV)
 
 # # # # # # # Step 1c - do not include for fragmentation
@@ -753,6 +1077,7 @@ class DAPairs:
 # acceptors.clean_acceptor(CLEAN_ACCEPTOR_CSV)
 
 # # Step 1b
+# acceptors.replace_r_with_arbitrary(CLEAN_ACCEPTOR_CSV)
 # acceptors.replace_r(CLEAN_ACCEPTOR_CSV)
 
 # # # # # Step 1d - canonSMILES to remove %10-%100
@@ -771,6 +1096,19 @@ class DAPairs:
 # pairings.create_master_csv(MASTER_ML_DATA)
 # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 
+# Check canonicalization of donors and acceptors.
+# master_df = pd.read_csv(MASTER_ML_DATA)
+# for index, row in master_df.iterrows():
+#     donor_smi = master_df.at[index, "Donor_SMILES"]
+#     acceptor_smi = master_df.at[index, "Acceptor_SMILES"]
+#     if Chem.CanonSmiles(donor_smi) != donor_smi:
+#         print(master_df.at[index, "Donor"])
+#     if Chem.CanonSmiles(acceptor_smi) != acceptor_smi:
+#         print(master_df.at[index, "Acceptor"])
+
+# pairings.unique_donors(OPV_DATA, CLEAN_DONOR_CSV)
+# pairings.unique_acceptors(OPV_DATA, CLEAN_ACCEPTOR_CSV)
+# pairings.find_missing_from_opv_data(OPV_DATA, MASTER_ML_DATA)
 # # # # Step 4b - Convert STR -> FLOAT
 # pairings.convert_str_to_float(MASTER_ML_DATA)
 # pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
@@ -783,3 +1121,7 @@ class DAPairs:
 
 # Step 5
 # Go to rdkit_frag.py (if needed)
+
+# Lookup missing OPVs from preprocessed vs. Google Sheets
+# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# pairings.lookup_missing(MASTER_ML_DATA)

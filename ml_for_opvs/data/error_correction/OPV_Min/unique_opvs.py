@@ -10,7 +10,7 @@ from ml_for_opvs.data.preprocess.clean_donors_acceptors import (
 
 OPV_MIN = pkg_resources.resource_filename(
     "ml_for_opvs",
-    "data/raw/OPV_Min/Machine Learning OPV Parameters - device_params.csv",
+    "data/raw/OPV_Min/FINAL Machine Learning OPV Parameters - ML Training Data.csv",
 )
 
 # OPV data after pre-processing
@@ -48,12 +48,12 @@ COMPARE_PATH = pkg_resources.resource_filename(
 
 class UniqueOPVs:
     """
-    Class that contains functions to: 
+    Class that contains functions to:
     i) find unique donors and acceptors
-    ii) filter for difference in lists from min and clean data
+    ii) filter for difference in lists from Google Sheets and available data
     iii) filter for donors and acceptors without SMILES
     iv) produce .csv file with missing donor and acceptors
-    
+
     Manually add the SMILES for missing donors and acceptors
     v) add new SMILES to clean_donor or clean_acceptor .csv files
     """
@@ -308,7 +308,7 @@ class UniqueOPVs:
 # run functions to create missing DONOR/ACCEPTORS.
 # WARNING: Do not run these unless you want to restart.
 # WARNING: The correct structures have been manually input for the missing DONORS/ACCEPTORS.
-# unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_CLEAN)
+unique_opvs = UniqueOPVs(opv_min=OPV_MIN, opv_clean=OPV_CLEAN)
 
 # # min_unique_donors = unique_opvs.unique_list("D", "min")
 # # min_unique_acceptors = unique_opvs.unique_list("A", "min")
@@ -340,5 +340,4 @@ class UniqueOPVs:
 # unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
 
 # compare Google Sheets and ChemDraw file
-# unique_opvs.compare(COMPARE_PATH, CHEMDRAW_DONOR, CHEMDRAW_ACCEPTOR)
-
+unique_opvs.compare(COMPARE_PATH, CHEMDRAW_DONOR, CHEMDRAW_ACCEPTOR)

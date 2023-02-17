@@ -1,13 +1,11 @@
 0
-F4-TCNQ
-DPE
-PN
 _
-CN
-NMP
-isopropanol
-CuI
+CN:DIO (1:1)
+PN
+DIO
 DBE
 CBA
-CN:DIO (1:1)
-DIO
+DPE
+isopropanol
+NMP
+CN

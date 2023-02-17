@@ -18,6 +18,8 @@ MASTER_DATA = pkg_resources.resource_filename(
 BRICS_FRAG_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/input_representation/OPV_Min/BRICS/master_brics_frag.csv"
 )
+
+
 def tokenize_frag(brics_frag):
     """
     Function that tokenizes fragment and returns tokenization to csv file
@@ -58,6 +60,7 @@ def tokenize_frag(brics_frag):
 
     return da_pair_tokenized, frag_dict
 
+
 def remove_dummy(mol):
     """
     Function that removes dummy atoms from mol and returns SMILES
@@ -77,6 +80,7 @@ def remove_dummy(mol):
     ed_mol.CommitBatchEdit()
     edited_mol = ed_mol.GetMol()
     return Chem.MolToSmiles(edited_mol)
+
 
 def bric_frag(data):
     """
@@ -104,13 +108,15 @@ def bric_frag(data):
         donor_brics = list(BRICS.BRICSDecompose(donor_mol, returnMols=True))
         donor_brics_smi = []
         for frag in donor_brics:
-            frag_smi = remove_dummy(frag)  # remove dummy atoms
-            donor_brics_smi.append(frag_smi)
+            # frag_smi = remove_dummy(frag)  # remove dummy atoms
+            frag = Chem.MolToSmiles(frag)
+            donor_brics_smi.append(frag)
         acceptor_brics_smi = []
         acceptor_brics = list(BRICS.BRICSDecompose(acceptor_mol, returnMols=True))
         for frag in acceptor_brics:
-            frag_smi = remove_dummy(frag)  # remove dummy atoms
-            acceptor_brics_smi.append(frag_smi)
+            # frag_smi = remove_dummy(frag)  # remove dummy atoms
+            frag = Chem.MolToSmiles(frag)
+            acceptor_brics_smi.append(frag)
 
         brics_df.at[index, "Donor_BRICS"] = donor_brics_smi
         # print(donor_smi, donor_brics_smi)
@@ -130,6 +136,7 @@ def bric_frag(data):
 
     return frag_dict
 
+
 def frag_visualization(frag_dict):
     """
     Visualizes the dictionary of unique fragments
@@ -137,7 +144,7 @@ def frag_visualization(frag_dict):
 
     Args:
         dictionary of unique fragments from donor and acceptor molecules
-    
+
     Returns:
         img: image of all the unique fragments
     """

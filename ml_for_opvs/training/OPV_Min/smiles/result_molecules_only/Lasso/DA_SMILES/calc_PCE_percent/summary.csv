@@ -1,0 +1,2 @@
+Dataset,num_of_folds,Features,Targets,Model,r_mean,r_std,r2_mean,r2_std,rmse_mean,rmse_std,mae_mean,mae_std,num_of_data
+OPV_Min,5,DA_SMILES,calc_PCE_percent,Lasso,0.4894635604500509,0.06882099889513574,0.16840759169643774,0.033875593010019474,2.809757446112569,0.2617977275011833,2.2674514567705164,0.18881878135990862,558

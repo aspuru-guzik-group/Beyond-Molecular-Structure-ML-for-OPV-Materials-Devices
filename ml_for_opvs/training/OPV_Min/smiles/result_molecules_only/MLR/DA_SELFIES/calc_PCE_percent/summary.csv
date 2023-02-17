@@ -1,0 +1,2 @@
+Dataset,num_of_folds,Features,Targets,Model,r_mean,r_std,r2_mean,r2_std,rmse_mean,rmse_std,mae_mean,mae_std,num_of_data
+OPV_Min,5,DA_SELFIES,calc_PCE_percent,MLR,-0.033272061045731785,0.05134714873017732,-8.871375206553404e+23,1.2899405910207265e+24,1887252788865.786,2064848076035.3892,231436141842.9432,245693618979.97144,558

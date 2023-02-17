@@ -1,0 +1,4 @@
+model_type=("SVM" "Lasso" "KNN" "KRR" "RF" "XGBoost")
+for mt in ${model_type[@]}; do
+    python ../train.py --train_path ../../../data/input_representation/OPV_Min/smiles/processed_smiles_electrical/KFold/input_train_[0-9].csv --test_path ../../../data/input_representation/OPV_Min/smiles/processed_smiles_electrical/KFold/input_test_[0-9].csv --input_representation None --feature_names HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV --target_name calc_PCE_percent --model_type $mt --hyperparameter_optimization False --hyperparameter_space_path ./opv_hpo_space.json --results_path ../../../training/OPV_Min/materials_only/result_molecules_only --random_state 22
+done
