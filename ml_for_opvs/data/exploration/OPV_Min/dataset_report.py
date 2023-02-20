@@ -49,31 +49,23 @@ labels_device_B: set = {
     "HTL thickness (nm)",
     "ETL thickness (nm)",
 }
-labels_electrical: set = {
+labels_mobility: set = {
     "hole mobility blend (cm^2 V^-1 s^-1)",
     "electron mobility blend (cm^2 V^-1 s^-1)",
 }
-# labels_fabrication_wo_solids: set = {
-#     "D:A ratio (m/m)",
-#     "solvent",
-#     "solvent additive",
-#     "solvent additive conc. (% v/v) ",
-#     "temperature of thermal annealing ",
-# }
-# labels_device_wo_thickness: set = {"hole contact layer", "electron contact layer"}
 
 filters: Dict[str, set] = {
     "fabrication": (refs | outputs | labels_molecules | labels_fabrication_A | labels_fabrication_B),
     "device": (refs | outputs | labels_molecules | labels_fabrication_A | labels_fabrication_B | labels_device_A | labels_device_B),
-    "electrical": (
-        refs
-        | outputs
-        | labels_molecules
-        | labels_fabrication_A
-        | labels_fabrication_B
-        | labels_device_A
-        | labels_device_B
-        | labels_electrical
+    "mobility": (
+            refs
+            | outputs
+            | labels_molecules
+            | labels_fabrication_A
+            | labels_fabrication_B
+            | labels_device_A
+            | labels_device_B
+            | labels_mobility
     ),
     "fabrication_noB": (
         refs | outputs | labels_molecules | labels_fabrication_A
@@ -85,13 +77,13 @@ filters: Dict[str, set] = {
         | labels_fabrication_A
         | labels_device_A
     ),
-    "electrical_noB": (
-        refs
-        | outputs
-        | labels_molecules
-        | labels_fabrication_A
-        | labels_device_A
-        | labels_electrical
+    "mobility_noB": (
+            refs
+            | outputs
+            | labels_molecules
+            | labels_fabrication_A
+            | labels_device_A
+            | labels_mobility
     ),
 }
 
@@ -99,10 +91,10 @@ filters: Dict[str, set] = {
 available: Dict[str, pd.DataFrame] = {
     "fabrication": opv_data[filters["fabrication"]].dropna(),
     "device": opv_data[filters["device"]].dropna(),
-    "electrical": opv_data[filters["electrical"]].dropna(),
+    "mobility": opv_data[filters["mobility"]].dropna(),
     "fabrication_noB": opv_data[filters["fabrication_noB"]].dropna(),
     "device_noB": opv_data[filters["device_noB"]].dropna(),
-    "electrical_noB": opv_data[filters["electrical_noB"]].dropna(),
+    "mobility_noB": opv_data[filters["mobility_noB"]].dropna(),
 }
 for key in available.keys():
     available[key].to_excel((output / f"available_{key}.xlsx"), index=False)
@@ -140,14 +132,14 @@ subset_summary: Dict[str, Union[int, float]] = {
     "fabrication (%)":   len(available["fabrication"]) / labels_summary["data points"],
     "device (raw)": len(available["device"]),
     "device (%)":        len(available["device"]) / labels_summary["data points"],
-    "electrical (raw)": len(available["electrical"]),
-    "electrical (%)":    len(available["electrical"]) / labels_summary["data points"],
+    "mobility (raw)": len(available["mobility"]),
+    "mobility (%)":    len(available["mobility"]) / labels_summary["data points"],
     "fabrication no B (raw)": len(available["fabrication_noB"]),
     "fabrication no B (%)": len(available["fabrication_noB"]) / labels_summary["data points"],
     "device no B (raw)": len(available["device_noB"]),
     "device no B (%)": len(available["device_noB"]) / labels_summary["data points"],
-    "electrical no B (raw)": len(available["electrical_noB"]),
-    "electrical no B (%)": len(available["electrical_noB"]) / labels_summary["data points"],
+    "mobility no B (raw)": len(available["mobility_noB"]),
+    "mobility no B (%)": len(available["mobility_noB"]) / labels_summary["data points"],
 }
 with (output / "subset_sizes.json").open(mode="w") as f:
     json.dump(subset_summary, f)
