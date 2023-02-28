@@ -64,5 +64,26 @@
             "Jsc_mA_cm_pow_neg2"
         ],
         "metrics": "r"
+    },
+    "feature_comparison": {
+        "datasets": [
+            "OPV_Min"
+        ],
+        "models": [
+            "RF",
+            "XGBoost",
+            "SVM"
+        ],
+        "input_representations": [
+            "fingerprint"
+        ],
+        "features": [
+            "result_fabrication_wo_solid"
+        ],
+        "feature_names": [],
+        "target_names": [
+            "calc_PCE_percent"
+        ],
+        "metrics": "r"
     }
 }

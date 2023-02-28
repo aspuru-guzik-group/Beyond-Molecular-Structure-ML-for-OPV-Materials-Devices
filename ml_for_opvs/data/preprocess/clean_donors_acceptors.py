@@ -57,6 +57,14 @@ UNIQUE_ACCEPTOR = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/OPV_Min/unique_acceptors.csv"
 )
 
+SOLVENT_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/raw/OPV_Min/solvent_properties.csv"
+)
+
+INTERLAYER_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/raw/OPV_Min/interlayer_properties.csv"
+)
+
 
 class DonorClean:
     """
@@ -694,7 +702,7 @@ class DAPairs:
     Class containing functions that prepare the Donor-Acceptor Pairs with OPV Data for ML
     """
 
-    def __init__(self, opv_data, donors_data, acceptors_data):
+    def __init__(self, opv_data, donors_data, acceptors_data, solvent_data: str):
         """
         Instantiates class with appropriate data
 
@@ -709,6 +717,7 @@ class DAPairs:
         self.opv_data = pd.read_csv(opv_data)
         self.donors = pd.read_csv(donors_data)
         self.acceptors = pd.read_csv(acceptors_data)
+        self.solvents = pd.read_csv(solvent_data)
 
     def create_master_csv(self, master_csv_path):
         """
@@ -743,9 +752,27 @@ class DAPairs:
             "Eg_A_eV",
             "D_A_ratio_m_m",
             "solvent",
+            "solvent_BP",
+            "solvent_density",
+            "solvent_dielectric",
+            "solvent_dipole",
+            "solvent_hansen_disp",
+            "solvent_h_bond",
+            "solvent_polar",
+            "solvent_log_pow",
+            "solvent_MP",
             "spin_coating_rpm",
             "total_solids_conc_mg_mL",
             "solvent_additive",
+            "solvent_additive_BP",
+            "solvent_additive_density",
+            "solvent_additive_dielectric",
+            "solvent_additive_dipole",
+            "solvent_additive_hansen_disp",
+            "solvent_additive_h_bond",
+            "solvent_additive_polar",
+            "solvent_additive_log_pow",
+            "solvent_additive_MP",
             "solvent_additive_conc_v_v_percent",
             "active_layer_thickness_nm",
             "annealing_temperature",
@@ -813,6 +840,56 @@ class DAPairs:
                 if isinstance(row["hole contact layer"], str):
                     hole_contact_layer = hole_contact_layer.strip()
 
+                # solvent properties
+                try:
+                    solvent_row = self.solvents.loc[
+                        self.solvents["Name"] == row["Solvent"]
+                    ]
+                    solvent_bp = solvent_row["BP"]
+                    solvent_density = solvent_row["Density"]
+                    solvent_dielectric = solvent_row["Dielectric"]
+                    solvent_dipole = solvent_row["Dipole"]
+                    solvent_disp = solvent_row["Hansen_Disp"]
+                    solvent_h_bond = solvent_row["Hansen_H_Bond"]
+                    solvent_polar = solvent_row["Hansen_Polar"]
+                    solvent_log_pow = solvent_row["log_Pow"]
+                    solvent_mp = solvent_row["MP"]
+                except:
+                    solvent_bp = 0
+                    solvent_density = 0
+                    solvent_dielectric = 0
+                    solvent_dipole = 0
+                    solvent_disp = 0
+                    solvent_h_bond = 0
+                    solvent_polar = 0
+                    solvent_log_pow = 0
+                    solvent_mp = 0
+
+                # solvent_additive properties
+                try:
+                    solvent_additive_row = self.solvents.loc[
+                        self.solvents["Name"] == row["Solvent_Additive"]
+                    ]
+                    solvent_additive_bp = solvent_additive_row["BP"]
+                    solvent_additive_density = solvent_additive_row["Density"]
+                    solvent_additive_dielectric = solvent_additive_row["Dielectric"]
+                    solvent_additive_dipole = solvent_additive_row["Dipole"]
+                    solvent_additive_disp = solvent_additive_row["Hansen_Disp"]
+                    solvent_additive_h_bond = solvent_additive_row["Hansen_H_Bond"]
+                    solvent_additive_polar = solvent_additive_row["Hansen_Polar"]
+                    solvent_additive_log_pow = solvent_additive_row["log_Pow"]
+                    solvent_additive_mp = solvent_additive_row["MP"]
+                except:
+                    solvent_additive_bp = 0
+                    solvent_additive_density = 0
+                    solvent_additive_dielectric = 0
+                    solvent_additive_dipole = 0
+                    solvent_additive_disp = 0
+                    solvent_additive_h_bond = 0
+                    solvent_additive_polar = 0
+                    solvent_additive_log_pow = 0
+                    solvent_additive_mp = 0
+
                 # append new donor-acceptor pair to masters dataframe
                 master_df = master_df.append(
                     {
@@ -838,9 +915,29 @@ class DAPairs:
                         "Eg_A_eV": row["Eg_A (eV)"],
                         "D_A_ratio_m_m": row["D:A ratio (m/m)"],
                         "solvent": solvent,
-                        "spin_coating_rpm": row["Active layer spin coating speed (rpm)"],
+                        "solvent_BP": solvent_bp,
+                        "solvent_density": solvent_density,
+                        "solvent_dielectric": solvent_dielectric,
+                        "solvent_dipole": solvent_dipole,
+                        "solvent_hansen_disp": solvent_disp,
+                        "solvent_h_bond": solvent_h_bond,
+                        "solvent_polar": solvent_polar,
+                        "solvent_log_pow": solvent_log_pow,
+                        "solvent_MP": solvent_mp,
+                        "spin_coating_rpm": row[
+                            "Active layer spin coating speed (rpm)"
+                        ],
                         "total_solids_conc_mg_mL": row["total solids conc. (mg/mL)"],
                         "solvent_additive": row["solvent additive"],
+                        "solvent_additive_BP": solvent_additive_bp,
+                        "solvent_additive_density": solvent_additive_density,
+                        "solvent_additive_dielectric": solvent_additive_dielectric,
+                        "solvent_additive_dipole": solvent_additive_dipole,
+                        "solvent_additive_hansen_disp": solvent_additive_disp,
+                        "solvent_additive_h_bond": solvent_additive_h_bond,
+                        "solvent_additive_polar": solvent_additive_polar,
+                        "solvent_additive_log_pow": solvent_additive_log_pow,
+                        "solvent_additive_MP": solvent_additive_mp,
                         "solvent_additive_conc_v_v_percent": row[
                             "solvent additive conc. (% v/v)"
                         ],
@@ -869,6 +966,7 @@ class DAPairs:
                     },
                     ignore_index=True,
                 )
+
         master_df.to_csv(master_csv_path, index=False)
 
     def fill_empty_values(self, master_csv_path):
@@ -1092,7 +1190,7 @@ class DAPairs:
 # # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 
 # # Step 4
-# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV, SOLVENT_DATA)
 # pairings.create_master_csv(MASTER_ML_DATA)
 # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 

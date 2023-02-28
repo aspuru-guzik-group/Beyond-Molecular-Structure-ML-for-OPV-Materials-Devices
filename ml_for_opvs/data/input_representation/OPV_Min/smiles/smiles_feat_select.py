@@ -61,15 +61,27 @@ device = {"active_layer_thickness_nm", "hole_contact_layer", "electron_contact_l
 device_wo_thickness = {"hole_contact_layer", "electron_contact_layer"}
 
 solvent = {
-    "BP",
-    "MP",
-    "Density",
-    "Dielectric",
-    "Dipole",
-    "log Pow",
-    "Hansen Disp",
-    "Hansen H-Bond",
-    "Hansen Polar",
+    "solvent_BP",
+    "solvent_MP",
+    "solvent_density",
+    "solvent_dielectric",
+    "solvent_dipole",
+    "solvent_log_pow",
+    "solvent_disp",
+    "solvent_h_bond",
+    "solvent_polar",
+}
+
+solvent_additive = {
+    "solvent_additive_BP",
+    "solvent_additive_MP",
+    "solvent_additive_density",
+    "solvent_additive_dielectric",
+    "solvent_additive_dipole",
+    "solvent_additive_log_pow",
+    "solvent_additive_disp",
+    "solvent_additive_h_bond",
+    "solvent_additive_polar",
 }
 
 

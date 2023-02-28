@@ -101,7 +101,13 @@ def heatmap(config: dict):
             "SVM",
         ]
         y = ["calc_PCE_percent", "FF_percent", "Voc_V", "Jsc_mA_cm_pow_neg2"]
-
+    elif config["config_name"] == "feature_comparison":
+        x = ["RF", "XGBoost", "SVM"]
+        y = [
+            "DA_FP_radius_3_nbits_1024",
+            "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV",
+            "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent",
+        ]
     # Heatmap
     # NOTE: You have to change the pivot columns depending on your plot!
     mean_summary: pd.DataFrame = summary.pivot("Feature_Names", "Model", mean_metric)

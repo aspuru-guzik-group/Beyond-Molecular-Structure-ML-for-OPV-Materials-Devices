@@ -46,7 +46,7 @@ fabrication = {
     "solvent",
     "total_solids_conc_mg_mL",
     "solvent_additive",
-    "solvent_additive_conc_percent_v_v",
+    "solvent_additive_conc_v_v_percent",
     "annealing_temperature",
 }
 
@@ -54,7 +54,7 @@ fabrication_wo_solid = {
     "D_A_ratio_m_m",
     "solvent",
     "solvent_additive",
-    "solvent_additive_conc_percent_v_v",
+    "solvent_additive_conc_v_v_percent",
     "annealing_temperature",
 }
 
@@ -63,17 +63,28 @@ device = {"active_layer_thickness_nm", "hole_contact_layer", "electron_contact_l
 device_wo_thickness = {"hole_contact_layer", "electron_contact_layer"}
 
 solvent = {
-    "BP",
-    "MP",
-    "Density",
-    "Dielectric",
-    "Dipole",
-    "log Pow",
-    "Hansen Disp",
-    "Hansen H-Bond",
-    "Hansen Polar",
+    "solvent_BP",
+    "solvent_MP",
+    "solvent_density",
+    "solvent_dielectric",
+    "solvent_dipole",
+    "solvent_log_pow",
+    "solvent_disp",
+    "solvent_h_bond",
+    "solvent_polar",
 }
 
+solvent_additive = {
+    "solvent_additive_BP",
+    "solvent_additive_MP",
+    "solvent_additive_density",
+    "solvent_additive_dielectric",
+    "solvent_additive_dipole",
+    "solvent_additive_log_pow",
+    "solvent_additive_disp",
+    "solvent_additive_h_bond",
+    "solvent_additive_polar",
+}
 
 # create a dictionary with feature group's name as the key and the feature list as the value
 feature_dict = {
@@ -90,7 +101,16 @@ feature_dict = {
     "device_wo_thickness": list(
         molecules | properties | fabrication_wo_solid | device_wo_thickness | output
     ),
-    "full": list(molecules | properties | fabrication | device | electrical | output),
+    "full": list(
+        molecules
+        | properties
+        | fabrication
+        | device
+        | electrical
+        | output
+        | solvent
+        | solvent_additive
+    ),
 }
 
 

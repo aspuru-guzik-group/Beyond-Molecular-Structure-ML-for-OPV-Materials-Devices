@@ -15,6 +15,8 @@ from ml_for_opvs.data.preprocess.clean_donors_acceptors import (
     OPV_DATA,
     MASTER_ML_DATA,
     MASTER_ML_DATA_PLOT,
+    SOLVENT_DATA,
+    INTERLAYER_DATA,
     DAPairs,
     DonorClean,
     AcceptorClean,
@@ -32,7 +34,10 @@ from ml_for_opvs.data.error_correction.OPV_Min.unique_opvs import (
 
 from ml_for_opvs.data.error_correction.OPV_Min.remove_anomaly import Anomaly
 from ml_for_opvs.data.error_correction.OPV_Min.approximate_properties import (
-    approximate_value, DUPLICATE_DONORS, DUPLICATE_ACCEPTORS, calculate_homo_lumo_gap
+    approximate_value,
+    DUPLICATE_DONORS,
+    DUPLICATE_ACCEPTORS,
+    calculate_homo_lumo_gap,
 )
 
 # from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import (
@@ -113,7 +118,7 @@ opv_smiles_to_selfies(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 print("Finished Step 3")
 
 # Step 4
-pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV, SOLVENT_DATA)
 pairings.create_master_csv(MASTER_ML_DATA)
 # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 
@@ -145,6 +150,7 @@ print("Finished Step 5")
 
 # Step 6
 # Add solvents
+
 # corr_plot = Correlation(MASTER_ML_DATA_PLOT)
 # corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA_PLOT)
 # corr_plot = Correlation(MASTER_ML_DATA)
