@@ -1,4 +1,4 @@
-﻿Name,Parameter_Type,IUPAC,SMILES canon,No.,Solvent,CAS,Formula,dipole,dD,dP,dH,dHDon,dHAcc,MW,Density,BPt,MPt,logKow,RI,Trouton,RER,ParachorGA,RD,DCp,log n,SurfTen
+﻿Name,Parameter_Type,IUPAC,SMILES canon,No.,Solvent,CAS,Formula,dipole,dD,dP,dH,dHDon,dHAcc,MW,Density,BPt,MPt,logKow,RI,Trouton,RER,ParachorGA,RD,DCp,log_n,SurfTen
 CN,['Solvent_Additive'],1-chloronaphthalene,Clc1cccc2ccccc21,870,1-Chloronaphthalene,90-13-1,C10H7Cl,1.55,20.5,4.9,2.5,0.6,3.3,162.62,1.194,259,-4,4,1.633,-47.72,-91.2,0.705,346.5,48.94,230.8,143.6
 DIO,['Solvent_Additive'],"1,8-diiodooctane",ICCCCCCCCI,,"1,8-diiodooctane",24772-63-2,C8H16I2,2.09,18.1,3.3,3,2.884402661,2.014923179,,1.84,364.69,18.5,5.033,1.562310066,94.5120375,0.041265849,503.2,64.939,308.08,0.8416,49.23966477
 DPE,['Solvent_Additive'],diphenyl ether,c1(Oc2ccccc2)ccccc1,1122,Diphenyl Ether,101-84-8,C12H10O,1.17,19.4,3.4,4,0.1,4.9,170.21,1.073,258,27,4.21,1.578,-51.05,-95,0.457,395.6,52.87,274.3,146.2
