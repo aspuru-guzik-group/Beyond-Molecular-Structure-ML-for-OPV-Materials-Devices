@@ -26,7 +26,7 @@ CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
 # From OPV Google Drive
 OPV_DATA = pkg_resources.resource_filename(
     "ml_for_opvs",
-    "data/raw/OPV_Min/FINAL Machine Learning OPV Parameters - ML Training Data.csv",
+    "data/raw/OPV_Min/OPV ML data extraction - ML Training Data.csv",
 )
 OPV_DONOR_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/raw/OPV_Min/Machine Learning OPV Parameters - Donors.csv"
@@ -752,27 +752,47 @@ class DAPairs:
             "Eg_A_eV",
             "D_A_ratio_m_m",
             "solvent",
-            "solvent_BP",
+            "solvent_BPt",
             "solvent_density",
-            "solvent_dielectric",
+            "solvent_dD",
+            "solvent_RI",
+            "solvent_MW",
+            "solvent_dP",
+            "solvent_dH",
+            "solvent_log_kow",
+            "solvent_MPt",
+            "solvent_dHDon",
+            "solvent_dHAcc",
+            "solvent_trouton",
             "solvent_dipole",
-            "solvent_hansen_disp",
-            "solvent_h_bond",
-            "solvent_polar",
-            "solvent_log_pow",
-            "solvent_MP",
+            "solvent_RER",
+            "solvent_ParachorGA",
+            "solvent_RD",
+            "solvent_DCp",
+            "solvent_log_n",
+            "solvent_SurfTen",
             "spin_coating_rpm",
             "total_solids_conc_mg_mL",
             "solvent_additive",
-            "solvent_additive_BP",
+            "solvent_additive_BPt",
             "solvent_additive_density",
-            "solvent_additive_dielectric",
+            "solvent_additive_dD",
+            "solvent_additive_RI",
+            "solvent_additive_MW",
+            "solvent_additive_dP",
+            "solvent_additive_dH",
+            "solvent_additive_log_kow",
+            "solvent_additive_MPt",
+            "solvent_additive_dHDon",
+            "solvent_additive_dHAcc",
+            "solvent_additive_trouton",
             "solvent_additive_dipole",
-            "solvent_additive_hansen_disp",
-            "solvent_additive_h_bond",
-            "solvent_additive_polar",
-            "solvent_additive_log_pow",
-            "solvent_additive_MP",
+            "solvent_additive_RER",
+            "solvent_additive_ParachorGA",
+            "solvent_additive_RD",
+            "solvent_additive_DCp",
+            "solvent_additive_log_n",
+            "solvent_additive_SurfTen",
             "solvent_additive_conc_v_v_percent",
             "active_layer_thickness_nm",
             "annealing_temperature",
@@ -843,27 +863,27 @@ class DAPairs:
                 # solvent properties
                 try:
                     solvent_row = self.solvents.loc[
-                        self.solvents["Name"] == row["Solvent"]
+                        self.solvents["Name"] == row["solvent"]
                     ]
-                    solvent_bp = solvent_row["BPt"]
-                    solvent_mw = solvent_row["MW"]
-                    solvent_density = solvent_row["Density"]
-                    solvent_RI = solvent_row["RI"]
-                    solvent_dipole = solvent_row["dipole"]
-                    solvent_dD = solvent_row["dD"]
-                    solvent_dP = solvent_row["dP"]
-                    solvent_dH = solvent_row["dH"]
-                    solvent_dHDon = solvent_row["dHDon"]
-                    solvent_dHAcc = solvent_row["dHAcc"]
-                    solvent_log_kow = solvent_row["logKow"]
-                    solvent_mp = solvent_row["MPt"]
-                    solvent_trouton = solvent_row["Trouton"]
-                    solvent_RER = solvent_row["RER"]
-                    solvent_ParachorGA = solvent_row["ParachorGA"]
-                    solvent_RD = solvent_row["RD"]
-                    solvent_DCp = solvent_row["DCp"]
-                    solvent_logn = solvent_row["log_n"]
-                    solvent_SurfTen = solvent_row["SurfTen"]
+                    solvent_bp = solvent_row["BPt"].values[0]
+                    solvent_mw = solvent_row["MW"].values[0]
+                    solvent_density = solvent_row["Density"].values[0]
+                    solvent_RI = solvent_row["RI"].values[0]
+                    solvent_dipole = solvent_row["dipole"].values[0]
+                    solvent_dD = solvent_row["dD"].values[0]
+                    solvent_dP = solvent_row["dP"].values[0]
+                    solvent_dH = solvent_row["dH"].values[0]
+                    solvent_dHDon = solvent_row["dHDon"].values[0]
+                    solvent_dHAcc = solvent_row["dHAcc"].values[0]
+                    solvent_log_kow = solvent_row["logKow"].values[0]
+                    solvent_mp = solvent_row["MPt"].values[0]
+                    solvent_trouton = solvent_row["Trouton"].values[0]
+                    solvent_RER = solvent_row["RER"].values[0]
+                    solvent_ParachorGA = solvent_row["ParachorGA"].values[0]
+                    solvent_RD = solvent_row["RD"].values[0]
+                    solvent_DCp = solvent_row["DCp"].values[0]
+                    solvent_logn = solvent_row["log_n"].values[0]
+                    solvent_SurfTen = solvent_row["SurfTen"].values[0]
                 except:
                     solvent_bp = 0
                     solvent_mw = 0
@@ -888,27 +908,29 @@ class DAPairs:
                 # solvent_additive properties
                 try:
                     solvent_additive_row = self.solvents.loc[
-                        self.solvents["Name"] == row["Solvent_Additive"]
+                        self.solvents["Name"] == row["solvent additive"]
                     ]
-                    solvent_additive_bp = solvent_additive_row["BPt"]
-                    solvent_additive_mw = solvent_additive_row["MW"]
-                    solvent_additive_density = solvent_additive_row["Density"]
-                    solvent_additive_RI = solvent_additive_row["RI"]
-                    solvent_additive_dipole = solvent_additive_row["dipole"]
-                    solvent_additive_dD = solvent_additive_row["dD"]
-                    solvent_additive_dP = solvent_additive_row["dP"]
-                    solvent_additive_dH = solvent_additive_row["dH"]
-                    solvent_additive_dHDon = solvent_additive_row["dHDon"]
-                    solvent_additive_dHAcc = solvent_additive_row["dHAcc"]
-                    solvent_additive_log_kow = solvent_additive_row["logKow"]
-                    solvent_additive_mp = solvent_additive_row["MPt"]
-                    solvent_additive_trouton = solvent_additive_row["Trouton"]
-                    solvent_additive_RER = solvent_additive_row["RER"]
-                    solvent_additive_ParachorGA = solvent_additive_row["ParachorGA"]
-                    solvent_additive_RD = solvent_additive_row["RD"]
-                    solvent_additive_DCp = solvent_additive_row["DCp"]
-                    solvent_additive_logn = solvent_additive_row["log_n"]
-                    solvent_additive_SurfTen = solvent_additive_row["SurfTen"]
+                    solvent_additive_bp = solvent_additive_row["BPt"].values[0]
+                    solvent_additive_mw = solvent_additive_row["MW"].values[0]
+                    solvent_additive_density = solvent_additive_row["Density"].values[0]
+                    solvent_additive_RI = solvent_additive_row["RI"].values[0]
+                    solvent_additive_dipole = solvent_additive_row["dipole"].values[0]
+                    solvent_additive_dD = solvent_additive_row["dD"].values[0]
+                    solvent_additive_dP = solvent_additive_row["dP"].values[0]
+                    solvent_additive_dH = solvent_additive_row["dH"].values[0]
+                    solvent_additive_dHDon = solvent_additive_row["dHDon"].values[0]
+                    solvent_additive_dHAcc = solvent_additive_row["dHAcc"].values[0]
+                    solvent_additive_log_kow = solvent_additive_row["logKow"].values[0]
+                    solvent_additive_mp = solvent_additive_row["MPt"].values[0]
+                    solvent_additive_trouton = solvent_additive_row["Trouton"].values[0]
+                    solvent_additive_RER = solvent_additive_row["RER"].values[0]
+                    solvent_additive_ParachorGA = solvent_additive_row[
+                        "ParachorGA"
+                    ].values[0]
+                    solvent_additive_RD = solvent_additive_row["RD"].values[0]
+                    solvent_additive_DCp = solvent_additive_row["DCp"].values[0]
+                    solvent_additive_logn = solvent_additive_row["log_n"].values[0]
+                    solvent_additive_SurfTen = solvent_additive_row["SurfTen"].values[0]
                 except:
                     solvent_additive_bp = 0
                     solvent_additive_mw = 0
@@ -962,7 +984,7 @@ class DAPairs:
                         "solvent_MW": solvent_mw,
                         "solvent_dD": solvent_dD,
                         "solvent_dP": solvent_dP,
-                        "solvent_log_Kow": solvent_log_kow,
+                        "solvent_log_kow": solvent_log_kow,
                         "solvent_MPt": solvent_mp,
                         "solvent_dH": solvent_dH,
                         "solvent_dHDon": solvent_dHDon,
@@ -990,7 +1012,7 @@ class DAPairs:
                         "solvent_additive_dHDon": solvent_additive_dHDon,
                         "solvent_additive_dHAcc": solvent_additive_dHAcc,
                         "solvent_additive_trouton": solvent_additive_trouton,
-                        "solvent_additive_log_Kow": solvent_additive_log_kow,
+                        "solvent_additive_log_kow": solvent_additive_log_kow,
                         "solvent_additive_RER": solvent_additive_RER,
                         "solvent_additive_ParachorGA": solvent_additive_ParachorGA,
                         "solvent_additive_RD": solvent_additive_RD,

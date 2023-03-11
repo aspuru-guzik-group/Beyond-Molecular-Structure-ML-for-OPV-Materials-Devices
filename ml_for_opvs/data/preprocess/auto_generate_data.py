@@ -109,7 +109,7 @@ from ml_for_opvs.data.preprocess.OPV_Min.clean_device_params import ParameterCle
 # # concatenate for acceptors
 # unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
 # acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
-print("Finished Step 2")
+# print("Finished Step 2")
 
 # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 # smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV) # DO NOT RUN, BigSMILES was partially automated and manually done.
@@ -128,10 +128,10 @@ pairings.create_master_csv(MASTER_ML_DATA)
 
 # Step 4c - Remove anomalies!
 # Go to ml_for_opvs > data > error_correction > remove_anomaly.py
-# anomaly = Anomaly(MASTER_ML_DATA)
-# anomaly.remove_anomaly(MASTER_ML_DATA)
+anomaly = Anomaly(MASTER_ML_DATA)
+anomaly.remove_anomaly(MASTER_ML_DATA)
 # anomaly.remove_anomaly(MASTER_ML_DATA_PLOT)
-# anomaly.correct_anomaly(MASTER_ML_DATA)
+anomaly.correct_anomaly(MASTER_ML_DATA)
 # anomaly.correct_anomaly(MASTER_ML_DATA_PLOT)
 
 # # Step 4c - Fill empty values for Thermal Annealing, and solvent_additives
