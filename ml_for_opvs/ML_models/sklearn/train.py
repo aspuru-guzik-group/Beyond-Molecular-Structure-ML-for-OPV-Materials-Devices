@@ -382,7 +382,7 @@ def main(config: dict):
             )
         else:
             model_dir_path: Path = results_path / "{}".format(config["model_type"])
-        feature_dir_path: Path = model_dir_path / "{}".format(config["feature_names"])
+        feature_dir_path: Path = model_dir_path / "{}".format(config["feature_set"])
         target_dir_path: Path = feature_dir_path / "{}".format(config["target_name"])
         # create folders if not present
         try:
@@ -500,6 +500,12 @@ if __name__ == "__main__":
         type=str,
         default=None,
         help="Choose input features. Format is: ex. D_A_ratio_m_m,solvent",
+    )
+    parser.add_argument(
+        "--feature_set",
+        type=str,
+        default=None,
+        help="Choose input features. Format is: ex. fabrication_wo_solid,solvent_properties",
     )
     parser.add_argument(
         "--target_name",

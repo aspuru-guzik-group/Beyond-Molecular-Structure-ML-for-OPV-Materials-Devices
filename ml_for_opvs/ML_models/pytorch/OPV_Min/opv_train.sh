@@ -1,5 +1,5 @@
 #!/bin/bash
-model_types=('NN' 'LSTM') # 'LSTM'
+model_types=('NN') # 'LSTM'
 
 # 1
 input_rep=("fingerprint")
