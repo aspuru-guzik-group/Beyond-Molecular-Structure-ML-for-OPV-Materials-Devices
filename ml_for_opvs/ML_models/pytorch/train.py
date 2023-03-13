@@ -123,9 +123,7 @@ def main(config: dict):
                 input_test_array,
                 max_input_length,
             ) = process_features(  # additional features are added at the end of array
-                train_df[column_names],
-                test_df[column_names],
-                input_rep_bool
+                train_df[column_names], test_df[column_names], input_rep_bool
             )
             config["input_size"] = max_input_length
             model = NNModel(config)
@@ -140,9 +138,7 @@ def main(config: dict):
                 input_test_array,
                 max_input_length,
             ) = process_features_LM(  # additional features are added at the end of array
-                train_df[column_names],
-                test_df[column_names],
-                input_rep_bool
+                train_df[column_names], test_df[column_names], input_rep_bool
             )
             config["vocab_size"] = max_input_length
             model = LSTMModel(config)
@@ -477,6 +473,11 @@ if __name__ == "__main__":
         "--feature_names",
         type=str,
         help="Choose input features. Format is: ex. SMILES,T_K,P_Mpa - Always put representation at the front.",
+    )
+    parser.add_argument(
+        "--feature_set",
+        type=str,
+        help="Choose input features. Format is: ex. fabrication_wo_solid,solvent_properties - Always put representation at the front.",
     )
     parser.add_argument(
         "--target_name",

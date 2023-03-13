@@ -1303,5 +1303,5 @@ class DAPairs:
 # Go to rdkit_frag.py (if needed)
 
 # Lookup missing OPVs from preprocessed vs. Google Sheets
-# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-# pairings.lookup_missing(MASTER_ML_DATA)
+pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV, SOLVENT_DATA)
+pairings.lookup_missing(MASTER_ML_DATA)

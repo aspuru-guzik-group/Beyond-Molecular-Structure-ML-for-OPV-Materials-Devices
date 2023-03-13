@@ -68,7 +68,7 @@ for ir in ${input_rep[@]}; do
                             then
                                 feature_clause+=",$fnd"
                             fi
-                            python ../train.py --train_path $train_path  --test_path $test_path --input_representation $irf --feature_names $feature_clause --target_name $tn --model_type $mt --multi_output_type $mot --hyperparameter_optimization True --hyperparameter_space_path ./opv_hpo_space.json --results_path ../../../training/OPV_Min/$ir/result_$fsg --random_state 22
+                            python ../train.py --train_path $train_path  --test_path $test_path --input_representation $irf --feature_names $feature_clause --feature_set $fsg",solvent_properties" --target_name $tn --model_type $mt --multi_output_type $mot --hyperparameter_optimization True --hyperparameter_space_path ./opv_hpo_space.json --results_path ../../../training/OPV_Min/$ir/result_$fsg --random_state 22
                             # sbatch opv_train_submit.sh $train_path  $test_path $feature_clause $tn $mt $ir $irf ${input_rep_filename_dict[$ir]} $fsg
                         done
                     done
