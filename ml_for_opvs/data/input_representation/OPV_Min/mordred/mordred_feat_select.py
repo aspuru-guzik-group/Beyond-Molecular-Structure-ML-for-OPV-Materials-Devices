@@ -61,45 +61,119 @@ device = {"active_layer_thickness_nm", "hole_contact_layer", "electron_contact_l
 device_wo_thickness = {"hole_contact_layer", "electron_contact_layer"}
 
 solvent = {
-    "solvent_BP",
-    "solvent_MP",
+    "solvent_BPt",
+    "solvent_MPt",
+    "solvent_MW",
     "solvent_density",
-    "solvent_dielectric",
     "solvent_dipole",
-    "solvent_log_pow",
-    "solvent_disp",
-    "solvent_h_bond",
-    "solvent_polar",
+    "solvent_dD",
+    "solvent_RI",
+    "solvent_dP",
+    "solvent_dH",
+    "solvent_log_kow",
+    "solvent_dHDon",
+    "solvent_dHAcc",
+    "solvent_trouton",
+    "solvent_log_n",
+    "solvent_SurfTen",
+    "solvent_DCp",
+    "solvent_ParachorGA",
+    "solvent_RER",
+    "solvent_RD",
 }
 
 solvent_additive = {
-    "solvent_additive_BP",
-    "solvent_additive_MP",
+    "solvent_additive_BPt",
+    "solvent_additive_MPt",
+    "solvent_additive_MW",
     "solvent_additive_density",
-    "solvent_additive_dielectric",
     "solvent_additive_dipole",
-    "solvent_additive_log_pow",
-    "solvent_additive_disp",
-    "solvent_additive_h_bond",
-    "solvent_additive_polar",
+    "solvent_additive_dD",
+    "solvent_additive_RI",
+    "solvent_additive_dP",
+    "solvent_additive_dH",
+    "solvent_additive_log_kow",
+    "solvent_additive_dHDon",
+    "solvent_additive_dHAcc",
+    "solvent_additive_trouton",
+    "solvent_additive_log_n",
+    "solvent_additive_SurfTen",
+    "solvent_additive_DCp",
+    "solvent_additive_ParachorGA",
+    "solvent_additive_RER",
+    "solvent_additive_RD",
 }
 
 # create a dictionary with feature group's name as the key and the feature list as the value
+# feature_dict = {
+#     "molecules_only": list(molecules | output),
+#     "molecules": list(molecules | properties | output),
+#     "fabrication": list(molecules | properties | fabrication | output),
+#     "device": list(molecules | properties | fabrication | device | output),
+#     "electrical": list(
+#         molecules | properties | fabrication | device | electrical | output
+#     ),
+#     "fabrication_wo_solid": list(
+#         molecules | properties | fabrication_wo_solid | output
+#     ),
+#     "device_wo_thickness": list(
+#         molecules | properties | fabrication_wo_solid | device_wo_thickness | output
+#     ),
+#     "full": list(molecules | properties | fabrication | device | electrical | output),
+# }
+
 feature_dict = {
-    "molecules_only": list(molecules | output),
-    "molecules": list(molecules | properties | output),
-    "fabrication": list(molecules | properties | fabrication | output),
-    "device": list(molecules | properties | fabrication | device | output),
+    "molecules_only": list(molecules | solvent | solvent_additive | output),
+    "molecules": list(molecules | properties | solvent | solvent_additive | output),
+    "fabrication": list(
+        molecules | properties | fabrication | solvent | solvent_additive | output
+    ),
+    "device": list(
+        molecules
+        | properties
+        | fabrication
+        | device
+        | solvent
+        | solvent_additive
+        | output
+    ),
     "electrical": list(
-        molecules | properties | fabrication | device | electrical | output
+        molecules
+        | properties
+        | fabrication
+        | device
+        | electrical
+        | solvent
+        | solvent_additive
+        | output
     ),
     "fabrication_wo_solid": list(
-        molecules | properties | fabrication_wo_solid | output
+        molecules
+        | properties
+        | fabrication_wo_solid
+        | solvent
+        | solvent_additive
+        | output
     ),
     "device_wo_thickness": list(
-        molecules | properties | fabrication_wo_solid | device_wo_thickness | output
+        molecules
+        | properties
+        | fabrication_wo_solid
+        | device_wo_thickness
+        | solvent
+        | solvent_additive
+        | output
     ),
-    "full": list(molecules | properties | fabrication | device | electrical | output),
+    "full": list(
+        molecules
+        | properties
+        | fabrication
+        | device
+        | electrical
+        | solvent
+        | solvent_additive
+        | output
+    ),
 }
 
 

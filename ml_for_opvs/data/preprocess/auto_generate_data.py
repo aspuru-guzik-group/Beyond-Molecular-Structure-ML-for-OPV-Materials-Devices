@@ -250,6 +250,17 @@ fs.feat_select("fabrication")
 fs.feat_select("device")
 fs.feat_select("electrical")
 
+from ml_for_opvs.data.input_representation.OPV_Min.mordred.mordred_feat_select import fs
+
+fs.feat_select("molecules_only")
+fs.feat_select("molecules")
+fs.feat_select("fabrication_wo_solid")
+fs.feat_select("device_wo_thickness")
+fs.feat_select("full")
+fs.feat_select("fabrication")
+fs.feat_select("device")
+fs.feat_select("electrical")
+
 # Cross-Validation
 # Run cross_valid_data_generate.sh in cmd line
 print("Finished all pre-processing")

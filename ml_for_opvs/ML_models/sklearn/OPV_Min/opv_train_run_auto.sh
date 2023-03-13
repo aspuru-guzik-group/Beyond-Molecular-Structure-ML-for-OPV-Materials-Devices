@@ -8,7 +8,7 @@ declare -A input_rep_filename_dict
 input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["smiles"]="smiles" ["mordred"]="mordred" ["mordred_pca"]="mordred_pca" ["graphembed"]="graphembed")
 
 # 2
-feat_select_group=("fabrication_wo_solid") # "fabrication_wo_solid" "device_wo_thickness"
+feat_select_group=("fabrication_wo_solid" "device_wo_thickness") # "fabrication_wo_solid" "device_wo_thickness"
 
 # 3
 declare -a input_rep_features
@@ -17,7 +17,7 @@ declare -a input_rep_features
 declare -a feature_name_dict
 
 # 5
-target_name=("calc_PCE_percent") #calc_PCE_percent, FF_percent, Jsc_mA_cm_pow_neg2, Voc_V
+target_name=("calc_PCE_percent" "FF_percent" "Jsc_mA_cm_pow_neg2" "Voc_V") #"calc_PCE_percent" "FF_percent" "Jsc_mA_cm_pow_neg2" "Voc_V"
 
 # 6
 model_type=("RF" "XGBoost" "SVM") # "RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN"
@@ -32,9 +32,9 @@ for ir in ${input_rep[@]}; do
             ;;
             "materials_only") feature_name_dict=("''" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV")
             ;;
-            "fabrication_wo_solid") feature_name_dict=("HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent")
+            "fabrication_wo_solid") feature_name_dict=("HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent,solvent_BPt,solvent_density,solvent_dD,solvent_RI,solvent_MW,solvent_dP,solvent_dH,solvent_log_kow,solvent_MPt,solvent_dHDon,solvent_dHAcc,solvent_trouton,solvent_dipole,solvent_RER,solvent_ParachorGA,solvent_RD,solvent_DCp,solvent_log_n,solvent_SurfTen,solvent_additive_BPt,solvent_additive_density,solvent_additive_dD,solvent_additive_RI,solvent_additive_MW,solvent_additive_dP,solvent_additive_dH,solvent_additive_log_kow,solvent_additive_MPt,solvent_additive_dHDon,solvent_additive_dHAcc,solvent_additive_trouton,solvent_additive_dipole,solvent_additive_RER,solvent_additive_ParachorGA,solvent_additive_RD,solvent_additive_DCp,solvent_additive_log_n,solvent_additive_SurfTen") # "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent"
             ;;
-            "device_wo_thickness") feature_name_dict=("''" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent,hole_contact_layer,electron_contact_layer")
+            "device_wo_thickness") feature_name_dict=("HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent,hole_contact_layer,electron_contact_layer,solvent_BPt,solvent_density,solvent_dD,solvent_RI,solvent_MW,solvent_dP,solvent_dH,solvent_log_kow,solvent_MPt,solvent_dHDon,solvent_dHAcc,solvent_trouton,solvent_dipole,solvent_RER,solvent_ParachorGA,solvent_RD,solvent_DCp,solvent_log_n,solvent_SurfTen,solvent_additive_BPt,solvent_additive_density,solvent_additive_dD,solvent_additive_RI,solvent_additive_MW,solvent_additive_dP,solvent_additive_dH,solvent_additive_log_kow,solvent_additive_MPt,solvent_additive_dHDon,solvent_additive_dHAcc,solvent_additive_trouton,solvent_additive_dipole,solvent_additive_RER,solvent_additive_ParachorGA,solvent_additive_RD,solvent_additive_DCp,solvent_additive_log_n,solvent_additive_SurfTen") # "''" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent,hole_contact_layer,electron_contact_layer"
             ;;
         esac
         for fnd in ${feature_name_dict[@]}; do

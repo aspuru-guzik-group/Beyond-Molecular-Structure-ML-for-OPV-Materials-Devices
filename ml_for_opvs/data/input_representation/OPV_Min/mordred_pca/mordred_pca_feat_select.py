@@ -62,27 +62,37 @@ device = {"active_layer_thickness_nm", "hole_contact_layer", "electron_contact_l
 device_wo_thickness = {"hole_contact_layer", "electron_contact_layer"}
 
 solvent = {
-    "solvent_BP",
-    "solvent_MP",
+    "solvent_BPt",
+    "solvent_MPt",
     "solvent_density",
-    "solvent_dielectric",
-    "solvent_dipole",
-    "solvent_log_pow",
-    "solvent_disp",
-    "solvent_h_bond",
-    "solvent_polar",
+    "solvent_dD",
+    "solvent_RI",
+    "solvent_dP",
+    "solvent_dH",
+    "solvent_log_kow",
+    "solvent_dHDon",
+    "solvent_dHAcc",
+    "solvent_trouton",
+    "solvent_log_n",
+    "solvent_SurfTen",
+    "solvent_DCp",
 }
 
 solvent_additive = {
-    "solvent_additive_BP",
-    "solvent_additive_MP",
+    "solvent_additive_BPt",
+    "solvent_additive_MPt",
     "solvent_additive_density",
-    "solvent_additive_dielectric",
-    "solvent_additive_dipole",
-    "solvent_additive_log_pow",
-    "solvent_additive_disp",
-    "solvent_additive_h_bond",
-    "solvent_additive_polar",
+    "solvent_additive_dD",
+    "solvent_additive_RI",
+    "solvent_additive_dP",
+    "solvent_additive_dH",
+    "solvent_additive_log_kow",
+    "solvent_additive_dHDon",
+    "solvent_additive_dHAcc",
+    "solvent_additive_trouton",
+    "solvent_additive_log_n",
+    "solvent_additive_SurfTen",
+    "solvent_additive_DCp",
 }
 
 # create a dictionary with feature group's name as the key and the feature list as the value
