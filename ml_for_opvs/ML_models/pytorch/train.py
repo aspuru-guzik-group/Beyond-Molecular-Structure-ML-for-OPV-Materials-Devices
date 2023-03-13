@@ -110,7 +110,6 @@ def main(config: dict):
             input_rep_bool,
         )
         config["output_size"] = len(config["target_name"].split(","))
-
         # Choose PyTorch Model
         if config["model_type"] == "NN":
             # process SMILES vs. Fragments vs. Fingerprints. How to handle that? handle this and tokenization in pipeline
@@ -123,7 +122,7 @@ def main(config: dict):
                 input_test_array,
                 max_input_length,
             ) = process_features(  # additional features are added at the end of array
-                train_df[column_names], test_df[column_names], input_rep_bool
+                train_df[column_names], test_df[column_names], input_rep_bool, config["input_representation"]
             )
             config["input_size"] = max_input_length
             model = NNModel(config)
@@ -138,7 +137,7 @@ def main(config: dict):
                 input_test_array,
                 max_input_length,
             ) = process_features_LM(  # additional features are added at the end of array
-                train_df[column_names], test_df[column_names], input_rep_bool
+                train_df[column_names], test_df[column_names], input_rep_bool, config["input_representation"]
             )
             config["vocab_size"] = max_input_length
             model = LSTMModel(config)

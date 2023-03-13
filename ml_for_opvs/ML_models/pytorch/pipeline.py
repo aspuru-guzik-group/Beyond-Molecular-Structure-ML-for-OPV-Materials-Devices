@@ -79,13 +79,14 @@ def filter_nan(df_to_filter):
     pass
 
 
-def process_features(train_feature_df, test_feature_df, input_rep_bool):
+def process_features(train_feature_df, test_feature_df, input_rep_bool, input_representation_name):
     """Processes various types of features (str, float, list) and returns "training ready" arrays.
 
     Args:
         train_feature_df (pd.DataFrame): subset of train_df with selected features.
         test_feature_df (pd.DataFrame): subset of test_df with selected features.
         input_rep_bool (bool): True = presence of input_representation. False = absence of input_representation (only use features).
+        input_representation_name (str): name of input representation
 
     Returns:
         input_train_array (np.array): tokenized, padded array ready for training
@@ -97,7 +98,7 @@ def process_features(train_feature_df, test_feature_df, input_rep_bool):
     column_headers = train_feature_df.columns
     for column in column_headers:
         if input_rep_bool:
-            if type(train_feature_df[column][1]) == str:
+            if column == input_representation_name:
                 input_representation = column
         else:
             input_representation = None
@@ -160,6 +161,7 @@ def process_features(train_feature_df, test_feature_df, input_rep_bool):
         except:  # The input_value was not a list, so ast.literal_eval will raise ValueError.
             input_instance = "str"
             input_value = concat_df[input_representation][1]
+        # print("input_value", input_value)
             # print("input_value is a string")
         if (
             input_instance == "list"
@@ -216,7 +218,7 @@ def process_features(train_feature_df, test_feature_df, input_rep_bool):
                 )
         else:
             raise TypeError("input_value is neither str or list. Fix it!")
-
+    # print("token2idx", token2idx)
     max_input_length = 0  # for padding and dimension for first layer of NN
     # processing training data
     input_train_list = []

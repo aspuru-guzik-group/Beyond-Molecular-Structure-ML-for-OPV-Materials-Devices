@@ -19,7 +19,7 @@ declare -a input_rep_features
 declare -a feature_name_dict
 
 # 5
-target_name=("Voc_V,FF_percent,Jsc_mA_cm_pow_neg2")
+target_name=("Voc_V,FF_percent,Jsc_mA_cm_pow_neg2" "calc_PCE_percent")
 
 # 6
 model_type=("NN")
