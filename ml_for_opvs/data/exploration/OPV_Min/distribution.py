@@ -18,7 +18,7 @@ MASTER_ML_DATA = pkg_resources.resource_filename(
 )
 
 
-def plot_feature_distributions(dataset: pd.DataFrame):
+def plot_feature_distributions(dataset: pd.DataFrame, drop_columns: list = None):
     """
     Function that plots the distribution of all variables in the dataset. The function only drops nan values in one column at a time.
     The function then plots the distributions in one figure, and saves the figure as a png file. The figure should have a length-to-width ratio of 3:2.
@@ -27,7 +27,7 @@ def plot_feature_distributions(dataset: pd.DataFrame):
         dataset: Pre-processed dataset of OPV device parameters
     """
     df = dataset.copy()  # make a copy of the dataset
-    df.drop(["ref", "Donor", "Acceptor", "Donor_SMILES", "Donor_Big_SMILES", "Donor_SELFIES", "Acceptor_SMILES", "Acceptor_Big_SMILES", "Acceptor_SELFIES"], axis=1, inplace=True)  # drop the columns that won't be used in the analysis
+    df.drop(drop_columns, axis=1, inplace=True)  # drop the columns that won't be used in the analysis
 
     df_columns = len(df.columns)  # get the number of columns in the dataset
     # find the number of rows and columns of the figure
@@ -135,4 +135,4 @@ if __name__ == "__main__":
     for pair in pairs_combinations:
         plot_heatmap_of_pair_frequency(opv_dataset, pair[0], pair[1])
 
-    plot_feature_distributions(opv_dataset)
+    plot_feature_distributions(opv_dataset, ["ref", "Donor", "Acceptor", "Donor_SMILES", "Donor_Big_SMILES", "Donor_SELFIES", "Acceptor_SMILES", "Acceptor_Big_SMILES", "Acceptor_SELFIES"])

@@ -21,11 +21,12 @@ def tokenize_from_dict(token2idx: dict, input_value: Union[list, str]) -> list:
     Returns:
         tokenized_list (list): list of tokenized inputs
     """
-    tokenized_list: list = []
-    for token in input_value:
-        tokenized_list.append(token2idx[token])
+    return [token2idx[token] for token in input_value]
+    # tokenized_list: list = []
+    # for token in input_value:
+        # tokenized_list.append(token2idx[token])
 
-    return tokenized_list
+    # return tokenized_list
 
 
 def pad_input(input_list_of_list, max_input_length) -> list:
@@ -85,14 +86,12 @@ def process_features(
         input_train_array (np.array): tokenized, padded array ready for training
         input_test_array (np.array): tokenized, padded array ready for test
     """
+    # TODO: What's this for?
     assert len(train_feature_df) > 1, train_feature_df
     assert len(test_feature_df) > 1, test_feature_df
     # First in column_headers will always be input_representation
-    column_headers = train_feature_df.columns
-    if input_rep_bool:
-        input_representation = column_headers[0]
-    else:
-        input_representation = None
+    column_headers: list = train_feature_df.columns
+    input_representation = column_headers[0] if input_rep_bool else None
 
     # calculate feature scale dict
     feature_scale_dict: dict = {}
@@ -114,6 +113,7 @@ def process_features(
 
     # TOKENIZATION
     # must loop through entire dataframe for token2idx
+    # ATTN: What's the goal here?
     input_instance = None
     if input_rep_bool:
         try:
@@ -124,6 +124,7 @@ def process_features(
             else:
                 input_instance = "list"
                 # print("input_value is a list which could be: 1) fragments or 2) SMILES")
+        # BUG: A simple except is too broad
         except:  # The input_value was not a list, so ast.literal_eval will raise valueError.
             input_instance = "str"
             input_value = concat_df[input_representation][1]
