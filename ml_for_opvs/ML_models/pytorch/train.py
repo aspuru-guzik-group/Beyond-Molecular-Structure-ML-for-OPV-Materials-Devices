@@ -145,34 +145,34 @@ def main(config: dict):
         # Create validation set from training set
         # NOTE: Reasoning is because sklearn uses BayesSearchCV on the training set for Hyperparameter Optimization. BayesSearchCV uses 5-Fold Cross-validation on the training set. As a consequence, 80% of the training data is used for validation of hyperparameter optimization. This means only 64% of total data is used for training.
         # NOTE: Solution is to recreate the validation fold from the training data for hyperparameter optimization.
-        (
-            input_train_array,
-            input_valid_array,
-            target_train_array,
-            target_valid_array,
-        ) = train_test_split(
-            input_train_array,
-            target_train_array,
-            test_size=0.2,
-            random_state=config["random_state"],
-        )
+        # (
+        #     input_train_array,
+        #     input_valid_array,
+        #     target_train_array,
+        #     target_valid_array,
+        # ) = train_test_split(
+        #     input_train_array,
+        #     target_train_array,
+        #     test_size=0.2,
+        #     random_state=config["random_state"],
+        # )
 
         # Create PyTorch Dataset and DataLoader
         train_set = PolymerDataset(
             input_train_array, target_train_array, config["random_state"]
         )
-        valid_set = PolymerDataset(
-            input_valid_array, target_valid_array, config["random_state"]
-        )
+        # valid_set = PolymerDataset(
+        #     input_valid_array, target_valid_array, config["random_state"]
+        # )
         test_set = PolymerDataset(
             input_test_array, target_test_array, config["random_state"]
         )
         train_dataloader = DataLoader(
             train_set, batch_size=config["train_batch_size"], shuffle=True
         )
-        valid_dataloader = DataLoader(
-            valid_set, batch_size=config["test_batch_size"], shuffle=False
-        )
+        # valid_dataloader = DataLoader(
+        #     valid_set, batch_size=config["test_batch_size"], shuffle=False
+        # )
         test_dataloader = DataLoader(
             test_set, batch_size=config["test_batch_size"], shuffle=False
         )
@@ -203,9 +203,9 @@ def main(config: dict):
             log_count += 1
             log_dir: Path = log_dir.parent / str(log_count)
         train_log: Path = log_dir / "train"
-        valid_log: Path = log_dir / "valid"
+        # valid_log: Path = log_dir / "valid"
         train_writer: SummaryWriter = SummaryWriter(log_dir=train_log)
-        valid_writer: SummaryWriter = SummaryWriter(log_dir=valid_log)
+        # valid_writer: SummaryWriter = SummaryWriter(log_dir=valid_log)
 
         # Scheduler
         scheduler1 = LinearLR(
@@ -290,56 +290,56 @@ def main(config: dict):
 
             ## VALIDATION LOOP
             # TODO: perform on validation set
-            model.train(False)
-            for i, valid_data in enumerate(valid_dataloader):
-                valid_inputs, valid_targets = valid_data
-                valid_inputs, valid_targets = valid_inputs.to(
-                    device="cuda"
-                ), valid_targets.to(device="cuda")
-                # convert to float
-                valid_inputs, valid_targets = (
-                    valid_inputs.float(),
-                    valid_targets.float(),
-                )
-                # Make predictions for this batch
-                valid_outputs = model(valid_inputs)
-                # Compute the loss
-                valid_loss = loss_fn(valid_outputs, valid_targets)
+            # model.train(False)
+            # for i, valid_data in enumerate(valid_dataloader):
+            #     valid_inputs, valid_targets = valid_data
+            #     valid_inputs, valid_targets = valid_inputs.to(
+            #         device="cuda"
+            #     ), valid_targets.to(device="cuda")
+            #     # convert to float
+            #     valid_inputs, valid_targets = (
+            #         valid_inputs.float(),
+            #         valid_targets.float(),
+            #     )
+            #     # Make predictions for this batch
+            #     valid_outputs = model(valid_inputs)
+            #     # Compute the loss
+            #     valid_loss = loss_fn(valid_outputs, valid_targets)
 
-                # Early Stopping
-                # current_loss = valid_loss
-                # if current_loss > last_loss:
-                #     trigger_times += 1
-                #     # print('Trigger Times:', trigger_times)
+            #     # Early Stopping
+            #     # current_loss = valid_loss
+            #     # if current_loss > last_loss:
+            #     #     trigger_times += 1
+            #     #     # print('Trigger Times:', trigger_times)
 
-                #     if trigger_times >= patience:
-                #         print('Early stopping!\nStart to test process.')
-                #         early_stop = True
-                #         break
-                # else:
-                #     # print('trigger times: 0')
-                #     trigger_times = 0
+            #     #     if trigger_times >= patience:
+            #     #         print('Early stopping!\nStart to test process.')
+            #     #         early_stop = True
+            #     #         break
+            #     # else:
+            #     #     # print('trigger times: 0')
+            #     #     trigger_times = 0
 
-                # last_loss = current_loss
+            #     # last_loss = current_loss
 
-                # Gather data and report
-                running_valid_loss += float(valid_loss)
-                # Gather number of examples trained
-                n_examples += len(valid_inputs)
-                # Gather number of iterations (batches) trained
-                n_valid_iter += 1
+            #     # Gather data and report
+            #     running_valid_loss += float(valid_loss)
+            #     # Gather number of examples trained
+            #     n_examples += len(valid_inputs)
+            #     # Gather number of iterations (batches) trained
+            #     n_valid_iter += 1
 
-            # Early Stopping
-            # if early_stop:
-            #     break
+            # # Early Stopping
+            # # if early_stop:
+            # #     break
 
-            valid_writer.add_scalar("loss_batch", valid_loss, n_examples)
-            valid_writer.add_scalar(
-                "loss_avg", running_valid_loss / n_valid_iter, n_examples
-            )
+            # valid_writer.add_scalar("loss_batch", valid_loss, n_examples)
+            # valid_writer.add_scalar(
+            #     "loss_avg", running_valid_loss / n_valid_iter, n_examples
+            # )
 
-            # Adjust learning rate
-            scheduler.step()
+            # # Adjust learning rate
+            # scheduler.step()
 
         # Inference
         # TODO: Perform on test set
@@ -417,7 +417,7 @@ def main(config: dict):
 
         # close SummaryWriter
         train_writer.close()
-        valid_writer.close()
+        # valid_writer.close()
     # make new file
     # summarize results
     progress_path: Path = target_dir_path / "progress_report.csv"
@@ -440,7 +440,6 @@ def main(config: dict):
         "mae_mean": mean(outer_mae),
         "mae_std": std(outer_mae),
         "num_of_data": len(input_train_array)
-        + len(input_valid_array)
         + len(input_test_array),
         "feature_length": max_input_length,
     }

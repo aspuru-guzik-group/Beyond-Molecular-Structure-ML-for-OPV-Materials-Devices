@@ -1236,6 +1236,21 @@ class DAPairs:
         missing_acceptor = sheets_acceptor - master_acceptor
 
         print(missing_donor, missing_acceptor)
+    
+    def create_master_ohe(self, master_file: str):
+        """
+        Generate a function that will one-hot encode the donor and acceptor molecules. 
+        Create one new column for the donor and acceptor one-hot encoded data.
+        """
+        master_data = pd.read_csv(master_data)
+        master_data["Donor_OHE"] = master_data["Donor"].apply(lambda x: self.one_hot_encode(x))
+        master_data["Acceptor_OHE"] = master_data["Acceptor"].apply(lambda x: self.one_hot_encode(x))
+        # concatenate both columns into a new column
+        master_data["Donor_Acceptor_OHE"] = master_data["Donor_OHE"] + master_data["Acceptor_OHE"]
+        master_data.to_csv(master_file, index=False)
+
+
+
 
 
 # Step 1
