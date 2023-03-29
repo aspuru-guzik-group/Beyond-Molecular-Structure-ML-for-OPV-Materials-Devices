@@ -79,7 +79,9 @@ def filter_nan(df_to_filter):
     pass
 
 
-def process_features(train_feature_df, test_feature_df, input_rep_bool, input_representation_name):
+def process_features(
+    train_feature_df, test_feature_df, input_rep_bool, input_representation_name
+):
     """Processes various types of features (str, float, list) and returns "training ready" arrays.
 
     Args:
@@ -162,7 +164,7 @@ def process_features(train_feature_df, test_feature_df, input_rep_bool, input_re
             input_instance = "str"
             input_value = concat_df[input_representation][1]
         # print("input_value", input_value)
-            # print("input_value is a string")
+        # print("input_value is a string")
         if (
             input_instance == "list"
         ):  # could be list of fragments or list of (augmented) SMILES or list of (augmented) manual frag strings.
@@ -904,6 +906,9 @@ def process_target(
     target_test_array = (target_test_array - target_min) / (target_max - target_min)
     target_train_array = np.expand_dims(target_train_array, axis=1)
     target_test_array = np.expand_dims(target_test_array, axis=1)
+
+    print("target_train_array", target_train_array)
+    assert False
 
     return target_train_array, target_test_array, target_max, target_min
 
