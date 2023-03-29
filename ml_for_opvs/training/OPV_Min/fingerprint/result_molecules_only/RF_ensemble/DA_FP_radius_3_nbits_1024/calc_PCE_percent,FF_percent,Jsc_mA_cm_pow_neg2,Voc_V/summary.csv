@@ -1,0 +1,2 @@
+Dataset,num_of_folds,Features,Targets,Model,r_mean,r_std,r2_mean,r2_std,rmse_mean,rmse_std,mae_mean,mae_std,num_of_data
+OPV_Min,5,DA_FP_radius_3_nbits_1024,"calc_PCE_percent,FF_percent,Jsc_mA_cm_pow_neg2,Voc_V",RF,0.7347955694277,0.027981453654989306,0.5312345860565356,0.050837854192742546,2.0884394735690783,0.15654725108734807,1.5722746545909774,0.11759843440111017,553

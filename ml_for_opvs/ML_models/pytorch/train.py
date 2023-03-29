@@ -376,8 +376,10 @@ def main(config: dict):
             ground_truth.extend(test_targets.tolist())
 
         # reverse min-max scaling
-        predictions: np.ndarray = scaler.inverse_transform(predictions)
-        ground_truth: np.ndarray = scaler.inverse_transform(ground_truth)
+        predictions: np.ndarray = scaler.inverse_transform(predictions).flatten()
+        ground_truth: np.ndarray = scaler.inverse_transform(ground_truth).flatten()
+        # print(f"{predictions=}")
+        # print(f"{ground_truth=}")
 
         # save model
         # NOTE: model is NOT saved because it takes up too much storage
@@ -389,7 +391,12 @@ def main(config: dict):
         results_path: Path = Path(os.path.abspath(config["results_path"]))
         model_dir_path: Path = results_path / "{}".format(config["model_type"])
         feature_dir_path: Path = model_dir_path / "{}".format(config["feature_names"])
-        target_dir_path: Path = feature_dir_path / "{}".format(config["feature_set"])
+        feature_set_dir_path: Path = feature_dir_path / "{}".format(
+            config["feature_set"]
+        )
+        target_dir_path: Path = feature_set_dir_path / "{}".format(
+            config["target_name"]
+        )
         # create folders if not present
         try:
             target_dir_path.mkdir(parents=True, exist_ok=True)
@@ -398,11 +405,15 @@ def main(config: dict):
         prediction_path: Path = target_dir_path / "prediction_{}.csv".format(fold)
         # export predictions
         prediction_columns: list = config["target_name"].split(",")
-        prediction_columns: list = ["predicted_{}".format(column) for column in prediction_columns]
+        prediction_columns: list = [
+            "predicted_{}".format(column) for column in prediction_columns
+        ]
         prediction_df: pd.DataFrame = pd.DataFrame(
             predictions, columns=prediction_columns
         )
-        for column, ground_truth_column in zip(config["target_name"].split(","), np.transpose(ground_truth)):
+        for column, ground_truth_column in zip(
+            config["target_name"].split(","), np.transpose(ground_truth)
+        ):
             prediction_df[column] = ground_truth_column
         print(prediction_df)
         prediction_df.to_csv(prediction_path, index=False)
@@ -450,8 +461,7 @@ def main(config: dict):
         "rmse_std": std(outer_rmse),
         "mae_mean": mean(outer_mae),
         "mae_std": std(outer_mae),
-        "num_of_data": len(input_train_array)
-        + len(input_test_array),
+        "num_of_data": len(input_train_array) + len(input_test_array),
         "feature_length": max_input_length,
     }
     summary_df: pd.DataFrame = pd.DataFrame.from_dict(summary_dict, orient="index")

@@ -5,6 +5,7 @@ from rdkit.Chem import AllChem
 from rdkit.Chem import Draw
 import csv
 import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
 
 pd.set_option("display.max_columns", 20)
 
@@ -63,6 +64,10 @@ SOLVENT_DATA = pkg_resources.resource_filename(
 
 INTERLAYER_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/raw/OPV_Min/interlayer_properties.csv"
+)
+
+MASTER_OHE_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/input_representation/OPV_Min/ohe/master_ohe.csv"
 )
 
 
@@ -1236,21 +1241,29 @@ class DAPairs:
         missing_acceptor = sheets_acceptor - master_acceptor
 
         print(missing_donor, missing_acceptor)
-    
-    def create_master_ohe(self, master_file: str):
-        """
-        Generate a function that will one-hot encode the donor and acceptor molecules. 
-        Create one new column for the donor and acceptor one-hot encoded data.
-        """
-        master_data = pd.read_csv(master_data)
-        master_data["Donor_OHE"] = master_data["Donor"].apply(lambda x: self.one_hot_encode(x))
-        master_data["Acceptor_OHE"] = master_data["Acceptor"].apply(lambda x: self.one_hot_encode(x))
-        # concatenate both columns into a new column
-        master_data["Donor_Acceptor_OHE"] = master_data["Donor_OHE"] + master_data["Acceptor_OHE"]
-        master_data.to_csv(master_file, index=False)
 
 
-
+def create_master_ohe(master_data: str, master_ohe: str):
+    """
+    Generate a function that will one-hot encode the all of the donor and acceptor molecules. Each unique molecule has a unique number.
+    Create one new column for the donor and acceptor one-hot encoded data.
+    """
+    master_df: pd.DataFrame = pd.read_csv(master_data)
+    donor_ohe = OneHotEncoder()
+    acceptor_ohe = OneHotEncoder()
+    donor_ohe.fit(master_df["Donor"].values.reshape(-1, 1))
+    acceptor_ohe.fit(master_df["Acceptor"].values.reshape(-1, 1))
+    donor_ohe_data = donor_ohe.transform(master_df["Donor"].values.reshape(-1, 1))
+    acceptor_ohe_data = acceptor_ohe.transform(
+        master_df["Acceptor"].values.reshape(-1, 1)
+    )
+    # print(f"{donor_ohe_data=}")
+    master_df["Donor_ohe"] = donor_ohe_data.toarray().tolist()
+    master_df["Acceptor_ohe"] = acceptor_ohe_data.toarray().tolist()
+    # print(f"{master_df.head()}")
+    # combine donor and acceptor ohe data into one column
+    master_df["DA_ohe"] = master_df["Donor_ohe"] + master_df["Acceptor_ohe"]
+    master_df.to_csv(master_ohe, index=False)
 
 
 # Step 1
@@ -1318,5 +1331,6 @@ class DAPairs:
 # Go to rdkit_frag.py (if needed)
 
 # Lookup missing OPVs from preprocessed vs. Google Sheets
-pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV, SOLVENT_DATA)
-pairings.lookup_missing(MASTER_ML_DATA)
+# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV, SOLVENT_DATA)
+# pairings.lookup_missing(MASTER_ML_DATA)
+# create_master_ohe(MASTER_ML_DATA, MASTER_OHE_DATA)

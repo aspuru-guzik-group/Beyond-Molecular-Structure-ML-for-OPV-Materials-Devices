@@ -2,15 +2,15 @@
 model_types=('NN') # 'LSTM'
 
 # 1
-input_rep=("fingerprint")
+input_rep=("ohe")
 
 # 1.1
 declare -A input_rep_filename_dict
 
-input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["manual_frag"]="manual_frag" ["aug_SMILES"]="augment" ["smiles"]="smiles")
+input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["smiles"]="smiles" ["mordred"]="mordred" ["mordred_pca"]="mordred_pca" ["graphembed"]="graphembed" ["ohe"]="ohe")
 
 # 2
-feat_select_group=("full" "fabrication_wo_solid" "device_wo_thickness")
+feat_select_group=("molecules_only") #"fabrication_wo_solid" "device_wo_thickness"
 
 # 3
 declare -a input_rep_features
@@ -22,12 +22,12 @@ declare -a feature_name_dict
 target_name=("calc_PCE_percent")
 
 # 6
-model_type=("NN" "LSTM")
+model_type=("NN")
 
 for ir in ${input_rep[@]}; do
     for fsg in ${feat_select_group[@]}; do
         case "$fsg" in
-            "full") feature_name_dict=("''" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV")
+            "molecules_only") feature_name_dict=("''")
             ;;
             "fabrication_wo_solid") feature_name_dict=("''" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV" "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature")
             ;;
@@ -48,6 +48,7 @@ for ir in ${input_rep[@]}; do
                         ;;
                         "smiles") input_rep_features=("DA_SMILES" "DA_SELFIES" "DA_BigSMILES")
                         ;;
+                        "ohe") input_rep_features=("DA_ohe")
                     esac
                     # initialize train and test data paths as empty strings
                     train_path=" ../../../data/input_representation/OPV_Min/$ir/processed_${input_rep_filename_dict[$ir]}_$fsg/KFold"
@@ -60,7 +61,7 @@ for ir in ${input_rep[@]}; do
                             feature_clause+=",$fnd"
                         fi
                         # echo Running for $train_path  $test_path $feature_clause $tn $mt $ir $irf ${input_rep_filename_dict[$ir]} $fsg
-                        python ../train.py --train_path $train_path/input_train_[0-9].csv  --test_path $test_path/input_test_[0-9].csv --input_representation $irf --feature_names $feature_clause --target_name $tn --model_type $mt --model_config_path ../$mt/model_config.json --results_path ../../../training/OPV_Min/$ir/processed_${input_rep_filename_dict[$ir]}_$fsg --random_state 22
+                        python ../train.py --train_path $train_path/input_train_[0-9].csv  --test_path $test_path/input_test_[0-9].csv --input_representation $irf --feature_names $feature_clause --target_name $tn --model_type $mt --model_config_path ../$mt/model_config.json --results_path ../../../training/OPV_Min/$ir/result_$fsg --random_state 22
                         # sbatch opv_train_submit.sh $train_path  $test_path $feature_clause $tn $mt $ir $irf ${input_rep_filename_dict[$ir]} $fsg
                     done
                 done

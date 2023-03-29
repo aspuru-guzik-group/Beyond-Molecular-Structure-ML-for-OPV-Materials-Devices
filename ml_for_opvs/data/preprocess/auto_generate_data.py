@@ -20,6 +20,8 @@ from ml_for_opvs.data.preprocess.clean_donors_acceptors import (
     DAPairs,
     DonorClean,
     AcceptorClean,
+    create_master_ohe,
+    MASTER_OHE_DATA,
 )
 
 from ml_for_opvs.data.error_correction.OPV_Min.unique_opvs import (
@@ -171,6 +173,9 @@ create_master_fp(MASTER_ML_DATA, FP_DATA, 3, 512)
 create_smi_csv(MASTER_ML_DATA, MASTER_SMI_DATA)
 print("Finished Step 7")
 
+create_master_ohe(MASTER_ML_DATA, MASTER_OHE_DATA)
+
+
 # Run feature filters to create subsets of the dataset
 """
 molecules = {'Donor', 'Acceptor','DA_pair_aug', 'DA_pair_tokenized_aug'}
@@ -251,6 +256,19 @@ fs.feat_select("device")
 fs.feat_select("electrical")
 
 from ml_for_opvs.data.input_representation.OPV_Min.mordred.mordred_feat_select import fs
+
+fs.feat_select("molecules_only")
+fs.feat_select("molecules")
+fs.feat_select("fabrication_wo_solid")
+fs.feat_select("device_wo_thickness")
+fs.feat_select("full")
+fs.feat_select("fabrication")
+fs.feat_select("device")
+fs.feat_select("electrical")
+
+from ml_for_opvs.data.input_representation.OPV_Min.ohe.ohe_feat_select import (
+    fs,
+)
 
 fs.feat_select("molecules_only")
 fs.feat_select("molecules")

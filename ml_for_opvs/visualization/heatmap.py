@@ -56,7 +56,7 @@ def heatmap(config: dict):
     # Order of X/Y-axes
     if config["config_name"] == "grid_search":
         x = [
-            # "MLR", # ignored for rmse and mae
+            "MLR",  # ignored for rmse and mae
             "Lasso",
             "KRR",
             "KNN",
@@ -78,9 +78,12 @@ def heatmap(config: dict):
             "DA_SELFIES",
             "DA_BigSMILES",
             "DA_SMILES",
+            "DA_ohe",
             "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV",
             "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV",
         ]
+        x_name = "Model"
+        y_name = "Feature_Names"
     elif config["config_name"] == "grid_search_multi":
         x = [
             "RF",
@@ -108,11 +111,13 @@ def heatmap(config: dict):
             "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV",
             "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent",
         ]
+        x_name = ""
+        y_name = ""
     # Heatmap
     # NOTE: You have to change the pivot columns depending on your plot!
-    print(summary)
-    mean_summary: pd.DataFrame = summary.pivot("Targets", "Model", mean_metric)
-    mean_summary: pd.DataFrame = mean_summary.reindex(index=y, columns=x)
+    print(f"{mean_metric=}")
+    mean_summary: pd.DataFrame = summary.pivot(x_name, y_name, mean_metric)
+    # mean_summary: pd.DataFrame = mean_summary.reindex(index=y, columns=x)
     summary_annotated: pd.DataFrame = deepcopy(summary)
     with pd.option_context(
         "display.max_rows",
@@ -131,12 +136,24 @@ def heatmap(config: dict):
 
     # NOTE: You have to change the pivot columns depending on your plot!
     summary_annotated: pd.DataFrame = summary_annotated.pivot(
-        "Targets", "Model", "annotate_label"
+        x_name, y_name, "annotate_label"
     )
-    summary_annotated: pd.DataFrame = summary_annotated.reindex(index=y, columns=x)
-    summary_annotated: np.ndarray = summary_annotated.to_numpy()
+    mean_summary: pd.DataFrame = mean_summary.T
+    summary_annotated: pd.DataFrame = summary_annotated.T
+    # summary_annotated: pd.DataFrame = summary_annotated.reindex(index=y, columns=x)
 
-    sns.heatmap(
+    summary_annotated: np.ndarray = summary_annotated.to_numpy()
+    with pd.option_context(
+        "display.max_rows",
+        None,
+        "display.max_columns",
+        None,
+        "display.precision",
+        3,
+    ):
+        print(mean_summary)
+        print(summary_annotated)
+    ax = sns.heatmap(
         mean_summary,
         annot=summary_annotated,
         cmap="viridis",

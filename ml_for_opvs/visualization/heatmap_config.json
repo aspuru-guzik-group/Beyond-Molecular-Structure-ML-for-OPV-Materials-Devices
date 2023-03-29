@@ -3,7 +3,18 @@
         "datasets": [
             "OPV_Min"
         ],
-        "models": [],
+        "models": [
+            "RF",
+            "XGBoost",
+            "Lasso",
+            "MLR",
+            "SVM",
+            "NN",
+            "GP",
+            "KNN",
+            "KRR",
+            "NGBoost"
+        ],
         "input_representations": [],
         "features": [
             "result_molecules_only"

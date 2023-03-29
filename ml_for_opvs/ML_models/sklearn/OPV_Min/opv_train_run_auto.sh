@@ -1,14 +1,14 @@
 #!/bin/bash
 # 1
-input_rep=("fingerprint") # "fingerprint" "BRICS" "smiles"
+input_rep=("fingerprint" "ohe" "mordred") # "fingerprint" "BRICS" "smiles"
 
 # 1.1
 declare -A input_rep_filename_dict
 
-input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["smiles"]="smiles" ["mordred"]="mordred" ["mordred_pca"]="mordred_pca" ["graphembed"]="graphembed")
+input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["smiles"]="smiles" ["mordred"]="mordred" ["mordred_pca"]="mordred_pca" ["graphembed"]="graphembed" ["ohe"]="ohe")
 
 # 2
-feat_select_group=("fabrication_wo_solid" "device_wo_thickness") # "fabrication_wo_solid" "device_wo_thickness"
+feat_select_group=("molecules_only") # "fabrication_wo_solid" "device_wo_thickness"
 
 # 3
 declare -a input_rep_features
@@ -17,13 +17,13 @@ declare -a input_rep_features
 declare -a feature_name_dict
 
 # 5
-target_name=("calc_PCE_percent" "FF_percent" "Jsc_mA_cm_pow_neg2" "Voc_V") #"calc_PCE_percent" "FF_percent" "Jsc_mA_cm_pow_neg2" "Voc_V"
+target_name=("calc_PCE_percent") #"calc_PCE_percent" "FF_percent" "Jsc_mA_cm_pow_neg2" "Voc_V"
 
 # 6
-model_type=("RF" "XGBoost" "SVM") # "RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN"
+model_type=("RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN") # "RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN"
 
 #7
-multi_output_type=("''")
+multi_output_type=("''") # "ensemble" or "multi"
 
 for ir in ${input_rep[@]}; do
     for fsg in ${feat_select_group[@]}; do
@@ -54,6 +54,8 @@ for ir in ${input_rep[@]}; do
                             ;;
                             "graphembed") input_rep_features=("DA_graphembed")
                             ;;
+                            "ohe") input_rep_features=("DA_ohe")
+                            ;;
                         esac
                         # initialize train and test data paths as empty strings
                         train_path=""
@@ -68,8 +70,9 @@ for ir in ${input_rep[@]}; do
                             then
                                 feature_clause+=",$fnd"
                             fi
-                            python ../train.py --train_path $train_path  --test_path $test_path --input_representation $irf --feature_names $feature_clause --feature_set $fsg",solvent_properties" --target_name $tn --model_type $mt --multi_output_type $mot --hyperparameter_optimization True --hyperparameter_space_path ./opv_hpo_space.json --results_path ../../../training/OPV_Min/$ir/result_$fsg --random_state 22
+                            python ../train.py --train_path $train_path  --test_path $test_path --input_representation $irf --feature_names $feature_clause --feature_set $fsg --target_name $tn --model_type $mt --multi_output_type $mot --hyperparameter_optimization True --hyperparameter_space_path ./opv_hpo_space.json --results_path ../../../training/OPV_Min/$ir/result_$fsg --random_state 22
                             # sbatch opv_train_submit.sh $train_path  $test_path $feature_clause $tn $mt $ir $irf ${input_rep_filename_dict[$ir]} $fsg
+                            # --feature_set $fsg",solvent_properties"
                         done
                     done
                 done
