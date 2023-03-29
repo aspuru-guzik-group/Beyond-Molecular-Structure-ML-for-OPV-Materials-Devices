@@ -84,19 +84,18 @@ def heatmap(config: dict):
         ]
         x_name = "Model"
         y_name = "Feature_Names"
-    elif config["config_name"] == "grid_search_multi":
+    elif config["config_name"] == "grid_search_ensemble":
         x = [
             "RF",
             "RF_ensemble",
-            "RF_multi",
             "XGBoost",
             "XGBoost_ensemble",
-            "XGBoost_multi",
             "SVM",
             "SVM_ensemble",
-            "SVM_multi",
         ]
         y = ["DA_FP_radius_3_nbits_1024"]
+        x_name = "Model"
+        y_name = "Target"
     elif config["config_name"] == "grid_search_target":
         x = [
             "RF",
@@ -105,14 +104,19 @@ def heatmap(config: dict):
         ]
         y = ["calc_PCE_percent", "FF_percent", "Voc_V", "Jsc_mA_cm_pow_neg2"]
     elif config["config_name"] == "feature_comparison":
-        x = ["RF", "XGBoost", "SVM"]
+        x = ["RF_ensemble", "XGBoost_ensemble", "SVM_ensemble"]
+        # y = [
+        #     "DA_FP_radius_3_nbits_1024",
+        #     "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV",
+        #     "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent",
+        # ]
         y = [
-            "DA_FP_radius_3_nbits_1024",
-            "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV",
-            "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent",
+            "result_device_wo_thickness",
+            "result_fabrication_wo_solid",
+            "result_molecules_only",
         ]
-        x_name = ""
-        y_name = ""
+        x_name = "Model"
+        y_name = "Features"
     # Heatmap
     # NOTE: You have to change the pivot columns depending on your plot!
     print(f"{mean_metric=}")

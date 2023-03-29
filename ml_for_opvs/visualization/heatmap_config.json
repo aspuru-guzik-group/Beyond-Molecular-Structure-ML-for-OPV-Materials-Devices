@@ -25,20 +25,17 @@
         ],
         "metrics": "r"
     },
-    "grid_search_multi": {
+    "grid_search_ensemble": {
         "datasets": [
             "OPV_Min"
         ],
         "models": [
             "RF",
             "RF_ensemble",
-            "RF_multi",
             "XGBoost",
             "XGBoost_ensemble",
-            "XGBoost_multi",
             "SVM",
-            "SVM_ensemble",
-            "SVM_multi"
+            "SVM_ensemble"
         ],
         "input_representations": [
             "fingerprint"
@@ -47,9 +44,7 @@
             "result_molecules_only"
         ],
         "input_names": [],
-        "target_names": [
-            "calc_PCE_percent"
-        ],
+        "target_names": [],
         "metrics": "r"
     },
     "grid_search_target": {
@@ -83,19 +78,21 @@
             "OPV_Min"
         ],
         "models": [
-            "RF",
-            "XGBoost",
-            "SVM"
+            "RF_ensemble",
+            "XGBoost_ensemble",
+            "SVM_ensemble"
         ],
         "input_representations": [
             "fingerprint"
         ],
-        "features": [
-            "result_fabrication_wo_solid"
+        "features": [],
+        "input_names": [
+            "device_wo_thickness,solvent_properties",
+            "fabrication_wo_solid,solvent_properties",
+            "molecules_only,solvent_properties"
         ],
-        "input_names": [],
         "target_names": [
-            "calc_PCE_percent"
+            "calc_PCE_percent,FF_percent,Jsc_mA_cm_pow_neg2,Voc_V"
         ],
         "metrics": "r"
     }
