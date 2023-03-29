@@ -110,7 +110,8 @@ def heatmap(config: dict):
         ]
     # Heatmap
     # NOTE: You have to change the pivot columns depending on your plot!
-    mean_summary: pd.DataFrame = summary.pivot("Feature_Names", "Model", mean_metric)
+    print(summary)
+    mean_summary: pd.DataFrame = summary.pivot("Targets", "Model", mean_metric)
     mean_summary: pd.DataFrame = mean_summary.reindex(index=y, columns=x)
     summary_annotated: pd.DataFrame = deepcopy(summary)
     with pd.option_context(
@@ -130,7 +131,7 @@ def heatmap(config: dict):
 
     # NOTE: You have to change the pivot columns depending on your plot!
     summary_annotated: pd.DataFrame = summary_annotated.pivot(
-        "Feature_Names", "Model", "annotate_label"
+        "Targets", "Model", "annotate_label"
     )
     summary_annotated: pd.DataFrame = summary_annotated.reindex(index=y, columns=x)
     summary_annotated: np.ndarray = summary_annotated.to_numpy()

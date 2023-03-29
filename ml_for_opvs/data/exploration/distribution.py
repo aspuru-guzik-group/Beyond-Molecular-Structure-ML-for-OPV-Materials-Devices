@@ -64,7 +64,7 @@ class Distribution:
         print(columns_dict)
         # select which columns you want to plot in the histogram
         column_idx_first = 9
-        column_idx_last = 41 + 1
+        column_idx_last = 42 + 1
 
         # prepares the correct number of (x,y) subplots
         # num_columns = column_idx_last - column_idx_first
@@ -209,9 +209,9 @@ class Distribution:
 # dist = Distribution(MASTER_ML_DATA_PLOT)
 dist = Distribution(MASTER_ML_DATA)
 
-# dist.histogram()
+dist.histogram()
 
-dist.x_y_heatmap("Acceptor", "solvent", ACCEPTOR_SOLVENT_PATH)
+# dist.x_y_heatmap("Acceptor", "solvent", ACCEPTOR_SOLVENT_PATH)
 
 # df = pd.read_csv(MASTER_ML_DATA_PLOT)
 # print(max(df["hole_mobility_blend"]))

@@ -116,10 +116,9 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                                 input_path_split: list[str] = str(feature_path).split(
                                     ","
                                 )
-                                if inputs == input_path_split[1:]:
-                                    target_paths: generator = handle_paths(
-                                        input_path, config, "target_names"
-                                    )
+                                target_paths: generator = handle_paths(
+                                    input_path, config, "target_names"
+                                )
                                 for target_path in target_paths:
                                     # TODO: change to progress report
                                     # TODO: add Dataset, Features, Model, Target, Feature Length, and Num of data

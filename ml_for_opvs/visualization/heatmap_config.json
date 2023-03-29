@@ -8,7 +8,7 @@
         "features": [
             "result_molecules_only"
         ],
-        "feature_names": [],
+        "input_names": [],
         "target_names": [
             "calc_PCE_percent"
         ],
@@ -35,7 +35,7 @@
         "features": [
             "result_molecules_only"
         ],
-        "feature_names": [],
+        "input_names": [],
         "target_names": [
             "calc_PCE_percent"
         ],
@@ -54,9 +54,11 @@
             "fingerprint"
         ],
         "features": [
-            "result_molecules_only"
+            "result_device_wo_thickness"
         ],
-        "feature_names": [],
+        "input_names": [
+            "device_wo_thickness,solvent_properties"
+        ],
         "target_names": [
             "calc_PCE_percent",
             "Voc_V",
@@ -80,7 +82,7 @@
         "features": [
             "result_fabrication_wo_solid"
         ],
-        "feature_names": [],
+        "input_names": [],
         "target_names": [
             "calc_PCE_percent"
         ],

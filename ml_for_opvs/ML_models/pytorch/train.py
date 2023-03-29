@@ -16,6 +16,7 @@ import numpy as np
 from numpy import mean, std
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 
 # from logging import Logger
 from pyparsing import Opt
@@ -98,17 +99,21 @@ def main(config: dict):
             input_rep_bool = False
         else:
             input_rep_bool = True
-        (
-            target_train_array,
-            target_test_array,
-            target_max,
-            target_min,
-        ) = process_target(
-            train_df[target_df_columns],
-            test_df[target_df_columns],
-            train_df[column_names],
-            input_rep_bool,
+
+        # Target Scaling
+        scaler = MinMaxScaler()
+        target_train_array: np.ndarray = (
+            train_df[target_df_columns].to_numpy().astype("float64")
         )
+        target_test_array: np.ndarray = (
+            test_df[target_df_columns].to_numpy().astype("float64")
+        )
+        scaler.fit(target_train_array)
+        target_max: np.ndarray = scaler.data_max_
+        target_min: np.ndarray = scaler.data_min_
+        target_train_array = scaler.transform(target_train_array)
+        target_test_array = scaler.transform(target_test_array)
+
         config["output_size"] = len(config["target_name"].split(","))
         # Choose PyTorch Model
         if config["model_type"] == "NN":
@@ -122,7 +127,10 @@ def main(config: dict):
                 input_test_array,
                 max_input_length,
             ) = process_features(  # additional features are added at the end of array
-                train_df[column_names], test_df[column_names], input_rep_bool, config["input_representation"]
+                train_df[column_names],
+                test_df[column_names],
+                input_rep_bool,
+                config["input_representation"],
             )
             config["input_size"] = max_input_length
             model = NNModel(config)
@@ -137,7 +145,10 @@ def main(config: dict):
                 input_test_array,
                 max_input_length,
             ) = process_features_LM(  # additional features are added at the end of array
-                train_df[column_names], test_df[column_names], input_rep_bool, config["input_representation"]
+                train_df[column_names],
+                test_df[column_names],
+                input_rep_bool,
+                config["input_representation"],
             )
             config["vocab_size"] = max_input_length
             model = LSTMModel(config)
@@ -364,13 +375,9 @@ def main(config: dict):
             predictions.extend(test_outputs.tolist())
             ground_truth.extend(test_targets.tolist())
 
-        predictions: np.ndarray = np.array(predictions).flatten()
-        ground_truth: np.ndarray = np.array(ground_truth).flatten()
         # reverse min-max scaling
-        predictions: np.ndarray = (predictions * (target_max - target_min)) + target_min
-        ground_truth: np.ndarray = (
-            ground_truth * (target_max - target_min)
-        ) + target_min
+        predictions: np.ndarray = scaler.inverse_transform(predictions)
+        ground_truth: np.ndarray = scaler.inverse_transform(ground_truth)
 
         # save model
         # NOTE: model is NOT saved because it takes up too much storage
@@ -382,7 +389,7 @@ def main(config: dict):
         results_path: Path = Path(os.path.abspath(config["results_path"]))
         model_dir_path: Path = results_path / "{}".format(config["model_type"])
         feature_dir_path: Path = model_dir_path / "{}".format(config["feature_names"])
-        target_dir_path: Path = feature_dir_path / "{}".format(config["target_name"])
+        target_dir_path: Path = feature_dir_path / "{}".format(config["feature_set"])
         # create folders if not present
         try:
             target_dir_path.mkdir(parents=True, exist_ok=True)
@@ -390,10 +397,14 @@ def main(config: dict):
             print("Folder already exists.")
         prediction_path: Path = target_dir_path / "prediction_{}.csv".format(fold)
         # export predictions
+        prediction_columns: list = config["target_name"].split(",")
+        prediction_columns: list = ["predicted_{}".format(column) for column in prediction_columns]
         prediction_df: pd.DataFrame = pd.DataFrame(
-            predictions, columns=["predicted_{}".format(config["target_name"])]
+            predictions, columns=prediction_columns
         )
-        prediction_df[config["target_name"]] = ground_truth
+        for column, ground_truth_column in zip(config["target_name"].split(","), np.transpose(ground_truth)):
+            prediction_df[column] = ground_truth_column
+        print(prediction_df)
         prediction_df.to_csv(prediction_path, index=False)
 
         # evaluate the model
