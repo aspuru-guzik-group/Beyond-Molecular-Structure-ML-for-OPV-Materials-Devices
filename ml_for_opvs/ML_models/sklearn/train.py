@@ -197,6 +197,7 @@ def main(config: dict):
 
                 # run hyperparameter optimization
                 if config["hyperparameter_optimization"] == "True":
+                    print("running hyperparameter optimization...")
                     # setup HPO space
                     space = get_space_dict(
                         config["hyperparameter_space_path"], config["model_type"]
@@ -302,15 +303,11 @@ def main(config: dict):
 
             # run hyperparameter optimization
             if config["hyperparameter_optimization"] == "True":
+                print("running hyperparameter optimization...")
                 # setup HPO space
-                if config["multi_output_type"] == "multi":
-                    space = get_space_multi_dict(
-                        config["hyperparameter_space_path"], config["model_type"]
-                    )
-                else:
-                    space = get_space_dict(
-                        config["hyperparameter_space_path"], config["model_type"]
-                    )
+                space = get_space_dict(
+                    config["hyperparameter_space_path"], config["model_type"]
+                )
                 # define search
                 search = BayesSearchCV(
                     estimator=model,
@@ -327,8 +324,10 @@ def main(config: dict):
                 result = search.fit(input_train_array, target_train_select)
                 # save best hyperparams for the best model from each fold
                 best_params: dict = result.best_params_
-                # get the best performing model fit on the whole training set
+                # get the best performing model fit on the subset of training set
                 model = result.best_estimator_
+                # re-train on whole training set using best hyperparameters
+                model.fit(input_train_array, target_train_select)
                 # inference on hold out set
                 yhat: np.ndarray = model.predict(input_val_array)
             else:
