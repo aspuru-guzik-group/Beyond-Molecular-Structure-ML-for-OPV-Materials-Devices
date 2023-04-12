@@ -2,7 +2,7 @@
 model_types=('NN') # 'LSTM'
 
 # 1
-input_rep=("fingerprint")
+input_rep=("mordred")
 
 # 1.1
 declare -A input_rep_filename_dict
@@ -10,7 +10,7 @@ declare -A input_rep_filename_dict
 input_rep_filename_dict=(["fingerprint"]="fingerprint" ["BRICS"]="brics_frag" ["smiles"]="smiles" ["mordred"]="mordred" ["mordred_pca"]="mordred_pca" ["graphembed"]="graphembed")
 
 # 2
-feat_select_group=("fabrication_wo_solid" "device_wo_thickness")
+feat_select_group=("molecules_only")
 
 # 3
 declare -a input_rep_features
@@ -19,7 +19,7 @@ declare -a input_rep_features
 declare -a feature_name_dict
 
 # 5
-target_name=("Voc_V,FF_percent,Jsc_mA_cm_pow_neg2" "calc_PCE_percent")
+target_name=("calc_PCE_percent")
 
 # 6
 model_type=("NN")

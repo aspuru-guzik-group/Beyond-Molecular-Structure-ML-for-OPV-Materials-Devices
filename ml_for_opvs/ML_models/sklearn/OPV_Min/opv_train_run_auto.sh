@@ -1,6 +1,6 @@
 #!/bin/bash
 # 1
-input_rep=("fingerprint" "ohe" "mordred") # "fingerprint" "BRICS" "smiles"
+input_rep=("mordred") # "fingerprint" "BRICS" "smiles"
 
 # 1.1
 declare -A input_rep_filename_dict

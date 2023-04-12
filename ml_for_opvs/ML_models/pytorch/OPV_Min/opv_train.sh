@@ -2,7 +2,7 @@
 model_types=('NN') # 'LSTM'
 
 # 1
-input_rep=("ohe")
+input_rep=("mordred")
 
 # 1.1
 declare -A input_rep_filename_dict

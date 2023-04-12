@@ -141,7 +141,7 @@ def convert_pkl_splits_to_data(
 
 # convert_pkl_to_data(GRAPH_PKL, MASTER_ML_DATA, GRAPH_PREPROCESSED)
 convert_pkl_to_data(MORDRED_PKL, MASTER_ML_DATA, MORDRED_PREPROCESSED, "mordred")
-convert_pkl_to_data(
-    PCA_MORDRED_PKL, MASTER_ML_DATA, PCA_MORDRED_PREPROCESSED, "mordred_pca"
-)
+# convert_pkl_to_data(
+#     PCA_MORDRED_PKL, MASTER_ML_DATA, PCA_MORDRED_PREPROCESSED, "mordred_pca"
+# )
 # convert_pkl_splits_to_data(GRAPH_PKL, MASTER_ML_DATA, GRAPH_PREPROCESSED, "graphembed")

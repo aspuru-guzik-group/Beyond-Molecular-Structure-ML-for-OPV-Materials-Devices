@@ -1,2 +1,2 @@
 alpha,max_depth,min_child_weight,n_estimators,subsample
-2.0,16.0,1.0,600.0,0.7
+0.2,18.0,2.0,700.0,1.0
