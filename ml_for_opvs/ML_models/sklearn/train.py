@@ -76,11 +76,14 @@ def main(config: dict):
     # for param in train_param.keys():
     #     config[param] = train_param[param]
 
+    # TODO: Replace all these filtered files with a single file that has all the data.
+    # Paths to data files for the training and test sets based on type of input representation and filters?
     # process multiple data files
     train_paths: str = config["train_paths"]
     test_paths: str = config["test_paths"]
 
     # NOTE: ATTENTION! Folds have different number of training / validation folds. YUCK!
+    # WTF: ???
     # calculate minimum number of examples, and cut it short
     min_val_len: list = []
     for train_path, test_path in zip(train_paths, test_paths):
@@ -90,6 +93,7 @@ def main(config: dict):
 
     min_val: int = min(min_val_len)
 
+    # NOTE: Ability to run subset from another filter type (?)
     # column names
     column_names = config["feature_names"].split(",")
 
@@ -143,7 +147,7 @@ def main(config: dict):
             input_rep_bool,
         )
         # target_train_array: [num_of_train, num_of_targets]
-        # TODO: factory pattern
+        # TODO: factory pattern!
         # setup model with default parameters
         if config["multi_output_type"] == "ensemble":
             ensemble_results: list = []
@@ -195,6 +199,7 @@ def main(config: dict):
                         "Model not found. Please use RF, XGBoost, SVM, KRR, MLR, KNN, Lasso"
                     )
 
+                # NOTE: Only hyperparameter optimization for RF and XGBoost
                 # run hyperparameter optimization
                 if config["hyperparameter_optimization"] == "True":
                     # setup HPO space
@@ -234,6 +239,7 @@ def main(config: dict):
                 # shapley_total.append(list(shap_values))
                 # print(f"{yhat.shape=}")
                 # reverse min-max scaling
+                # NOTE: Stanley changed to MinMaxScaler
                 yhat: np.ndarray = (
                     yhat * (target_max_select - target_min_select)
                 ) + target_min_select

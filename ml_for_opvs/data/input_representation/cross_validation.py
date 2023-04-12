@@ -28,6 +28,7 @@ def main(config):
     seed = config["random_seed"]
     fold_path = data_dir / Path(data_filename) / Path(config["type_of_crossval"])
     fold_path.mkdir(parents=True, exist_ok=True)
+    # TODO: Factory pattern?
     if config["type_of_crossval"] == "KFold":
         kf = KFold(n_splits=num_of_folds, shuffle=True, random_state=seed)
         i = 0
@@ -40,6 +41,7 @@ def main(config):
             test.to_csv(test_dir, index=False)
             i += 1
 
+    # TODO: Deprecate or implement for continuous objectives
     elif config["type_of_crossval"] == "StratifiedKFold":
         kf = StratifiedKFold(n_splits=num_of_folds, shuffle=True, random_state=seed)
         i = 0

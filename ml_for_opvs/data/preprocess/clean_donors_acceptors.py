@@ -77,6 +77,7 @@ class DonorClean:
         self.master_donor = pd.read_csv(master_donor)
         self.opv_donor = pd.read_csv(opv_donor)
 
+    # NOTE: Only done once
     def clean_donor(self, clean_donor):
         """
         Function that creates a .csv with the correct SMILES, substituted R groups
@@ -140,6 +141,7 @@ class DonorClean:
         )
         clean_df.to_csv(clean_donor, index=False)
 
+    # ATTN: Deprecated
     def replace_r_with_arbitrary(self, clean_donor):
         """
         Replace R group in the clean_min_acceptors.csv
@@ -204,6 +206,7 @@ class DonorClean:
             clean_df.at[index, "SMILES"] = smi
         clean_df.to_csv(clean_donor, index=False)
 
+    # ATTN: ONly done once
     def replace_r(self, clean_donor):
         """Replace R group in the clean_min_donors.csv
 
@@ -283,6 +286,7 @@ class DonorClean:
 
         clean_df.to_csv(clean_donor, index=False)
 
+    # ATTN: Deprecated
     def delete_r(self, clean_donor):
         """
         Function that deletes R group.
@@ -335,6 +339,7 @@ class DonorClean:
             index += 1
         clean_df.to_csv(clean_donor, index=False)
 
+    # ATTN: ??
     def remove_methyl(self, clean_donor):
         """
         Function that checks the number of methyl groups and removes them on donor molecules.
@@ -871,6 +876,7 @@ class DAPairs:
                 )
         master_df.to_csv(master_csv_path, index=False)
 
+    # ATTN: Deprecated
     def fill_empty_values(self, master_csv_path):
         """
         Function that fills in NaN values because it is reasonable.
@@ -906,6 +912,7 @@ class DAPairs:
 
         master_data.to_csv(master_csv_path, index=False)
 
+    # ATTN: Deprecated?
     def filter_master_csv(
         self, master_csv_path, filtered_master_csv_path, column_idx_list
     ):
@@ -942,6 +949,7 @@ class DAPairs:
 
         filter_master_data.to_csv(filtered_master_csv_path, index=False)
 
+    # NOTE: Treats D:A ration column or maybe solvent additive (check)
     def convert_str_to_float(self, master_csv_path):
         """
         Converts D_A_ratio and solvent_additive_conc string representation to float
@@ -1056,72 +1064,3 @@ class DAPairs:
         missing_acceptor = sheets_acceptor - master_acceptor
 
         print(missing_donor, missing_acceptor)
-
-
-# Step 1
-# donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
-# donors.clean_donor(CLEAN_DONOR_CSV)
-
-# # # # Step 1b
-# donors.replace_r_with_arbitrary(CLEAN_DONOR_CSV)
-# donors.replace_r(CLEAN_DONOR_CSV)
-
-# # # # # # # Step 1c - do not include for fragmentation
-# # # # # donors.remove_methyl(CLEAN_DONOR_CSV)
-
-# # # # # # Step 1d - canonSMILES to remove %10-%100
-# donors.canon_smi(CLEAN_DONOR_CSV)
-
-# # # # # Step 1
-# acceptors = AcceptorClean(MASTER_ACCEPTOR_CSV, OPV_ACCEPTOR_DATA)
-# acceptors.clean_acceptor(CLEAN_ACCEPTOR_CSV)
-
-# # Step 1b
-# acceptors.replace_r_with_arbitrary(CLEAN_ACCEPTOR_CSV)
-# acceptors.replace_r(CLEAN_ACCEPTOR_CSV)
-
-# # # # # Step 1d - canonSMILES to remove %10-%100
-# acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
-
-# # Step 1e - Fragmentation
-# donors.delete_r(CLEAN_DONOR_CSV)
-# acceptors.delete_r(CLEAN_ACCEPTOR_CSV)
-
-# # Step 2 - ERROR CORRECTION (fill in missing D/A)
-
-# # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
-
-# # Step 4
-# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-# pairings.create_master_csv(MASTER_ML_DATA)
-# pairings.create_master_csv(MASTER_ML_DATA_PLOT)
-
-# Check canonicalization of donors and acceptors.
-# master_df = pd.read_csv(MASTER_ML_DATA)
-# for index, row in master_df.iterrows():
-#     donor_smi = master_df.at[index, "Donor_SMILES"]
-#     acceptor_smi = master_df.at[index, "Acceptor_SMILES"]
-#     if Chem.CanonSmiles(donor_smi) != donor_smi:
-#         print(master_df.at[index, "Donor"])
-#     if Chem.CanonSmiles(acceptor_smi) != acceptor_smi:
-#         print(master_df.at[index, "Acceptor"])
-
-# pairings.unique_donors(OPV_DATA, CLEAN_DONOR_CSV)
-# pairings.unique_acceptors(OPV_DATA, CLEAN_ACCEPTOR_CSV)
-# pairings.find_missing_from_opv_data(OPV_DATA, MASTER_ML_DATA)
-# # # # Step 4b - Convert STR -> FLOAT
-# pairings.convert_str_to_float(MASTER_ML_DATA)
-# pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
-
-# # Step 4c - Fill empty values for Thermal Annealing, and solvent_additives
-# pairings.fill_empty_values(MASTER_ML_DATA)
-
-# Step 4d - Remove anomalies!
-# Go to ml_for_opvs > data > error_correction > remove_anomaly.py
-
-# Step 5
-# Go to rdkit_frag.py (if needed)
-
-# Lookup missing OPVs from preprocessed vs. Google Sheets
-# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-# pairings.lookup_missing(MASTER_ML_DATA)

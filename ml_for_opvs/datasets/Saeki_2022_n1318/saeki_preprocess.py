@@ -43,7 +43,7 @@ def fix_charges(smiles):
 
 
 if __name__ == "__main__":
-    # saeki = pd.read_csv("Saeki_corrected.csv")
+    saeki = pd.read_csv("Saeki_corrected.csv")
     # saeki["n wrong"] = saeki["n(SMILES)"].apply(lambda x: get_incorrect_smiles(x))
     # saeki["p wrong"] = saeki["p(SMILES)"].apply(lambda x: get_incorrect_smiles(x))
     # print("n wrong:", saeki["n wrong"].sum())
@@ -51,11 +51,10 @@ if __name__ == "__main__":
     # print("p wrong:", saeki["p wrong"].sum())
     # print(saeki[saeki["p wrong"] == True]["p(SMILES)"])
 
-    # saeki["n(mol)"] = saeki["n(SMILES)"].apply(lambda x: Chem.MolFromSmiles(x))
-    # saeki["p(mol)"] = saeki["p(SMILES)"].apply(lambda x: Chem.MolFromSmiles(x))
-    # saeki["n(FP)"] = saeki["n(mol)"].apply(lambda x: np.array(AllChem.GetMorganFingerprintAsBitVect(x, 3, nBits=1024)))
-    # saeki["p(FP)"] = saeki["p(mol)"].apply(lambda x: np.array(AllChem.GetMorganFingerprintAsBitVect(x, 3, nBits=1024)))
-    saeki = pd.read_pickle("saeki_corrected.pkl")
+    saeki["n(mol)"] = saeki["n(SMILES)"].apply(lambda x: Chem.MolFromSmiles(x))
+    saeki["p(mol)"] = saeki["p(SMILES)"].apply(lambda x: Chem.MolFromSmiles(x))
+    saeki["n(FP)"] = saeki["n(mol)"].apply(lambda x: np.array(AllChem.GetMorganFingerprintAsBitVect(x, 3, nBits=512)))
+    saeki["p(FP)"] = saeki["p(mol)"].apply(lambda x: np.array(AllChem.GetMorganFingerprintAsBitVect(x, 3, nBits=512)))
     saeki["n,p(FP)"] = [[*n, *p] for n, p in zip(saeki["n(FP)"], saeki["p(FP)"])]
-    saeki.to_pickle("saeki_corrected.pkl")
+    saeki.to_pickle("saeki_corrected_512.pkl")
     pass
