@@ -7,7 +7,7 @@ from sklearn.model_selection import KFold, StratifiedKFold
 from skopt import BayesSearchCV
 from skopt.space import Real, Integer
 
-saeki = pd.read_pickle("saeki_corrected_512.pkl")
+saeki = pd.read_pickle("../../../data/Saeki_2022_n1318/saeki_corrected_512.pkl")
 n_bits = 512
 print(len(saeki["n,p(FP)"][0]))
 

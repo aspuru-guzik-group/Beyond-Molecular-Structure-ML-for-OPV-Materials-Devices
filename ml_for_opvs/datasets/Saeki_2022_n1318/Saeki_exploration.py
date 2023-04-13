@@ -1,9 +1,7 @@
-from pathlib import Path
-
 import pandas as pd
 import pkg_resources
 
-from ml_for_opvs.data.exploration.OPV_Min.distribution import plot_feature_distributions
+from code.visualization.data_distribution import plot_feature_distributions
 # from ml_for_opvs.data.exploration.OPV_Min.correlation import
 
 """

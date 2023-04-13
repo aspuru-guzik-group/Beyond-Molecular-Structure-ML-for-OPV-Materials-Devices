@@ -43,7 +43,7 @@ def fix_charges(smiles):
 
 
 if __name__ == "__main__":
-    saeki = pd.read_csv("Saeki_corrected.csv")
+    saeki = pd.read_csv("../../../data/Saeki_2022_n1318/Saeki_corrected.csv")
     # saeki["n wrong"] = saeki["n(SMILES)"].apply(lambda x: get_incorrect_smiles(x))
     # saeki["p wrong"] = saeki["p(SMILES)"].apply(lambda x: get_incorrect_smiles(x))
     # print("n wrong:", saeki["n wrong"].sum())

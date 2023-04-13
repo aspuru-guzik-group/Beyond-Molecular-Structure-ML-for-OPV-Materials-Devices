@@ -1,16 +1,19 @@
 import itertools
+from pathlib import Path
 
 import pkg_resources
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
+
 from matplotlib.offsetbox import AnchoredText
 
 # OPV data after pre-processing
-MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
-    "ml_for_opvs",
-    "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv",
-)
+# MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
+#     "ml_for_opvs",
+#     "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv",
+# )
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
     "ml_for_opvs",
@@ -20,11 +23,14 @@ MASTER_ML_DATA = pkg_resources.resource_filename(
 
 def plot_feature_distributions(dataset: pd.DataFrame, drop_columns: list = None):
     """
-    Function that plots the distribution of all variables in the dataset. The function only drops nan values in one column at a time.
-    The function then plots the distributions in one figure, and saves the figure as a png file. The figure should have a length-to-width ratio of 3:2.
+    Function that plots the distribution of all variables in the dataset.
+    The function only drops nan values in one column at a time.
+    The function then plots the distributions in one figure, and saves the figure as a png file.
+    The figure should have a length-to-width ratio of 3:2.
 
     Args:
         dataset: Pre-processed dataset of OPV device parameters
+        drop_columns: Columns to drop from the dataset
     """
     df = dataset.copy()  # make a copy of the dataset
     df.drop(drop_columns, axis=1, inplace=True)  # drop the columns that won't be used in the analysis
@@ -45,7 +51,7 @@ def plot_feature_distributions(dataset: pd.DataFrame, drop_columns: list = None)
         current_column = df.columns[i]
         current_val_list = df[current_column].tolist()
         current_val_list = [
-            item for item in current_val_list if not (pd.isnull(item)) == True
+            item for item in current_val_list if not (pd.isnull(item)) is True
         ]
         unique_val_list = list(set(current_val_list))
         axs[y_idx, x_idx].set_title(current_column)
@@ -104,7 +110,7 @@ def plot_heatmap_of_pair_frequency(dataset: pd.DataFrame, column1: str, column2:
     df = df.reindex(sorted(df.index), axis=0)  # sort the rows in ascending order
 
     # plot the heatmap
-    fig, ax = plt.subplots(figsize=(3000, 1000))
+    fig, ax = plt.subplots(figsize=(300, 100))
     im = ax.imshow(df)
     # Show all ticks and label them with the respective list entries
     ax.set_xticks(np.arange(len(df.columns)))
@@ -123,7 +129,7 @@ def plot_heatmap_of_pair_frequency(dataset: pd.DataFrame, column1: str, column2:
 
     ax.set_title(f"Heatmap of {column1} and {column2} pair frequency")
     fig.tight_layout()
-    plt.savefig(f"heatmap_{column1}_{column2}_frequency.png")
+    plt.savefig(f"frequency map_{column1} {column2}.png")
 
 
 if __name__ == "__main__":
@@ -135,4 +141,7 @@ if __name__ == "__main__":
     for pair in pairs_combinations:
         plot_heatmap_of_pair_frequency(opv_dataset, pair[0], pair[1])
 
-    plot_feature_distributions(opv_dataset, ["ref", "Donor", "Acceptor", "Donor_SMILES", "Donor_Big_SMILES", "Donor_SELFIES", "Acceptor_SMILES", "Acceptor_Big_SMILES", "Acceptor_SELFIES"])
+    plot_feature_distributions(opv_dataset, ["ref", "Donor", "Acceptor", "Donor_SMILES", "Donor_Big_SMILES",
+                                             "Donor_SELFIES", "Acceptor_SMILES", "Acceptor_Big_SMILES",
+                                             "Acceptor_SELFIES"]
+                               )
