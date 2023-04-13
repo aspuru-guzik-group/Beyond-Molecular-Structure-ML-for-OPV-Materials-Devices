@@ -202,6 +202,7 @@ def main(config: dict):
                 # NOTE: Only hyperparameter optimization for RF and XGBoost
                 # run hyperparameter optimization
                 if config["hyperparameter_optimization"] == "True":
+                    print("running hyperparameter optimization...")
                     # setup HPO space
                     space = get_space_dict(
                         config["hyperparameter_space_path"], config["model_type"]
@@ -222,8 +223,10 @@ def main(config: dict):
                     result = search.fit(input_train_array, target_train_select)
                     # save best hyperparams for the best model from each fold
                     best_params: dict = result.best_params_
-                    # get the best performing model fit on the whole training set
+                    # get the best performing model fit on the subset of training set
                     model = result.best_estimator_
+                    # re-train on whole training set using best hyperparameters
+                    model.fit(input_train_array, target_train_select)
                     # inference on hold out set
                     yhat: np.ndarray = model.predict(input_val_array)
                 else:
@@ -306,15 +309,11 @@ def main(config: dict):
 
             # run hyperparameter optimization
             if config["hyperparameter_optimization"] == "True":
+                print("running hyperparameter optimization...")
                 # setup HPO space
-                if config["multi_output_type"] == "multi":
-                    space = get_space_multi_dict(
-                        config["hyperparameter_space_path"], config["model_type"]
-                    )
-                else:
-                    space = get_space_dict(
-                        config["hyperparameter_space_path"], config["model_type"]
-                    )
+                space = get_space_dict(
+                    config["hyperparameter_space_path"], config["model_type"]
+                )
                 # define search
                 search = BayesSearchCV(
                     estimator=model,
@@ -331,8 +330,10 @@ def main(config: dict):
                 result = search.fit(input_train_array, target_train_select)
                 # save best hyperparams for the best model from each fold
                 best_params: dict = result.best_params_
-                # get the best performing model fit on the whole training set
+                # get the best performing model fit on the subset of training set
                 model = result.best_estimator_
+                # re-train on whole training set using best hyperparameters
+                model.fit(input_train_array, target_train_select)
                 # inference on hold out set
                 yhat: np.ndarray = model.predict(input_val_array)
             else:
@@ -389,7 +390,8 @@ def main(config: dict):
         else:
             model_dir_path: Path = results_path / "{}".format(config["model_type"])
         feature_dir_path: Path = model_dir_path / "{}".format(config["feature_names"])
-        target_dir_path: Path = feature_dir_path / "{}".format(config["target_name"])
+        feature_set_path: Path = feature_dir_path / "{}".format(config["feature_set"])
+        target_dir_path: Path = feature_set_path / "{}".format(config["target_name"])
         # create folders if not present
         try:
             target_dir_path.mkdir(parents=True, exist_ok=True)
@@ -506,6 +508,12 @@ if __name__ == "__main__":
         type=str,
         default=None,
         help="Choose input features. Format is: ex. D_A_ratio_m_m,solvent",
+    )
+    parser.add_argument(
+        "--feature_set",
+        type=str,
+        default=None,
+        help="Choose input features. Format is: ex. fabrication_wo_solid,solvent_properties",
     )
     parser.add_argument(
         "--target_name",

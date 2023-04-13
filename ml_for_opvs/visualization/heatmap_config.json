@@ -3,31 +3,39 @@
         "datasets": [
             "OPV_Min"
         ],
-        "models": [],
+        "models": [
+            "RF",
+            "XGBoost",
+            "Lasso",
+            "MLR",
+            "SVM",
+            "NN",
+            "GP",
+            "KNN",
+            "KRR",
+            "NGBoost"
+        ],
         "input_representations": [],
         "features": [
             "result_molecules_only"
         ],
-        "feature_names": [],
+        "input_names": [],
         "target_names": [
             "calc_PCE_percent"
         ],
         "metrics": "r"
     },
-    "grid_search_multi": {
+    "grid_search_ensemble": {
         "datasets": [
             "OPV_Min"
         ],
         "models": [
             "RF",
             "RF_ensemble",
-            "RF_multi",
             "XGBoost",
             "XGBoost_ensemble",
-            "XGBoost_multi",
             "SVM",
-            "SVM_ensemble",
-            "SVM_multi"
+            "SVM_ensemble"
         ],
         "input_representations": [
             "fingerprint"
@@ -35,10 +43,8 @@
         "features": [
             "result_molecules_only"
         ],
-        "feature_names": [],
-        "target_names": [
-            "calc_PCE_percent"
-        ],
+        "input_names": [],
+        "target_names": [],
         "metrics": "r"
     },
     "grid_search_target": {
@@ -54,14 +60,39 @@
             "fingerprint"
         ],
         "features": [
-            "result_molecules_only"
+            "result_device_wo_thickness"
         ],
-        "feature_names": [],
+        "input_names": [
+            "device_wo_thickness,solvent_properties"
+        ],
         "target_names": [
             "calc_PCE_percent",
             "Voc_V",
             "FF_percent",
             "Jsc_mA_cm_pow_neg2"
+        ],
+        "metrics": "r"
+    },
+    "feature_comparison": {
+        "datasets": [
+            "OPV_Min"
+        ],
+        "models": [
+            "RF_ensemble",
+            "XGBoost_ensemble",
+            "SVM_ensemble"
+        ],
+        "input_representations": [
+            "fingerprint"
+        ],
+        "features": [],
+        "input_names": [
+            "device_wo_thickness,solvent_properties",
+            "fabrication_wo_solid,solvent_properties",
+            "molecules_only,solvent_properties"
+        ],
+        "target_names": [
+            "calc_PCE_percent,FF_percent,Jsc_mA_cm_pow_neg2,Voc_V"
         ],
         "metrics": "r"
     }

@@ -15,9 +15,13 @@ from ml_for_opvs.data.preprocess.clean_donors_acceptors import (
     OPV_DATA,
     MASTER_ML_DATA,
     MASTER_ML_DATA_PLOT,
+    SOLVENT_DATA,
+    INTERLAYER_DATA,
     DAPairs,
     DonorClean,
     AcceptorClean,
+    create_master_ohe,
+    MASTER_OHE_DATA,
 )
 
 from ml_for_opvs.data.error_correction.OPV_Min.unique_opvs import (
@@ -32,7 +36,10 @@ from ml_for_opvs.data.error_correction.OPV_Min.unique_opvs import (
 
 from ml_for_opvs.data.error_correction.OPV_Min.remove_anomaly import Anomaly
 from ml_for_opvs.data.error_correction.OPV_Min.approximate_properties import (
-    approximate_value, DUPLICATE_DONORS, DUPLICATE_ACCEPTORS, calculate_homo_lumo_gap
+    approximate_value,
+    DUPLICATE_DONORS,
+    DUPLICATE_ACCEPTORS,
+    calculate_homo_lumo_gap,
 )
 
 # from ml_for_opvs.data.input_representation.OPV_Min.aug_SMILES.augment import (
@@ -104,7 +111,7 @@ from ml_for_opvs.data.preprocess.OPV_Min.clean_device_params import ParameterCle
 # # concatenate for acceptors
 # unique_opvs.concat_missing_and_clean(MISSING_SMI_ACCEPTOR, CLEAN_ACCEPTOR, "A")
 # acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
-print("Finished Step 2")
+# print("Finished Step 2")
 
 # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
 # smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV) # DO NOT RUN, BigSMILES was partially automated and manually done.
@@ -113,7 +120,7 @@ opv_smiles_to_selfies(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
 print("Finished Step 3")
 
 # Step 4
-pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV, SOLVENT_DATA)
 pairings.create_master_csv(MASTER_ML_DATA)
 # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
 
@@ -123,10 +130,10 @@ pairings.create_master_csv(MASTER_ML_DATA)
 
 # Step 4c - Remove anomalies!
 # Go to ml_for_opvs > data > error_correction > remove_anomaly.py
-# anomaly = Anomaly(MASTER_ML_DATA)
-# anomaly.remove_anomaly(MASTER_ML_DATA)
+anomaly = Anomaly(MASTER_ML_DATA)
+anomaly.remove_anomaly(MASTER_ML_DATA)
 # anomaly.remove_anomaly(MASTER_ML_DATA_PLOT)
-# anomaly.correct_anomaly(MASTER_ML_DATA)
+anomaly.correct_anomaly(MASTER_ML_DATA)
 # anomaly.correct_anomaly(MASTER_ML_DATA_PLOT)
 
 # # Step 4c - Fill empty values for Thermal Annealing, and solvent_additives
@@ -145,6 +152,7 @@ print("Finished Step 5")
 
 # Step 6
 # Add solvents
+
 # corr_plot = Correlation(MASTER_ML_DATA_PLOT)
 # corr_plot.solvent_correlation(PARAMETER_INVENTORY, MASTER_ML_DATA_PLOT)
 # corr_plot = Correlation(MASTER_ML_DATA)
@@ -164,6 +172,9 @@ create_master_fp(MASTER_ML_DATA, FP_DATA, 3, 512)
 
 create_smi_csv(MASTER_ML_DATA, MASTER_SMI_DATA)
 print("Finished Step 7")
+
+create_master_ohe(MASTER_ML_DATA, MASTER_OHE_DATA)
+
 
 # Run feature filters to create subsets of the dataset
 """
@@ -234,6 +245,30 @@ fs.feat_select("electrical")
 # fs.feat_select("electrical")
 
 from ml_for_opvs.data.input_representation.OPV_Min.smiles.smiles_feat_select import fs
+
+fs.feat_select("molecules_only")
+fs.feat_select("molecules")
+fs.feat_select("fabrication_wo_solid")
+fs.feat_select("device_wo_thickness")
+fs.feat_select("full")
+fs.feat_select("fabrication")
+fs.feat_select("device")
+fs.feat_select("electrical")
+
+from ml_for_opvs.data.input_representation.OPV_Min.mordred.mordred_feat_select import fs
+
+fs.feat_select("molecules_only")
+fs.feat_select("molecules")
+fs.feat_select("fabrication_wo_solid")
+fs.feat_select("device_wo_thickness")
+fs.feat_select("full")
+fs.feat_select("fabrication")
+fs.feat_select("device")
+fs.feat_select("electrical")
+
+from ml_for_opvs.data.input_representation.OPV_Min.ohe.ohe_feat_select import (
+    fs,
+)
 
 fs.feat_select("molecules_only")
 fs.feat_select("molecules")

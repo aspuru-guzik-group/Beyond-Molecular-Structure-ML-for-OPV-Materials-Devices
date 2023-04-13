@@ -5,6 +5,7 @@ from rdkit.Chem import AllChem
 from rdkit.Chem import Draw
 import csv
 import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
 
 pd.set_option("display.max_columns", 20)
 
@@ -26,7 +27,7 @@ CLEAN_ACCEPTOR_CSV = pkg_resources.resource_filename(
 # From OPV Google Drive
 OPV_DATA = pkg_resources.resource_filename(
     "ml_for_opvs",
-    "data/raw/OPV_Min/FINAL Machine Learning OPV Parameters - ML Training Data.csv",
+    "data/raw/OPV_Min/OPV ML data extraction - ML Training Data.csv",
 )
 OPV_DONOR_DATA = pkg_resources.resource_filename(
     "ml_for_opvs", "data/raw/OPV_Min/Machine Learning OPV Parameters - Donors.csv"
@@ -55,6 +56,18 @@ UNIQUE_DONOR = pkg_resources.resource_filename(
 
 UNIQUE_ACCEPTOR = pkg_resources.resource_filename(
     "ml_for_opvs", "data/preprocess/OPV_Min/unique_acceptors.csv"
+)
+
+SOLVENT_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/raw/OPV_Min/solvent_properties.csv"
+)
+
+INTERLAYER_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/raw/OPV_Min/interlayer_properties.csv"
+)
+
+MASTER_OHE_DATA = pkg_resources.resource_filename(
+    "ml_for_opvs", "data/input_representation/OPV_Min/ohe/master_ohe.csv"
 )
 
 
@@ -699,7 +712,7 @@ class DAPairs:
     Class containing functions that prepare the Donor-Acceptor Pairs with OPV Data for ML
     """
 
-    def __init__(self, opv_data, donors_data, acceptors_data):
+    def __init__(self, opv_data, donors_data, acceptors_data, solvent_data: str):
         """
         Instantiates class with appropriate data
 
@@ -714,6 +727,7 @@ class DAPairs:
         self.opv_data = pd.read_csv(opv_data)
         self.donors = pd.read_csv(donors_data)
         self.acceptors = pd.read_csv(acceptors_data)
+        self.solvents = pd.read_csv(solvent_data)
 
     def create_master_csv(self, master_csv_path):
         """
@@ -748,9 +762,47 @@ class DAPairs:
             "Eg_A_eV",
             "D_A_ratio_m_m",
             "solvent",
+            "solvent_BPt",
+            "solvent_density",
+            "solvent_dD",
+            "solvent_RI",
+            "solvent_MW",
+            "solvent_dP",
+            "solvent_dH",
+            "solvent_log_kow",
+            "solvent_MPt",
+            "solvent_dHDon",
+            "solvent_dHAcc",
+            "solvent_trouton",
+            "solvent_dipole",
+            "solvent_RER",
+            "solvent_ParachorGA",
+            "solvent_RD",
+            "solvent_DCp",
+            "solvent_log_n",
+            "solvent_SurfTen",
             "spin_coating_rpm",
             "total_solids_conc_mg_mL",
             "solvent_additive",
+            "solvent_additive_BPt",
+            "solvent_additive_density",
+            "solvent_additive_dD",
+            "solvent_additive_RI",
+            "solvent_additive_MW",
+            "solvent_additive_dP",
+            "solvent_additive_dH",
+            "solvent_additive_log_kow",
+            "solvent_additive_MPt",
+            "solvent_additive_dHDon",
+            "solvent_additive_dHAcc",
+            "solvent_additive_trouton",
+            "solvent_additive_dipole",
+            "solvent_additive_RER",
+            "solvent_additive_ParachorGA",
+            "solvent_additive_RD",
+            "solvent_additive_DCp",
+            "solvent_additive_log_n",
+            "solvent_additive_SurfTen",
             "solvent_additive_conc_v_v_percent",
             "active_layer_thickness_nm",
             "annealing_temperature",
@@ -818,6 +870,98 @@ class DAPairs:
                 if isinstance(row["hole contact layer"], str):
                     hole_contact_layer = hole_contact_layer.strip()
 
+                # solvent properties
+                try:
+                    solvent_row = self.solvents.loc[
+                        self.solvents["Name"] == row["solvent"]
+                    ]
+                    solvent_bp = solvent_row["BPt"].values[0]
+                    solvent_mw = solvent_row["MW"].values[0]
+                    solvent_density = solvent_row["Density"].values[0]
+                    solvent_RI = solvent_row["RI"].values[0]
+                    solvent_dipole = solvent_row["dipole"].values[0]
+                    solvent_dD = solvent_row["dD"].values[0]
+                    solvent_dP = solvent_row["dP"].values[0]
+                    solvent_dH = solvent_row["dH"].values[0]
+                    solvent_dHDon = solvent_row["dHDon"].values[0]
+                    solvent_dHAcc = solvent_row["dHAcc"].values[0]
+                    solvent_log_kow = solvent_row["logKow"].values[0]
+                    solvent_mp = solvent_row["MPt"].values[0]
+                    solvent_trouton = solvent_row["Trouton"].values[0]
+                    solvent_RER = solvent_row["RER"].values[0]
+                    solvent_ParachorGA = solvent_row["ParachorGA"].values[0]
+                    solvent_RD = solvent_row["RD"].values[0]
+                    solvent_DCp = solvent_row["DCp"].values[0]
+                    solvent_logn = solvent_row["log_n"].values[0]
+                    solvent_SurfTen = solvent_row["SurfTen"].values[0]
+                except:
+                    solvent_bp = 0
+                    solvent_mw = 0
+                    solvent_density = 0
+                    solvent_RI = 0
+                    solvent_dipole = 0
+                    solvent_dD = 0
+                    solvent_dP = 0
+                    solvent_dH = 0
+                    solvent_dHDon = 0
+                    solvent_dHAcc = 0
+                    solvent_trouton = 0
+                    solvent_log_kow = 0
+                    solvent_mp = 0
+                    solvent_RER = 0
+                    solvent_ParachorGA = 0
+                    solvent_RD = 0
+                    solvent_DCp = 0
+                    solvent_logn = 0
+                    solvent_SurfTen = 0
+
+                # solvent_additive properties
+                try:
+                    solvent_additive_row = self.solvents.loc[
+                        self.solvents["Name"] == row["solvent additive"]
+                    ]
+                    solvent_additive_bp = solvent_additive_row["BPt"].values[0]
+                    solvent_additive_mw = solvent_additive_row["MW"].values[0]
+                    solvent_additive_density = solvent_additive_row["Density"].values[0]
+                    solvent_additive_RI = solvent_additive_row["RI"].values[0]
+                    solvent_additive_dipole = solvent_additive_row["dipole"].values[0]
+                    solvent_additive_dD = solvent_additive_row["dD"].values[0]
+                    solvent_additive_dP = solvent_additive_row["dP"].values[0]
+                    solvent_additive_dH = solvent_additive_row["dH"].values[0]
+                    solvent_additive_dHDon = solvent_additive_row["dHDon"].values[0]
+                    solvent_additive_dHAcc = solvent_additive_row["dHAcc"].values[0]
+                    solvent_additive_log_kow = solvent_additive_row["logKow"].values[0]
+                    solvent_additive_mp = solvent_additive_row["MPt"].values[0]
+                    solvent_additive_trouton = solvent_additive_row["Trouton"].values[0]
+                    solvent_additive_RER = solvent_additive_row["RER"].values[0]
+                    solvent_additive_ParachorGA = solvent_additive_row[
+                        "ParachorGA"
+                    ].values[0]
+                    solvent_additive_RD = solvent_additive_row["RD"].values[0]
+                    solvent_additive_DCp = solvent_additive_row["DCp"].values[0]
+                    solvent_additive_logn = solvent_additive_row["log_n"].values[0]
+                    solvent_additive_SurfTen = solvent_additive_row["SurfTen"].values[0]
+                except:
+                    solvent_additive_bp = 0
+                    solvent_additive_mw = 0
+                    solvent_additive_density = 0
+                    solvent_additive_RI = 0
+                    solvent_additive_dipole = 0
+                    solvent_additive_dD = 0
+                    solvent_additive_dP = 0
+                    solvent_additive_dH = 0
+                    solvent_additive_dHDon = 0
+                    solvent_additive_dHAcc = 0
+                    solvent_additive_trouton = 0
+                    solvent_additive_log_kow = 0
+                    solvent_additive_mp = 0
+                    solvent_additive_RER = 0
+                    solvent_additive_ParachorGA = 0
+                    solvent_additive_RD = 0
+                    solvent_additive_DCp = 0
+                    solvent_additive_logn = 0
+                    solvent_additive_SurfTen = 0
+
                 # append new donor-acceptor pair to masters dataframe
                 master_df = master_df.append(
                     {
@@ -843,9 +987,49 @@ class DAPairs:
                         "Eg_A_eV": row["Eg_A (eV)"],
                         "D_A_ratio_m_m": row["D:A ratio (m/m)"],
                         "solvent": solvent,
-                        "spin_coating_rpm": row["Active layer spin coating speed (rpm)"],
+                        "solvent_BPt": solvent_bp,
+                        "solvent_density": solvent_density,
+                        "solvent_RI": solvent_RI,
+                        "solvent_dipole": solvent_dipole,
+                        "solvent_MW": solvent_mw,
+                        "solvent_dD": solvent_dD,
+                        "solvent_dP": solvent_dP,
+                        "solvent_log_kow": solvent_log_kow,
+                        "solvent_MPt": solvent_mp,
+                        "solvent_dH": solvent_dH,
+                        "solvent_dHDon": solvent_dHDon,
+                        "solvent_dHAcc": solvent_dHAcc,
+                        "solvent_trouton": solvent_trouton,
+                        "solvent_RER": solvent_RER,
+                        "solvent_ParachorGA": solvent_ParachorGA,
+                        "solvent_RD": solvent_RD,
+                        "solvent_DCp": solvent_DCp,
+                        "solvent_log_n": solvent_logn,
+                        "solvent_SurfTen": solvent_SurfTen,
+                        "spin_coating_rpm": row[
+                            "Active layer spin coating speed (rpm)"
+                        ],
                         "total_solids_conc_mg_mL": row["total solids conc. (mg/mL)"],
                         "solvent_additive": row["solvent additive"],
+                        "solvent_additive_BPt": solvent_additive_bp,
+                        "solvent_additive_density": solvent_additive_density,
+                        "solvent_additive_MW": solvent_additive_mw,
+                        "solvent_additive_RI": solvent_additive_RI,
+                        "solvent_additive_dipole": solvent_additive_dipole,
+                        "solvent_additive_dD": solvent_additive_dD,
+                        "solvent_additive_dP": solvent_additive_dP,
+                        "solvent_additive_dH": solvent_additive_dH,
+                        "solvent_additive_dHDon": solvent_additive_dHDon,
+                        "solvent_additive_dHAcc": solvent_additive_dHAcc,
+                        "solvent_additive_trouton": solvent_additive_trouton,
+                        "solvent_additive_log_kow": solvent_additive_log_kow,
+                        "solvent_additive_RER": solvent_additive_RER,
+                        "solvent_additive_ParachorGA": solvent_additive_ParachorGA,
+                        "solvent_additive_RD": solvent_additive_RD,
+                        "solvent_additive_DCp": solvent_additive_DCp,
+                        "solvent_additive_MPt": solvent_additive_mp,
+                        "solvent_additive_log_n": solvent_additive_logn,
+                        "solvent_additive_SurfTen": solvent_additive_SurfTen,
                         "solvent_additive_conc_v_v_percent": row[
                             "solvent additive conc. (% v/v)"
                         ],
@@ -874,6 +1058,7 @@ class DAPairs:
                     },
                     ignore_index=True,
                 )
+
         master_df.to_csv(master_csv_path, index=False)
 
     # ATTN: Deprecated
@@ -1064,3 +1249,95 @@ class DAPairs:
         missing_acceptor = sheets_acceptor - master_acceptor
 
         print(missing_donor, missing_acceptor)
+
+
+def create_master_ohe(master_data: str, master_ohe: str):
+    """
+    Generate a function that will one-hot encode the all of the donor and acceptor molecules. Each unique molecule has a unique number.
+    Create one new column for the donor and acceptor one-hot encoded data.
+    """
+    master_df: pd.DataFrame = pd.read_csv(master_data)
+    donor_ohe = OneHotEncoder()
+    acceptor_ohe = OneHotEncoder()
+    donor_ohe.fit(master_df["Donor"].values.reshape(-1, 1))
+    acceptor_ohe.fit(master_df["Acceptor"].values.reshape(-1, 1))
+    donor_ohe_data = donor_ohe.transform(master_df["Donor"].values.reshape(-1, 1))
+    acceptor_ohe_data = acceptor_ohe.transform(
+        master_df["Acceptor"].values.reshape(-1, 1)
+    )
+    # print(f"{donor_ohe_data=}")
+    master_df["Donor_ohe"] = donor_ohe_data.toarray().tolist()
+    master_df["Acceptor_ohe"] = acceptor_ohe_data.toarray().tolist()
+    # print(f"{master_df.head()}")
+    # combine donor and acceptor ohe data into one column
+    master_df["DA_ohe"] = master_df["Donor_ohe"] + master_df["Acceptor_ohe"]
+    master_df.to_csv(master_ohe, index=False)
+
+
+# Step 1
+# donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
+# donors.clean_donor(CLEAN_DONOR_CSV)
+
+# # # # Step 1b
+# donors.replace_r_with_arbitrary(CLEAN_DONOR_CSV)
+# donors.replace_r(CLEAN_DONOR_CSV)
+
+# # # # # # # Step 1c - do not include for fragmentation
+# # # # # donors.remove_methyl(CLEAN_DONOR_CSV)
+
+# # # # # # Step 1d - canonSMILES to remove %10-%100
+# donors.canon_smi(CLEAN_DONOR_CSV)
+
+# # # # # Step 1
+# acceptors = AcceptorClean(MASTER_ACCEPTOR_CSV, OPV_ACCEPTOR_DATA)
+# acceptors.clean_acceptor(CLEAN_ACCEPTOR_CSV)
+
+# # Step 1b
+# acceptors.replace_r_with_arbitrary(CLEAN_ACCEPTOR_CSV)
+# acceptors.replace_r(CLEAN_ACCEPTOR_CSV)
+
+# # # # # Step 1d - canonSMILES to remove %10-%100
+# acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
+
+# # Step 1e - Fragmentation
+# donors.delete_r(CLEAN_DONOR_CSV)
+# acceptors.delete_r(CLEAN_ACCEPTOR_CSV)
+
+# # Step 2 - ERROR CORRECTION (fill in missing D/A)
+
+# # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
+
+# # Step 4
+# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# pairings.create_master_csv(MASTER_ML_DATA)
+# pairings.create_master_csv(MASTER_ML_DATA_PLOT)
+
+# Check canonicalization of donors and acceptors.
+# master_df = pd.read_csv(MASTER_ML_DATA)
+# for index, row in master_df.iterrows():
+#     donor_smi = master_df.at[index, "Donor_SMILES"]
+#     acceptor_smi = master_df.at[index, "Acceptor_SMILES"]
+#     if Chem.CanonSmiles(donor_smi) != donor_smi:
+#         print(master_df.at[index, "Donor"])
+#     if Chem.CanonSmiles(acceptor_smi) != acceptor_smi:
+#         print(master_df.at[index, "Acceptor"])
+
+# pairings.unique_donors(OPV_DATA, CLEAN_DONOR_CSV)
+# pairings.unique_acceptors(OPV_DATA, CLEAN_ACCEPTOR_CSV)
+# pairings.find_missing_from_opv_data(OPV_DATA, MASTER_ML_DATA)
+# # # # Step 4b - Convert STR -> FLOAT
+# pairings.convert_str_to_float(MASTER_ML_DATA)
+# pairings.convert_str_to_float(MASTER_ML_DATA_PLOT)
+
+# # Step 4c - Fill empty values for Thermal Annealing, and solvent_additives
+# pairings.fill_empty_values(MASTER_ML_DATA)
+
+# Step 4d - Remove anomalies!
+# Go to ml_for_opvs > data > error_correction > remove_anomaly.py
+
+# Step 5
+# Go to rdkit_frag.py (if needed)
+
+# Lookup missing OPVs from preprocessed vs. Google Sheets
+# pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+# pairings.lookup_missing(MASTER_ML_DATA)

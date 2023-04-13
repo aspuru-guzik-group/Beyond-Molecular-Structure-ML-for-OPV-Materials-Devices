@@ -97,17 +97,20 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                             input_paths: list[Path] = model_path.iterdir()
                             # print("input_paths")
                             # print(list(input_paths))
-                            for input_path in input_paths:
-                                # print(feature_path)
-                                target_paths: generator = handle_paths(
-                                    input_path, config, "target_names"
-                                )
-                                # print("target_path", list(target_paths))
-                                for target_path in target_paths:
-                                    result_path: Path = target_path / "{}.csv".format(
-                                        result_file
+                            try:
+                                for input_path in input_paths:
+                                    # print(feature_path)
+                                    target_paths: generator = handle_paths(
+                                        input_path, config, "target_names"
                                     )
-                                    result_paths.append(result_path)
+                                    # print("target_path", list(target_paths))
+                                    for target_path in target_paths:
+                                        result_path: Path = (
+                                            target_path / "{}.csv".format(result_file)
+                                        )
+                                        result_paths.append(result_path)
+                            except:
+                                pass
                         else:
                             # print("feature_paths")
                             # print(feature_paths)
@@ -116,10 +119,9 @@ def path_to_result(config: dict, result_file: str) -> list[Path]:
                                 input_path_split: list[str] = str(feature_path).split(
                                     ","
                                 )
-                                if inputs == input_path_split[1:]:
-                                    target_paths: generator = handle_paths(
-                                        input_path, config, "target_names"
-                                    )
+                                target_paths: generator = handle_paths(
+                                    input_path, config, "target_names"
+                                )
                                 for target_path in target_paths:
                                     # TODO: change to progress report
                                     # TODO: add Dataset, Features, Model, Target, Feature Length, and Num of data

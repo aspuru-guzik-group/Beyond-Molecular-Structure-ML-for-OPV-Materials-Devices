@@ -56,7 +56,7 @@ def heatmap(config: dict):
     # Order of X/Y-axes
     if config["config_name"] == "grid_search":
         x = [
-            # "MLR", # ignored for rmse and mae
+            "MLR",  # ignored for rmse and mae
             "Lasso",
             "KRR",
             "KNN",
@@ -78,22 +78,24 @@ def heatmap(config: dict):
             "DA_SELFIES",
             "DA_BigSMILES",
             "DA_SMILES",
+            "DA_ohe",
             "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV",
             "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV",
         ]
-    elif config["config_name"] == "grid_search_multi":
+        x_name = "Model"
+        y_name = "Feature_Names"
+    elif config["config_name"] == "grid_search_ensemble":
         x = [
             "RF",
             "RF_ensemble",
-            "RF_multi",
             "XGBoost",
             "XGBoost_ensemble",
-            "XGBoost_multi",
             "SVM",
             "SVM_ensemble",
-            "SVM_multi",
         ]
         y = ["DA_FP_radius_3_nbits_1024"]
+        x_name = "Model"
+        y_name = "Target"
     elif config["config_name"] == "grid_search_target":
         x = [
             "RF",
@@ -101,11 +103,25 @@ def heatmap(config: dict):
             "SVM",
         ]
         y = ["calc_PCE_percent", "FF_percent", "Voc_V", "Jsc_mA_cm_pow_neg2"]
-
+    elif config["config_name"] == "feature_comparison":
+        x = ["RF_ensemble", "XGBoost_ensemble", "SVM_ensemble"]
+        # y = [
+        #     "DA_FP_radius_3_nbits_1024",
+        #     "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV",
+        #     "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent",
+        # ]
+        y = [
+            "result_device_wo_thickness",
+            "result_fabrication_wo_solid",
+            "result_molecules_only",
+        ]
+        x_name = "Model"
+        y_name = "Features"
     # Heatmap
     # NOTE: You have to change the pivot columns depending on your plot!
-    mean_summary: pd.DataFrame = summary.pivot("Feature_Names", "Model", mean_metric)
-    mean_summary: pd.DataFrame = mean_summary.reindex(index=y, columns=x)
+    print(f"{mean_metric=}")
+    mean_summary: pd.DataFrame = summary.pivot(x_name, y_name, mean_metric)
+    # mean_summary: pd.DataFrame = mean_summary.reindex(index=y, columns=x)
     summary_annotated: pd.DataFrame = deepcopy(summary)
     with pd.option_context(
         "display.max_rows",
@@ -124,12 +140,24 @@ def heatmap(config: dict):
 
     # NOTE: You have to change the pivot columns depending on your plot!
     summary_annotated: pd.DataFrame = summary_annotated.pivot(
-        "Feature_Names", "Model", "annotate_label"
+        x_name, y_name, "annotate_label"
     )
-    summary_annotated: pd.DataFrame = summary_annotated.reindex(index=y, columns=x)
-    summary_annotated: np.ndarray = summary_annotated.to_numpy()
+    mean_summary: pd.DataFrame = mean_summary.T
+    summary_annotated: pd.DataFrame = summary_annotated.T
+    # summary_annotated: pd.DataFrame = summary_annotated.reindex(index=y, columns=x)
 
-    sns.heatmap(
+    summary_annotated: np.ndarray = summary_annotated.to_numpy()
+    with pd.option_context(
+        "display.max_rows",
+        None,
+        "display.max_columns",
+        None,
+        "display.precision",
+        3,
+    ):
+        print(mean_summary)
+        print(summary_annotated)
+    ax = sns.heatmap(
         mean_summary,
         annot=summary_annotated,
         cmap="viridis",

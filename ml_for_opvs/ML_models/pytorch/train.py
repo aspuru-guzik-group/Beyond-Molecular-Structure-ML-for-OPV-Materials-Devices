@@ -16,6 +16,7 @@ import numpy as np
 from numpy import mean, std
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 
 # from logging import Logger
 from pyparsing import Opt
@@ -98,19 +99,22 @@ def main(config: dict):
             input_rep_bool = False
         else:
             input_rep_bool = True
-        (
-            target_train_array,
-            target_test_array,
-            target_max,
-            target_min,
-        ) = process_target(
-            train_df[target_df_columns],
-            test_df[target_df_columns],
-            train_df[column_names],
-            input_rep_bool,
-        )
-        config["output_size"] = len(config["target_name"].split(","))
 
+        # Target Scaling
+        scaler = MinMaxScaler()
+        target_train_array: np.ndarray = (
+            train_df[target_df_columns].to_numpy().astype("float64")
+        )
+        target_test_array: np.ndarray = (
+            test_df[target_df_columns].to_numpy().astype("float64")
+        )
+        scaler.fit(target_train_array)
+        target_max: np.ndarray = scaler.data_max_
+        target_min: np.ndarray = scaler.data_min_
+        target_train_array = scaler.transform(target_train_array)
+        target_test_array = scaler.transform(target_test_array)
+
+        config["output_size"] = len(config["target_name"].split(","))
         # Choose PyTorch Model
         if config["model_type"] == "NN":
             # process SMILES vs. Fragments vs. Fingerprints. How to handle that? handle this and tokenization in pipeline
@@ -125,7 +129,8 @@ def main(config: dict):
             ) = process_features(  # additional features are added at the end of array
                 train_df[column_names],
                 test_df[column_names],
-                input_rep_bool
+                input_rep_bool,
+                config["input_representation"],
             )
             config["input_size"] = max_input_length
             model = NNModel(config)
@@ -142,7 +147,8 @@ def main(config: dict):
             ) = process_features_LM(  # additional features are added at the end of array
                 train_df[column_names],
                 test_df[column_names],
-                input_rep_bool
+                input_rep_bool,
+                config["input_representation"],
             )
             config["vocab_size"] = max_input_length
             model = LSTMModel(config)
@@ -150,34 +156,34 @@ def main(config: dict):
         # Create validation set from training set
         # NOTE: Reasoning is because sklearn uses BayesSearchCV on the training set for Hyperparameter Optimization. BayesSearchCV uses 5-Fold Cross-validation on the training set. As a consequence, 80% of the training data is used for validation of hyperparameter optimization. This means only 64% of total data is used for training.
         # NOTE: Solution is to recreate the validation fold from the training data for hyperparameter optimization.
-        (
-            input_train_array,
-            input_valid_array,
-            target_train_array,
-            target_valid_array,
-        ) = train_test_split(
-            input_train_array,
-            target_train_array,
-            test_size=0.2,
-            random_state=config["random_state"],
-        )
+        # (
+        #     input_train_array,
+        #     input_valid_array,
+        #     target_train_array,
+        #     target_valid_array,
+        # ) = train_test_split(
+        #     input_train_array,
+        #     target_train_array,
+        #     test_size=0.2,
+        #     random_state=config["random_state"],
+        # )
 
         # Create PyTorch Dataset and DataLoader
         train_set = PolymerDataset(
             input_train_array, target_train_array, config["random_state"]
         )
-        valid_set = PolymerDataset(
-            input_valid_array, target_valid_array, config["random_state"]
-        )
+        # valid_set = PolymerDataset(
+        #     input_valid_array, target_valid_array, config["random_state"]
+        # )
         test_set = PolymerDataset(
             input_test_array, target_test_array, config["random_state"]
         )
         train_dataloader = DataLoader(
             train_set, batch_size=config["train_batch_size"], shuffle=True
         )
-        valid_dataloader = DataLoader(
-            valid_set, batch_size=config["test_batch_size"], shuffle=False
-        )
+        # valid_dataloader = DataLoader(
+        #     valid_set, batch_size=config["test_batch_size"], shuffle=False
+        # )
         test_dataloader = DataLoader(
             test_set, batch_size=config["test_batch_size"], shuffle=False
         )
@@ -208,9 +214,9 @@ def main(config: dict):
             log_count += 1
             log_dir: Path = log_dir.parent / str(log_count)
         train_log: Path = log_dir / "train"
-        valid_log: Path = log_dir / "valid"
+        # valid_log: Path = log_dir / "valid"
         train_writer: SummaryWriter = SummaryWriter(log_dir=train_log)
-        valid_writer: SummaryWriter = SummaryWriter(log_dir=valid_log)
+        # valid_writer: SummaryWriter = SummaryWriter(log_dir=valid_log)
 
         # Scheduler
         scheduler1 = LinearLR(
@@ -295,56 +301,56 @@ def main(config: dict):
 
             ## VALIDATION LOOP
             # TODO: perform on validation set
-            model.train(False)
-            for i, valid_data in enumerate(valid_dataloader):
-                valid_inputs, valid_targets = valid_data
-                valid_inputs, valid_targets = valid_inputs.to(
-                    device="cuda"
-                ), valid_targets.to(device="cuda")
-                # convert to float
-                valid_inputs, valid_targets = (
-                    valid_inputs.float(),
-                    valid_targets.float(),
-                )
-                # Make predictions for this batch
-                valid_outputs = model(valid_inputs)
-                # Compute the loss
-                valid_loss = loss_fn(valid_outputs, valid_targets)
+            # model.train(False)
+            # for i, valid_data in enumerate(valid_dataloader):
+            #     valid_inputs, valid_targets = valid_data
+            #     valid_inputs, valid_targets = valid_inputs.to(
+            #         device="cuda"
+            #     ), valid_targets.to(device="cuda")
+            #     # convert to float
+            #     valid_inputs, valid_targets = (
+            #         valid_inputs.float(),
+            #         valid_targets.float(),
+            #     )
+            #     # Make predictions for this batch
+            #     valid_outputs = model(valid_inputs)
+            #     # Compute the loss
+            #     valid_loss = loss_fn(valid_outputs, valid_targets)
 
-                # Early Stopping
-                # current_loss = valid_loss
-                # if current_loss > last_loss:
-                #     trigger_times += 1
-                #     # print('Trigger Times:', trigger_times)
+            #     # Early Stopping
+            #     # current_loss = valid_loss
+            #     # if current_loss > last_loss:
+            #     #     trigger_times += 1
+            #     #     # print('Trigger Times:', trigger_times)
 
-                #     if trigger_times >= patience:
-                #         print('Early stopping!\nStart to test process.')
-                #         early_stop = True
-                #         break
-                # else:
-                #     # print('trigger times: 0')
-                #     trigger_times = 0
+            #     #     if trigger_times >= patience:
+            #     #         print('Early stopping!\nStart to test process.')
+            #     #         early_stop = True
+            #     #         break
+            #     # else:
+            #     #     # print('trigger times: 0')
+            #     #     trigger_times = 0
 
-                # last_loss = current_loss
+            #     # last_loss = current_loss
 
-                # Gather data and report
-                running_valid_loss += float(valid_loss)
-                # Gather number of examples trained
-                n_examples += len(valid_inputs)
-                # Gather number of iterations (batches) trained
-                n_valid_iter += 1
+            #     # Gather data and report
+            #     running_valid_loss += float(valid_loss)
+            #     # Gather number of examples trained
+            #     n_examples += len(valid_inputs)
+            #     # Gather number of iterations (batches) trained
+            #     n_valid_iter += 1
 
-            # Early Stopping
-            # if early_stop:
-            #     break
+            # # Early Stopping
+            # # if early_stop:
+            # #     break
 
-            valid_writer.add_scalar("loss_batch", valid_loss, n_examples)
-            valid_writer.add_scalar(
-                "loss_avg", running_valid_loss / n_valid_iter, n_examples
-            )
+            # valid_writer.add_scalar("loss_batch", valid_loss, n_examples)
+            # valid_writer.add_scalar(
+            #     "loss_avg", running_valid_loss / n_valid_iter, n_examples
+            # )
 
-            # Adjust learning rate
-            scheduler.step()
+            # # Adjust learning rate
+            # scheduler.step()
 
         # Inference
         # TODO: Perform on test set
@@ -369,13 +375,11 @@ def main(config: dict):
             predictions.extend(test_outputs.tolist())
             ground_truth.extend(test_targets.tolist())
 
-        predictions: np.ndarray = np.array(predictions).flatten()
-        ground_truth: np.ndarray = np.array(ground_truth).flatten()
         # reverse min-max scaling
-        predictions: np.ndarray = (predictions * (target_max - target_min)) + target_min
-        ground_truth: np.ndarray = (
-            ground_truth * (target_max - target_min)
-        ) + target_min
+        predictions: np.ndarray = scaler.inverse_transform(predictions).flatten()
+        ground_truth: np.ndarray = scaler.inverse_transform(ground_truth).flatten()
+        # print(f"{predictions=}")
+        # print(f"{ground_truth=}")
 
         # save model
         # NOTE: model is NOT saved because it takes up too much storage
@@ -387,7 +391,12 @@ def main(config: dict):
         results_path: Path = Path(os.path.abspath(config["results_path"]))
         model_dir_path: Path = results_path / "{}".format(config["model_type"])
         feature_dir_path: Path = model_dir_path / "{}".format(config["feature_names"])
-        target_dir_path: Path = feature_dir_path / "{}".format(config["target_name"])
+        feature_set_dir_path: Path = feature_dir_path / "{}".format(
+            config["feature_set"]
+        )
+        target_dir_path: Path = feature_set_dir_path / "{}".format(
+            config["target_name"]
+        )
         # create folders if not present
         try:
             target_dir_path.mkdir(parents=True, exist_ok=True)
@@ -395,10 +404,18 @@ def main(config: dict):
             print("Folder already exists.")
         prediction_path: Path = target_dir_path / "prediction_{}.csv".format(fold)
         # export predictions
+        prediction_columns: list = config["target_name"].split(",")
+        prediction_columns: list = [
+            "predicted_{}".format(column) for column in prediction_columns
+        ]
         prediction_df: pd.DataFrame = pd.DataFrame(
-            predictions, columns=["predicted_{}".format(config["target_name"])]
+            predictions, columns=prediction_columns
         )
-        prediction_df[config["target_name"]] = ground_truth
+        for column, ground_truth_column in zip(
+            config["target_name"].split(","), np.transpose(ground_truth)
+        ):
+            prediction_df[column] = ground_truth_column
+        print(prediction_df)
         prediction_df.to_csv(prediction_path, index=False)
 
         # evaluate the model
@@ -422,7 +439,7 @@ def main(config: dict):
 
         # close SummaryWriter
         train_writer.close()
-        valid_writer.close()
+        # valid_writer.close()
     # make new file
     # summarize results
     progress_path: Path = target_dir_path / "progress_report.csv"
@@ -444,9 +461,7 @@ def main(config: dict):
         "rmse_std": std(outer_rmse),
         "mae_mean": mean(outer_mae),
         "mae_std": std(outer_mae),
-        "num_of_data": len(input_train_array)
-        + len(input_valid_array)
-        + len(input_test_array),
+        "num_of_data": len(input_train_array) + len(input_test_array),
         "feature_length": max_input_length,
     }
     summary_df: pd.DataFrame = pd.DataFrame.from_dict(summary_dict, orient="index")
@@ -477,6 +492,11 @@ if __name__ == "__main__":
         "--feature_names",
         type=str,
         help="Choose input features. Format is: ex. SMILES,T_K,P_Mpa - Always put representation at the front.",
+    )
+    parser.add_argument(
+        "--feature_set",
+        type=str,
+        help="Choose input features. Format is: ex. fabrication_wo_solid,solvent_properties - Always put representation at the front.",
     )
     parser.add_argument(
         "--target_name",
