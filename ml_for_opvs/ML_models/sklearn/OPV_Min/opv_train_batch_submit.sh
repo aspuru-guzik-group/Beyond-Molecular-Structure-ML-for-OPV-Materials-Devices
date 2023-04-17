@@ -1,4 +1,4 @@
-# generate bash files for training across all (input rep) + (feature set) + (model type). need to add one for .format{} to the code to indicate model type
+# generate bash files for training across all (input rep) + (feature set) + (model type). need to add one for .format{} to the python_code to indicate model type
 #!/bin/bash
 #SBATCH --time=6:00:00
 #SBATCH --output=/project/6033559/stanlo/ml_for_opvs/ml_for_opvs/ML_models/pytorch/OPV_Min/slurm.out

@@ -1,4 +1,6 @@
 from os import error
+from pathlib import Path
+
 import pkg_resources
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -76,7 +78,7 @@ class DonorClean:
     Class containing functions that preprocesses the donor data.
     """
 
-    def __init__(self, master_donor, opv_donor):
+    def __init__(self, master_donor: Path, opv_donor: Path) -> None:
         """
         Instantiates class with appropriate data
 
@@ -87,11 +89,11 @@ class DonorClean:
         Returns:
             None
         """
-        self.master_donor = pd.read_csv(master_donor)
-        self.opv_donor = pd.read_csv(opv_donor)
+        self.master_donor: pd.DataFrame = pd.read_csv(master_donor)
+        self.opv_donor: pd.DataFrame = pd.read_csv(opv_donor)
 
     # NOTE: Only done once
-    def clean_donor(self, clean_donor):
+    def clean_donor(self, clean_donor: Path):
         """
         Function that creates a .csv with the correct SMILES, substituted R groups
 
@@ -101,7 +103,7 @@ class DonorClean:
         Returns:
             .csv with columns: | Donor | SMILES | SMILES (w/ substituted R) | Big_SMILES | SELFIES
         """
-        headers = [
+        headers: list[str] = [
             "Donor",
             "SMILES",
             "SMILES w/o R_group replacement",
@@ -109,15 +111,15 @@ class DonorClean:
             "Big_SMILES",
             "SELFIES",
         ]
-        clean_df = pd.DataFrame(columns=headers)
-        opv_labels = list(self.opv_donor["name"])
+        clean_df: pd.DataFrame = pd.DataFrame(columns=headers)
+        opv_labels: list[str] = list(self.opv_donor["name"])
         # Collect statistics about number of errors
-        total_donors = 0
-        missing_donors = 0  # donors not in the OPV but in the data
-        error_donors = 0  # number of donors with any error
+        total_donors: int = 0
+        missing_donors: int = 0  # donors not in the OPV but in the data
+        error_donors: int = 0  # number of donors with any error
         for index, row in self.master_donor.iterrows():
             # Ignore structures with error comments
-            error_list = [
+            error_list: list[str] = [
                 "not in drive, not in literature",
                 "error",
                 "wrong structure",
@@ -152,71 +154,6 @@ class DonorClean:
             "total: ",
             total_donors,
         )
-        clean_df.to_csv(clean_donor, index=False)
-
-    # ATTN: Deprecated
-    def replace_r_with_arbitrary(self, clean_donor):
-        """
-        Replace R group in the clean_min_acceptors.csv
-
-        Args:
-            clean_donor: path to processed acceptors
-
-        Returns:
-            SMILES column contains acceptors with replaced R groups
-        """
-        patts = {
-            "[R1]": "CC(CCCCCC)CCCCCCCC",
-            "[R2]": "CCCCCCCC",
-            "[R3]": "[Si](CCC)(CCC)(CCC)",
-            "[R4]": "CC(CC)CCCC",
-            "[R5]": "SCCCCCCCCCCCC",
-            "[R6]": "CC(CCCCCCCC)CCCCCCCCCC",
-            "[R7]": "SCC(CCCCCC)CCCC",
-            "[R8]": "[Si](CC)(CC)(CC)",
-            "[R9]": "[Si](C(C)C)(C(C)C)C(C)C",
-            "[R10]": "[Si](CCCC)(CCCC)(CCCC)",
-            "[R11]": "[Si](C)(C)CCCCCCCC",
-            "[R12]": "SCCCCC=C",
-            "[R13]": "SCC4CCCCC4",
-            "[R14]": "CCCCCC",
-            "[R15]": "CCCCCCCCCC",
-            "[R18]": "CCCCC",
-            "[R19]": "CCCCCCCCCCCCCCCC",
-            "[R20]": "CCCCCCCCCCC",
-            "[R21]": "C(CCCCCCCCC)CCCCCCC",
-            "[R23]": "CC(CCCCCCCCCCCC)CCCCCCCCCC",
-            "[R24]": "COCCOC",
-            "[R25]": "CC(CCCCCCCCCCC)CCCCCCCCC",
-            "[R26]": "CCC",
-            "[R27]": "CCCC",
-            "[R28]": "CCC(CC)CCCC",
-            "[R29]": "CCCC(CC)CCCC",
-        }
-
-        # New R group substitution pattern
-        new_patts = {}
-        atomic_num = 21
-        for k, v in patts.items():
-            # Only provides the transition metals and lanthanides
-            # Outside of transition metals and lanthanides, valencies were weird, gave explicit Hs.
-            if atomic_num == 31:
-                atomic_num = 39
-            elif atomic_num == 49:
-                atomic_num = 57
-            elif atomic_num == 81:
-                atomic_num = 89
-            mol = Chem.MolFromSmarts("[#{}]".format(atomic_num))
-            smi = Chem.MolToSmiles(mol)
-            new_patts[smi] = k
-            atomic_num += 1
-
-        clean_df = pd.read_csv(clean_donor)
-        for index, row in clean_df.iterrows():
-            smi = clean_df.at[index, "SMILES"]
-            for key in new_patts.keys():
-                smi = smi.replace(new_patts[key], key)
-            clean_df.at[index, "SMILES"] = smi
         clean_df.to_csv(clean_donor, index=False)
 
     # ATTN: ONly done once
@@ -299,58 +236,6 @@ class DonorClean:
 
         clean_df.to_csv(clean_donor, index=False)
 
-    # ATTN: Deprecated
-    def delete_r(self, clean_donor):
-        """
-        Function that deletes R group.
-
-        Args:
-            clean_donor: path to processed donors
-
-        Returns:
-            SMILES w/o R group column contains donors with deleted R groups
-        """
-        patts = {
-            "[R1]": "CC(CCCCCC)CCCCCCCC",
-            "[R2]": "CCCCCCCC",
-            "[R3]": "[Si](CCC)(CCC)(CCC)",
-            "[R4]": "CC(CC)CCCC",
-            "[R5]": "SCCCCCCCCCCCC",
-            "[R6]": "CC(CCCCCCCC)CCCCCCCCCC",
-            "[R7]": "SCC(CCCCCC)CCCC",
-            "[R8]": "[Si](CC)(CC)(CC)",
-            "[R9]": "[Si](C(C)C)(C(C)C)C(C)C",
-            "[R10]": "[Si](CCCC)(CCCC)(CCCC)",
-            "[R11]": "[Si](C)(C)CCCCCCCC",
-            "[R12]": "SCCCCC=C",
-            "[R13]": "SCC4CCCCC4",
-            "[R14]": "CCCCCC",
-            "[R15]": "CCCCCCCCCC",
-            "[R18]": "CCCCC",
-            "[R19]": "CCCCCCCCCCCCCCCC",
-            "[R20]": "CCCCCCCCCCC",
-            "[R21]": "C(CCCCCCCCC)CCCCCCC",
-            "[R23]": "CC(CCCCCCCCCCCC)CCCCCCCCCC",
-            "[R24]": "COCCOC",
-            "[R25]": "CC(CCCCCCCCCCC)CCCCCCCCC",
-            "[R26]": "CCC",
-            "[R27]": "CCCC",
-            "[R28]": "CCC(CC)CCCC",
-            "[R29]": "CCCC(CC)CCCC",
-        }
-        clean_df = pd.read_csv(clean_donor)
-        donor_smi_r_list = clean_df["SMILES w/o R_group replacement"]
-        index = 0
-        for smi in donor_smi_r_list:
-            for r in patts:
-                smi = smi.replace(r, "*")
-            # check if SMILES is valid
-            mol = Chem.MolFromSmiles(smi)
-            smi = Chem.MolToSmiles(mol)
-            smi = Chem.CanonSmiles(smi)
-            clean_df.at[index, "SMILES w/o R_group"] = smi
-            index += 1
-        clean_df.to_csv(clean_donor, index=False)
 
     # ATTN: ??
     def remove_methyl(self, clean_donor):
@@ -394,6 +279,7 @@ class DonorClean:
 
         clean_df.to_csv(clean_donor, index=False)
 
+    # TODO: Unused?
     def canon_smi(self, clean_donor):
         """
         Function to canonicalize all the smiles in donor_df to rid of %10...
@@ -1061,42 +947,6 @@ class DAPairs:
 
         master_df.to_csv(master_csv_path, index=False)
 
-    # ATTN: Deprecated
-    def fill_empty_values(self, master_csv_path):
-        """
-        Function that fills in NaN values because it is reasonable.
-        Ex. solvent_additive does not have to be present. Therefore, "N/A" should replace NaN
-
-        Args:
-            master_csv_path: path to the processed master file for future data representation modifications
-
-        Returns:
-            .csv file with filled reasonable values
-        """
-        master_data = pd.read_csv(master_csv_path)
-        column_names = master_data.columns
-
-        # columns that can have NaN values
-        idx_solvent_additive = 16
-        idx_solvent_additive_conc = 17
-        idx_annealing_temp = 19
-        null_master_data = master_data.isna()
-
-        # placeholders
-        # N/A for string values, -1 for int,float values
-        for index, row in master_data.iterrows():
-            if null_master_data.at[index, column_names[idx_solvent_additive]] == True:
-                master_data.at[index, column_names[idx_solvent_additive]] = "N/A"
-            if (
-                null_master_data.at[index, column_names[idx_solvent_additive_conc]]
-                == True
-            ):
-                master_data.at[index, column_names[idx_solvent_additive_conc]] = -1
-            if null_master_data.at[index, column_names[idx_annealing_temp]] == True:
-                master_data.at[index, column_names[idx_annealing_temp]] = -1
-
-        master_data.to_csv(master_csv_path, index=False)
-
     # ATTN: Deprecated?
     def filter_master_csv(
         self, master_csv_path, filtered_master_csv_path, column_idx_list
@@ -1154,7 +1004,7 @@ class DAPairs:
                 master_data.at[index, "D_A_ratio_m_m"] = round(float_ratio_data, 3)
 
             # solvent_additive_conc data
-            # TODO:
+            # TODO: ???
             try:
                 master_data.at[index, "solvent_additive_conc_v_v_percent"] = float(
                     solvent_add_conc_data
