@@ -55,7 +55,7 @@ def parity_molplotly(label_data: Path, prediction_data: Path):
     dict(
       type= 'line',
       yref= 'paper', y0= 0, y1= 1,
-      xref= 'x', x0= 5, x1= 5
+      xref= 'x', x0= 0, x1= 5
     )
 ])
     # add molecules to the plotly graph - returns a Dash app
