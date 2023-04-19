@@ -29,16 +29,21 @@ prediction_data: Path = (
 )
 
 
-def parity_molplotly(smi_data: Path, prediction_data: Path):
+def parity_molplotly(label_data: Path, prediction_data: Path):
     """Plot parity plot with molplotly.
     Args:
         smi_data (Path): _description_
         prediction_data (Path): _description_
     """
-    smi_data: pd.DataFrame = pd.read_csv(smi_data)
+    label_data: pd.DataFrame = pd.read_csv(label_data)
     prediction_data: pd.DataFrame = pd.read_csv(prediction_data)
-    smi_data: pd.Series = smi_data["DA_SMILES"]
+    smi_data: pd.Series = label_data["DA_SMILES"]
+    donor_label: pd.Series = label_data["Donor"]
+    acceptor_label: pd.Series = label_data["Acceptor"]
+    label_data["DA_Label"] = donor_label + "/" + acceptor_label
     prediction_data["smiles"] = smi_data
+    prediction_data["DA_Label"] = label_data["DA_Label"]
+    print(prediction_data.head())
 
     # generate a scatter plot
     fig = px.scatter(
@@ -46,12 +51,19 @@ def parity_molplotly(smi_data: Path, prediction_data: Path):
         x="calc_PCE_percent,FF_percent,Jsc_mA_cm_pow_neg2,Voc_V",
         y="predicted_calc_PCE_percent,FF_percent,Jsc_mA_cm_pow_neg2,Voc_V",
     )
-
+    fig.update_layout(shapes=[
+    dict(
+      type= 'line',
+      yref= 'paper', y0= 0, y1= 1,
+      xref= 'x', x0= 5, x1= 5
+    )
+])
     # add molecules to the plotly graph - returns a Dash app
     app = molplotly.add_molecules(
         fig=fig,
         df=prediction_data,
         smiles_col="smiles",
+        title_col="DA_Label",
     )
 
     # run Dash app inline in notebook (or in an external server)
