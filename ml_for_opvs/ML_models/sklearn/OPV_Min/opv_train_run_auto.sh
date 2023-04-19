@@ -1,6 +1,6 @@
 #!/bin/bash
 # 1
-input_rep=("mordred") # "fingerprint" "BRICS" "smiles"
+input_rep=("fingerprint" "mordred") # "fingerprint" "BRICS" "smiles"
 
 # 1.1
 declare -A input_rep_filename_dict
@@ -20,10 +20,10 @@ declare -a feature_name_dict
 target_name=("calc_PCE_percent") #"calc_PCE_percent" "FF_percent" "Jsc_mA_cm_pow_neg2" "Voc_V"
 
 # 6
-model_type=("RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN") # "RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN"
+model_type=("RF" "XGBoost") # "RF" "XGBoost" "KRR" "MLR" "SVM" "Lasso" "KNN"
 
 #7
-multi_output_type=("''") # "ensemble" or "multi"
+multi_output_type=("ensemble") # "ensemble" or "multi" or "''" for nothing
 
 for ir in ${input_rep[@]}; do
     for fsg in ${feat_select_group[@]}; do
