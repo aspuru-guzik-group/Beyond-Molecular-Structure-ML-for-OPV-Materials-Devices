@@ -1,6 +1,10 @@
+import json
+
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
+
+from code_python import DATASETS
 
 
 def clean_structures(material: str, master_df: pd.DataFrame, reference: pd.DataFrame) -> pd.DataFrame:
@@ -17,7 +21,6 @@ def clean_structures(material: str, master_df: pd.DataFrame, reference: pd.DataF
         material,
         "SMILES",
         "SMILES w/o R_group replacement",
-        "SMILES w/o R_group",
         "BigSMILES",
         "SELFIES",
     ]
@@ -67,7 +70,7 @@ def clean_structures(material: str, master_df: pd.DataFrame, reference: pd.DataF
     return clean_df
 
 
-def replace_r_with_arbitrary(r_group_patterns: dict[str, str], structures: pd.DataFrame) -> pd.DataFrame:
+def replace_r_with_arbitrary(structures: pd.DataFrame, r_group_patterns: dict[str, str]) -> pd.DataFrame:
     """
     Replace R group in the clean_min_acceptors.csv
 
@@ -101,7 +104,7 @@ def replace_r_with_arbitrary(r_group_patterns: dict[str, str], structures: pd.Da
     return structures
 
 
-def replace_arbitrary_with_sidechain(r_group_patterns: dict[str, str], structures: pd.DataFrame) -> pd.DataFrame:
+def replace_arbitrary_with_sidechain(structures: pd.DataFrame, r_group_patterns: dict[str, str]) -> pd.DataFrame:
     # New R group substitution pattern
     # ATTN: What is this doing? Something about fixing patterns?
     new_patts = {}
@@ -146,7 +149,23 @@ def replace_arbitrary_with_sidechain(r_group_patterns: dict[str, str], structure
 
 
 if __name__ == "__main__":
+    raw_data = DATASETS / "Min_2020_n558" / "raw"
+    r_groups_file = raw_data.parent / "r_groups.json"
     # TODO: Make sure R groups JSON has all the R groups!!!
-    clean_structures("Donor", "clean_min_donors.csv", "donors.csv")
-    replace_r_with_arbitrary("donors.csv", "clean_min_donors.csv")
-    replace_arbitrary_with_sidechain("donors.csv", "clean_min_donors.csv")
+    with r_groups_file.open("r") as f:
+        r_groups = json.load(f)
+
+    for material in ["Donor", "Acceptor"]:
+        master_file = raw_data / f"min_{material.lower()}s_smiles_master_EDITED.csv"
+        master_df = pd.read_csv(master_file)
+        reference_file = raw_data / f"reference {material.lower()}s.csv"
+        reference_df = pd.read_csv(reference_file)
+
+        clean_df: pd.DataFrame = clean_structures(material, master_df, reference_df)
+        clean_smiles_df: pd.DataFrame = replace_arbitrary_with_sidechain(
+            replace_r_with_arbitrary(clean_df, r_groups),
+            r_groups
+        )
+
+        clean_file = raw_data.parent / f"clean {material.lower()}s.csv"
+        clean_smiles_df.to_csv(clean_file, index=False)
