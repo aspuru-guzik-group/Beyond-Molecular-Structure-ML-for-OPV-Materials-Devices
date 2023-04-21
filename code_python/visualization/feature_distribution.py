@@ -1,4 +1,5 @@
 import itertools
+import math
 from pathlib import Path
 
 import pkg_resources
@@ -47,6 +48,7 @@ def plot_feature_distributions(dataset: pd.DataFrame,
         y_rows = x_columns + 1
     elif x_columns == np.ceil(np.sqrt(num_columns)):
         y_rows = x_columns
+
     fig, axs = plt.subplots(y_rows, x_columns, figsize=(y_rows * 6, x_columns * 2))  # prepare the figure
     column_range: list = list(range(0, df_columns))  # get the range of columns to plot
     x_idx = 0  # index of the current column
@@ -91,6 +93,68 @@ def plot_feature_distributions(dataset: pd.DataFrame,
     plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
     plt.tight_layout()
     plt.savefig(output_dir / f"feature distribution.png")
+
+
+# def plot_feature_distributions(dataset: pd.DataFrame, output_dir: Path, drop_columns: list = None):
+#     """
+#     Plots the distribution of all variables in the dataset.
+#
+#     Args:
+#         dataset: Pre-processed dataset of OPV device parameters
+#         dataset_name: Name of the dataset
+#         drop_columns: Columns to drop from the dataset
+#     """
+#     # # Create a copy of the dataset
+#     # dataset_copy = dataset.copy()
+#
+#     dataset.drop(drop_columns, axis=1, inplace=True)  # drop the columns that won't be used in the analysis
+#
+#     # Iterate over the columns to drop
+#     for column in dataset.columns:
+#         # Drop nan values in the current column
+#         dataset = dataset.dropna(subset=[column])
+#
+#     # Calculate the number of rows and columns in the figure
+#     n_variables = dataset.shape[1]
+#     n_rows = math.ceil(n_variables/2)
+#     n_cols = 2
+#
+#     n_feats: int = dataset.shape[1]  # get the number of columns in the dataset
+#     n_cols = round(np.sqrt(n_feats))
+#     if n_cols == np.floor(np.sqrt(n_feats)):
+#         # if the number of columns is a perfect square, then the number of rows is one more than the number of columns
+#         n_rows = n_cols + 1
+#     elif n_cols == np.ceil(np.sqrt(n_feats)):
+#         n_rows = n_cols
+#
+#     # Create the figure and axes objects
+#     fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 6, n_rows * 2))
+#
+#     # Flatten the axes array
+#     axes = axes.flatten()
+#
+#     # Iterate over the columns in the dataset
+#     for i, column in enumerate(dataset.columns):
+#         # Plot the distribution of the current column
+#         axes[i].hist(dataset[column].astype(str), bins=30, alpha=0.5)
+#         axes[i].set_xlabel(column)
+#         axes[i].set_ylabel('Count')
+#         axes[i].grid()
+#
+#     # Add a title to the figure
+#     # fig.suptitle(f'Distribution of variables in {dataset_name}')
+#
+#     left = 0.125  # the left side of the subplots of the figure
+#     right = 0.9  # the right side of the subplots of the figure
+#     bottom = 0.1  # the bottom of the subplots of the figure
+#     top = 0.9  # the top of the subplots of the figure
+#     wspace = 0.3  # the amount of width reserved for blank space between subplots
+#     hspace = 0.6  # the amount of height reserved for white space between subplots
+#     plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
+#     plt.tight_layout()
+#
+#     # Save the figure as a png file
+#     fig.savefig(output_dir / "feature distributions.png")
 
 
 def plot_heatmap_of_pair_frequency(dataset: pd.DataFrame, column1: str, column2: str, output_dir: Path):
@@ -138,27 +202,34 @@ def plot_heatmap_of_pair_frequency(dataset: pd.DataFrame, column1: str, column2:
 
 
 if __name__ == "__main__":
-    # # opv_dataset = pd.read_csv(MASTER_ML_DATA)
-    # opv_dataset: pd.DataFrame = pd.read_csv(min_dataset)
-    # figures: Path = Path("../../figures/Min")
-    #
+    min_dataset: Path = Path(__file__).parent.parent.parent / "datasets" / "Min_2020_n558" / "cleaned_dataset.csv"
+    opv_dataset: pd.DataFrame = pd.read_csv(min_dataset)
+    figures: Path = Path(__file__).parent.parent.parent / "figures" / "Min"
+
     # pairs_list = ["Donor", "Acceptor", "solvent"]
     # # find every non-symmetric combination in pairs_list
     # pairs_combinations = list(itertools.combinations(pairs_list, 2))
     # for pair in pairs_combinations:
     #     plot_heatmap_of_pair_frequency(opv_dataset, pair[0], pair[1], figures)
-    #
-    # plot_feature_distributions(opv_dataset,
-    #                            figures,
-    #                            drop_columns=["ref", "Donor", "Acceptor", "Donor_SMILES", "Donor_Big_SMILES",
-    #                                          "Donor_SELFIES", "Acceptor_SMILES", "Acceptor_Big_SMILES",
-    #                                          "Acceptor_SELFIES"]
-    #                            )
 
-    saeki = pd.read_csv(Path(__file__).parent.parent.parent / "datasets" / "Saeki_2022_n1318" / "Saeki_corrected.csv")
-    figures: Path = Path(__file__).parent.parent.parent / "figures" / "Saeki"
-    pairs_list = ["p(SMILES)", "n(SMILES)"]
-    pairs_combinations = list(itertools.combinations(pairs_list, 2))
-    for pair in pairs_combinations:
-        plot_heatmap_of_pair_frequency(saeki, pair[0], pair[1], figures)
-    plot_feature_distributions(saeki, figures, drop_columns=["ID", "Ref", "n(SMILES)", "p(SMILES)"])
+    solvent_properties = [
+        "dipole", "dD", "dP", "dH", "dHDon", "dHAcc", "MW", "Density", "BPt", "MPt",
+        "logKow", "RI", "Trouton", "RER", "ParachorGA", "RD", "DCp", "log n", "SurfTen"
+    ]
+
+    plot_feature_distributions(opv_dataset,
+                               figures,
+                               # drop_columns=["ref", "ref number from paper", "DOI", "Donor", "Acceptor", "Donor_SMILES", "Donor_Big_SMILES",
+                               #               "Donor_SELFIES", "Acceptor_SMILES", "Acceptor_Big_SMILES",
+                               #               "Acceptor_SELFIES"]
+                               drop_columns=["ref", "DOI", "Donor", "Acceptor",
+                                             *[f"solvent {prop}" for prop in solvent_properties], *[f"solvent additive {prop}" for prop in solvent_properties],]
+                               )
+
+    # saeki = pd.read_csv(Path(__file__).parent.parent.parent / "datasets" / "Saeki_2022_n1318" / "Saeki_corrected.csv")
+    # figures: Path = Path(__file__).parent.parent.parent / "figures" / "Saeki"
+    # pairs_list = ["p(labels)", "n(labels)"]
+    # pairs_combinations = list(itertools.combinations(pairs_list, 2))
+    # for pair in pairs_combinations:
+    #     plot_heatmap_of_pair_frequency(saeki, pair[0], pair[1], figures)
+    # plot_feature_distributions(saeki, figures, drop_columns=["ID", "Ref", "n(SMILES)", "p(SMILES)", "n(labels)", "p(labels)"])

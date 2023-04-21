@@ -1,7 +1,7 @@
 import pandas as pd
 import pkg_resources
 
-from python_code.visualization.feature_distribution import plot_feature_distributions
+from code_python.visualization.feature_distribution import plot_feature_distributions
 # from ml_for_opvs.data.exploration.OPV_Min.correlation import
 
 """

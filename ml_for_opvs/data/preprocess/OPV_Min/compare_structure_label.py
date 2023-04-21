@@ -50,7 +50,7 @@ if __name__ == "__main__":
     # cleaned_donors = find_duplicate_labels(donors, "Donor")
     # cleaned_donors.to_csv("clean_min_donors_frfr.csv", index=False)
 
-    acceptors = pd.read_csv("clean_min_acceptors.csv")
+    acceptors = pd.read_csv("../../../../datasets/Min_2020_n558/raw/clean_min_acceptors.csv")
     acceptor_labels = set(opv_data["Acceptor Molecule"])
     acceptors = get_mols(get_labels_set(acceptors, "Acceptor", acceptor_labels))
     cleaned_acceptors = find_duplicate_labels(acceptors, "Acceptor")

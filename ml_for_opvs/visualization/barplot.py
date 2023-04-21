@@ -7,7 +7,7 @@ import pandas as pd
 from textwrap import wrap
 import textwrap
 
-from python_code.visualization.path_utils import (
+from code_python.visualization.path_utils import (
     gather_results,
     path_to_result,
 )

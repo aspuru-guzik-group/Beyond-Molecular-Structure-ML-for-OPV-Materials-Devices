@@ -7,7 +7,7 @@ import seaborn as sns
 import pandas as pd
 import json
 
-from python_code.visualization.path_utils import (
+from code_python.visualization.path_utils import (
     gather_results,
     path_to_result,
 )
