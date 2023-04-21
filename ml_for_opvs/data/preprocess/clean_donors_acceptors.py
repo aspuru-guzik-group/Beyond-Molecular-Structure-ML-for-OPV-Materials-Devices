@@ -1267,12 +1267,12 @@ def create_master_ohe(master_data: str, master_ohe: str):
 
 
 # Step 1
-# donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
-# donors.clean_donor(CLEAN_DONOR_CSV)
+donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
+donors.clean_donor(CLEAN_DONOR_CSV)
 
 # # # # Step 1b
-# donors.replace_r_with_arbitrary(CLEAN_DONOR_CSV)
-# donors.replace_r(CLEAN_DONOR_CSV)
+donors.replace_r_with_arbitrary(CLEAN_DONOR_CSV)
+donors.replace_r(CLEAN_DONOR_CSV)
 
 # # # # # # # Step 1c - do not include for fragmentation
 # # # # # donors.remove_methyl(CLEAN_DONOR_CSV)
@@ -1281,12 +1281,12 @@ def create_master_ohe(master_data: str, master_ohe: str):
 # donors.canon_smi(CLEAN_DONOR_CSV)
 
 # # # # # Step 1
-# acceptors = AcceptorClean(MASTER_ACCEPTOR_CSV, OPV_ACCEPTOR_DATA)
-# acceptors.clean_acceptor(CLEAN_ACCEPTOR_CSV)
+acceptors = AcceptorClean(MASTER_ACCEPTOR_CSV, OPV_ACCEPTOR_DATA)
+acceptors.clean_acceptor(CLEAN_ACCEPTOR_CSV)
 
 # # Step 1b
-# acceptors.replace_r_with_arbitrary(CLEAN_ACCEPTOR_CSV)
-# acceptors.replace_r(CLEAN_ACCEPTOR_CSV)
+acceptors.replace_r_with_arbitrary(CLEAN_ACCEPTOR_CSV)
+acceptors.replace_r(CLEAN_ACCEPTOR_CSV)
 
 # # # # # Step 1d - canonSMILES to remove %10-%100
 # acceptors.canon_smi(CLEAN_ACCEPTOR_CSV)
