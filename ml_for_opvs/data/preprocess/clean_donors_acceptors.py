@@ -108,7 +108,7 @@ class DonorClean:
             "SMILES",
             "SMILES w/o R_group replacement",
             "SMILES w/o R_group",
-            "Big_SMILES",
+            "BigSMILES",
             "SELFIES",
         ]
         clean_df: pd.DataFrame = pd.DataFrame(columns=headers)
@@ -134,7 +134,7 @@ class DonorClean:
                         "SMILES": row["R_grp_SMILES"],
                         "SMILES w/o R_group replacement": row["R_grp_SMILES"],
                         "SMILES w/o R_group": " ",
-                        "Big_SMILES": " ",
+                        "BigSMILES": " ",
                         "SELFIES": " ",
                     },
                     ignore_index=True,
@@ -237,7 +237,7 @@ class DonorClean:
         clean_df.to_csv(clean_donor, index=False)
 
 
-    # ATTN: ??
+    # ATTN: ???
     def remove_methyl(self, clean_donor):
         """
         Function that checks the number of methyl groups and removes them on donor molecules.

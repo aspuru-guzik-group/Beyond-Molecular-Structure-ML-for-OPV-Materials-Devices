@@ -1,8 +1,8 @@
 {
-  "Donor Molecule": "category",
-  "Acceptor Molecule": "category",
+  "Donor": "category",
+  "Acceptor": "category",
   "solvent": "category",
   "solvent additive": "category",
-  "hole contact layer":  "category",
-  "electron contact layer": "category"
+  "HTL":  "category",
+  "ETL": "category"
 }

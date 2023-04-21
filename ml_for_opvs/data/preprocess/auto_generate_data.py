@@ -80,15 +80,15 @@ from ml_for_opvs.data.input_representation.OPV_Min.fingerprint.morgan_fingerprin
 from ml_for_opvs.data.preprocess.OPV_Min.clean_device_params import ParameterClean
 
 # Step 1
-# donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
-# donors.clean_donor(CLEAN_DONOR_CSV)
+donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
+donors.clean_donor(CLEAN_DONOR_CSV)
 
-# # # # # Step 1b
-# donors.replace_r_with_arbitrary(CLEAN_DONOR_CSV)
-# donors.replace_r(CLEAN_DONOR_CSV)
+# # # # Step 1b
+donors.replace_r_with_arbitrary(CLEAN_DONOR_CSV)
+donors.replace_r(CLEAN_DONOR_CSV)
 
-# # # # # # # Step 1d - canonSMILES to remove %10-%100
-# donors.canon_smi(CLEAN_DONOR_CSV)
+# # # # # # Step 1d - canonSMILES to remove %10-%100
+donors.canon_smi(CLEAN_DONOR_CSV)
 
 # # # # # # Step 1
 # acceptors = AcceptorClean(MASTER_ACCEPTOR_CSV, OPV_ACCEPTOR_DATA)

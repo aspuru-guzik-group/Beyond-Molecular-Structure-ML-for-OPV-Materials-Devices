@@ -5,6 +5,7 @@ import pandas as pd
 from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem
 
+from code_python import DATASETS
 from code_python.cleaning.utils import find_identical_molecules
 
 
@@ -52,11 +53,11 @@ def assign_ids(smiles_series: pd.Series) -> pd.Series:
 
 if __name__ == "__main__":
     # Import csv version
-    dataset_csv = Path(__file__).parent.parent.parent / "datasets" / "Saeki_2022_n1318" / "Saeki_corrected.csv"
+    dataset_csv = DATASETS / "Saeki_2022_n1318" / "Saeki_corrected.csv"
     saeki = pd.read_csv(dataset_csv)
 
     # # Import pkl version
-    dataset_pkl = Path(__file__).parent.parent.parent / "datasets" / "Saeki_2022_n1318" / "Saeki_corrected_r5_b512.pkl"
+    dataset_pkl = DATASETS / "Saeki_2022_n1318" / "Saeki_corrected_r5_b512.pkl"
     # saeki = pd.read_pickle(dataset_pkl)
 
     # # Convert energy level columns to negative scale

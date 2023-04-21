@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
+from code_python import DATASETS
+
 
 class FeatureCleaner:
     def __init__(self,
@@ -28,12 +30,7 @@ class FeatureCleaner:
 
         # Clean up processing features
 
-        # # Remove anomalies
-        # TODO: Handle anomalous values in e.g. hole mob, electron mob,
-        # anomaly = Anomaly(MASTER_ML_DATA)
-        # anomaly.remove_anomaly(MASTER_ML_DATA)
-        # anomaly.correct_anomaly(MASTER_ML_DATA)
-
+        # # Calculate hole:electron mobility ratio
         self.dataset["hole:electron mobility ratio"] = self.calculate_hole_electron_mobility_ratio()
 
         # # Add calculated PCE
@@ -110,7 +107,7 @@ class FeatureCleaner:
         Returns:
             pandas series of hole:electron mobility ratios
         """
-        mob_ratio: pd.Series = self.dataset["hole mobility blend (cm^2 V^-1 s^-1)"] / self.dataset["electron mobility blend (cm^2 V^-1 s^-1)d"]
+        mob_ratio: pd.Series = self.dataset["hole mobility blend (cm^2 V^-1 s^-1)"] / self.dataset["electron mobility blend (cm^2 V^-1 s^-1)"]
         return mob_ratio
 
     def calculate_homo_lumo_gap(self, material: str) -> pd.Series:
@@ -197,8 +194,7 @@ class FeatureCleaner:
         Returns:
             Dictionary of duplicate labels
         """
-        duplicates_dict: dict[str, list[str]] = duplicates_df.set_index("Name0").T.to_dict("list")
-        # TODO: Remove nans from dictionary
+        duplicates_dict: dict[str, list[str]] = duplicates_df.T.to_dict("list")
         for key, values in duplicates_dict.items():
             duplicates_dict[key] = [value for value in values if not pd.isnull(value)]
         return duplicates_dict
@@ -249,7 +245,6 @@ class FeatureCleaner:
         Returns:
             DataFrame of down-selected interlayer properties
         """
-        full_properties: pd.DataFrame = full_properties.set_index("Name")
         if not selected_interlayer_properties:
             filtered_properties: pd.DataFrame = full_properties
         else:
@@ -272,7 +267,6 @@ class FeatureCleaner:
         Returns:
             DataFrame of down-selected solvent properties
         """
-        full_properties: pd.DataFrame = full_properties.set_index("Name")
         if not selected_solvent_properties:
             filtered_properties: pd.DataFrame = full_properties
         else:
@@ -290,11 +284,10 @@ class StructureCleaner:
     }
 
     string_representations: list[str] = [
-        "Donor",
         "SMILES",
-        "SMILES w/o R_group replacement",
-        "SMILES w/o R_group",
-        "Big_SMILES",
+        "SMILES w/o R group replacement",
+        "SMILES w/o R group",
+        "Big SMILES",
         "SELFIES",
     ]
 
@@ -303,6 +296,7 @@ class StructureCleaner:
 
     def main(self) -> pd.DataFrame:
         ### Clean up structural features and generate structural representations
+        # ATTN: For both Donor and Acceptor
         # Step 1
         # donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
         # donors.clean_donor(CLEAN_DONOR_CSV)
@@ -349,30 +343,31 @@ def assign_datatypes(dataset: pd.DataFrame, feature_types: dict) -> pd.DataFrame
 
 
 if __name__ == "__main__":
+    min_dir: Path = DATASETS / "Min_2020_n558"
+    min_raw_dir: Path = min_dir / "raw"
+
     # Import raw dataset downloaded from Google Drive
-    raw_dataset_file = Path(
-        __file__).parent.parent.parent / "datasets" / "Min_2020_n558" / "raw" / "raw dataset.csv"
-    raw_dataset: pd.DataFrame = pd.read_csv(raw_dataset_file)
+    raw_dataset_file = min_raw_dir / "raw dataset.csv"
+    raw_dataset: pd.DataFrame = pd.read_csv(raw_dataset_file, index_col="ref")
 
     # Get list of duplicated Donor and Acceptor labels
-    duplicated_labels_file = Path(
-        __file__).parent.parent.parent / "datasets" / "Min_2020_n558" / "raw" / "duplicate labels.csv"
-    duplicated_labels: pd.DataFrame = pd.read_csv(duplicated_labels_file)
+    duplicated_labels_file = min_raw_dir / "duplicate labels.csv"
+    duplicated_labels: pd.DataFrame = pd.read_csv(duplicated_labels_file, index_col="Name0")
+
+    # Get selected properties
+    selected_properties_file = min_dir / "selected properties.json"
+    with selected_properties_file.open("r") as f:
+        selected_properties = json.load(f)
 
     # Get solvent and solvent additive properties
-    solvent_properties_file = Path(
-        __file__).parent.parent.parent / "datasets" / "Min_2020_n558" / "raw" / "solvent properties.csv"
-    solvent_properties: pd.DataFrame = pd.read_csv(solvent_properties_file)
-    selected_solvent_properties: list[str] = [
-        "dipole", "dD", "dP", "dH", "dHDon", "dHAcc", "MW", "Density", "BPt", "MPt",
-        "logKow", "RI", "Trouton", "RER", "ParachorGA", "RD", "DCp", "log n", "SurfTen"
-    ]
+    solvent_properties_file = min_raw_dir / "solvent properties.csv"
+    solvent_properties: pd.DataFrame = pd.read_csv(solvent_properties_file, index_col="Name")
+    selected_solvent_properties: list[str] = selected_properties["solvent"]
 
     # Get interlayer properties
-    interlayer_properties_file = Path(
-        __file__).parent.parent.parent / "datasets" / "Min_2020_n558" / "raw" / "interlayer properties.csv"
-    interlayer_properties: pd.DataFrame = pd.read_csv(interlayer_properties_file)
-    selected_interlayer_properties: list[str] = ["Energy Level"]
+    interlayer_properties_file = min_raw_dir / "interlayer properties.csv"
+    interlayer_properties: pd.DataFrame = pd.read_csv(interlayer_properties_file, index_col="Name")
+    selected_interlayer_properties: list[str] = selected_properties["interlayer"]
 
     # Clean features in the dataset
     dataset: pd.DataFrame = FeatureCleaner(raw_dataset,
@@ -384,18 +379,18 @@ if __name__ == "__main__":
                                            ).main()
 
     # Save dataset to csv without structural representations
-    dataset_csv = Path(__file__).parent.parent.parent / "datasets" / "Min_2020_n558" / "cleaned dataset.csv"
-    dataset.to_csv(dataset_csv, index=False)
+    dataset_csv = min_dir / "cleaned dataset.csv"
+    # dataset.to_csv(dataset_csv)
 
     # # Add structural representations to the dataset
     # dataset: pd.DataFrame = StructureCleaner(dataset).main()
     #
     # # Get datatypes of categorical features
-    # feature_types_file = Path(__file__).parent.parent.parent / "datasets" / "Min_2020_n558" / "feature_types.csv"
+    # feature_types_file = DATASETS / "Min_2020_n558" / "feature_types.csv"
     # with feature_types_file.open("r") as f:
     #     feature_types: dict = json.load(f)
     # dataset: pd.DataFrame = assign_datatypes(dataset, feature_types)
     #
     # # Save dataset to pickle with structural representations
-    # dataset_pkl = Path(__file__).parent.parent.parent / "datasests" / "Min_2020_n558" / "cleaned_dataset.pkl"
+    # dataset_pkl = DATASETS / "Min_2020_n558" / "cleaned_dataset.pkl"
     # dataset.to_pickle(dataset_pkl)

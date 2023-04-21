@@ -10,6 +10,8 @@ import seaborn as sns
 
 from matplotlib.offsetbox import AnchoredText
 
+from code_python import DATASETS, FIGURES
+
 # OPV data after pre-processing
 # MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
 #     "ml_for_opvs",
@@ -49,7 +51,8 @@ def plot_feature_distributions(dataset: pd.DataFrame,
     elif x_columns == np.ceil(np.sqrt(num_columns)):
         y_rows = x_columns
 
-    fig, axs = plt.subplots(y_rows, x_columns, figsize=(y_rows * 6, x_columns * 2))  # prepare the figure
+    # fig, axs = plt.subplots(y_rows, x_columns, figsize=(y_rows * 6, x_columns * 2))  # prepare the figure
+    fig, axs = plt.subplots(y_rows, x_columns, figsize=(y_rows * 3, x_columns * 2))  # prepare the figure
     column_range: list = list(range(0, df_columns))  # get the range of columns to plot
     x_idx = 0  # index of the current column
     y_idx = 0  # index of the current row
@@ -77,8 +80,13 @@ def plot_feature_distributions(dataset: pd.DataFrame,
         anchored_text = AnchoredText(total, loc="lower right")
         axs[y_idx, x_idx].add_artist(anchored_text)
         if isinstance(current_val_list[0], str):
-            axs[y_idx, x_idx].tick_params(axis="x", labelrotation=90)
+            axs[y_idx, x_idx].tick_params(axis="x", labelrotation=45)
             axs[y_idx, x_idx].tick_params(axis="x", labelsize=6)
+
+        if current_column in ["solvent additive conc. (% v/v)", "hole:electron mobility ratio",
+                              "hole mobility blend (cm^2 V^-1 s^-1)", "electron mobility blend (cm^2 V^-1 s^-1)"]:
+            axs[y_idx, x_idx].set_xscale("log")
+
         y_idx += 1
         if y_idx == y_rows:
             y_idx = 0
@@ -95,66 +103,36 @@ def plot_feature_distributions(dataset: pd.DataFrame,
     plt.savefig(output_dir / f"feature distribution.png")
 
 
-# def plot_feature_distributions(dataset: pd.DataFrame, output_dir: Path, drop_columns: list = None):
-#     """
-#     Plots the distribution of all variables in the dataset.
+# def plot_feature_distributions(data):
+#     # Define the columns to plot on a log scale
+#     log_cols = ["solvent additive conc. (% v/v)", "hole:electron mobility ratio",
+#                 "hole mobility blend (cm^2 V^-1 s^-1)", "electron mobility blend (cm^2 V^-1 s^-1)"]
 #
-#     Args:
-#         dataset: Pre-processed dataset of OPV device parameters
-#         dataset_name: Name of the dataset
-#         drop_columns: Columns to drop from the dataset
-#     """
-#     # # Create a copy of the dataset
-#     # dataset_copy = dataset.copy()
+#     # Create a list of the non-log columns
+#     nonlog_cols = [col for col in data.columns if col not in log_cols]
 #
-#     dataset.drop(drop_columns, axis=1, inplace=True)  # drop the columns that won't be used in the analysis
+#     # Create a grid of subplots
+#     fig, axes = plt.subplots(nrows=len(data.columns), figsize=(10, 20))
 #
-#     # Iterate over the columns to drop
-#     for column in dataset.columns:
-#         # Drop nan values in the current column
-#         dataset = dataset.dropna(subset=[column])
+#     # Loop over the non-log columns and plot the distributions
+#     for i, col in enumerate(nonlog_cols):
+#         sns.histplot(data[col], ax=axes[i])
+#         axes[i].set_xlabel(col)
+#         if isinstance(data[col].iloc[0], str):
+#             plt.setp(axes[i].get_xticklabels(), rotation=45, ha='right')
 #
-#     # Calculate the number of rows and columns in the figure
-#     n_variables = dataset.shape[1]
-#     n_rows = math.ceil(n_variables/2)
-#     n_cols = 2
+#     # Loop over the log columns and plot the distributions on a log scale
+#     for i, col in enumerate(log_cols):
+#         sns.histplot(data[col], ax=axes[len(nonlog_cols) + i], log_scale=True)
+#         axes[len(nonlog_cols) + i].set_xlabel(col)
+#         if isinstance(data[col].iloc[0], str):
+#             plt.setp(axes[len(nonlog_cols) + i].get_xticklabels(), rotation=45, ha='right')
 #
-#     n_feats: int = dataset.shape[1]  # get the number of columns in the dataset
-#     n_cols = round(np.sqrt(n_feats))
-#     if n_cols == np.floor(np.sqrt(n_feats)):
-#         # if the number of columns is a perfect square, then the number of rows is one more than the number of columns
-#         n_rows = n_cols + 1
-#     elif n_cols == np.ceil(np.sqrt(n_feats)):
-#         n_rows = n_cols
+#     # Adjust spacing between subplots
+#     plt.subplots_adjust(hspace=0.5)
 #
-#     # Create the figure and axes objects
-#     fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 6, n_rows * 2))
-#
-#     # Flatten the axes array
-#     axes = axes.flatten()
-#
-#     # Iterate over the columns in the dataset
-#     for i, column in enumerate(dataset.columns):
-#         # Plot the distribution of the current column
-#         axes[i].hist(dataset[column].astype(str), bins=30, alpha=0.5)
-#         axes[i].set_xlabel(column)
-#         axes[i].set_ylabel('Count')
-#         axes[i].grid()
-#
-#     # Add a title to the figure
-#     # fig.suptitle(f'Distribution of variables in {dataset_name}')
-#
-#     left = 0.125  # the left side of the subplots of the figure
-#     right = 0.9  # the right side of the subplots of the figure
-#     bottom = 0.1  # the bottom of the subplots of the figure
-#     top = 0.9  # the top of the subplots of the figure
-#     wspace = 0.3  # the amount of width reserved for blank space between subplots
-#     hspace = 0.6  # the amount of height reserved for white space between subplots
-#     plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
-#     plt.tight_layout()
-#
-#     # Save the figure as a png file
-#     fig.savefig(output_dir / "feature distributions.png")
+#     # Show the plot
+#     plt.show()
 
 
 def plot_heatmap_of_pair_frequency(dataset: pd.DataFrame, column1: str, column2: str, output_dir: Path):
@@ -202,9 +180,9 @@ def plot_heatmap_of_pair_frequency(dataset: pd.DataFrame, column1: str, column2:
 
 
 if __name__ == "__main__":
-    min_dataset: Path = Path(__file__).parent.parent.parent / "datasets" / "Min_2020_n558" / "cleaned_dataset.csv"
+    min_dataset: Path = DATASETS / "Min_2020_n558" / "cleaned dataset.csv"
     opv_dataset: pd.DataFrame = pd.read_csv(min_dataset)
-    figures: Path = Path(__file__).parent.parent.parent / "figures" / "Min"
+    figures: Path = FIGURES / "Min"
 
     # pairs_list = ["Donor", "Acceptor", "solvent"]
     # # find every non-symmetric combination in pairs_list
@@ -217,17 +195,15 @@ if __name__ == "__main__":
         "logKow", "RI", "Trouton", "RER", "ParachorGA", "RD", "DCp", "log n", "SurfTen"
     ]
 
-    plot_feature_distributions(opv_dataset,
-                               figures,
-                               # drop_columns=["ref", "ref number from paper", "DOI", "Donor", "Acceptor", "Donor_SMILES", "Donor_Big_SMILES",
-                               #               "Donor_SELFIES", "Acceptor_SMILES", "Acceptor_Big_SMILES",
-                               #               "Acceptor_SELFIES"]
-                               drop_columns=["ref", "DOI", "Donor", "Acceptor",
-                                             *[f"solvent {prop}" for prop in solvent_properties], *[f"solvent additive {prop}" for prop in solvent_properties],]
+    plot_feature_distributions(opv_dataset.drop(columns=["ref", "DOI", "Donor", "Acceptor",
+                                                         *[f"solvent {prop}" for prop in solvent_properties],
+                                                         *[f"solvent additive {prop}" for prop in
+                                                           solvent_properties], ]),
+                               # figures,
                                )
 
-    # saeki = pd.read_csv(Path(__file__).parent.parent.parent / "datasets" / "Saeki_2022_n1318" / "Saeki_corrected.csv")
-    # figures: Path = Path(__file__).parent.parent.parent / "figures" / "Saeki"
+    # saeki = pd.read_csv(DATASETS / "Saeki_2022_n1318" / "Saeki_corrected.csv")
+    # figures: Path = FIGURES / "Saeki"
     # pairs_list = ["p(labels)", "n(labels)"]
     # pairs_combinations = list(itertools.combinations(pairs_list, 2))
     # for pair in pairs_combinations:
