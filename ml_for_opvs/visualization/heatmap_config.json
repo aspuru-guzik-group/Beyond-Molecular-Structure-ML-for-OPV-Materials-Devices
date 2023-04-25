@@ -13,7 +13,8 @@
             "GP",
             "KNN",
             "KRR",
-            "NGBoost"
+            "NGBoost",
+            "GNN"
         ],
         "input_representations": [],
         "features": [
@@ -60,11 +61,9 @@
             "fingerprint"
         ],
         "features": [
-            "result_device_wo_thickness"
+            "result_molecules_only"
         ],
-        "input_names": [
-            "device_wo_thickness,solvent_properties"
-        ],
+        "input_names": [],
         "target_names": [
             "calc_PCE_percent",
             "Voc_V",

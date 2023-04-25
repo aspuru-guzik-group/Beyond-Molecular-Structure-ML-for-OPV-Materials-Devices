@@ -78,9 +78,9 @@ def heatmap(config: dict):
             "DA_SELFIES",
             "DA_BigSMILES",
             "DA_SMILES",
-            "DA_ohe",
             "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV",
-            "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV",
+            # "HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV",
+            "DA_ohe",
         ]
         x_name = "Model"
         y_name = "Feature_Names"
@@ -103,6 +103,8 @@ def heatmap(config: dict):
             "SVM",
         ]
         y = ["calc_PCE_percent", "FF_percent", "Voc_V", "Jsc_mA_cm_pow_neg2"]
+        x_name = "Model"
+        y_name = "Target"
     elif config["config_name"] == "feature_comparison":
         x = ["RF_ensemble", "XGBoost_ensemble", "SVM_ensemble"]
         # y = [
@@ -121,7 +123,8 @@ def heatmap(config: dict):
     # NOTE: You have to change the pivot columns depending on your plot!
     print(f"{mean_metric=}")
     mean_summary: pd.DataFrame = summary.pivot(x_name, y_name, mean_metric)
-    # mean_summary: pd.DataFrame = mean_summary.reindex(index=y, columns=x)
+    mean_summary: pd.DataFrame = mean_summary.reindex(index=x, columns=y)
+
     summary_annotated: pd.DataFrame = deepcopy(summary)
     with pd.option_context(
         "display.max_rows",
@@ -142,9 +145,11 @@ def heatmap(config: dict):
     summary_annotated: pd.DataFrame = summary_annotated.pivot(
         x_name, y_name, "annotate_label"
     )
+    # mean_summary: pd.DataFrame = mean_summary.T
+    # summary_annotated: pd.DataFrame = summary_annotated.T
+    summary_annotated: pd.DataFrame = summary_annotated.reindex(index=x, columns=y)
     mean_summary: pd.DataFrame = mean_summary.T
     summary_annotated: pd.DataFrame = summary_annotated.T
-    # summary_annotated: pd.DataFrame = summary_annotated.reindex(index=y, columns=x)
 
     summary_annotated: np.ndarray = summary_annotated.to_numpy()
     with pd.option_context(
@@ -162,7 +167,11 @@ def heatmap(config: dict):
         annot=summary_annotated,
         cmap="viridis",
         fmt="",
-        cbar_kws={"label": "{} (±{})".format(mean_metric, std_metric)},
+        cbar_kws={
+            "label": "Average of $\;R$ \n ($±\;$Standard Deviation of $\;R$)".format(
+                mean_metric, std_metric
+            ),
+        },
     )
 
     # for plotting/saving
