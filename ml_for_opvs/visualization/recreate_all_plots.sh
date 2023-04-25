@@ -6,4 +6,5 @@
 # python heatmap.py --path ../training/ --config_path ./heatmap_config.json --config_name grid_search_ensemble --plot_path ./heatmap/
 python heatmap.py --path ../training/ --config_path ./heatmap_config.json --config_name grid_search_target --plot_path ./heatmap/
 # python heatmap.py --path ../training/ --config_path ./heatmap_config.json --config_name feature_comparison --plot_path ./heatmap/
+# python heatmap.py --path ../training/ --config_path ./heatmap_config.json --config_name fab_wo_solid_comparison --plot_path ./heatmap/
 # SCATTERPLOTS

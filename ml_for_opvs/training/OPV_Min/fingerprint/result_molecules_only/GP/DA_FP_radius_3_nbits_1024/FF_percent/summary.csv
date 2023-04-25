@@ -1,0 +1,2 @@
+Dataset,num_of_folds,Features,Targets,Model,num_of_data,r_mean,r_std,r2_mean,r2_std
+OPV_Min,5,fp,FF_percent,gp,5,0.5528565823100741,0.08781726815226146,0.2754587096904624,0.104627658121311

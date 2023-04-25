@@ -1,0 +1,2 @@
+Dataset,num_of_folds,Features,Targets,Model,num_of_data,r_mean,r_std,r2_mean,r2_std
+OPV_Min,5,mordred,Jsc_mA_cm_pow_neg2,gp,5,0.6408799834289212,0.09878989750584331,0.27763679497575844,0.22145111351649757

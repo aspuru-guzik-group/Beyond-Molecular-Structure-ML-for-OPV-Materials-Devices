@@ -35,7 +35,7 @@ def heatmap(config: dict):
 
     summary: pd.DataFrame = gather_results(summary_paths)
     # Plot Axis
-    fig, ax = plt.subplots(figsize=(14, 9))
+    fig, ax = plt.subplots(figsize=(14, 6))
     # Title
     ax.set_title("Heatmap of {}".format(config["datasets"][0]))
     # display all the rows and columns in pandas
@@ -101,10 +101,14 @@ def heatmap(config: dict):
             "RF",
             "XGBoost",
             "SVM",
+            "GP",
+            "NGBoost",
+            "GP_joint",
         ]
-        y = ["calc_PCE_percent", "FF_percent", "Voc_V", "Jsc_mA_cm_pow_neg2"]
+        y = ["FF_percent", "Voc_V", "Jsc_mA_cm_pow_neg2", "calc_PCE_percent,FF_percent,Jsc_mA_cm_pow_neg2,Voc_V"]
         x_name = "Model"
         y_name = "Target"
+        summary = summary.replace({"RF_ensemble": "RF", "XGBoost_ensemble": "XGBoost", "SVM_ensemble": "SVM", "GP_ensemble": "GP", "NGBoost_ensemble": "NGBoost"})
     elif config["config_name"] == "feature_comparison":
         x = ["RF_ensemble", "XGBoost_ensemble", "SVM_ensemble"]
         # y = [
@@ -119,9 +123,18 @@ def heatmap(config: dict):
         ]
         x_name = "Model"
         y_name = "Features"
+    elif config["config_name"] == "fab_wo_solid_comparison":
+        x = ["RF", "XGBoost", "SVM"]
+        summary = summary.replace({"DA_FP_radius_3_nbits_1024": "Fingerprint", "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV": "Fingerprint + Material", "DA_FP_radius_3_nbits_1024,HOMO_D_eV,LUMO_D_eV,HOMO_A_eV,LUMO_A_eV,Eg_D_eV,Ehl_D_eV,Eg_A_eV,Ehl_A_eV,D_A_ratio_m_m,solvent,solvent_additive,annealing_temperature,solvent_additive_conc_v_v_percent": "Fingerprint + Material + Fabrication", "fabrication_wo_solid,solvent_properties": "Fingerprint + Material + Fabrication + Solvent Properties"})
+        y = ["Fingerprint", "Fingerprint + Material", "Fingerprint + Material + Fabrication", "Fingerprint + Material + Fabrication + Solvent Properties"]
+        x_name = "Model"
+        y_name = "Feature_Names"
     # Heatmap
-    # NOTE: You have to change the pivot columns depending on your plot!
-    print(f"{mean_metric=}")
+    # NOTE: You have to change the pivot columns depending on your plot
+    # remove NaN rows from y_name
+    summary = summary.dropna(subset=y_name)
+    print(f"{summary.columns=}")
+    summary.to_csv("test.csv")
     mean_summary: pd.DataFrame = summary.pivot(x_name, y_name, mean_metric)
     mean_summary: pd.DataFrame = mean_summary.reindex(index=x, columns=y)
 
@@ -162,15 +175,17 @@ def heatmap(config: dict):
     ):
         print(mean_summary)
         print(summary_annotated)
+    if config["metrics"] == "r":
+        colorbar_label = "$\;R$"
+    elif config["metrics"] == "r2":
+        colorbar_label = "$\;R^2$"
     ax = sns.heatmap(
         mean_summary,
         annot=summary_annotated,
         cmap="viridis",
         fmt="",
         cbar_kws={
-            "label": "Average of $\;R$ \n ($±\;$Standard Deviation of $\;R$)".format(
-                mean_metric, std_metric
-            ),
+            "label": f"Average of {colorbar_label} \n ($±\;$Standard Deviation of {colorbar_label})"
         },
     )
 

@@ -1,0 +1,2 @@
+Dataset,num_of_folds,Features,Targets,Model,num_of_data,r_mean,r_std,r2_mean,r2_std
+OPV_Min,5,mordred,Jsc_mA_cm_pow_neg2,ngboost,5,0.7734115457299182,0.049409249721928436,0.5797718453101598,0.06967902321154548
