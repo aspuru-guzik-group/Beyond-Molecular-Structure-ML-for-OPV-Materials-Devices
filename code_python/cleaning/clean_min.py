@@ -4,6 +4,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
+from rdkit import Chem
 from scipy.stats import norm
 
 from code_python import DATASETS
@@ -275,14 +276,6 @@ class FeatureCleaner:
 
 
 class StructureCleaner:
-    structure_errors: set[str] = {
-        "not in drive, not in literature",
-        "error",
-        "wrong structure",
-        "same name different structure",
-        "not in literature",
-    }
-
     string_representations: list[str] = [
         "SMILES",
         "SMILES w/o R group replacement",
@@ -291,10 +284,23 @@ class StructureCleaner:
         "SELFIES",
     ]
 
-    def __init__(self, dataset: pd.DataFrame) -> None:
+    def __init__(self, dataset: pd.DataFrame, donor_structures: pd.DataFrame, acceptor_structures: pd.DataFrame) -> None:
         self.dataset: pd.DataFrame = dataset
+        self.material_smiles: dict[str, pd.DataFrame] = {"Donor": donor_structures.set_index("Donor"),
+                                                         "Acceptor": acceptor_structures.set_index("Acceptor")
+                                                         }
 
     def main(self) -> pd.DataFrame:
+        for material in ["Donor", "Acceptor"]:
+            # TODO: Assign and canonicalize SMILES
+            self.dataset[f"{material} SMILES"] = self.assign_smiles(material, self.material_smiles[material])
+            # TODO: Assign SELFIES
+            # TODO: Assign BigSMILES
+
+            # TODO: Generate fingerprints
+            # TODO: Generate mordred descriptors
+
+
         ### Clean up structural features and generate structural representations
         # ATTN: For both Donor and Acceptor
         # Step 1
@@ -330,6 +336,17 @@ class StructureCleaner:
         pairings.create_master_csv(MASTER_ML_DATA)
         # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
         return self.dataset
+
+    def assign_smiles(self, material: str, mapping: pd.DataFrame) -> pd.Series:
+        """
+        Assigns SMILES to the dataset.
+        """
+        return self.dataset[material].map(mapping["SMILES"])
+
+    @staticmethod
+    def canonicalize(smiles_column: pd.Series) -> list[str]:
+        """Canonicalize SMILES strings."""
+        return [Chem.CanonSmiles(smiles) for smiles in smiles_column]
 
 
 def assign_datatypes(dataset: pd.DataFrame, feature_types: dict) -> pd.DataFrame:

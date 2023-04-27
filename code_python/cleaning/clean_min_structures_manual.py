@@ -2,7 +2,7 @@ import json
 
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, Mol
 
 from code_python import DATASETS
 
@@ -40,10 +40,9 @@ def clean_structures(material: str, master_df: pd.DataFrame, reference: pd.DataF
             "not in literature",
         ]
         if row["Comments (Stanley)"] not in error_list:
-            # NOTE: add BigSMILES, SELFIES here
             clean_df = clean_df.append(
                 {
-                    "Donor":                          row["Name"],
+                    material:                         row["Name"],
                     "SMILES":                         row["R_grp_SMILES"],
                     "SMILES w/o R_group replacement": row["R_grp_SMILES"],
                     "SMILES w/o R_group":             " ",
@@ -70,90 +69,91 @@ def clean_structures(material: str, master_df: pd.DataFrame, reference: pd.DataF
     return clean_df
 
 
-def replace_r_with_arbitrary(structures: pd.DataFrame, r_group_patterns: dict[str, str]) -> pd.DataFrame:
+def replace_in_string(smiles: str, labels: pd.Series) -> str:
     """
-    Replace R group in the clean_min_acceptors.csv
+    Replaces R groups in a SMILES string by string replacement.
 
     Args:
-        clean_donor: path to processed acceptors
+        smiles: SMILES string
+        labels: pandas Series of R group labels
 
     Returns:
-        SMILES column contains acceptors with replaced R groups
+        SMILES string with R groups replaced with arbitrary metals
     """
-    # New R group substitution pattern
-    new_patts = {}
-    atomic_num = 21
-    for k, v in r_group_patterns.items():
-        # Only provides the transition metals and lanthanides
-        if atomic_num == 31:
-            atomic_num = 39
-        elif atomic_num == 49:
-            atomic_num = 57
-        elif atomic_num == 81:
-            atomic_num = 89
-        mol = Chem.MolFromSmarts(f"[#{atomic_num}]")
-        smi = Chem.MolToSmiles(mol)
-        new_patts[smi] = k
-        atomic_num += 1
+    for label, metal in labels.items():
+        smiles = smiles.replace(label, metal)
+    return smiles
 
-    for index, row in structures.iterrows():
-        smi = structures.at[index, "SMILES"]
-        for key in new_patts.keys():
-            smi = smi.replace(new_patts[key], key)
-        structures.at[index, "SMILES"] = smi
+
+def replace_r_with_arbitrary(structures: pd.DataFrame, r_groups: pd.DataFrame) -> pd.DataFrame:
+    """
+    Replace R groups with arbitrary metals in SMILES strings.
+
+    Args:
+        structures: pandas DataFrame of SMILES strings
+        r_groups: pandas DataFrame of R group labels, metal and sidechain SMILES strings
+
+    Returns:
+        pandas DataFrame of SMILES strings with R groups replaced with arbitrary metals
+    """
+    r_labels: pd.DataFrame = r_groups.set_index("label")
+    structures["SMILES"] = [replace_in_string(smiles, r_labels["metal"]) for smiles in structures["SMILES"]]
     return structures
 
 
-def replace_arbitrary_with_sidechain(structures: pd.DataFrame, r_group_patterns: dict[str, str]) -> pd.DataFrame:
-    # New R group substitution pattern
-    # ATTN: What is this doing? Something about fixing patterns?
-    new_patts = {}
-    atomic_num = 21
-    for k, v in r_group_patterns.items():
-        # Only provides the transition metals and lanthanides
-        if atomic_num == 31:
-            atomic_num = 39
-        elif atomic_num == 49:
-            atomic_num = 57
-        elif atomic_num == 81:
-            atomic_num = 89
-        mol = Chem.MolFromSmarts(f"[#{atomic_num}]")
-        smi = Chem.MolToSmiles(mol)
-        new_patts[smi] = v
-        atomic_num += 1
+def replace_in_molecule(mol: Mol, labels: pd.Series) -> str:
+    """
+    Replaces arbitrary metals in RDKit Mol object with substructure replacement.
 
-    # smiles: pd.Series = structures["SMILES"]
-    # index = 0
-    for index, row in structures.iterrows():
-        smi = row["SMILES"]
-        mol = Chem.MolFromSmarts(smi)
+    Args:
+        mol: RDKit Mol object
+        labels: pandas Series of sidechain SMILES strings
+
+    Returns:
+        SMILES string with arbitrary metals replaced with sidechains
+    """
+    for metal, sidechain in labels.items():
+        if metal in Chem.MolToSmiles(mol):
+            products = AllChem.ReplaceSubstructs(
+                mol,
+                Chem.MolFromSmarts(metal),
+                Chem.MolFromSmarts(sidechain),
+                replaceAll=True,
+            )
+            mol = products[0]
+    return Chem.CanonSmiles(Chem.MolToSmiles(mol))
+
+
+def replace_arbitrary_with_sidechain(structures: pd.DataFrame, r_groups: pd.DataFrame) -> pd.DataFrame:
+    """
+    Replace arbitrary metals with sidechain SMILES strings in SMILES strings.
+
+    Args:
+        structures: pandas DataFrame of SMILES strings
+        r_groups: pandas DataFrame of R group labels, metal and sidechain SMILES strings
+
+    Returns:
+        pandas DataFrame of SMILES strings with arbitrary metals replaced with sidechain SMILES strings
+    """
+    r_metals: pd.DataFrame = r_groups.set_index("metal")
+
+    molecules: list[Mol] = []
+    for smiles in structures["SMILES"]:
+        mol = Chem.MolFromSmarts(smiles)
         # Sanitize SMARTS
         mol.UpdatePropertyCache()
         Chem.GetSymmSSSR(mol)
         mol.GetRingInfo().NumRings()
+        molecules.append(mol)
 
-        for r in new_patts:
-            if r in smi:
-                products = AllChem.ReplaceSubstructs(
-                    mol,
-                    Chem.MolFromSmarts(r),
-                    Chem.MolFromSmarts(new_patts[r]),
-                    replaceAll=True,
-                )
-                mol = products[0]
-        smi = Chem.CanonSmiles(Chem.MolToSmiles(mol))
-        structures.at[index, "SMILES"] = smi
-        # index += 1
-
+    structures["SMILES"] = [replace_in_molecule(mol, r_metals["SMILES"]) for mol in molecules]
     return structures
 
 
 if __name__ == "__main__":
     raw_data = DATASETS / "Min_2020_n558" / "raw"
-    r_groups_file = raw_data.parent / "r_groups.json"
-    # TODO: Make sure R groups JSON has all the R groups!!!
-    with r_groups_file.open("r") as f:
-        r_groups = json.load(f)
+    r_groups_file = raw_data.parent / "cleaned R groups.csv"
+    r_groups = pd.read_csv(r_groups_file)
 
     for material in ["Donor", "Acceptor"]:
         master_file = raw_data / f"min_{material.lower()}s_smiles_master_EDITED.csv"
@@ -167,5 +167,5 @@ if __name__ == "__main__":
             r_groups
         )
 
-        clean_file = raw_data.parent / f"clean {material.lower()}s.csv"
+        clean_file = raw_data.parent / f"cleaned {material.lower()}s.csv"
         clean_smiles_df.to_csv(clean_file, index=False)
