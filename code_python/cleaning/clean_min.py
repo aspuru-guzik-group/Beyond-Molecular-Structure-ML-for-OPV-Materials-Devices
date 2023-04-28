@@ -2,9 +2,14 @@ import json
 from pathlib import Path
 from typing import Optional
 
+import mordred
+import mordred.descriptors
 import numpy as np
 import pandas as pd
+import selfies
+from mordred import Calculator
 from rdkit import Chem
+from rdkit.Chem import AllChem, Mol
 from scipy.stats import norm
 
 from code_python import DATASETS
@@ -276,33 +281,37 @@ class FeatureCleaner:
 
 
 class StructureCleaner:
-    string_representations: list[str] = [
-        "SMILES",
-        "SMILES w/o R group replacement",
-        "SMILES w/o R group",
-        "Big SMILES",
-        "SELFIES",
-    ]
+    # string_representations: list[str] = [
+    #     "SMILES",
+    #     "SMILES w/o R group replacement",
+    #     "SMILES w/o R group",
+    #     "Big SMILES",
+    #     "SELFIES",
+    # ]
 
     def __init__(self, dataset: pd.DataFrame, donor_structures: pd.DataFrame, acceptor_structures: pd.DataFrame) -> None:
         self.dataset: pd.DataFrame = dataset
-        self.material_smiles: dict[str, pd.DataFrame] = {"Donor": donor_structures.set_index("Donor"),
-                                                         "Acceptor": acceptor_structures.set_index("Acceptor")
+        donor_structures["SMILES"] = self.canonicalize(donor_structures["SMILES"])
+        acceptor_structures["SMILES"] = self.canonicalize(acceptor_structures["SMILES"])
+        self.material_smiles: dict[str, pd.DataFrame] = {"Donor": donor_structures["SMILES"].set_index("Donor"),
+                                                         "Acceptor": acceptor_structures["SMILES"].set_index("Acceptor")
                                                          }
 
     def main(self) -> pd.DataFrame:
         for material in ["Donor", "Acceptor"]:
-            # TODO: Assign and canonicalize SMILES
             self.dataset[f"{material} SMILES"] = self.assign_smiles(material, self.material_smiles[material])
-            # TODO: Assign SELFIES
-            # TODO: Assign BigSMILES
+            self.dataset[f"{material} SELFIES"] = self.assign_selfies(self.dataset[f"{material} SMILES"])
+            self.dataset[f"{material} BigSMILES"] = self.assign_bigsmiles(material, self.dataset[f"{material} SMILES"])
+            self.dataset[f"{material} Mol"] = self.assign_mol(self.dataset[f"{material} SMILES"])
+            self.assign_fingerprints(material, radius=5, nbits=512)
 
-            # TODO: Generate fingerprints
-            # TODO: Generate mordred descriptors
+        # TODO: Generate mordred descriptors
+        self.mordred_descriptors: pd.DataFrame = self.generate_mordred_descriptors()
+        self.mordred_descriptors_used: pd.Series = pd.Series(self.mordred_descriptors.columns.tolist())
+        for material in ["Donor", "Acceptor"]:
+            self.dataset[f"{material} mordred"] = self.assign_mordred(self.dataset[f"{material} Mol"])
 
-
-        ### Clean up structural features and generate structural representations
-        # ATTN: For both Donor and Acceptor
+        # # # Clean up structural features and generate structural representations
         # Step 1
         # donors = DonorClean(MASTER_DONOR_CSV, OPV_DONOR_DATA)
         # donors.clean_donor(CLEAN_DONOR_CSV)
@@ -328,8 +337,8 @@ class StructureCleaner:
         # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
         # smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV) # DO NOT RUN, BigSMILES was partially automated and manually done.
         sanity_check_bigsmiles(CLEAN_DONOR_CSV)
-        opv_smiles_to_selfies(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
-        print("Finished Step 3")
+        # opv_smiles_to_selfies(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
+        # print("Finished Step 3")
 
         # Step 4
         pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV, SOLVENT_DATA)
@@ -337,16 +346,138 @@ class StructureCleaner:
         # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
         return self.dataset
 
-    def assign_smiles(self, material: str, mapping: pd.DataFrame) -> pd.Series:
+    def assign_bigsmiles(self, material: str, smiles_series: pd.Series) -> pd.Series:
+        """
+        If material is donor, assign BigSMILES. If material is acceptor, assign SMILES.
+
+        Args:
+            material: Donor or Acceptor
+            smiles_series: Series of SMILES strings
+
+        Returns:
+            Series of BigSMILES strings
+        """
+        if material == "Donor":
+            bigsmiles_series: pd.Series = smiles_series.map(lambda smiles: self.convert_to_big_smiles(smiles))
+        elif material == "Acceptor":
+            bigsmiles_series: pd.Series = smiles_series
+        print(f"Done assigning {material} BigSMILES.")
+        return bigsmiles_series
+
+    def assign_fingerprints(self, material: str, radius: int = 3, nbits: int = 1024) -> None:
+        """
+        Assigns ECFP fingerprints to the dataset.
+        """
+        self.dataset[f"{material} ECFP{2*radius}_{nbits}"] = self.dataset[f"{material} Mol"].map(lambda mol: self.generate_fingerprint(mol, radius, nbits))
+        print(f"Done assigning {material} ECFP{2*radius} fingerprints with {nbits} bits.")
+
+    @staticmethod
+    def assign_mol(smiles_series: pd.Series) -> pd.Series:
+        """
+        Converts SMILES to RDKit Mol.
+
+        Args:
+            smiles_series: Series of SMILES strings
+
+        Returns:
+            Series of RDKit Mol objects
+        """
+        mol_series: pd.Series = smiles_series.map(lambda smiles: Chem.MolFromSmiles(smiles))
+        print("Done assigning RDKit Mol objects.")
+        return mol_series
+
+    def assign_mordred(self, labels: pd.Series) -> pd.Series:
+        """
+        Assigns Mordred descriptors to the dataset.
+        """
+        mordred_series: pd.Series = labels.map(lambda mol: self.generate_mordred_descriptors(mol))
+        print("Done assigning Mordred descriptors.")
+        return mordred_series
+
+    @staticmethod
+    def assign_selfies(smiles_series: pd.Series) -> pd.Series:
+        """
+        Converts SMILES to SELFIES.
+
+        Args:
+            smiles_series: Series of SMILES strings
+
+        Returns:
+            Series of SELFIES strings
+        """
+        selfies_series: pd.Series = smiles_series.map(lambda smiles: selfies.encoder(smiles))
+        print("Done assigning SELFIES.")
+        return selfies_series
+
+    def assign_smiles(self, material: str, mapping: pd.DataFrame) -> list[str]:
         """
         Assigns SMILES to the dataset.
         """
-        return self.dataset[material].map(mapping["SMILES"])
+        mapped_smiles: pd.Series = self.dataset[material].map(mapping["SMILES"])
+        print(f"Done assigning {material} SMILES.")
+        return mapped_smiles
 
     @staticmethod
     def canonicalize(smiles_column: pd.Series) -> list[str]:
         """Canonicalize SMILES strings."""
         return [Chem.CanonSmiles(smiles) for smiles in smiles_column]
+
+    @staticmethod
+    def convert_to_big_smiles(smiles: str) -> str:
+        """Convert SMILES string to BigSMILES."""
+        # BUG: How to do since only partially automated?
+        return smiles
+
+    @staticmethod
+    def generate_fingerprint(mol: Mol, radius: int = 3, nbits: int = 1024) -> np.ndarray:
+        """
+        Generate ECFP fingerprint.
+
+        Args:
+            mol: RDKit Mol object
+            radius: Fingerprint radius
+            nbits: Number of bits in fingerprint
+
+        Returns:
+            ECFP fingerprint as numpy array
+        """
+        fingerprint: np.ndarray = AllChem.GetMorganFingerprintAsBitVect(mol, radius=radius, nBits=nbits)
+        return fingerprint
+
+    def generate_mordred_descriptors(self) -> pd.DataFrame:
+        """
+        Generate Mordred descriptors from "Donor Mol" and "Acceptor Mol" columns in the dataset.
+        Remove all columns with nan values, and remove all columns with zero variance.
+
+        Returns:
+            DataFrame of filtered Mordred descriptors
+        """
+        donor_mols: pd.Series = self.material_smiles["Donor"].map(lambda smiles: Chem.MolFromSmiles(smiles))
+        acceptor_mols: pd.Series = self.material_smiles["Acceptor"].map(lambda smiles: Chem.MolFromSmiles(smiles))
+        all_mols: pd.Series = pd.concat([donor_mols, acceptor_mols])
+
+        calc: Calculator = Calculator(mordred.descriptors, ignore_3D=True)
+        descriptors: pd.Series = all_mols.map(lambda mol: calc(mol))
+        mordred_descriptors: pd.DataFrame = pd.DataFrame(descriptors.tolist(), index=all_mols.index)
+        # Remove any columns with nan values
+        mordred_descriptors.dropna(axis=1, how='any', inplace=True)
+        # Remove any columns with zero variance
+        mordred_descriptors = mordred_descriptors.loc[:, mordred_descriptors.var() != 0]
+        print("Done generating Mordred descriptors.")
+        return mordred_descriptors
+
+    def get_mordred_descriptors(self, label: str) -> np.ndarray:
+        """
+        Get Mordred descriptors for a given label.
+
+        Args:
+            label: Donor or Acceptor
+
+        Returns:
+            Mordred descriptors as numpy array
+        """
+        descriptors: np.ndarray = self.mordred_descriptors.loc[label].to_numpy(dtype=float, copy=True)
+        return descriptors
 
 
 def assign_datatypes(dataset: pd.DataFrame, feature_types: dict) -> pd.DataFrame:
@@ -395,19 +526,20 @@ if __name__ == "__main__":
                                            selected_interlayer_properties=selected_interlayer_properties
                                            ).main()
 
-    # Save dataset to csv without structural representations
-    dataset_csv = min_dir / "cleaned dataset.csv"
-    # dataset.to_csv(dataset_csv)
+    # Add structural representations to the dataset
+    dataset: pd.DataFrame = StructureCleaner(dataset).main()
 
-    # # Add structural representations to the dataset
-    # dataset: pd.DataFrame = StructureCleaner(dataset).main()
-    #
-    # # Get datatypes of categorical features
-    # feature_types_file = DATASETS / "Min_2020_n558" / "feature_types.csv"
-    # with feature_types_file.open("r") as f:
-    #     feature_types: dict = json.load(f)
-    # dataset: pd.DataFrame = assign_datatypes(dataset, feature_types)
-    #
-    # # Save dataset to pickle with structural representations
-    # dataset_pkl = DATASETS / "Min_2020_n558" / "cleaned_dataset.pkl"
+    # Get datatypes of categorical features
+    feature_types_file = min_dir / "feature_types.json"
+    with feature_types_file.open("r") as f:
+        feature_types: dict = json.load(f)
+    dataset: pd.DataFrame = assign_datatypes(dataset, feature_types)
+
+    # Specify paths for saving
+    dataset_csv = min_dir / "cleaned_dataset.csv"
+    dataset_pkl = min_dir / "cleaned_dataset.pkl"
+    mordred_csv = min_dir / "mordred_descriptors.csv"
+
+    # Save the dataset
     # dataset.to_pickle(dataset_pkl)
+    # dataset.to_csv(dataset_csv)  # TODO: Drop unreadable columns
