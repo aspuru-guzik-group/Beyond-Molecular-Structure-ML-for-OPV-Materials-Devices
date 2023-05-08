@@ -27,3 +27,6 @@ label,SMILES,IUPAC
 [R29],CCCC(CC)CCCC,4-ethyloctyl
 [R30],CC(CCCC)CCCCCC,2-butyloctyl
 [R31],CC(CCCC)CCCC,2-butylhexyl
+[R32],CCCCCCCCCCCC,n-dodecyl
+[R33],CCC(C)CCCC(C)C,"3,7-dimethyloctyl"
+[R34],CC(CCCCCCCCCC)CCCCCCCCCCCC,2-decyltetradecyl

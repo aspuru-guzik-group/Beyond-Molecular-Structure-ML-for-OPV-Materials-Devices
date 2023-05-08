@@ -293,23 +293,28 @@ class StructureCleaner:
         self.dataset: pd.DataFrame = dataset
         donor_structures["SMILES"] = self.canonicalize(donor_structures["SMILES"])
         acceptor_structures["SMILES"] = self.canonicalize(acceptor_structures["SMILES"])
-        self.material_smiles: dict[str, pd.DataFrame] = {"Donor": donor_structures["SMILES"].set_index("Donor"),
-                                                         "Acceptor": acceptor_structures["SMILES"].set_index("Acceptor")
+        self.material_smiles: dict[str, pd.DataFrame] = {"Donor": donor_structures.set_index("Donor"),
+                                                         "Acceptor": acceptor_structures.set_index("Acceptor")
+                                                         # "Donor": donor_structures["SMILES"].set_index("Donor"),
+                                                         # "Acceptor": acceptor_structures["SMILES"].set_index("Acceptor")
                                                          }
 
     def main(self) -> pd.DataFrame:
         for material in ["Donor", "Acceptor"]:
             self.dataset[f"{material} SMILES"] = self.assign_smiles(material, self.material_smiles[material])
+            print(self.dataset[material][self.dataset[f"{material} SMILES"].isna()].unique())
             self.dataset[f"{material} SELFIES"] = self.assign_selfies(self.dataset[f"{material} SMILES"])
             self.dataset[f"{material} BigSMILES"] = self.assign_bigsmiles(material, self.dataset[f"{material} SMILES"])
             self.dataset[f"{material} Mol"] = self.assign_mol(self.dataset[f"{material} SMILES"])
-            self.assign_fingerprints(material, radius=5, nbits=512)
+            self.assign_fingerprints(material, radius=3, nbits=512)
 
         # TODO: Generate mordred descriptors
         self.mordred_descriptors: pd.DataFrame = self.generate_mordred_descriptors()
         self.mordred_descriptors_used: pd.Series = pd.Series(self.mordred_descriptors.columns.tolist())
         for material in ["Donor", "Acceptor"]:
             self.dataset[f"{material} mordred"] = self.assign_mordred(self.dataset[f"{material} Mol"])
+
+        # TODO: Add tokenized string representations??? SMILES, SELFIES, BigSMILES
 
         # # # Clean up structural features and generate structural representations
         # Step 1
@@ -336,13 +341,13 @@ class StructureCleaner:
 
         # Step 3 - smiles_to_bigsmiles.py & smiles_to_selfies.py
         # smile_to_bigsmile(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV) # DO NOT RUN, BigSMILES was partially automated and manually done.
-        sanity_check_bigsmiles(CLEAN_DONOR_CSV)
+        # sanity_check_bigsmiles(CLEAN_DONOR_CSV)
         # opv_smiles_to_selfies(CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV)
         # print("Finished Step 3")
 
         # Step 4
-        pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV, SOLVENT_DATA)
-        pairings.create_master_csv(MASTER_ML_DATA)
+        # pairings = DAPairs(OPV_DATA, CLEAN_DONOR_CSV, CLEAN_ACCEPTOR_CSV, SOLVENT_DATA)
+        # pairings.create_master_csv(MASTER_ML_DATA)
         # pairings.create_master_csv(MASTER_ML_DATA_PLOT)
         return self.dataset
 
@@ -413,13 +418,20 @@ class StructureCleaner:
         """
         Assigns SMILES to the dataset.
         """
-        mapped_smiles: pd.Series = self.dataset[material].map(mapping["SMILES"])
+        # BUG: Mapping returns nans! What's wrong?
+        # print(self.dataset[self.dataset.duplicated()])
+        # print(mapping[mapping.duplicated(subset="SMILES")])
+        mapping: dict[str, str] = mapping["SMILES"].to_dict()
+        # print(mapping["P2F-Ehp"])
+        # mapped_smiles: pd.Series = self.dataset[material].map(mapping["SMILES"])
+        mapped_smiles: pd.Series = self.dataset[material].map(mapping)
         print(f"Done assigning {material} SMILES.")
         return mapped_smiles
 
     @staticmethod
     def canonicalize(smiles_column: pd.Series) -> list[str]:
         """Canonicalize SMILES strings."""
+        # TODO: This should work with either apply or map.
         return [Chem.CanonSmiles(smiles) for smiles in smiles_column]
 
     @staticmethod
@@ -452,10 +464,13 @@ class StructureCleaner:
         Returns:
             DataFrame of filtered Mordred descriptors
         """
-        donor_mols: pd.Series = self.material_smiles["Donor"].map(lambda smiles: Chem.MolFromSmiles(smiles))
-        acceptor_mols: pd.Series = self.material_smiles["Acceptor"].map(lambda smiles: Chem.MolFromSmiles(smiles))
+        donor_mols: pd.Series = self.material_smiles["Donor"]["SMILES"].map(lambda smiles: Chem.MolFromSmiles(smiles))
+        acceptor_mols: pd.Series = self.material_smiles["Acceptor"]["SMILES"].map(lambda smiles: Chem.MolFromSmiles(smiles))
         all_mols: pd.Series = pd.concat([donor_mols, acceptor_mols])
 
+        # BUG: Get numpy "RuntimeWarning: overflow encountered in reduce"
+        # Generate Mordred descriptors
+        print("Generating mordred descriptors...")
         calc: Calculator = Calculator(mordred.descriptors, ignore_3D=True)
         descriptors: pd.Series = all_mols.map(lambda mol: calc(mol))
         mordred_descriptors: pd.DataFrame = pd.DataFrame(descriptors.tolist(), index=all_mols.index)
@@ -503,7 +518,7 @@ if __name__ == "__main__":
     duplicated_labels: pd.DataFrame = pd.read_csv(duplicated_labels_file, index_col="Name0")
 
     # Get selected properties
-    selected_properties_file = min_dir / "selected properties.json"
+    selected_properties_file = min_dir / "selected_properties.json"
     with selected_properties_file.open("r") as f:
         selected_properties = json.load(f)
 
@@ -526,8 +541,15 @@ if __name__ == "__main__":
                                            selected_interlayer_properties=selected_interlayer_properties
                                            ).main()
 
+    # Load cleaned donor and acceptor structures
+    donor_structures_file = min_dir / "cleaned donors.csv"
+    donor_structures: pd.DataFrame = pd.read_csv(donor_structures_file)
+    acceptor_structures_file = min_dir / "cleaned acceptors.csv"
+    acceptor_structures: pd.DataFrame = pd.read_csv(acceptor_structures_file)
+
     # Add structural representations to the dataset
-    dataset: pd.DataFrame = StructureCleaner(dataset).main()
+    dataset: pd.DataFrame = StructureCleaner(dataset, donor_structures=donor_structures, acceptor_structures=acceptor_structures).main()
+    mordred_used: pd.Series = StructureCleaner.mordred_descriptors_used
 
     # Get datatypes of categorical features
     feature_types_file = min_dir / "feature_types.json"
@@ -541,5 +563,15 @@ if __name__ == "__main__":
     mordred_csv = min_dir / "mordred_descriptors.csv"
 
     # Save the dataset
-    # dataset.to_pickle(dataset_pkl)
+    dataset.to_pickle(dataset_pkl)
     # dataset.to_csv(dataset_csv)  # TODO: Drop unreadable columns
+
+    # Save mordred descriptors
+    mordred_used.to_csv(mordred_csv)
+
+# ATTN: When done, check the following:
+#  - Check that all labels don't have Tanimoto similarity = 1
+#  - All labels have SMILES
+#  - All rows have solvent descriptors
+#  - All rows that have solvent additives have solvent additive descriptors
+#  - All rows that have interlayer have interlayer descriptors
