@@ -51,3 +51,4 @@ def find_identical_molecules(series, radius, bits):
                     print(f"Molecule {i+1}: {mol1}")
                     print(f"Molecule {j+1}: {mol2}\n")
     print("radius:", radius, "\tbits:", bits, "\t\tmolecule clashes:", clashes, "\n\n")
+    return clashes
