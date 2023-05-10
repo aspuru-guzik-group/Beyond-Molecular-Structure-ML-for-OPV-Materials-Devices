@@ -1,13 +1,8 @@
 {
-  "DOI": "category",
   "Donor": "category",
   "Acceptor": "category",
   "solvent": "category",
   "solvent additive": "category",
   "HTL":  "category",
-  "ETL": "category",
-  "Donor SMILES": "category",
-  "Acceptor SMILES": "category",
-  "Donor SELFIES": "category",
-  "Acceptor SELFIES": "category"
+  "ETL": "category"
 }

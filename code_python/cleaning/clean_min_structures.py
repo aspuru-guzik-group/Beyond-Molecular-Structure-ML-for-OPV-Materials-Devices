@@ -161,7 +161,6 @@ if __name__ == "__main__":
         reference_file = raw_data / f"reference {material.lower()}s.csv"
         reference_df = pd.read_csv(reference_file)
 
-        # BUG: Some labels are being lost here
         clean_df: pd.DataFrame = clean_structures(material, master_df, reference_df)
         clean_smiles_df: pd.DataFrame = replace_arbitrary_with_sidechain(
             replace_r_with_arbitrary(clean_df, r_groups),
