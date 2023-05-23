@@ -87,6 +87,9 @@ def main():
     for material in ["Donor", "Acceptor"]:
         dataset[f"{material} mordred"] = assign_mordred(dataset[f"{material} Mol"], mordred_descriptors)
 
+    # Save dataset
+    dataset.to_pickle(dataset_pkl)
+
 
 if __name__ == "__main__":
     main()
