@@ -478,7 +478,7 @@ def get_readable_only(dataset: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-if __name__ == "__main__":
+def pre_main():
     min_dir: Path = DATASETS / "Min_2020_n558"
     min_raw_dir: Path = min_dir / "raw"
 
@@ -542,3 +542,7 @@ if __name__ == "__main__":
 
     # Save mordred descriptors
     # mordred_used.to_csv(mordred_csv)
+
+
+if __name__ == "__main__":
+    pre_main()

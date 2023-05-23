@@ -150,12 +150,13 @@ def replace_arbitrary_with_sidechain(structures: pd.DataFrame, r_groups: pd.Data
     return structures
 
 
-if __name__ == "__main__":
+def man_main():
     raw_data = DATASETS / "Min_2020_n558" / "raw"
     r_groups_file = raw_data.parent / "cleaned R groups.csv"
     r_groups = pd.read_csv(r_groups_file)
 
-    for material in ["Donor", "Acceptor"]:
+    # for material in ["Donor", "Acceptor"]:
+    for material in ["Acceptor"]:
         master_file = raw_data / f"min_{material.lower()}s_smiles_master_EDITED.csv"
         master_df = pd.read_csv(master_file)
         reference_file = raw_data / f"reference {material.lower()}s.csv"
@@ -169,3 +170,7 @@ if __name__ == "__main__":
 
         clean_file = raw_data.parent / f"cleaned {material.lower()}s.csv"
         clean_smiles_df.to_csv(clean_file, index=False)
+
+
+if __name__ == "__main__":
+    man_main()

@@ -22,10 +22,14 @@ def ingest_r_groups(r_groups: pd.DataFrame) -> pd.DataFrame:
     return r_groups
 
 
-if __name__ == "__main__":
+def r_main():
     r_groups_csv: Path = DATASETS / "Min_2020_n558" / "raw" / "r_groups.csv"
     clean_csv: Path = DATASETS / "Min_2020_n558" / "cleaned R groups.csv"
 
     r_groups: pd.DataFrame = pd.read_csv(r_groups_csv)
     r_groups: pd.DataFrame = ingest_r_groups(r_groups)
     r_groups.to_csv(clean_csv, index=False)
+
+
+if __name__ == "__main__":
+    r_main()
