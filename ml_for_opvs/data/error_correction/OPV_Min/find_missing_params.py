@@ -67,7 +67,7 @@ STATS_A_LUMO = pkg_resources.resource_filename(
 
 class MissingParameters:
     """
-    Class that contains functions to evaluate any parameter. Potential tools:
+    Class that contains functions to evaluate_model any parameter. Potential tools:
     - Find missing parameters and return the D-A pair
     - Automate processing of parameter
     """

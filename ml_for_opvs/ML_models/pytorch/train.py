@@ -418,7 +418,7 @@ def main(config: dict):
         print(prediction_df)
         prediction_df.to_csv(prediction_path, index=False)
 
-        # evaluate the model
+        # evaluate_model the model
         r: float = np.corrcoef(ground_truth, predictions)[0, 1]
         r2: float = r2_score(ground_truth, predictions)
         rmse: float = np.sqrt(mean_squared_error(ground_truth, predictions))

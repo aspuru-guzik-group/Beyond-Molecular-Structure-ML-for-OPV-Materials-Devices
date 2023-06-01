@@ -88,7 +88,8 @@ def main():
         dataset[f"{material} mordred"] = assign_mordred(dataset[f"{material} Mol"], mordred_descriptors)
 
     # Save dataset
-    dataset.to_pickle(dataset_pkl)
+    mordred_pkl = min_dir / "cleaned_dataset_mordred.pkl"
+    dataset[["Donor mordred", "Acceptor mordred"]].to_pickle(mordred_pkl)
 
 
 if __name__ == "__main__":

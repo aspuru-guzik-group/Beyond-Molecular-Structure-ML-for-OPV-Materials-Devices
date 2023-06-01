@@ -49,6 +49,7 @@ def custom_scorer(y, yhat):
 score_func = make_scorer(custom_scorer, greater_is_better=False)
 
 
+# NOTE: Old
 def dataset_find(result_path: str):
     """Finds the dataset name for the given path from the known datasets we have.
 
@@ -426,7 +427,7 @@ def main(config: dict):
         yhat_df.to_csv(prediction_path, index=False)
         fold += 1
 
-        # evaluate the model
+        # evaluate_model the model
         r: float = np.corrcoef(y_test, yhat)[0, 1]
         r2: float = r2_score(y_test, yhat)
         rmse: float = np.sqrt(mean_squared_error(y_test, yhat))

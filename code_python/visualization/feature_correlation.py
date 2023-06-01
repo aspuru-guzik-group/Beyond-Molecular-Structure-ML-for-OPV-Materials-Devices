@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -5,7 +7,10 @@ import matplotlib.pyplot as plt
 
 from pathlib import Path
 from sklearn.metrics import r2_score
-from typing import Callable
+from typing import Callable, Optional
+
+from code_python import DATASETS, FIGURES
+from code_python.training import unroll_lists_to_columns
 
 
 def calculate_pearson(df: pd.DataFrame) -> pd.DataFrame:
@@ -54,9 +59,12 @@ correlation_labels: dict[str, str] = {"pearson": "Pearson Correlation (R)",
 
 
 class HeatmapGenerator:
-    def __init__(self, file: Path, properties: list[str], plot_name: str) -> None:
-        self.full_df: pd.DataFrame = pd.read_csv(file)
-        self.df: pd.DataFrame = self.full_df[properties]
+    def __init__(self, full_df: pd.DataFrame, properties: Optional[list[str]], plot_name: str) -> None:
+        if properties:
+            self.df: pd.DataFrame = full_df[properties]
+        else:
+            self.df: pd.DataFrame = full_df
+
         self.plot_name: str = plot_name
 
     def calculate_matrix(self, method: str) -> pd.DataFrame:
@@ -125,11 +133,12 @@ class HeatmapGenerator:
             method: The method to use to calculate the correlation matrix.
                 Options are "pearson", "r2", "rmse", and "mae".
         """
-        self.f.savefig(f"correlation_{self.plot_name.lower()}_{method.lower()}.png")
+        figure_dir: Path = FIGURES / "Min"
+        self.f.savefig(figure_dir / f"correlation_{self.plot_name.lower()}_{method.lower()}.png")
         plt.close()
 
 
-def plot_all_methods(file: Path, properties: list[str], plot_name: str) -> None:
+def plot_all_methods(df: pd.DataFrame, properties: Optional[list[str]], plot_name: str) -> None:
     """
     Plot the correlation matrix for all methods.
 
@@ -141,13 +150,48 @@ def plot_all_methods(file: Path, properties: list[str], plot_name: str) -> None:
     Returns:
         None
     """
-    heatmap: HeatmapGenerator = HeatmapGenerator(file, properties, plot_name)
+    heatmap: HeatmapGenerator = HeatmapGenerator(df, properties, plot_name)
     for method in calculation_factory.keys():
-        heatmap.plot(method)
+        try:
+            heatmap.plot(method)
+        except ValueError:
+            print(f"Could not plot {method} for {plot_name}")
+
+
+def plot_solvent_correlations(df: pd.DataFrame) -> None:
+    with open(DATASETS / "Min_2020_n558" / "selected_properties.json", "r") as f:
+        solvent_descriptors: list[str] = json.load(f)["solvent"]
+    for descriptors in ["solvent descriptors", "solvent additive descriptors"]:
+        new_cols: list[str] = [f"solvent {d}" for d in solvent_descriptors]
+        solvents: pd.DataFrame = unroll_lists_to_columns(df, [descriptors], new_cols)
+        solvent_correlations: pd.DataFrame = pd.concat(
+            [solvents, df[["Voc (V)", "Jsc (mA cm^-2)", "FF (%)", "calculated PCE (%)"]]], axis=1)
+        plot_all_methods(solvent_correlations, None, descriptors)
+
+
+def plot_processing_correlations(df: pd.DataFrame) -> None:
+    device_feats: list[str] = ["D:A ratio (m/m)", "Active layer spin coating speed (rpm)",
+                               "total solids conc. (mg/mL)", "solvent additive conc. (% v/v)",
+                               "active layer thickness (nm)", "temperature of thermal annealing",
+                               "annealing time (min)", "HTL energy level (eV)", "HTL thickness (nm)",
+                               "ETL energy level (eV)", "ETL thickness (nm)", "hole mobility blend (cm^2 V^-1 s^-1)",
+                               "electron mobility blend (cm^2 V^-1 s^-1)", "hole:electron mobility ratio",
+                               "Voc (V)", "Jsc (mA cm^-2)", "FF (%)", "calculated PCE (%)"]
+    plot_all_methods(df, device_feats, "device fabrication")
+
+
+def plot_material_correlations(df: pd.DataFrame) -> None:
+    material_props: list[str] = ["Donor PDI", "Donor Mn (kDa)", "Donor Mw (kDa)",
+                                 "HOMO_D (eV)", "LUMO_D (eV)", "Ehl_D (eV)", "Eg_D (eV)",
+                                 "HOMO_A (eV)", "LUMO_A (eV)", "Ehl_A (eV)", "Eg_A (eV)",
+                                 "Voc (V)", "Jsc (mA cm^-2)", "FF (%)", "calculated PCE (%)"]
+    plot_all_methods(df, material_props, "material properties")
 
 
 if __name__ == "__main__":
-    df_path: Path = Path.home() / "Downloads" / "HSPiP solvent properties.csv"
-    props: list[str] = ["dipole", "dD", "dP", "dH", "dHDon", "dHAcc", "MW", "Density", "BPt", "MPt", "logKow",
-                        "RI", "Trouton", "RER", "ParachorGA", "RD", "DCp", "log n", "SurfTen"]
-    plot_all_methods(df_path, props, "solvent properties")
+    df_path: Path = DATASETS / "Min_2020_n558" / "cleaned_dataset.pkl"
+    opv_dataset: pd.DataFrame = pd.read_pickle(df_path)
+
+    # plot_solvent_correlations(opv_dataset)
+    # plot_processing_correlations(opv_dataset)
+    plot_material_correlations(opv_dataset)

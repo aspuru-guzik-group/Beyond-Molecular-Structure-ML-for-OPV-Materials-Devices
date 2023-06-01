@@ -11,6 +11,7 @@ from ml_for_opvs.ML_models.sklearn.tokenizer import Tokenizer
 np.set_printoptions(suppress=True)
 
 
+# NOTE: IGnore
 def tokenize_from_dict(token2idx: dict, input_value: Union[list, str]) -> list:
     """
 
@@ -29,6 +30,7 @@ def tokenize_from_dict(token2idx: dict, input_value: Union[list, str]) -> list:
     # return tokenized_list
 
 
+# NOTE: Ignore?
 def pad_input(input_list_of_list, max_input_length) -> list:
     """Pad the input_value (pre-padding) with 0's until max_length is met.
 
@@ -61,6 +63,7 @@ def feature_scale(feature_series: pd.Series) -> np.array:
     return max_value, min_value
 
 
+# NOTE: Does naothing
 def filter_nan(df_to_filter):
     """
     Args:
@@ -72,6 +75,7 @@ def filter_nan(df_to_filter):
     pass
 
 
+# NOTE: Not useful
 def process_features(
     train_feature_df, test_feature_df, input_rep_bool
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -429,6 +433,7 @@ def process_features(
     return input_train_array, input_test_array
 
 
+# NOTE: Not useful
 def process_target(
     train_target_df, test_target_df, train_df, input_rep_bool
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -519,6 +524,7 @@ def process_target(
     return target_train_array, target_test_array, targets_max, targets_min
 
 
+
 def get_space_dict(space_json_path, model_type):
     """Opens json file and returns a dictionary of the space.
 
@@ -564,6 +570,7 @@ def get_space_dict(space_json_path, model_type):
     return space
 
 
+# NOTE: Not used?
 def get_space_multi_dict(space_json_path, model_type):
     """Opens json file and returns a dictionary of the space.
 

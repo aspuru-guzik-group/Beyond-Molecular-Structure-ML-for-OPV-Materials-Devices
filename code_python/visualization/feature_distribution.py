@@ -180,7 +180,7 @@ def plot_heatmap_of_pair_frequency(dataset: pd.DataFrame, column1: str, column2:
 
 
 if __name__ == "__main__":
-    min_dataset: Path = DATASETS / "Min_2020_n558" / "cleaned dataset.csv"
+    min_dataset: Path = DATASETS / "Min_2020_n558" / "cleaned_dataset.csv"
     opv_dataset: pd.DataFrame = pd.read_csv(min_dataset)
     figures: Path = FIGURES / "Min"
 
