@@ -1,0 +1,10 @@
+﻿Donor,Donor SMILES,Acceptor,Acceptor SMILES
+benzene,c1ccccc1,butane,CCCC
+furan,c1occc1,neopentane,CC(C)(C)C
+thiophene,c1sccc1,cyclohexane,C1CCCCC1
+furan,c1occc1,cyclohexane,C1CCCCC1
+thiophene,c1sccc1,butane,CCCC
+benzene,c1ccccc1,neopentane,CC(C)(C)C
+thiophene,c1sccc1,neopentane,CC(C)(C)C
+benzene,c1ccccc1,cyclohexane,C1CCCCC1
+furan,c1occc1,butane,CCCC
