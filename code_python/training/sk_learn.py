@@ -3,7 +3,10 @@ import pandas as pd
 from sklearn.model_selection import KFold
 from typing import Optional
 
+from skopt import BayesSearchCV
+
 from code_python import DATASETS
+from code_python.pipeline import HYPEROPT_SPACE
 from code_python.pipeline.scaling import scale_features, scale_targets
 from code_python.training import SEEDS
 from code_python.pipeline.utils import evaluate_model, regressor_factory, scaler_factory
@@ -50,11 +53,40 @@ def split_k_folds(x: pd.DataFrame,
         yield x_train_scaled, x_test_scaled, y_train_scaled, y_test_scaled
 
 
+def optimize_hyperparameters(x_train, y_train, regressor, seed: int) -> dict[str, float]:
+    """
+    Optimize hyperparameters.
+
+    Args:
+        dataset: Dataset to use.
+
+    Returns:
+        Dictionary of hyperparameters.
+    """
+    # Define the hyperparameter optimization function
+    bayes_opt = BayesSearchCV(regressor(random_state=seed),
+                              HYPEROPT_SPACE,
+                              # TODO: Figure this out
+                              cv=kfold,
+                              # n_points=5,
+                              # n_iter=10,
+                              n_jobs=-1,
+                              random_state=42)
+
+    # Fit the hyperparameter optimization function on the training set
+    bayes_opt.fit(x_train, y_train)
+
+    # Get the optimal hyperparameters
+    best_params = bayes_opt.best_params_
+    return best_params
+
+
 def run(dataset: pd.DataFrame,
         structural_features: list[str],
         scalar_filter: Optional[str],
         scaler: str,
         regressor: str,
+        hyperparameter_optimization: bool = False,
         **kwargs) -> None:
     """
     Run the model.
@@ -64,6 +96,8 @@ def run(dataset: pd.DataFrame,
         structural_features: Structural features to use.
         scalar_filter: Scalar features to use.
         scaler: Scaler to use.
+        regressor: Regressor to use.
+        hyperparameter_optimization: Whether to optimize hyperparameters.
         **kwargs: Keyword arguments.
 
     Returns:
@@ -78,17 +112,21 @@ def run(dataset: pd.DataFrame,
     # Get splits
     for seed in SEEDS:
         for x_train, x_test, y_train, y_test in split_k_folds(x, y, seed, scaler, scalar_features):
-            # Train model
-            regressor = regressor_factory[regressor](random_state=seed, **kwargs)
-            regressor.fit(x_train, y_train)
+
+            if hyperparameter_optimization:
+                # Find best hyperparameters
+                best_params = optimize_hyperparameters(x_train, y_train, regressor, seed)
+                # Train model with optimal hyperparameters
+                regressor = regressor_factory[regressor](random_state=seed, **best_params)
+            else:
+                # Train model
+                regressor = regressor_factory[regressor](random_state=seed, **kwargs)
+                regressor.fit(x_train, y_train)
 
             # Evaluate model
             # "fold": [], "r": [], "r2": [], "rmse": [], "mae": []
             y_pred = regressor.predict(x_test)
             scores: dict[str, float] = evaluate_model(y_test, y_pred)
-
-
-
 
 
 def main():

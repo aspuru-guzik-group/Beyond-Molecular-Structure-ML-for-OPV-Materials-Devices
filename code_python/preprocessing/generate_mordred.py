@@ -46,11 +46,16 @@ def generate_mordred_descriptors(donor_structures: pd.DataFrame, acceptor_struct
     print("Generating mordred descriptors...")
     calc: Calculator = Calculator(mordred.descriptors, ignore_3D=True)
     descriptors: pd.Series = all_mols.map(lambda mol: calc(mol))
-    mordred_descriptors: pd.DataFrame = pd.DataFrame(descriptors.tolist(), index=all_mols.index)
+    mordred_descriptors: pd.DataFrame = pd.DataFrame.from_records(descriptors, index=all_mols.index)
     # Remove any columns with nan values
     mordred_descriptors.dropna(axis=1, how='any', inplace=True)
     # Remove any columns with zero variance
-    mordred_descriptors = mordred_descriptors.loc[:, mordred_descriptors.var() != 0]
+    mordred_descriptors.dropna(axis=1, how='any', inplace=True)
+    descriptor_variances: pd.Series = mordred_descriptors.var()
+    variance_mask: pd.Series = descriptor_variances.eq(0)
+    zero_variance: pd.Series = variance_mask[variance_mask == True]
+    invariant_descriptors: list[str] = zero_variance.index.to_list()
+    mordred_descriptors: pd.DataFrame = mordred_descriptors.drop(invariant_descriptors, axis=1)
     print("Done generating Mordred descriptors.")
     return mordred_descriptors
 
