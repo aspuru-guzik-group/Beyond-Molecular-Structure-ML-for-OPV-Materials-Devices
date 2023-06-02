@@ -1,15 +1,16 @@
-import os
+import sys
 from pathlib import Path
+from typing import Union
 
 import mordred
-import numpy as np
-from mordred import Calculator
 import mordred.descriptors
+import numpy as np
 import pandas as pd
+from mordred import Calculator
 from rdkit import Chem
 from rdkit.Chem import Mol
 
-if os.name == "posix":
+if sys.platform == "linux":
     DATASETS = Path("~/projects/ml_for_opvs/datasets")
 else:
     from code_python import DATASETS
@@ -93,40 +94,62 @@ def assign_mordred(labels: pd.Series, mordred_descriptors: pd.DataFrame) -> pd.S
     return mordred_series
 
 
-def test():
-    # Load cleaned donor and acceptor structures
-    # min_dir: Path = DATASETS / "Min_2020_n558"
-    # donor_structures_file = min_dir / "cleaned donors.csv"
-    # donor_structures: pd.DataFrame = pd.read_csv(donor_structures_file)
-    donor_structures: pd.DataFrame = pd.read_csv("test donors.csv")
-
-    # acceptor_structures_file = min_dir / "cleaned acceptors.csv"
-    # acceptor_structures: pd.DataFrame = pd.read_csv(acceptor_structures_file)
-    acceptor_structures: pd.DataFrame = pd.read_csv("test acceptors.csv")
-
-    # Load dataset
-    # dataset_pkl = min_dir / "cleaned_dataset.pkl"
-    # dataset: pd.DataFrame = pd.read_pickle(dataset_pkl)
-    dataset: pd.DataFrame = pd.read_pickle("test dataset.pkl")
-
+def run(donor_structures: pd.DataFrame,
+        acceptor_structures: pd.DataFrame,
+        dataset: pd.DataFrame,
+        mordred_csv: Union[Path, str],
+        mordred_pkl: Union[Path, str]
+        ) -> None:
     # Generate mordred descriptors and remove 0 variance and nan columns
     mordred_descriptors: pd.DataFrame = generate_mordred_descriptors(donor_structures, acceptor_structures)
     mordred_descriptors_used: pd.Series = pd.Series(mordred_descriptors.columns.tolist())
 
     # Save mordred descriptor IDs
-    # mordred_csv = min_dir / "mordred descriptors used.csv"
-    mordred_csv = "test mordred used.csv"
     mordred_descriptors_used.to_csv(mordred_csv)
 
     for material in ["Donor", "Acceptor"]:
         dataset[f"{material} mordred"] = assign_mordred(dataset[f"{material}"], mordred_descriptors)
 
-    # Save dataset
-    # mordred_pkl = min_dir / "cleaned_dataset_mordred.pkl"
-    mordred_pkl = "test dataset mordred.pkl"
+    # Save dataset with mordred descriptors
     dataset[["Donor mordred", "Acceptor mordred"]].to_pickle(mordred_pkl)
-    pass
+
+
+def test():
+    # Load cleaned donor and acceptor structures
+    donor_structures: pd.DataFrame = pd.read_csv("test donors.csv")
+
+    # acceptor_structures_file = min_dir / "cleaned acceptors.csv"
+    acceptor_structures: pd.DataFrame = pd.read_csv("test acceptors.csv")
+
+    # Load dataset
+    dataset: pd.DataFrame = pd.read_pickle("test dataset.pkl")
+
+    mordred_csv = "test mordred used.csv"
+    mordred_pkl = "test dataset mordred.pkl"
+
+    run(donor_structures, acceptor_structures, dataset, mordred_csv, mordred_pkl)
+
+def main():
+    # Load cleaned donor and acceptor structures
+    min_dir: Path = DATASETS / "Min_2020_n558"
+    donor_structures_file = min_dir / "cleaned donors.csv"
+    donor_structures: pd.DataFrame = pd.read_csv(donor_structures_file)
+    acceptor_structures_file = min_dir / "cleaned acceptors.csv"
+    acceptor_structures: pd.DataFrame = pd.read_csv(acceptor_structures_file)
+
+    # Load dataset
+    dataset_pkl = min_dir / "cleaned_dataset.pkl"
+    dataset: pd.DataFrame = pd.read_pickle(dataset_pkl)
+
+    # Save mordred descriptor IDs
+    mordred_csv = min_dir / "mordred_descriptors.csv"
+
+    # Save dataset
+    mordred_pkl = min_dir / "cleaned_dataset_mordred.pkl"
+
+    run(donor_structures, acceptor_structures, dataset, mordred_csv, mordred_pkl)
 
 
 if __name__ == "__main__":
     test()
+    main()
