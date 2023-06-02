@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import mordred
@@ -7,7 +8,10 @@ import mordred.descriptors
 import pandas as pd
 from rdkit import Chem
 
-from code_python import DATASETS
+if os.name == "posix":
+    DATASETS = Path("~/projects/opv_ml/ml_for_opvs/datasets")
+else:
+    from code_python import DATASETS
 
 
 def get_mordred_descriptors(mordred_descriptors: pd.DataFrame, label: str) -> np.ndarray:
