@@ -7,6 +7,7 @@ from mordred import Calculator
 import mordred.descriptors
 import pandas as pd
 from rdkit import Chem
+from rdkit.Chem import Mol
 
 if os.name == "posix":
     DATASETS = Path("~/projects/ml_for_opvs/datasets")
