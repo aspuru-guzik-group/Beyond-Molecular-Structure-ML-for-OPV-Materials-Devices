@@ -9,7 +9,7 @@ import pandas as pd
 from rdkit import Chem
 
 if os.name == "posix":
-    DATASETS = Path("~/projects/opv_ml/ml_for_opvs/datasets")
+    DATASETS = Path("~/projects/ml_for_opvs/datasets")
 else:
     from code_python import DATASETS
 
