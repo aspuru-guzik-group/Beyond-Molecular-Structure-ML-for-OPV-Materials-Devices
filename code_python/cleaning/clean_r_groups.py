@@ -2,7 +2,8 @@ import pandas as pd
 from pathlib import Path
 from rdkit import Chem
 
-from code_python import DATASETS
+HERE: Path = Path(__file__).resolve().parent
+DATASETS: Path = HERE.parent.parent / "datasets"
 
 
 def ingest_r_groups(r_groups: pd.DataFrame) -> pd.DataFrame:

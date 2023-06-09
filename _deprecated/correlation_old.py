@@ -16,28 +16,28 @@ from sklearn.metrics import mean_squared_error
 
 # OPV data after pre-processing
 MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
-    "ml_for_opvs",
+    "_ml_for_opvs",
     "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv",
 )
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
+    "_ml_for_opvs", "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv"
 )
 
 CORRELATION_PLOT = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/exploration/OPV_Min/correlation_parity_plot.png"
+    "_ml_for_opvs", "data/exploration/OPV_Min/correlation_parity_plot.png"
 )
 
 CORRELATION_HEATMAP_PLOT = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/exploration/OPV_Min/correlation_heatmap_plot.png"
+    "_ml_for_opvs", "data/exploration/OPV_Min/correlation_heatmap_plot.png"
 )
 
 RMSE_HEATMAP_PLOT = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/exploration/OPV_Min/rmse_heatmap_plot.png"
+    "_ml_for_opvs", "data/exploration/OPV_Min/rmse_heatmap_plot.png"
 )
 
 PARAMETER_INVENTORY = pkg_resources.resource_filename(
-    "ml_for_opvs", "data/raw/OPV_Min/solvent_properties.csv"
+    "_ml_for_opvs", "data/raw/OPV_Min/solvent_properties.csv"
 )
 
 

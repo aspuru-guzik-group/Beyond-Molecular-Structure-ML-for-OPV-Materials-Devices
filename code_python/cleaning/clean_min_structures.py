@@ -1,10 +1,12 @@
 import json
+from pathlib import Path
 
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem, Mol
 
-from code_python import DATASETS
+HERE: Path = Path(__file__).resolve().parent
+DATASETS: Path = HERE.parent.parent / "datasets"
 
 
 def clean_structures(material: str, master_df: pd.DataFrame, reference: pd.DataFrame) -> pd.DataFrame:

@@ -5,8 +5,8 @@ import pandas as pd
 from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem
 
-from code_python import DATASETS
-from code_python.cleaning.utils import find_identical_molecules
+HERE: Path = Path(__file__).resolve().parent
+DATASETS: Path = HERE.parent.parent / "datasets"
 
 
 def convert_energy_levels(dataset: pd.DataFrame) -> pd.DataFrame:

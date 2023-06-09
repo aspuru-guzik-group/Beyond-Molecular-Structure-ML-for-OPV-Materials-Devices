@@ -1,9 +1,12 @@
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-from code_python import DATASETS
+HERE: Path = Path(__file__).resolve().parent
+DATASETS: Path = HERE.parent.parent / "datasets"
 
 
 def assign_ids(smiles_series: pd.Series) -> pd.Series:

@@ -8,8 +8,10 @@ import selfies
 from rdkit import Chem
 from scipy.stats import norm
 
-from code_python import DATASETS
-from code_python.preprocessing.utils import canonicalize_column, generate_brics, generate_fingerprint, tokenizer_factory
+from preprocess_utils import canonicalize_column, generate_brics, generate_fingerprint, tokenizer_factory
+
+HERE: Path = Path(__file__).resolve().parent
+DATASETS: Path = HERE.parent.parent / "datasets"
 
 
 class FeatureProcessor:
@@ -425,45 +427,6 @@ class StructureProcessor:
                 representation](self.dataset[f"{material} {representation}"], all_representation)
 
         print(f"Done tokenizing {representation}.")
-
-    # def generate_mordred_descriptors(self) -> pd.DataFrame:
-    #     """
-    #     Generate Mordred descriptors from "Donor Mol" and "Acceptor Mol" columns in the dataset.
-    #     Remove all columns with nan values, and remove all columns with zero variance.
-    #
-    #     Returns:
-    #         DataFrame of filtered Mordred descriptors
-    #     """
-    #     donor_mols: pd.Series = self.material_smiles["Donor"]["SMILES"].map(lambda smiles: Chem.MolFromSmiles(smiles))
-    #     acceptor_mols: pd.Series = self.material_smiles["Acceptor"]["SMILES"].map(
-    #         lambda smiles: Chem.MolFromSmiles(smiles))
-    #     all_mols: pd.Series = pd.concat([donor_mols, acceptor_mols])
-    #
-    #     # BUG: Get numpy "RuntimeWarning: overflow encountered in reduce"
-    #     # Generate Mordred descriptors
-    #     print("Generating mordred descriptors...")
-    #     calc: Calculator = Calculator(mordred.descriptors, ignore_3D=True)
-    #     descriptors: pd.Series = all_mols.map(lambda mol: calc(mol))
-    #     mordred_descriptors: pd.DataFrame = pd.DataFrame(descriptors.tolist(), index=all_mols.index)
-    #     # Remove any columns with nan values
-    #     mordred_descriptors.dropna(axis=1, how='any', inplace=True)
-    #     # Remove any columns with zero variance
-    #     mordred_descriptors = mordred_descriptors.loc[:, mordred_descriptors.var() != 0]
-    #     print("Done generating Mordred descriptors.")
-    #     return mordred_descriptors
-
-    # def get_mordred_descriptors(self, label: str) -> np.ndarray:
-    #     """
-    #     Get Mordred descriptors for a given label.
-    #
-    #     Args:
-    #         label: Donor or Acceptor
-    #
-    #     Returns:
-    #         Mordred descriptors as numpy array
-    #     """
-    #     descriptors: np.ndarray = self.mordred_descriptors.loc[label].to_numpy(dtype=float, copy=True)
-    #     return descriptors
 
 
 def assign_datatypes(dataset: pd.DataFrame, feature_types: dict) -> pd.DataFrame:

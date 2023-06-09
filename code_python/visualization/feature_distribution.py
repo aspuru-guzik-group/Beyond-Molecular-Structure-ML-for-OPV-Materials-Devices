@@ -14,12 +14,12 @@ from code_python import DATASETS, FIGURES
 
 # OPV data after pre-processing
 # MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
-#     "ml_for_opvs",
+#     "_ml_for_opvs",
 #     "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv",
 # )
 
 MASTER_ML_DATA = pkg_resources.resource_filename(
-    "ml_for_opvs",
+    "_ml_for_opvs",
     "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv",
 )
 

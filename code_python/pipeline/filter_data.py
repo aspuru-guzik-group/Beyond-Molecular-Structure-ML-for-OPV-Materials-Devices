@@ -1,6 +1,21 @@
+import json
+from pathlib import Path
+from typing import Optional
+
 import pandas as pd
 
-from code_python.pipeline import FILTERS, SUBSETS
+from pipeline_utils import unrolling_factory
+
+HERE = Path(__file__).parent
+
+with open(HERE / "filters.json", "r") as f:
+    FILTERS: dict[str, list[str]] = json.load(f)
+
+with open(HERE / "subsets.json", "r") as f:
+    SUBSETS: dict[str, list[str]] = json.load(f)
+
+with open(HERE / "hyperopt_space.json", "r") as f:
+    HYPEROPT_SPACE: dict[str, dict[str, list]] = json.load(f)
 
 
 def get_feature_ids(feat_filter: str) -> list[str]:
@@ -36,7 +51,7 @@ def filter_features(df: pd.DataFrame, feat_filter: str, **kwargs) -> pd.DataFram
     return get_subset(df, feature_ids, **kwargs)
 
 
-def get_subset(df: pd.DataFrame, feature_ids: list[str], dropna: bool = False) -> pd.DataFrame:
+def get_subset(df: pd.DataFrame, feature_ids: list[str]) -> pd.DataFrame:
     """
     Get a subset of columns from a DataFrame.
 
@@ -48,15 +63,17 @@ def get_subset(df: pd.DataFrame, feature_ids: list[str], dropna: bool = False) -
     Returns:
         DataFrame with subset of columns.
     """
-    if dropna:
-        subset_df: pd.DataFrame = df[feature_ids].dropna()
-    else:
-        subset_df: pd.DataFrame = df[feature_ids]
+    subset_df: pd.DataFrame = df[feature_ids]
     return subset_df
 
 
-def filter_dataset(raw_dataset: pd.DataFrame, structure_feats: list[str], scalar_feats: list[str],
-                   target_feats: list[str], **kwargs) -> tuple[pd.DataFrame, pd.DataFrame]:
+def filter_dataset(raw_dataset: pd.DataFrame,
+                   structure_feats: list[str],
+                   scalar_feats: list[str],
+                   target_feats: list[str],
+                   dropna: bool = True,
+                   unroll: Optional[dict] = None,
+                   ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Filter the dataset.
 
@@ -69,10 +86,22 @@ def filter_dataset(raw_dataset: pd.DataFrame, structure_feats: list[str], scalar
     Returns:
         Input features and targets.
     """
-    structure_features: pd.DataFrame = raw_dataset[structure_feats]
-    scalar_features: pd.DataFrame = get_subset(raw_dataset, scalar_feats, **kwargs)
-    training_features: pd.DataFrame = pd.concat([structure_features, scalar_features], axis=1)
+    dataset: pd.DataFrame = raw_dataset[structure_feats + scalar_feats + target_feats]
+    if dropna:
+        dataset: pd.DataFrame = dataset.dropna()
 
-    targets: pd.DataFrame = raw_dataset[target_feats]
+    if unroll:  # TODO: This gets complicated if unrolling multiple columns?
+        structure_features: pd.DataFrame = unrolling_factory[unroll["representation"]](dataset[structure_feats], **unroll)
+    else:
+        structure_features: pd.DataFrame = dataset[structure_feats]
+
+    scalar_features: pd.DataFrame = dataset[scalar_feats]
+    if not scalar_features.columns.empty:
+        scalar_features: pd.DataFrame = scalar_features.reset_index(drop=True)
+        training_features: pd.DataFrame = pd.concat([structure_features, scalar_features], axis=1)
+    else:
+        training_features: pd.DataFrame = structure_features
+
+    targets: pd.DataFrame = dataset[target_feats]
 
     return training_features, targets

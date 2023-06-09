@@ -1,4 +1,4 @@
-name: ml_for_opvs
+name: _ml_for_opvs
 
 channels:
   - conda-forge
