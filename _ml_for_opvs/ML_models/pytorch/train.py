@@ -168,6 +168,7 @@ def main(config: dict):
         #     random_state=config["random_state"],
         # )
 
+        # ATTN: Important! PolymerDataset converts from numpy array (DataFrame?) to torch tensor
         # Create PyTorch Dataset and DataLoader
         train_set = PolymerDataset(
             input_train_array, target_train_array, config["random_state"]
@@ -178,6 +179,8 @@ def main(config: dict):
         test_set = PolymerDataset(
             input_test_array, target_test_array, config["random_state"]
         )
+
+        # ATTN: DataLoader defines batch size and whether to shuffle data
         train_dataloader = DataLoader(
             train_set, batch_size=config["train_batch_size"], shuffle=True
         )
@@ -188,6 +191,7 @@ def main(config: dict):
             test_set, batch_size=config["test_batch_size"], shuffle=False
         )
 
+        # NOTE: Setting loss and optimizer
         # Choose Loss Function
         if config["loss"] == "MSE":
             loss_fn = nn.MSELoss()
@@ -218,6 +222,7 @@ def main(config: dict):
         train_writer: SummaryWriter = SummaryWriter(log_dir=train_log)
         # valid_writer: SummaryWriter = SummaryWriter(log_dir=valid_log)
 
+        # NOTE: How learning rate should be adjusted across epochs
         # Scheduler
         scheduler1 = LinearLR(
             optimizer,
@@ -234,6 +239,7 @@ def main(config: dict):
         # TODO: log activations, lr, loss,
 
         # LOOP by EPOCHS
+        # ATTN: Could be different on a Mac
         device: torch.device = torch.device("cuda:0")
         model.to(device)
         running_loss = 0
@@ -254,6 +260,7 @@ def main(config: dict):
         # patience = 10
         # trigger_times = 0
         # early_stop = False
+        # NOTE: Start training (boilerplate)
         for epoch in range(config["num_of_epochs"]):
             ## TRAINING LOOP
             ## Make sure gradient tracking is on
@@ -298,6 +305,7 @@ def main(config: dict):
                     epoch, n_examples, loss, lr
                 )
             )
+            # NOTE: End training loop boilerplate
 
             ## VALIDATION LOOP
             # TODO: perform on validation set

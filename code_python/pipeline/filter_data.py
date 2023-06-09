@@ -96,11 +96,16 @@ def filter_dataset(raw_dataset: pd.DataFrame,
         structure_features: pd.DataFrame = dataset[structure_feats]
 
     scalar_features: pd.DataFrame = dataset[scalar_feats]
-    if not scalar_features.columns.empty:
+
+    scalars_available: bool = not scalar_features.columns.empty
+    struct_available: bool = not structure_features.columns.empty
+    if struct_available and not scalars_available:
+        training_features: pd.DataFrame = structure_features
+    elif scalars_available and not struct_available:
+        training_features: pd.DataFrame = scalar_features
+    else:
         scalar_features: pd.DataFrame = scalar_features.reset_index(drop=True)
         training_features: pd.DataFrame = pd.concat([structure_features, scalar_features], axis=1)
-    else:
-        training_features: pd.DataFrame = structure_features
 
     targets: pd.DataFrame = dataset[target_feats]
 

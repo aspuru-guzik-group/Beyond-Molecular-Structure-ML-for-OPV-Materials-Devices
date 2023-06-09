@@ -4,6 +4,8 @@
   "fabrication all": ["material properties", "fabrication", "fabrication missing"],
   "device architecture": ["material properties", "fabrication", "device architecture"],
   "device architecture all": ["material properties", "fabrication", "fabrication missing", "device architecture", "device architecture missing"],
+  "fabrication only": ["fabrication", "device architecture"],
+  "fabrication only all": ["fabrication", "fabrication missing", "device architecture", "device architecture missing"],
   "mobilities": ["material properties", "fabrication", "device architecture", "mobilities"],
   "log mobilities": ["material properties", "fabrication", "device architecture", " log mobilities"],
   "mobilities all": ["material properties", "fabrication", "fabrication missing", "device architecture", "device architecture missing", "mobilities"],

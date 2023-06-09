@@ -1,12 +1,15 @@
 import json
+import pickle
 from itertools import product
+from pathlib import Path
+from typing import List
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
-from pathlib import Path
-from typing import Generator, List, Union
+
+score_bounds: dict[str, int] = {"r": 1, "r2": 1, "mae": 10, "rmse": 10}
 
 
 def get_results_from_file(root_dir: Path, representation: str, model: str, score: str) -> tuple[float, float]:
@@ -18,11 +21,21 @@ def get_results_from_file(root_dir: Path, representation: str, model: str, score
     Returns:
         Average score from JSON file
     """
-    for f in root_dir.glob(f"{model}_{representation}*_scores.json"):
-        with open(f) as json_file:
-            data: dict = json.load(json_file)
+    score_file: list[Path] = list(root_dir.glob(f"{model}_{representation}*_scores.json"))
+    if len(score_file) == 0:
+        avg, std = np.nan, np.nan
+    else:
+        # for f in root_dir.glob(f"{model}_{representation}*_scores.json"):
+        #     with open(f) as json_file:
+        #         data: dict = json.load(json_file)
+        file = score_file[0]
+        with open(file, "r") as f:
+            data = json.load(f)
         avg = data[f"{score}_avg"]
         std = data[f"{score}_stdev"]
+
+    avg: float = np.nan if abs(avg) > score_bounds[score] else avg
+    std: float = np.nan if abs(std) > score_bounds[score] else std
     return avg, std
 
 
@@ -34,11 +47,12 @@ def generate_annotations(num: float) -> str:
     return num_txt
 
 
-def create_model_struct_heatmap(root_dir: Path, score: str) -> None:
+def create_grid_search_heatmap(root_dir: Path, score: str) -> None:
     # Collect x-axis labels from directory names
     # TODO: MOre flfexible
-    y_labels: List[str] = ["OHE", "material properties", "SMILES", "SELFIES", "BRICS", "ECFP5-2048", "mordred"]
-    x_labels: List[str] = ["MLR", "Lasso", "KRR", "KNN", "SVR", "RF", "XGB", "NGB"]
+    y_labels: List[str] = ["fabrication only", "OHE", "material properties", "SMILES", "SELFIES", "BRICS", "ECFP5-2048",
+                           "mordred", "GNN"][::-1]
+    x_labels: List[str] = ["MLR", "Lasso", "KRR", "KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GP", "NN", "GNN"]
 
     avg_scores: pd.DataFrame = pd.DataFrame(columns=x_labels, index=y_labels)
     std_scores: pd.DataFrame = pd.DataFrame(columns=x_labels, index=y_labels)
@@ -57,21 +71,38 @@ def create_model_struct_heatmap(root_dir: Path, score: str) -> None:
         std_txt: str = generate_annotations(std)
         annotations.loc[y, x] = f"{avg_txt}\n±{std_txt}"
 
+    avg_scores = avg_scores.astype(float)
+    annotations = annotations.astype(str)
+
     # Create heatmap
-    fig, ax = plt.subplots(figsize=(10, 8))
-    avg_scores = avg_scores.astype(float).T
-    annotations = annotations.astype(str).T  # TODO: Correct pivoting
-    sns.heatmap(avg_scores, annot=annotations, fmt="", cmap="viridis", cbar=True, ax=ax, mask=avg_scores.isnull())
+    fig, ax = plt.subplots(figsize=(12, 8))
+    custom_cmap = sns.color_palette("viridis", as_cmap=True)
+    custom_cmap.set_bad(color="gray")
+    hmap = sns.heatmap(avg_scores,
+                       annot=annotations,
+                       fmt="",
+                       cmap=custom_cmap,
+                       cbar=True,
+                       ax=ax,
+                       mask=avg_scores.isnull())
 
     # Set axis labels and tick labels
-    ax.set_xticks(np.arange(len(y_labels)) + 0.5)
-    ax.set_yticks(np.arange(len(x_labels)) + 0.5)
-    ax.set_xticklabels(y_labels, rotation=45, ha='right')
-    ax.set_yticklabels(x_labels)
+    ax.set_xticks(np.arange(len(avg_scores.columns)) + 0.5)
+    ax.set_yticks(np.arange(len(avg_scores.index)) + 0.5)
+    ax.set_xticklabels(avg_scores.columns, rotation=45, ha='right')
+    ax.set_yticklabels(avg_scores.index, rotation=0, ha='right')
 
-    # Set plot title and adjust layout
-    plt.title("Heatmap with Average Values and Standard Deviations")
+    # Set plot and axis titles
+    plt.title(f"Average Values and Standard Deviations of {score.upper()} Scores")
+    ax.set_xlabel("Machine Learning Models")
+    ax.set_ylabel("Structural Representations")
+    # Set colorbar title
+    cbar = hmap.collections[0].colorbar
+    cbar.set_label(f"Average {score.upper()} (± Standard Deviation)", rotation=270, labelpad=20)
+
+    # Adjust layout and save figure
     plt.tight_layout()
+    plt.savefig(root_dir / f"heatmap_{score}.png", dpi=600)
 
     # Show the heatmap
     plt.show()
@@ -85,4 +116,5 @@ if __name__ == "__main__":
     directory_paths: List[Path] = [dir for dir in results.glob("*") if dir.is_dir()]
 
     # Create heatmap
-    create_model_struct_heatmap(results, "r")
+    for score in ["r", "r2", "rmse", "mae"]:
+        create_grid_search_heatmap(results, score)

@@ -28,13 +28,13 @@ class NNModel(nn.Module):
             config (args): Model Configuration parameters.
         """
         super(NNModel, self).__init__()
-        self.embeds: nn.Sequential = nn.Sequential(
+        self.embeds: nn.Sequential = nn.Sequential(  # ATTN: Defines first two layers: input and embedding
             nn.Linear(config["input_size"], config["embedding_size"]),
             nn.ReLU(),
             OrthoLinear(config["embedding_size"], config["hidden_size"]),
             nn.ReLU(),
         )
-        self.linearlayers: nn.ModuleList = nn.ModuleList(
+        self.linearlayers: nn.ModuleList = nn.ModuleList(  # NOTE: Add n hidden layers same size as embedding layer
             [
                 nn.Sequential(
                     OrthoLinear(config["hidden_size"], config["hidden_size"]), nn.ReLU()
@@ -43,7 +43,7 @@ class NNModel(nn.Module):
             ]
         )
 
-        self.output: nn.Linear = nn.Linear(config["hidden_size"], config["output_size"])
+        self.output: nn.Linear = nn.Linear(config["hidden_size"], config["output_size"])  # NOTE: Final output layer
 
     def forward(self, x: torch.tensor):
         """

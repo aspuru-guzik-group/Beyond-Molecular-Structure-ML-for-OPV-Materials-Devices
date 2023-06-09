@@ -4,8 +4,10 @@ from typing import Union
 
 import pandas as pd
 
+from data_handling import save_results
 from models import regressor_factory
-from training_utils import process_scores, run_structure_only, save_results
+from scoring import process_scores
+from training_utils import run_structure_and_scalar, run_structure_only
 
 sys.path.append("../pipeline")
 from pipeline_utils import radius_to_bits
@@ -128,10 +130,42 @@ def main_properties_only(regressor_type: str, target_features: list[str],
                     subdir_ids=[representation])
 
 
-def main_grid(hyperopt: bool) -> None:
+def main_processing_only(regressor_type: str, target_features: list[str],
+                         hyperparameter_optimization: bool) -> None:
+    representation: str = "fabrication only"
+    structural_features: list[str] = []
+    unroll = {}
+    scalar_filter: str = "fabrication only"
+
+    dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"  # TODO: Change?
+    opv_dataset: pd.DataFrame = pd.read_pickle(dataset)
+
+    scores, predictions = run_structure_and_scalar(opv_dataset,
+                                                   representation=representation,
+                                                   structural_features=structural_features,
+                                                   scalar_filter=scalar_filter,
+                                                   scaler_type="Standard",
+                                                   target_features=target_features,
+                                                   regressor_type=regressor_type,
+                                                   unroll=unroll,
+                                                   hyperparameter_optimization=hyperparameter_optimization,
+
+                                                   )
+
+    scores = process_scores(scores)
+
+    struct_only_dir: Path = HERE.parent.parent / "results" / "structure_only"
+    subdir_ids: list[str] = [representation]
+    subdir_ids = subdir_ids + ["hyperopt"] if hyperparameter_optimization else subdir_ids
+    save_results(scores, predictions,
+                 results_dir=struct_only_dir,
+                 subdir_ids=subdir_ids,
+                 regressor_type=regressor_type)
+
+
+def main_grid(hyperopt: bool = False) -> None:
     for model in regressor_factory:
         target_feats: list[str] = ["calculated PCE (%)"]
-        hyperopt: bool = False
 
         # ECFP
         main_ecfp_only(model,
@@ -147,11 +181,6 @@ def main_grid(hyperopt: bool) -> None:
                       target_features=target_feats,
                       hyperparameter_optimization=hyperopt)
 
-        # material properties
-        main_properties_only(model,
-                             target_features=target_feats,
-                             hyperparameter_optimization=hyperopt)
-
         # tokenized
         for struct_repr in ["BRICS", "SELFIES", "SMILES"]:
             main_tokenized_only(struct_repr,
@@ -159,11 +188,23 @@ def main_grid(hyperopt: bool) -> None:
                                 target_features=target_feats,
                                 hyperparameter_optimization=hyperopt)
 
+        # material properties
+        main_properties_only(model,
+                             target_features=target_feats,
+                             hyperparameter_optimization=hyperopt)
+
+        # processing only
+        main_processing_only(model,
+                             target_features=target_feats,
+                             hyperparameter_optimization=hyperopt)
+
 
 if __name__ == "__main__":
-    for h_opt in [True, False]:
-        main_grid(hyperopt=h_opt)
+    # for h_opt in [True, False]:
+    #     main_grid(hyperopt=h_opt)
 
-    # main_ecfp_only("Lasso",
-    #                target_features=["calculated PCE (%)"],
-    #                  hyperparameter_optimization=False)
+    # main_grid(hyperopt=False)
+
+    main_ecfp_only("KRR",
+                   target_features=["calculated PCE (%)"],
+                   hyperparameter_optimization=True)

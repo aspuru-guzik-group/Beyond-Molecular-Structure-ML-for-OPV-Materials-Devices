@@ -108,6 +108,7 @@ representation_scaling_factory: dict[str, dict[str, Union[Callable, str]]] = {
     "SMILES":  {"callable": MinMaxScaler, "type": "MinMax"},
     "OHE":     {"callable": MinMaxScaler, "type": "MinMax"},
     "material properties": {"callable": StandardScaler, "type": "Standard"},
+    "fabrication only": {"callable": StandardScaler, "type": "Standard"},
     # "GNN":     {"callable": MinMaxScaler, "type": "MinMax"},
 }
 

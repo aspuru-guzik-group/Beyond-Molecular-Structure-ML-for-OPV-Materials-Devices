@@ -10,7 +10,11 @@ import seaborn as sns
 
 from matplotlib.offsetbox import AnchoredText
 
-from code_python import DATASETS, FIGURES
+# from code_python import DATASETS, FIGURES
+
+HERE: Path = Path(__file__).resolve().parent
+DATASETS: Path = HERE.parent.parent / "datasets"
+FIGURES: Path = HERE.parent.parent / "figures"
 
 # OPV data after pre-processing
 # MASTER_ML_DATA_PLOT = pkg_resources.resource_filename(
@@ -39,7 +43,7 @@ def plot_feature_distributions(dataset: pd.DataFrame,
         drop_columns: Columns to drop from the dataset
     """
     df = dataset.copy()  # make a copy of the dataset
-    df.drop(drop_columns, axis=1, inplace=True)  # drop the columns that won't be used in the analysis
+    # df.drop(drop_columns, axis=1, inplace=True)  # drop the columns that won't be used in the analysis
 
     df_columns = len(df.columns)  # get the number of columns in the dataset
     # find the number of rows and columns of the figure
@@ -195,11 +199,15 @@ if __name__ == "__main__":
         "logKow", "RI", "Trouton", "RER", "ParachorGA", "RD", "DCp", "log n", "SurfTen"
     ]
 
+    structs = [f"{p[0]} {p[1]}" for p in itertools.product(["Donor", "Acceptor"], ["SMILES", "SELFIES"])]
+
     plot_feature_distributions(opv_dataset.drop(columns=["ref", "DOI", "Donor", "Acceptor",
-                                                         *[f"solvent {prop}" for prop in solvent_properties],
-                                                         *[f"solvent additive {prop}" for prop in
-                                                           solvent_properties], ]),
-                               # figures,
+                                                         *structs,
+                                                         # *[f"solvent {prop}" for prop in solvent_properties],
+                                                         # *[f"solvent additive {prop}" for prop in
+                                                         #   solvent_properties],
+                                                         ]),
+                               figures,
                                )
 
     # saeki = pd.read_csv(DATASETS / "Saeki_2022_n1318" / "Saeki_corrected.csv")
