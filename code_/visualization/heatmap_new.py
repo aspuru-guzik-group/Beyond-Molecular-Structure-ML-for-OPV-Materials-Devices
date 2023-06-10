@@ -110,7 +110,7 @@ def create_grid_search_heatmap(root_dir: Path, score: str) -> None:
 
 if __name__ == "__main__":
     root = Path(__file__).resolve().parent.parent.parent
-    results = root / "results" / "structure_only"
+    results = root / "results" / "structure_only" / "hyperopt"
 
     # Use pathlib glob to get all directories in results
     directory_paths: List[Path] = [dir for dir in results.glob("*") if dir.is_dir()]

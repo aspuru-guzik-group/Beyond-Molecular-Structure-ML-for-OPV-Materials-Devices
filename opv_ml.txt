@@ -3,6 +3,7 @@ graph-nets
 jupyter
 matplotlib
 mordred
+ngboost
 numpy
 optuna
 pandarallel
