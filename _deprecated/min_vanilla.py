@@ -13,7 +13,7 @@ from sklearn.model_selection import KFold, StratifiedKFold
 from skopt import BayesSearchCV
 from skopt.space import Real, Integer
 
-from code_python import DATASETS
+from code_ import DATASETS
 
 # saeki = pd.read_pickle("../../datasets/Saeki_2022_n1318/saeki_corrected_512.pkl")
 # dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset.pkl"

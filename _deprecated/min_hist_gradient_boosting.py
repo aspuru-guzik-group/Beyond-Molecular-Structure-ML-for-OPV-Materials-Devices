@@ -9,9 +9,9 @@ import sklearn
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.model_selection import KFold
 
-from code_python import DATASETS
-from code_python.pipeline import SUBSETS
-from code_python.pipeline.pipeline_utils import unroll_lists_to_columns, unroll_solvent_descriptors
+from code_ import DATASETS
+from code_.pipeline import SUBSETS
+from code_.pipeline.pipeline_utils import unroll_lists_to_columns, unroll_solvent_descriptors
 
 dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"
 opv_dataset = pd.read_pickle(dataset)
@@ -23,7 +23,7 @@ n_bits = 4096
 
 subsets: dict[str, list[str]] = SUBSETS
 
-with open("../code_python/training/seeds.json", "r") as f:
+with open("../code_/training/seeds.json", "r") as f:
     seeds: list[int] = json.load(f)
 
 # Define columns in subset

@@ -200,11 +200,11 @@ def main_grid(hyperopt: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    # for h_opt in [True, False]:
-    #     main_grid(hyperopt=h_opt)
+    for h_opt in [False, True]:
+        main_grid(hyperopt=h_opt)
 
     # main_grid(hyperopt=False)
 
-    main_ecfp_only("KRR",
-                   target_features=["calculated PCE (%)"],
-                   hyperparameter_optimization=True)
+    # main_ecfp_only("KRR",
+    #                target_features=["calculated PCE (%)"],
+    #                hyperparameter_optimization=True)

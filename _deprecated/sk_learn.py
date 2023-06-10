@@ -5,12 +5,12 @@ from typing import Optional
 
 from skopt import BayesSearchCV
 
-from code_python import DATASETS
-from code_python.pipeline import HYPEROPT_SPACE
-from code_python.pipeline.scaling import scale_features, scale_targets
-from code_python.training import SEEDS
-from code_python.pipeline.pipeline_utils import evaluate_model, regressor_factory, scaler_factory
-from code_python.pipeline.filter_data import filter_dataset, get_feature_ids
+from code_ import DATASETS
+from code_.pipeline import HYPEROPT_SPACE
+from code_.pipeline.scaling import scale_features, scale_targets
+from code_.training import SEEDS
+from code_.pipeline.pipeline_utils import evaluate_model, regressor_factory, scaler_factory
+from code_.pipeline.filter_data import filter_dataset, get_feature_ids
 
 
 def split_k_folds(x: pd.DataFrame,

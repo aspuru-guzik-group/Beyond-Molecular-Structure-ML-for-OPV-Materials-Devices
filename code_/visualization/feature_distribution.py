@@ -10,7 +10,7 @@ import seaborn as sns
 
 from matplotlib.offsetbox import AnchoredText
 
-# from code_python import DATASETS, FIGURES
+# from code_ import DATASETS, FIGURES
 
 HERE: Path = Path(__file__).resolve().parent
 DATASETS: Path = HERE.parent.parent / "datasets"

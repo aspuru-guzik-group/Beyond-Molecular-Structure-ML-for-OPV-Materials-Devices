@@ -9,8 +9,8 @@ from pathlib import Path
 from sklearn.metrics import r2_score
 from typing import Callable, Optional
 
-from code_python import DATASETS, FIGURES
-from code_python.training import unroll_lists_to_columns
+from code_ import DATASETS, FIGURES
+from code_.training import unroll_lists_to_columns
 
 
 def calculate_pearson(df: pd.DataFrame) -> pd.DataFrame:
