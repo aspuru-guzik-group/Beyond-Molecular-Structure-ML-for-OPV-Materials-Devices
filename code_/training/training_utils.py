@@ -160,8 +160,9 @@ def run_structure_and_scalar(dataset: pd.DataFrame,
                              representation: str,
                              structural_features: list[str],
                              scalar_filter: str,
+                             subspace_filter: str,
                              target_features: list[str],
-                             scaler_type: str,
+                             # scaler_type: str,
                              regressor_type: str,
                              hyperparameter_optimization: bool = False,
                              unroll: Optional[dict] = None,
@@ -194,7 +195,8 @@ def run_structure_and_scalar(dataset: pd.DataFrame,
     # Establish preprocessing and training pipeline
     structura_transformer: Pipeline = Pipeline(steps=[(representation_scaling_factory[representation]["type"],
                                                        representation_scaling_factory[representation]["callable"]()),
-                                                      ])  
+                                                      ])
+    # TODO: Per-feature scaling with ColumnTansformer?
     numeric_transformer = Pipeline(steps=[(scaler_type, scaler_factory[scaler_type]()),
                                           ])  
     preprocessor: ColumnTransformer = ColumnTransformer(
