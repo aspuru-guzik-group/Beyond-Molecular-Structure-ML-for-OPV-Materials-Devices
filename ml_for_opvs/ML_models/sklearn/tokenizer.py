@@ -3,10 +3,9 @@ import re
 from collections import Counter
 import selfies as sf
 import pandas as pd
-
 import numpy as np
 
-TOKENIZER_PATTERN = "(\%\([0-9]{3}\)|\[[^\]]+]|Se?|Si?|Br?|Cl?|N|O|S|P|F|I|b|c|n|o|s|p|\||\(|\)|\.|=|#|-|\+|\\|\/|:|~|@|\?|>>?|\*|\$|\%[0-9]{2}|[0-9])"
+TOKENIZER_PATTERN = r"(\%\([0-9]{3}\)|\[[^\]]+]|Se?|Si?|Br?|Cl?|N|O|S|P|F|I|b|c|n|o|s|p|\||\(|\)|\.|=|#|-|\+|\\|\/|:|~|@|\?|>>?|\*|\$|\%[0-9]{2}|[0-9])"
 TOKENIZER_REGEX = re.compile(TOKENIZER_PATTERN)
 
 
@@ -149,8 +148,9 @@ class Tokenizer:
 
 
 # for presentation (can be deleted)
-# tk = Tokenizer()
-# tokenized_smile = tk.tokenize(
-#     "[C][C][S][C][=C][Branch2_1][Ring1][Ring2][C][S][C][Branch1_1][O][C][C][Branch1_1][Ring1][C][C][C][C][C][C][=C][C][Expl=Ring1][=N][C][C][=C][Branch2_1][Branch1_2][Branch1_2][C][=C][C][=C][Branch2_1][Branch1_1][O][C][S][C][Branch1_1][Branch2_1][C][=C][C][=C][S][Ring1][Branch1_1][=C][C][Expl=Ring1][Branch2_3][C][Branch2_1][Ring2][Branch1_2][C][=C][Branch1_1][O][C][C][Branch1_1][Ring1][C][C][C][C][C][C][S][C][Branch1_1][O][C][C][Branch1_1][Ring1][C][C][C][C][C][C][=C][Ring2][Ring1][Branch1_1][C][Ring2][Ring1][Branch2_2][=O][=O][S][Ring2][Ring2][Branch2_1][S][C][Expl=Ring2][Ring2][=N][C][Branch2_1][Ring1][Ring2][C][S][C][Branch1_1][O][C][C][Branch1_1][Ring1][C][C][C][C][C][C][=C][C][Expl=Ring1][=N][=C][Ring2][Branch1_2][O][C][Expl=Ring2][Branch1_2][=C]"
-# )
-# print(tokenized_smile)
+tk = Tokenizer()
+tokenized_smile = tk.tokenize(
+    "C\C=C/CC#N"
+)
+print(tokenized_smile)
+print("\\")
