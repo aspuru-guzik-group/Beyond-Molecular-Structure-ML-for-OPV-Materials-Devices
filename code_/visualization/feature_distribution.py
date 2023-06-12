@@ -1,16 +1,13 @@
-import itertools
-import math
 from pathlib import Path
 
-import pkg_resources
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
-
+import pandas as pd
+import pkg_resources
 from matplotlib.offsetbox import AnchoredText
 
 # from code_ import DATASETS, FIGURES
+from code_.training.filter_data import filter_dataset
 
 HERE: Path = Path(__file__).resolve().parent
 DATASETS: Path = HERE.parent.parent / "datasets"
@@ -42,6 +39,7 @@ def plot_feature_distributions(dataset: pd.DataFrame,
         dataset_name: Name of the dataset
         drop_columns: Columns to drop from the dataset
     """
+    output_dir.mkdir(parents=True, exist_ok=True)
     df = dataset.copy()  # make a copy of the dataset
     # df.drop(drop_columns, axis=1, inplace=True)  # drop the columns that won't be used in the analysis
 
@@ -183,6 +181,22 @@ def plot_heatmap_of_pair_frequency(dataset: pd.DataFrame, column1: str, column2:
     plt.savefig(output_dir / f"frequency map_{column1} {column2}.png")
 
 
+def get_solvent_distributions(solv_type: str):
+    solvent_properties = [
+        "dipole", "dD", "dP", "dH", "dHDon", "dHAcc", "MW", "Density", "BPt", "MPt",
+        "logKow", "RI", "Trouton", "RER", "ParachorGA", "RD", "DCp", "log n", "SurfTen"
+    ]
+    solv_data = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"
+    solv_data = pd.read_pickle(solv_data)
+
+    unroll: dict[str, str] = {"representation": " ".join(solv_type.split(" ")[0:-1]),
+                              "solv_type": solv_type}
+    solvent_properties, _ = filter_dataset(solv_data, structure_feats=[solv_type], scalar_feats=[],
+                                           target_feats=[], dropna=False, unroll=unroll)
+
+    plot_feature_distributions(solvent_properties, FIGURES / "Min" / f"{solv_type}_properties")
+
+
 if __name__ == "__main__":
     min_dataset: Path = DATASETS / "Min_2020_n558" / "cleaned_dataset.csv"
     opv_dataset: pd.DataFrame = pd.read_csv(min_dataset)
@@ -194,21 +208,19 @@ if __name__ == "__main__":
     # for pair in pairs_combinations:
     #     plot_heatmap_of_pair_frequency(opv_dataset, pair[0], pair[1], figures)
 
-    solvent_properties = [
-        "dipole", "dD", "dP", "dH", "dHDon", "dHAcc", "MW", "Density", "BPt", "MPt",
-        "logKow", "RI", "Trouton", "RER", "ParachorGA", "RD", "DCp", "log n", "SurfTen"
-    ]
+    # structs = [f"{p[0]} {p[1]}" for p in itertools.product(["Donor", "Acceptor"], ["SMILES", "SELFIES"])]
+    #
+    # plot_feature_distributions(opv_dataset.drop(columns=["ref", "DOI", "Donor", "Acceptor",
+    #                                                      *structs,
+    #                                                      # *[f"solvent {prop}" for prop in solvent_properties],
+    #                                                      # *[f"solvent additive {prop}" for prop in
+    #                                                      #   solvent_properties],
+    #                                                      ]),
+    #                            figures,
+    #                            )
 
-    structs = [f"{p[0]} {p[1]}" for p in itertools.product(["Donor", "Acceptor"], ["SMILES", "SELFIES"])]
-
-    plot_feature_distributions(opv_dataset.drop(columns=["ref", "DOI", "Donor", "Acceptor",
-                                                         *structs,
-                                                         # *[f"solvent {prop}" for prop in solvent_properties],
-                                                         # *[f"solvent additive {prop}" for prop in
-                                                         #   solvent_properties],
-                                                         ]),
-                               figures,
-                               )
+    for solv_type in ["solvent descriptors", "solvent additive descriptors"]:
+        get_solvent_distributions(solv_type)
 
     # saeki = pd.read_csv(DATASETS / "Saeki_2022_n1318" / "Saeki_corrected.csv")
     # figures: Path = FIGURES / "Saeki"

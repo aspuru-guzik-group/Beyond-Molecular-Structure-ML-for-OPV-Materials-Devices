@@ -4,6 +4,9 @@ import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr
 from sklearn.metrics import make_scorer, mean_absolute_error, mean_squared_error
+from sklearn.metrics._scorer import r2_scorer
+from sklearn.model_selection import cross_val_predict, cross_validate
+
 
 # from training_utils import N_FOLDS, SEEDS
 
@@ -70,8 +73,30 @@ def process_scores(scores: dict[int, dict[str, float]]) -> dict[Union[int, str],
     stdevs: list[float] = [np.std([seed[f"test_{score}"] for seed in scores.values()]) for score in score_types]
     std_errs: list[float] = [stdev / np.sqrt(sample_size) for stdev in stdevs]
     for score, avg, stdev, stderr in zip(score_types, avgs, stdevs, std_errs):
-        scores[f"{score}_avg"] = avg
+        scores[f"{score}_avg"] = abs(avg) if score in ["rmse", "mae"] else avg
         scores[f"{score}_stdev"] = stdev
         scores[f"{score}_stderr"] = stderr
 
     return scores
+
+
+def cross_validate_regressor(regressor, X, y, cv) -> tuple[dict[str, float], np.ndarray]:
+    # Training and scoring on each fold
+    scores: dict[str, float] = cross_validate(regressor, X, y,
+                                              cv=cv,
+                                              scoring={"r":    r_scorer,
+                                                       "r2":   r2_scorer,
+                                                       "rmse": rmse_scorer,
+                                                       "mae":  mae_scorer},
+                                              # return_estimator=True,
+                                              n_jobs=-1,
+                                              )
+
+    predictions: np.ndarray = cross_val_predict(regressor, X, y,
+                                                cv=cv,
+                                                n_jobs=-1,
+                                                )
+
+    # estimator_params: list[dict] = [estimator.get_params(deep=True) for estimator in scores["estimator"]]
+    # new_e_params = iterate_and_remove(estimator_params)
+    return scores, predictions

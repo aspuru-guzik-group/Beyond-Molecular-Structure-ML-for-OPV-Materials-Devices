@@ -11,7 +11,7 @@ from sklearn.model_selection import KFold
 
 from code_ import DATASETS
 from code_.pipeline import SUBSETS
-from code_.pipeline.pipeline_utils import unroll_lists_to_columns, unroll_solvent_descriptors
+from code_.training.pipeline_utils import unroll_lists_to_columns, unroll_solvent_descriptors
 
 dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"
 opv_dataset = pd.read_pickle(dataset)
