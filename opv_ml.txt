@@ -16,6 +16,7 @@ seaborn
 selfies
 shap
 tensorflow
+threadpoolctl>=3.1
 torch
 torch_geometric
 xgboost

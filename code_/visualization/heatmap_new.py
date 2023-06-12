@@ -9,19 +9,28 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-score_bounds: dict[str, int] = {"r": 1, "r2": 1, "mae": 10, "rmse": 10}
+from matplotlib import rc
+rc("font",**{"family":"sans-serif","sans-serif":["Arial"], "size": 16})
+
+score_bounds: dict[str, int] = {"r": 1, "r2": 1, "mae": 25, "rmse": 25}
+
+var_titles: dict[str, str] = {"stdev": "Standard Deviation", "stderr": "Standard Error"}
 
 
-def get_results_from_file(root_dir: Path, representation: str, model: str, score: str) -> tuple[float, float]:
+def get_results_from_file(results_dir: Path, model: str, score: str, var: str) -> tuple[float, float]:
     """
     Args:
-        struct_rep: Structural representation
-        model: Machine learning model
+        root_dir: Root directory containing all results
+        representation: Representation for which to get scores
+        model: Model for which to get scores.
+        score: Score to plot
+        var: Variance to plot
 
     Returns:
-        Average score from JSON file
+        Average and variance of score
     """
-    score_file: list[Path] = list(root_dir.glob(f"{model}_{representation}*_scores.json"))
+    # assert results_dir.exists(), f"Results directory does not exist: {results_dir}"
+    score_file: list[Path] = list(results_dir.glob(f"{model}_scores.json"))
     if len(score_file) == 0:
         avg, std = np.nan, np.nan
     else:
@@ -32,14 +41,31 @@ def get_results_from_file(root_dir: Path, representation: str, model: str, score
         with open(file, "r") as f:
             data = json.load(f)
         avg = data[f"{score}_avg"]
-        std = data[f"{score}_stdev"]
+        if var == "stdev":
+            std = data[f"{score}_stdev"]
+        elif var == "stderr":
+            std = data[f"{score}_stderr"]
+        else:
+            raise ValueError(f"Unknown variance type: {var}")
+        # se = data[f"{score}_stderr"]
 
     avg: float = np.nan if abs(avg) > score_bounds[score] else avg
     std: float = np.nan if abs(std) > score_bounds[score] else std
+    # se: float = np.nan if abs(se) > score_bounds[score] else se
+
+    if score in ["mae", "rmse"]:
+        avg, std = abs(avg), abs(std)
     return avg, std
 
 
 def generate_annotations(num: float) -> str:
+    """
+    Args:
+        num: Number to annotate
+
+    Returns:
+        String to annotate heatmap
+    """
     if isinstance(num, float) and not np.isnan(num):
         num_txt: str = f"{round(num, 2)}"
     else:
@@ -47,23 +73,38 @@ def generate_annotations(num: float) -> str:
     return num_txt
 
 
-def create_grid_search_heatmap(root_dir: Path, score: str) -> None:
-    # Collect x-axis labels from directory names
-    # TODO: MOre flfexible
-    y_labels: List[str] = ["fabrication only", "OHE", "material properties", "SMILES", "SELFIES", "BRICS", "ECFP5-2048",
-                           "mordred", "GNN"][::-1]
-    x_labels: List[str] = ["MLR", "Lasso", "KRR", "KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GP", "NN", "GNN"]
-
+def _create_heatmap(root_dir: Path,
+                    score: str, var: str,
+                    x_labels: list[str], y_labels: list[str],
+                    figsize: tuple[int, int],
+                    fig_title: str,
+                    x_title: str,
+                    y_title: str,
+                    fname: str,
+                    ) -> None:
+    """
+    Args:
+        root_dir: Root directory containing all results
+        score: Score to plot
+        var: Variance to plot
+        x_labels: Labels for x-axis
+        y_labels: Labels for y-axis
+        figsize: Figure size
+        fig_title: Figure title
+        x_title: X-axis title
+        y_title: Y-axis title
+        fname: Filename to save figure
+    """
     avg_scores: pd.DataFrame = pd.DataFrame(columns=x_labels, index=y_labels)
     std_scores: pd.DataFrame = pd.DataFrame(columns=x_labels, index=y_labels)
+    annotations: pd.DataFrame = pd.DataFrame(columns=x_labels, index=y_labels)
 
     for rep, model in product(y_labels, x_labels):
-        p = root_dir / rep
-        avg, std = get_results_from_file(p, rep, model, score)
+        p = root_dir / f"features_{rep}"
+        avg, std = get_results_from_file(p, model, score, var)
         avg_scores.at[rep, model] = avg
         std_scores.at[rep, model] = std
 
-    annotations: pd.DataFrame = pd.DataFrame(columns=x_labels, index=y_labels)
     for x, y in product(x_labels, y_labels):
         avg: float = avg_scores.loc[y, x]
         std: float = std_scores.loc[y, x]
@@ -75,7 +116,7 @@ def create_grid_search_heatmap(root_dir: Path, score: str) -> None:
     annotations = annotations.astype(str)
 
     # Create heatmap
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=figsize)
     custom_cmap = sns.color_palette("viridis", as_cmap=True)
     custom_cmap.set_bad(color="gray")
     hmap = sns.heatmap(avg_scores,
@@ -84,37 +125,66 @@ def create_grid_search_heatmap(root_dir: Path, score: str) -> None:
                        cmap=custom_cmap,
                        cbar=True,
                        ax=ax,
-                       mask=avg_scores.isnull())
+                       mask=avg_scores.isnull(),
+                       annot_kws={"fontsize":12})
 
     # Set axis labels and tick labels
     ax.set_xticks(np.arange(len(avg_scores.columns)) + 0.5)
     ax.set_yticks(np.arange(len(avg_scores.index)) + 0.5)
-    ax.set_xticklabels(avg_scores.columns, rotation=45, ha='right')
-    ax.set_yticklabels(avg_scores.index, rotation=0, ha='right')
+    ax.set_xticklabels(avg_scores.columns, rotation=45, ha="right")
+    ax.set_yticklabels(avg_scores.index, rotation=0, ha="right")
 
     # Set plot and axis titles
-    plt.title(f"Average Values and Standard Deviations of {score.upper()} Scores")
-    ax.set_xlabel("Machine Learning Models")
-    ax.set_ylabel("Structural Representations")
+    plt.title(fig_title)
+    ax.set_xlabel(x_title)
+    ax.set_ylabel(y_title)
     # Set colorbar title
+    score: str = "$R^2$" if score == "r2" else score
     cbar = hmap.collections[0].colorbar
-    cbar.set_label(f"Average {score.upper()} (± Standard Deviation)", rotation=270, labelpad=20)
+    cbar.set_label(f"Average {score.upper()} ± {var_titles[var]}", rotation=270, labelpad=20)
 
     # Adjust layout and save figure
     plt.tight_layout()
-    plt.savefig(root_dir / f"heatmap_{score}.png", dpi=600)
+    plt.savefig(root_dir / f"{fname}.png", dpi=600)
 
     # Show the heatmap
     plt.show()
 
 
+def create_grid_search_heatmap(root_dir: Path, score: str, var: str) -> None:
+    """
+    Args:
+        root_dir: Root directory containing all results
+        score: Score to plot
+        var: Variance to plot
+    """
+    # Collect x-axis labels from directory names
+    # TODO: MOre flfexible
+    y_labels: List[str] = ["fabrication only", "OHE", "material properties", "SMILES", "SELFIES", "BRICS", "ECFP",
+                           "mordred", "GNN"][::-1]
+    x_labels: List[str] = ["MLR", "Lasso", "KRR", "KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GP", "NN", "GNN"]
+
+    target: str = ", ".join(root_dir.name.split("_")[1:])
+    score_txt: str = "$R^2$" if score == "r2" else score.upper()
+
+    _create_heatmap(root_dir,
+                    score, var,
+                    x_labels, y_labels,
+                    figsize=(12, 8),
+                    fig_title=f"Average {score_txt} Scores for Models Predicting {target}",
+                    x_title="Machine Learning Models",
+                    y_title="Structural Representations",
+                    fname=f"model-representation search heatmap_{score}"
+                    )
+
+
 if __name__ == "__main__":
     root = Path(__file__).resolve().parent.parent.parent
-    results = root / "results" / "structure_only" / "hyperopt"
+    results = root / "results" / "target_Voc"
 
     # Use pathlib glob to get all directories in results
     directory_paths: List[Path] = [dir for dir in results.glob("*") if dir.is_dir()]
 
     # Create heatmap
     for score in ["r", "r2", "rmse", "mae"]:
-        create_grid_search_heatmap(results, score)
+        create_grid_search_heatmap(results, score, var="stderr")

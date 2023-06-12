@@ -2,7 +2,6 @@ import numpy as np
 from ngboost import NGBRegressor
 from scipy.spatial.distance import jaccard
 from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
-from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.linear_model import Lasso, LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
@@ -167,6 +166,15 @@ regressor_factory: dict[str, type] = {
     # "NN":    MLPRegressor,  # ATTN: Not actually this one?
     "NN":    NNRegressor,
 }
+
+
+def model_dropna(model_type: str) -> bool:
+    """Returns whether the model_type requires dropping NaNs from data."""
+    if model_type == "HGB":
+        return False
+    else:
+        return True
+
 
 regressor_search_space: dict[str, dict] = {
     "MLR":   {"regressor__fit_intercept": [True, False]},

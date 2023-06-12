@@ -4,7 +4,7 @@ from typing import Union
 
 import pandas as pd
 
-from data_handling import save_results
+from data_handling import save_results, target_abbrev
 from models import regressor_factory
 from scoring import process_scores
 from training_utils import run_structure_and_scalar, run_structure_only
@@ -22,9 +22,9 @@ def _structure_only(representation: str,
                     regressor_type: str,
                     target_features: list[str],
                     hyperparameter_optimization: bool,
-                    subdir_ids: list[Union[str, int]]
+                    # subdir_ids: list[Union[str, int]]
                     ) -> None:
-    dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"  # TODO: Change?
+    dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"  # TODO: Change to pass dataset?
     opv_dataset: pd.DataFrame = pd.read_pickle(dataset)
 
     scores, predictions = run_structure_only(opv_dataset,
@@ -38,12 +38,14 @@ def _structure_only(representation: str,
 
     scores = process_scores(scores)
 
-    struct_only_dir: Path = HERE.parent.parent / "results" / "structure_only"
-    subdir_ids = subdir_ids + ["hyperopt"] if hyperparameter_optimization else subdir_ids
+    targets_dir: str = "-".join([target_abbrev[target] for target in target_features])
+    features_dir: str = "-".join([representation])
+    results_dir: Path = HERE.parent.parent / "results" / f"target_{targets_dir}" / f"features_{features_dir}"
     save_results(scores, predictions,
-                 results_dir=struct_only_dir,
-                 subdir_ids=subdir_ids,
-                 regressor_type=regressor_type)
+                 results_dir=results_dir,
+                 regressor_type=regressor_type,
+                 hyperparameter_optimization=hyperparameter_optimization,
+                 )
 
 
 def main_ecfp_only(regressor_type: str,
@@ -65,7 +67,8 @@ def main_ecfp_only(regressor_type: str,
                     regressor_type=regressor_type,
                     target_features=target_features,
                     hyperparameter_optimization=hyperparameter_optimization,
-                    subdir_ids=[f"{representation}{radius}-{n_bits}"])
+                    # subdir_ids=[f"{representation}{radius}-{n_bits}"]
+                    )
 
 
 def main_tokenized_only(representation: str, regressor_type: str, target_features: list[str],
@@ -80,7 +83,8 @@ def main_tokenized_only(representation: str, regressor_type: str, target_feature
                     regressor_type=regressor_type,
                     target_features=target_features,
                     hyperparameter_optimization=hyperparameter_optimization,
-                    subdir_ids=[representation])
+                    # subdir_ids=[representation]
+                    )
 
 
 def main_ohe_only(regressor_type: str, target_features: list[str],
@@ -95,7 +99,8 @@ def main_ohe_only(regressor_type: str, target_features: list[str],
                     regressor_type=regressor_type,
                     target_features=target_features,
                     hyperparameter_optimization=hyperparameter_optimization,
-                    subdir_ids=[representation])
+                    # subdir_ids=[representation]
+                    )
 
 
 def main_mordred_only(regressor_type: str, target_features: list[str],
@@ -110,7 +115,8 @@ def main_mordred_only(regressor_type: str, target_features: list[str],
                     regressor_type=regressor_type,
                     target_features=target_features,
                     hyperparameter_optimization=hyperparameter_optimization,
-                    subdir_ids=[representation])
+                    # subdir_ids=[representation]
+                    )
 
 
 def main_properties_only(regressor_type: str, target_features: list[str],
@@ -127,7 +133,8 @@ def main_properties_only(regressor_type: str, target_features: list[str],
                     regressor_type=regressor_type,
                     target_features=target_features,
                     hyperparameter_optimization=hyperparameter_optimization,
-                    subdir_ids=[representation])
+                    # subdir_ids=[representation]
+                    )
 
 
 def main_processing_only(regressor_type: str, target_features: list[str],
@@ -149,7 +156,7 @@ def main_processing_only(regressor_type: str, target_features: list[str],
                                                    regressor_type=regressor_type,
                                                    unroll=unroll,
                                                    hyperparameter_optimization=hyperparameter_optimization,
-
+                                                   subspace_filter=None,
                                                    )
 
     scores = process_scores(scores)
@@ -159,13 +166,15 @@ def main_processing_only(regressor_type: str, target_features: list[str],
     subdir_ids = subdir_ids + ["hyperopt"] if hyperparameter_optimization else subdir_ids
     save_results(scores, predictions,
                  results_dir=struct_only_dir,
-                 subdir_ids=subdir_ids,
-                 regressor_type=regressor_type)
+                 # subdir_ids=subdir_ids,
+                 regressor_type=regressor_type,
+                 hyperparameter_optimization=hyperparameter_optimization,
+                 )
 
 
-def main_grid(hyperopt: bool = False) -> None:
+def main_grid(target_feats: list[str], hyperopt: bool = False) -> None:
     for model in regressor_factory:
-        target_feats: list[str] = ["calculated PCE (%)"]
+        # target_feats: list[str] = ["calculated PCE (%)"]
 
         # ECFP
         main_ecfp_only(model,
@@ -200,10 +209,11 @@ def main_grid(hyperopt: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    for h_opt in [False, True]:
-        main_grid(hyperopt=h_opt)
+    # for h_opt in [False, True]:
+    #     main_grid(, hyperopt=h_opt)
 
-    # main_grid(hyperopt=False)
+    for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+        main_grid(target_feats=target, hyperopt=False)
 
     # main_ecfp_only("KRR",
     #                target_features=["calculated PCE (%)"],

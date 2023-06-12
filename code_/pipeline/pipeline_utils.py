@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Callable, Union
 
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, QuantileTransformer, StandardScaler
 
 HERE: Path = Path(__file__).resolve().parent
 DATASETS: Path = HERE.parent.parent / "datasets"
@@ -88,28 +88,86 @@ def get_material_properties(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
     return df
 
 
-unrolling_factory: dict[str, Callable] = {"solvent": unroll_solvent_descriptors,
-                                          "ECFP":    unroll_fingerprints,
-                                          "mordred": get_mordred_descriptors,
-                                          "BRICS":   unroll_tokens,
-                                          "SELFIES": unroll_tokens,
-                                          "SMILES":  unroll_tokens,
-                                          "OHE":     get_ohe_structures,
+unrolling_factory: dict[str, Callable] = {"solvent":             unroll_solvent_descriptors,
+                                          "ECFP":                unroll_fingerprints,
+                                          "mordred":             get_mordred_descriptors,
+                                          "BRICS":               unroll_tokens,
+                                          "SELFIES":             unroll_tokens,
+                                          "SMILES":              unroll_tokens,
+                                          "OHE":                 get_ohe_structures,
                                           "material properties": get_material_properties,
                                           # "GNN":     get_gnn_embeddings,  # TODO: Implement GNN embeddings
                                           }
 
+
+class GaussianQuantileTransformer(QuantileTransformer):
+    def __init__(
+            self,
+            *,
+            n_quantiles=1000,
+            output_distribution="normal",
+            ignore_implicit_zeros=False,
+            subsample=10_000,
+            random_state=None,
+            copy=True,
+    ):
+        super().__init__(
+            n_quantiles=n_quantiles,
+            output_distribution=output_distribution,
+            ignore_implicit_zeros=ignore_implicit_zeros,
+            subsample=subsample,
+            random_state=random_state,
+            copy=copy,
+        )
+
+
 representation_scaling_factory: dict[str, dict[str, Union[Callable, str]]] = {
-    "solvent": {"callable": StandardScaler, "type": "Standard"},
-    "ECFP":    {"callable": MinMaxScaler, "type": "MinMax"},
-    "mordred": {"callable": StandardScaler, "type": "Standard"},
-    "BRICS":   {"callable": MinMaxScaler, "type": "MinMax"},
-    "SELFIES": {"callable": MinMaxScaler, "type": "MinMax"},
-    "SMILES":  {"callable": MinMaxScaler, "type": "MinMax"},
-    "OHE":     {"callable": MinMaxScaler, "type": "MinMax"},
-    "material properties": {"callable": StandardScaler, "type": "Standard"},
-    "fabrication only": {"callable": StandardScaler, "type": "Standard"},
+    "solvent":             {"callable": GaussianQuantileTransformer,
+                            "type":     "Quantile"},
+    "ECFP":                {"callable": MinMaxScaler, "type": "MinMax"},
+    "mordred":             {"callable": GaussianQuantileTransformer,
+                            "type":     "Quantile"},
+    "BRICS":               {"callable": MinMaxScaler, "type": "MinMax"},
+    "SELFIES":             {"callable": MinMaxScaler, "type": "MinMax"},
+    "SMILES":              {"callable": MinMaxScaler, "type": "MinMax"},
+    "OHE":                 {"callable": MinMaxScaler, "type": "MinMax"},
+    "material properties": {"callable": GaussianQuantileTransformer,
+                            "type":     "Quantile"},
+    "fabrication only":    {"callable": GaussianQuantileTransformer,
+                            "type":     "Quantile"},
     # "GNN":     {"callable": MinMaxScaler, "type": "MinMax"},
 }
 
 radius_to_bits: dict[int, int] = {3: 512, 4: 1024, 5: 2048, 6: 4096}
+
+# def get_feature_scaling(feature: str) -> TransformerMixin:
+#     if feature in [
+#         "Donor PDI", "Donor Mn (kDa)", "Donor Mw (kDa)",
+#         "HOMO_D (eV)", "LUMO_D (eV)", "Eg_D (eV)", "Ehl_D (eV)",
+#         "HOMO_A (eV)", "LUMO_A (eV)", "Eg_A (eV)", "Ehl_A (eV)",
+#         "active layer thickness (nm)",
+#     ]:
+#         return QuantileTransformer(output_distribution="normal")
+#     elif feature in [
+#         "D:A ratio (m/m)", "total solids conc. (mg/mL)", "solvent additive conc. (% v/v)",
+#         "temperature of thermal annealing", "annealing time (min)",
+#         "HTL energy level (eV)", "ETL energy level (eV)", "HTL thickness (nm)", "ETL thickness (nm)"
+#     ]:
+#         return MinMaxScaler()
+#     else:
+#         raise ValueError(f"Feature {feature} not recognized.")
+
+
+quantile_features: list[str] = [
+    "Donor PDI", "Donor Mn (kDa)", "Donor Mw (kDa)",
+    "HOMO_D (eV)", "LUMO_D (eV)", "Eg_D (eV)", "Ehl_D (eV)",
+    "HOMO_A (eV)", "LUMO_A (eV)", "Eg_A (eV)", "Ehl_A (eV)",
+    "active layer thickness (nm)",
+    "log hole mobility blend (cm^2 V^-1 s^-1)", "log electron mobility blend (cm^2 V^-1 s^-1)",
+    "log hole:electron mobility ratio",
+]
+minmax_features: list[str] = [
+    "D:A ratio (m/m)", "total solids conc. (mg/mL)", "solvent additive conc. (% v/v)",
+    "temperature of thermal annealing", "annealing time (min)",
+    "HTL energy level (eV)", "ETL energy level (eV)", "HTL thickness (nm)", "ETL thickness (nm)",
+]

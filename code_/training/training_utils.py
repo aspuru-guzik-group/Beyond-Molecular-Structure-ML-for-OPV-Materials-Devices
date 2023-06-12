@@ -1,23 +1,22 @@
 import json
-import pickle
 import sys
-from pathlib import Path
 from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
-from scipy.stats import pearsonr
-from sklearn.compose import ColumnTransformer
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.metrics._scorer import make_scorer, r2_scorer
+from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
+from sklearn.metrics._scorer import r2_scorer
 from sklearn.model_selection import KFold, cross_val_predict, cross_validate
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MinMaxScaler, QuantileTransformer
 from skopt import BayesSearchCV
+
+from code_.pipeline.pipeline_utils import minmax_features, quantile_features
 
 sys.path.append("../pipeline/")
 from filter_data import filter_dataset, get_feature_ids
-from pipeline_utils import representation_scaling_factory, scaler_factory
-from models import regressor_factory, regressor_search_space
+from pipeline_utils import representation_scaling_factory
+from models import model_dropna, regressor_factory, regressor_search_space
 from scoring import mae_scorer, r_scorer, rmse_scorer
 
 # Seeds for generating random states
@@ -30,7 +29,7 @@ N_FOLDS: int = 5
 # N_FOLDS: int = 2  # ATTN: Testing only
 
 # Number of iterations for Bayesian optimization
-BO_ITER: int = 100
+BO_ITER: int = 50
 # BO_ITER: int = 1  # ATTN: Testing only
 
 
@@ -143,7 +142,9 @@ def run_structure_only(dataset: pd.DataFrame,
                           structure_feats=structural_features,
                           scalar_feats=[],
                           target_feats=target_features,
-                          unroll=unroll, )
+                          unroll=unroll,
+                          dropna=model_dropna(regressor_type)
+                          )
 
     # Establish preprocessing and training pipeline
     preprocessor: Pipeline = Pipeline(steps=[(representation_scaling_factory[representation]["type"],
@@ -160,6 +161,7 @@ def run_structure_and_scalar(dataset: pd.DataFrame,
                              representation: str,
                              structural_features: list[str],
                              scalar_filter: str,
+                             subspace_filter: Optional[str],
                              target_features: list[str],
                              scaler_type: str,
                              regressor_type: str,
@@ -189,19 +191,20 @@ def run_structure_and_scalar(dataset: pd.DataFrame,
                           structure_feats=structural_features,
                           scalar_feats=scalar_features,
                           target_feats=target_features,
-                          unroll=unroll, )
+                          unroll=unroll,
+                          dropna=model_dropna(regressor_type)
+                          )
 
     # Establish preprocessing and training pipeline
-    structura_transformer: Pipeline = Pipeline(steps=[(representation_scaling_factory[representation]["type"],
-                                                       representation_scaling_factory[representation]["callable"]()),
-                                                      ])  
-    numeric_transformer = Pipeline(steps=[(scaler_type, scaler_factory[scaler_type]()),
-                                          ])  
+    quantile_numeric_feats: list[str] = [feat for feat in scalar_features if feat in quantile_features]
+    minmax_numeric_feats: list[str] = [feat for feat in scalar_features if feat in minmax_features]
     preprocessor: ColumnTransformer = ColumnTransformer(
-        remainder="passthrough",
+        # remainder="passthrough",
         transformers=[
-            ("structural", structura_transformer, structural_features),
-            ("numeric", numeric_transformer, scalar_features),
+            (representation_scaling_factory[representation]["type"],
+             representation_scaling_factory[representation]["callable"](), structural_features),
+            ("gaussian quantile", QuantileTransformer(output_distribution="normal"), quantile_numeric_feats),
+            ("minmax", MinMaxScaler(), minmax_numeric_feats)
         ])
 
     return _run(X, y,
@@ -238,7 +241,7 @@ def run_hyperparam_opt(X, y,
                               return_train_score=True,
                               )
         # bayes.fit(X_train, y_train)
-        bayes.fit(X_train, y_train  )
+        bayes.fit(X_train, y_train)
         print(f"Best parameters: {bayes.best_params_}")
         estimators.append(bayes)
 
@@ -261,21 +264,41 @@ def _run(X, y,
         # Splitting for model cross-validation
         cv_outer = KFold(n_splits=N_FOLDS, shuffle=True, random_state=seed)
 
+        # MinMax scale everything if model is a neural network
+        if regressor_type == "NN":
+            y_transform = Pipeline(
+                steps=[("quantile", QuantileTransformer(output_distribution="normal", random_state=seed)),
+                       ("minmax", MinMaxScaler())])
+            preprocessor = Pipeline(
+                steps=[("preprocessor", preprocessor),
+                       ("minmax", MinMaxScaler())])
+        else:
+            y_transform = QuantileTransformer(output_distribution="normal", random_state=seed)
+
+        y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
+            regressor=regressor_factory[regressor_type](**kwargs),
+            transformer=y_transform
+        )
+
+        # Set random state for preprocessing
+        if isinstance(preprocessor, ColumnTransformer) and "gaussian quantile" in preprocessor.transformers:
+            preprocessor.set_params(**{"gaussian quantile": {"random_state": seed}})
+
         regressor = Pipeline(
             steps=[("preprocessor", preprocessor),
                    # ("regressor", regressor_factory[regressor_type](random_state=seed, **kwargs))]
-                   ("regressor", regressor_factory[regressor_type](**kwargs))]
-        )  
+                   ("regressor", y_transform_regressor)]
+        )
 
         if hyperparameter_optimization:
             # Hyperparameter optimization
             best_estimator = run_hyperparam_opt(X, y, cv_outer=cv_outer, n_folds=N_FOLDS, seed=seed,
                                                 regressor_type=regressor_type, regressor=regressor)
 
-            scores, predictions = cross_validate_regressor(best_estimator, X, y  , cv_outer)
+            scores, predictions = cross_validate_regressor(best_estimator, X, y, cv_outer)
 
         else:
-            scores, predictions = cross_validate_regressor(regressor, X, y  , cv_outer)
+            scores, predictions = cross_validate_regressor(regressor, X, y, cv_outer)
 
         seed_scores[seed] = scores
         seed_predictions[seed] = predictions.flatten()
