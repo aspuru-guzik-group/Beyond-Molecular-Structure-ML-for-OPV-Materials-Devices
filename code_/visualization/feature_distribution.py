@@ -1,13 +1,17 @@
 from pathlib import Path
 
+import sys
+import itertools
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pkg_resources
+
 from matplotlib.offsetbox import AnchoredText
 
 # from code_ import DATASETS, FIGURES
-from code_.training.filter_data import filter_dataset
+sys.path.append("../training")
+from filter_data import filter_dataset
 
 HERE: Path = Path(__file__).resolve().parent
 DATASETS: Path = HERE.parent.parent / "datasets"
@@ -78,8 +82,13 @@ def plot_feature_distributions(dataset: pd.DataFrame,
         y_ticks = list(np.arange(start, end, stepsize))
         y_ticks.append(end)
         axs[y_idx, x_idx].yaxis.set_ticks(y_ticks)
-        total = "Total: " + str(len(current_val_list))
-        anchored_text = AnchoredText(total, loc="lower right")
+        try:
+            mean = np.mean(current_val_list)
+            std = np.std(current_val_list)
+            total = "Total: " + str(len(current_val_list)) + "\n" + "Mean: " + str(mean) + "\n" + "Std: " + str(std)
+        except:
+            total = "Total: " + str(len(current_val_list))
+        anchored_text = AnchoredText(total, loc="upper right")
         axs[y_idx, x_idx].add_artist(anchored_text)
         if isinstance(current_val_list[0], str):
             axs[y_idx, x_idx].tick_params(axis="x", labelrotation=45)
@@ -208,19 +217,19 @@ if __name__ == "__main__":
     # for pair in pairs_combinations:
     #     plot_heatmap_of_pair_frequency(opv_dataset, pair[0], pair[1], figures)
 
-    # structs = [f"{p[0]} {p[1]}" for p in itertools.product(["Donor", "Acceptor"], ["SMILES", "SELFIES"])]
-    #
-    # plot_feature_distributions(opv_dataset.drop(columns=["ref", "DOI", "Donor", "Acceptor",
-    #                                                      *structs,
-    #                                                      # *[f"solvent {prop}" for prop in solvent_properties],
-    #                                                      # *[f"solvent additive {prop}" for prop in
-    #                                                      #   solvent_properties],
-    #                                                      ]),
-    #                            figures,
-    #                            )
+    structs = [f"{p[0]} {p[1]}" for p in itertools.product(["Donor", "Acceptor"], ["SMILES", "SELFIES"])]
+    
+    plot_feature_distributions(opv_dataset.drop(columns=["ref", "DOI", "Donor", "Acceptor",
+                                                         *structs,
+                                                         # *[f"solvent {prop}" for prop in solvent_properties],
+                                                         # *[f"solvent additive {prop}" for prop in
+                                                         #   solvent_properties],
+                                                         ]),
+                               figures,
+                               )
 
-    for solv_type in ["solvent descriptors", "solvent additive descriptors"]:
-        get_solvent_distributions(solv_type)
+    # for solv_type in ["solvent descriptors", "solvent additive descriptors"]:
+    #     get_solvent_distributions(solv_type)
 
     # saeki = pd.read_csv(DATASETS / "Saeki_2022_n1318" / "Saeki_corrected.csv")
     # figures: Path = FIGURES / "Saeki"
