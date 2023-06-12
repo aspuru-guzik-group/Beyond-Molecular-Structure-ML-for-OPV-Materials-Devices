@@ -1,10 +1,11 @@
 import json
 from pathlib import Path
+from typing import Dict
 
 import numpy as np
 import pandas as pd
 
-target_abbrev: dict[str, str] = {
+target_abbrev: Dict[str, str] = {
     "calculated PCE (%)": "PCE",
     "Voc (V)":           "Voc",
     "Jsc (mA cm^-2)":   "Jsc",
@@ -26,7 +27,7 @@ class NumpyArrayEncoder(json.JSONEncoder):
             return super(NumpyArrayEncoder, self).default(obj)
 
 
-def save_results(scores: dict[int, dict[str, float]],
+def save_results(scores: Dict[int, Dict[str, float]],
                  predictions: pd.DataFrame,
                  results_dir: Path,
                  regressor_type: str,

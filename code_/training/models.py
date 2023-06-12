@@ -9,6 +9,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.svm import SVR
 from skopt.space import Categorical, Integer, Real
 from xgboost import XGBRegressor
+from pytorch_models import GPRegressor, GNNPredictor
 
 
 def tanimoto_distance(fp1: np.array, fp2: np.array, **kwargs) -> float:
@@ -162,6 +163,8 @@ regressor_factory: dict[str, type] = {
     "XGB":   XGBRegressor,
     "HGB":   HistGradientBoostingRegressor,
     "NGB":   NGBRegressor,
+    "GP":    GPRegressor,
+    # "GNN":   GNNPredictor,
     # "GP":    GaussianProcessRegressor,  # ATTN: Don't use this one for multi-output?
     # "NN":    MLPRegressor,  # ATTN: Not actually this one?
     "NN":    NNRegressor,
@@ -227,10 +230,15 @@ regressor_search_space: dict[str, dict] = {
                "regressor__regressor__natural_gradient": [True, False],
                "regressor__regressor__verbose":          [False],
               },
-    # "GP":  { "regressor__regressor__kernel": Categorical([tanimoto_distance]),
-    #          "regressor__regressor__n_restarts_optimizer": Integer(0, 5),
-    #          "regressor__regressor__normalize_y":         [True],
-    #         },
+    "GP":   { "regressor__regressor__lr":             [5e-2], 
+            # "regressor__regressor__kernel": Categorical([tanimoto_distance]),
+            #  "regressor__regressor__n_restarts_optimizer": Integer(0, 5),
+            #  "regressor__regressor__normalize_y":         [True],
+            },
+    "GNN":   { "regressor__regressor__hidden_size":    Integer(50, 100),
+               "regressor__regressor__lr":             Real(1e-4, 1e-2),
+               "regressor__regressor__depth":          Integer(1,4)
+             },
     "NN":    { "regressor__regressor__n_layers":       Integer(1, 20),
                "regressor__regressor__n_neurons":      Integer(1, 100),
                "regressor__regressor__activation":     Categorical(["logistic", "tanh", "relu"]),

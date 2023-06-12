@@ -3,12 +3,91 @@ from pathlib import Path
 import pandas as pd
 
 from training_utils import train_regressor
+from data_handling import save_results, target_abbrev
+from models import regressor_factory
+from scoring import process_scores
+from training_utils import run_structure_and_scalar, run_structure_only, run_graphs_only
+from pytorch_models import GNNPredictor
+
+sys.path.append("../pipeline")
 from pipeline_utils import radius_to_bits
 
 HERE: Path = Path(__file__).resolve().parent
 DATASETS: Path = HERE.parent.parent / "datasets"
 
 
+def _structure_only(representation: str,
+                    structural_features: list[str],
+                    unroll: dict[str, str],
+                    regressor_type: str,
+                    target_features: list[str],
+                    hyperparameter_optimization: bool,
+                    # subdir_ids: list[Union[str, int]]
+                    ) -> None:
+    dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"  # TODO: Change to pass dataset?
+    opv_dataset: pd.DataFrame = pd.read_pickle(dataset)
+
+    if regressor_type == "GNN":
+        scores, predictions = run_graphs_only(opv_dataset,
+                                             structural_features=structural_features,
+                                             target_features=target_features,
+                                             regressor_type=regressor_type,
+                                             unroll=unroll,
+                                             hyperparameter_optimization=hyperparameter_optimization,
+                                             )
+    elif regressor_type == 'GP':
+        scores, predictions = run_structure_only(opv_dataset,
+                                                representation=representation,
+                                                structural_features=structural_features,
+                                                target_features=target_features,
+                                                regressor_type=regressor_type,
+                                                unroll=unroll,
+                                                hyperparameter_optimization=hyperparameter_optimization,
+                                                kernel='tanimoto' if 'ECFP' in representation else 'rbf'
+                                                )
+    else:
+        scores, predictions = run_structure_only(opv_dataset,
+                                                representation=representation,
+                                                structural_features=structural_features,
+                                                target_features=target_features,
+                                                regressor_type=regressor_type,
+                                                unroll=unroll,
+                                                hyperparameter_optimization=hyperparameter_optimization,
+                                                )
+        
+
+
+    scores = process_scores(scores)
+
+    targets_dir: str = "-".join([target_abbrev[target] for target in target_features])
+    features_dir: str = "-".join([representation])
+    results_dir: Path = HERE.parent.parent / "results" / f"target_{targets_dir}" / f"features_{features_dir}"
+    save_results(scores, predictions,
+                 results_dir=results_dir,
+                 regressor_type=regressor_type,
+                 hyperparameter_optimization=hyperparameter_optimization,
+                 )
+    
+
+def main_graphs_only(regressor_type: str,
+                    target_features: list[str],
+                    hyperparameter_optimization: bool) -> None:
+    '''Only acceptable for GNNPredictor
+    '''
+    representation: str = 'SMILES'
+    structural_features: list[str] = [f"Donor SMILES", "Acceptor SMILES"]
+    unroll = None 
+
+    _structure_only(representation=representation,
+                    structural_features=structural_features,
+                    unroll=unroll,
+                    regressor_type=regressor_type,
+                    target_features=target_features,
+                    hyperparameter_optimization=hyperparameter_optimization,
+                    # subdir_ids=[representation]
+                    )
+                   
+                   
 def main_ecfp_only(dataset: pd.DataFrame,
                    regressor_type: str,
                    target_features: list[str],
@@ -149,7 +228,14 @@ def main_grid(target_feats: list[str], hyperopt: bool = False) -> None:
     # for model in regressor_factory:
     for model in ["MLR"]:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
+                   
+        if model == 'GNN':
+            # import pdb; pdb.set_trace()
+            main_graphs_only(model,
+                            target_features=target_feats,
+                            hyperparameter_optimization=hyperopt)
 
+        else:
         # ECFP
         main_ecfp_only(dataset=opv_dataset,
                        regressor_type=model,
