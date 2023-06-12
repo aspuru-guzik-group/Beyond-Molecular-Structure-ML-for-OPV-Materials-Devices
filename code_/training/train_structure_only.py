@@ -7,7 +7,8 @@ import pandas as pd
 from data_handling import save_results, target_abbrev
 from models import regressor_factory
 from scoring import process_scores
-from training_utils import run_structure_and_scalar, run_structure_only
+from training_utils import run_structure_and_scalar, run_structure_only, run_graphs_only
+from pytorch_models import GNNPredictor
 
 sys.path.append("../pipeline")
 from pipeline_utils import radius_to_bits
@@ -27,14 +28,35 @@ def _structure_only(representation: str,
     dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"  # TODO: Change to pass dataset?
     opv_dataset: pd.DataFrame = pd.read_pickle(dataset)
 
-    scores, predictions = run_structure_only(opv_dataset,
-                                             representation=representation,
+    if regressor_type == "GNN":
+        scores, predictions = run_graphs_only(opv_dataset,
                                              structural_features=structural_features,
                                              target_features=target_features,
                                              regressor_type=regressor_type,
                                              unroll=unroll,
                                              hyperparameter_optimization=hyperparameter_optimization,
                                              )
+    elif regressor_type == 'GP':
+        scores, predictions = run_structure_only(opv_dataset,
+                                                representation=representation,
+                                                structural_features=structural_features,
+                                                target_features=target_features,
+                                                regressor_type=regressor_type,
+                                                unroll=unroll,
+                                                hyperparameter_optimization=hyperparameter_optimization,
+                                                kernel='tanimoto' if 'ECFP' in representation else 'rbf'
+                                                )
+    else:
+        scores, predictions = run_structure_only(opv_dataset,
+                                                representation=representation,
+                                                structural_features=structural_features,
+                                                target_features=target_features,
+                                                regressor_type=regressor_type,
+                                                unroll=unroll,
+                                                hyperparameter_optimization=hyperparameter_optimization,
+                                                )
+        
+
 
     scores = process_scores(scores)
 
@@ -46,7 +68,27 @@ def _structure_only(representation: str,
                  regressor_type=regressor_type,
                  hyperparameter_optimization=hyperparameter_optimization,
                  )
+    
 
+def main_graphs_only(regressor_type: str,
+                    target_features: list[str],
+                    hyperparameter_optimization: bool) -> None:
+    '''Only acceptable for GNNPredictor
+    '''
+    representation: str = 'SMILES'
+    structural_features: list[str] = [f"Donor SMILES", "Acceptor SMILES"]
+    unroll = None 
+
+    _structure_only(representation=representation,
+                    structural_features=structural_features,
+                    unroll=unroll,
+                    regressor_type=regressor_type,
+                    target_features=target_features,
+                    hyperparameter_optimization=hyperparameter_optimization,
+                    # subdir_ids=[representation]
+                    )
+    
+    
 
 def main_ecfp_only(regressor_type: str,
                    target_features: list[str],
@@ -174,38 +216,44 @@ def main_processing_only(regressor_type: str, target_features: list[str],
 
 def main_grid(target_feats: list[str], hyperopt: bool = False) -> None:
     for model in regressor_factory:
-        # target_feats: list[str] = ["calculated PCE (%)"]
+    # target_feats: list[str] = ["calculated PCE (%)"]
+        if model == 'GNN':
+            # import pdb; pdb.set_trace()
+            main_graphs_only(model,
+                            target_features=target_feats,
+                            hyperparameter_optimization=hyperopt)
 
-        # ECFP
-        main_ecfp_only(model,
-                       target_features=target_feats,
-                       hyperparameter_optimization=hyperopt)
-        # mordred
-        main_mordred_only(model,
-                          target_features=target_feats,
-                          hyperparameter_optimization=hyperopt)
+        else:
+            # ECFP
+            main_ecfp_only(model,
+                        target_features=target_feats,
+                        hyperparameter_optimization=hyperopt)
+            # mordred
+            main_mordred_only(model,
+                            target_features=target_feats,
+                            hyperparameter_optimization=hyperopt)
 
-        # OHE
-        main_ohe_only(model,
-                      target_features=target_feats,
-                      hyperparameter_optimization=hyperopt)
+            # OHE
+            main_ohe_only(model,
+                        target_features=target_feats,
+                        hyperparameter_optimization=hyperopt)
 
-        # tokenized
-        for struct_repr in ["BRICS", "SELFIES", "SMILES"]:
-            main_tokenized_only(struct_repr,
-                                model,
+            # tokenized
+            for struct_repr in ["BRICS", "SELFIES", "SMILES"]:
+                main_tokenized_only(struct_repr,
+                                    model,
+                                    target_features=target_feats,
+                                    hyperparameter_optimization=hyperopt)
+
+            # material properties
+            main_properties_only(model,
                                 target_features=target_feats,
                                 hyperparameter_optimization=hyperopt)
 
-        # material properties
-        main_properties_only(model,
-                             target_features=target_feats,
-                             hyperparameter_optimization=hyperopt)
-
-        # processing only
-        main_processing_only(model,
-                             target_features=target_feats,
-                             hyperparameter_optimization=hyperopt)
+            # processing only
+            main_processing_only(model,
+                                target_features=target_feats,
+                                hyperparameter_optimization=hyperopt)
 
 
 if __name__ == "__main__":
@@ -213,7 +261,8 @@ if __name__ == "__main__":
     #     main_grid(, hyperopt=h_opt)
 
     for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-        main_grid(target_feats=[target], hyperopt=True)
+        main_grid(target_feats=[target], hyperopt=False)
+
 
     # main_ecfp_only("KRR",
     #                target_features=["calculated PCE (%)"],

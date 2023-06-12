@@ -303,3 +303,82 @@ def _run(X, y,
 
     seed_predictions: pd.DataFrame = pd.DataFrame.from_dict(seed_predictions, orient="columns")
     return seed_scores, seed_predictions
+
+
+def run_graphs_only(dataset: pd.DataFrame,
+                    structural_features: list[str],
+                    target_features: list[str],
+                    regressor_type: str,
+                    hyperparameter_optimization: bool = False,
+                    unroll: Optional[dict] = None,
+                    **kwargs) -> tuple[dict[int, dict[str, float]], pd.DataFrame]:
+    """
+            Run the model.
+
+            Args:
+                dataset: Dataset to use.
+                structural_features: Structural features to use.
+                scaler: Scaler to use.
+                regressor: Regressor to use.
+                hyperparameter_optimization: Whether to optimize hyperparameters.
+                **kwargs: Keyword arguments.
+
+            Returns:
+                None.
+            """
+    # Filter dataset
+    X, y = filter_dataset(dataset,
+                          structure_feats=structural_features,
+                          scalar_feats=[],
+                          target_feats=target_features,
+                          unroll=unroll,
+                          dropna=model_dropna(regressor_type)
+                          )
+
+    return _run_graphs(X, y,
+                regressor_type=regressor_type,
+                hyperparameter_optimization=hyperparameter_optimization,
+                **kwargs)
+
+
+
+def _run_graphs(X, y,
+         regressor_type: str,
+         hyperparameter_optimization: bool = False,
+         **kwargs) -> tuple[dict[int, dict[str, float]], pd.DataFrame]:
+    # Get seeds for initializing random state of splitting and training
+    seed_scores: dict[int, dict[str, float]] = {}
+    seed_predictions: dict[int, np.ndarray] = {}
+    for seed in SEEDS:
+
+        # Splitting for model cross-validation
+        cv_outer = KFold(n_splits=N_FOLDS, shuffle=True, random_state=seed)
+
+        y_transform = QuantileTransformer(output_distribution="normal", random_state=seed)
+
+        y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
+            regressor=regressor_factory[regressor_type](**kwargs),
+            transformer=y_transform
+        )
+
+        regressor = Pipeline(
+            steps=[# ("preprocessor", preprocessor),
+                   # ("regressor", regressor_factory[regressor_type](random_state=seed, **kwargs))]
+                   ("regressor", y_transform_regressor)]
+        )
+
+        if hyperparameter_optimization:
+            # Hyperparameter optimization
+            best_estimator = run_hyperparam_opt(X, y, cv_outer=cv_outer, n_folds=N_FOLDS, seed=seed,
+                                                regressor_type=regressor_type, regressor=regressor)
+
+            scores, predictions = cross_validate_regressor(best_estimator, X, y, cv_outer)
+
+        else:
+            scores, predictions = cross_validate_regressor(regressor, X, y, cv_outer)
+
+        seed_scores[seed] = scores
+        seed_predictions[seed] = predictions.flatten()
+
+    seed_predictions: pd.DataFrame = pd.DataFrame.from_dict(seed_predictions, orient="columns")
+    return seed_scores, seed_predictions
