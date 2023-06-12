@@ -1,0 +1,58 @@
+{
+  "material labels": [
+    "Donor",
+    "Acceptor"
+  ],
+  "material properties": [
+    "HOMO_D (eV)",
+    "LUMO_D (eV)",
+    "Eg_D (eV)",
+    "Ehl_D (eV)",
+    "HOMO_A (eV)",
+    "LUMO_A (eV)",
+    "Eg_A (eV)",
+    "Ehl_A (eV)"
+  ],
+  "material properties missing": [
+    "Donor PDI",
+    "Donor Mn (kDa)",
+    "Donor Mw (kDa)"
+  ],
+  "fabrication labels": [
+    "solvent",
+    "solvent additive"
+  ],
+  "fabrication": [
+    "D:A ratio (m/m)",
+    "solvent additive conc. (% v/v)",
+    "temperature of thermal annealing"
+  ],
+  "fabrication missing": [
+    "Active layer spin coating speed (rpm)",
+    "total solids conc. (mg/mL)",
+    "annealing time (min)"
+  ],
+  "device architecture labels": [
+    "hole contact layer",
+    "electron contact layer"
+  ],
+  "device architecture": [
+    "HTL energy level (eV)",
+    "ETL energy level (eV)"
+  ],
+  "device architecture missing": [
+    "active layer thickness (nm)",
+    "HTL thickness (nm)",
+    "ETL thickness (nm)"
+  ],
+  "mobilities": [
+    "hole mobility blend (cm^2 V^-1 s^-1)",
+    "electron mobility blend (cm^2 V^-1 s^-1)",
+    "hole:electron mobility ratio"
+  ],
+  "log mobilities": [
+    "log hole mobility blend (cm^2 V^-1 s^-1)",
+    "log electron mobility blend (cm^2 V^-1 s^-1)",
+    "log hole:electron mobility ratio"
+  ]
+}

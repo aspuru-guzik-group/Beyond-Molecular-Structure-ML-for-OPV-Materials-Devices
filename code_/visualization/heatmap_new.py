@@ -1,5 +1,4 @@
 import json
-import pickle
 from itertools import product
 from pathlib import Path
 from typing import List
@@ -8,9 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-
 from matplotlib import rc
-rc("font",**{"family":"sans-serif","sans-serif":["Arial"], "size": 16})
+
+rc("font", **{"family": "sans-serif", "sans-serif": ["Arial"], "size": 16})
 
 score_bounds: dict[str, int] = {"r": 1, "r2": 1, "mae": 25, "rmse": 25}
 
@@ -117,7 +116,8 @@ def _create_heatmap(root_dir: Path,
 
     # Create heatmap
     fig, ax = plt.subplots(figsize=figsize)
-    custom_cmap = sns.color_palette("viridis", as_cmap=True)
+    palette: str = "viridis" if score in ["r", "r2"] else "viridis_r"
+    custom_cmap = sns.color_palette(palette, as_cmap=True)
     custom_cmap.set_bad(color="gray")
     hmap = sns.heatmap(avg_scores,
                        annot=annotations,
@@ -126,7 +126,7 @@ def _create_heatmap(root_dir: Path,
                        cbar=True,
                        ax=ax,
                        mask=avg_scores.isnull(),
-                       annot_kws={"fontsize":12})
+                       annot_kws={"fontsize": 12})
 
     # Set axis labels and tick labels
     ax.set_xticks(np.arange(len(avg_scores.columns)) + 0.5)
@@ -180,11 +180,12 @@ def create_grid_search_heatmap(root_dir: Path, score: str, var: str) -> None:
 
 if __name__ == "__main__":
     root = Path(__file__).resolve().parent.parent.parent
-    results = root / "results" / "target_Voc"
+    for target in ["PCE", "Voc", "Jsc", "FF"]:
+        results = root / "results" / f"target_{target}"
 
-    # Use pathlib glob to get all directories in results
-    directory_paths: List[Path] = [dir for dir in results.glob("*") if dir.is_dir()]
+        # Use pathlib glob to get all directories in results
+        directory_paths: List[Path] = [dir for dir in results.glob("*") if dir.is_dir()]
 
-    # Create heatmap
-    for score in ["r", "r2", "rmse", "mae"]:
-        create_grid_search_heatmap(results, score, var="stderr")
+        # Create heatmap
+        for score in ["r", "r2", "rmse", "mae"]:
+            create_grid_search_heatmap(results, score, var="stderr")
