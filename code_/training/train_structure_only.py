@@ -156,6 +156,7 @@ def main_processing_only(regressor_type: str, target_features: list[str],
                                                    regressor_type=regressor_type,
                                                    unroll=unroll,
                                                    hyperparameter_optimization=hyperparameter_optimization,
+                                                   subspace_filter=None,
                                                    )
 
     scores = process_scores(scores)
@@ -171,9 +172,9 @@ def main_processing_only(regressor_type: str, target_features: list[str],
                  )
 
 
-def main_grid(hyperopt: bool = False) -> None:
+def main_grid(target_feats: list[str], hyperopt: bool = False) -> None:
     for model in regressor_factory:
-        target_feats: list[str] = ["calculated PCE (%)"]
+        # target_feats: list[str] = ["calculated PCE (%)"]
 
         # ECFP
         main_ecfp_only(model,
@@ -208,10 +209,11 @@ def main_grid(hyperopt: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    for h_opt in [False, True]:
-        main_grid(hyperopt=h_opt)
+    # for h_opt in [False, True]:
+    #     main_grid(, hyperopt=h_opt)
 
-    # main_grid(hyperopt=False)
+    for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+        main_grid(target_feats=target, hyperopt=False)
 
     # main_ecfp_only("KRR",
     #                target_features=["calculated PCE (%)"],
