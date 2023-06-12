@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler, PowerTransformer
+from sklearn.preprocessing import MinMaxScaler, PowerTransformer, QuantileTransformer
 from skopt import BayesSearchCV
 
 from data_handling import save_results, target_abbrev
@@ -23,17 +23,15 @@ HERE: Path = Path(__file__).resolve().parent
 # Seeds for generating random states
 with open("seeds.json", "r") as f:
     SEEDS: list[int] = json.load(f)
-    # SEEDS: list[int] = SEEDS[:1]  # ATTN: Testing only
+    SEEDS: list[int] = SEEDS[:1]  # ATTN: Testing only
 
 # Number of folds for cross-validation
 N_FOLDS: int = 5
-# N_FOLDS: int = 2  # ATTN: Testing only
+N_FOLDS: int = 2  # ATTN: Testing only
 
 # Number of iterations for Bayesian optimization
-BO_ITER: int = 50
-
-
-# BO_ITER: int = 1  # ATTN: Testing only
+BO_ITER: int = 36
+BO_ITER: int = 1  # ATTN: Testing only
 
 
 # def preprocess_properties_and_processing(scalar_features: list[str],
@@ -200,8 +198,10 @@ def _prepare_data(dataset: pd.DataFrame,
     # Select features to use in the model
     if scalar_filter:
         scalar_features: list[str] = get_feature_ids(scalar_filter)
+        print("n scalar features:", len(scalar_features))
         if subspace_filter:
             scalar_features: list[str] = get_feature_ids(subspace_filter)
+            print("n scalar features:", len(scalar_features))
     else:
         scalar_features: list[str] = []
 
@@ -227,12 +227,20 @@ def _prepare_data(dataset: pd.DataFrame,
                       # ("power", PowerTransformer(), power_numeric_feats),
                       # ("minmax", MinMaxScaler(), minmax_numeric_feats)
                       ])
-
-    return _run(X, y,
-                preprocessor=preprocessor,
-                regressor_type=regressor_type,
-                hyperparameter_optimization=hyperparameter_optimization,
-                **kwargs)
+    if regressor_type == "GP":
+        kernel: str = "tanimoto" if "ECFP" in representation else "rbf"
+        return _run(X, y,
+                    preprocessor=preprocessor,
+                    regressor_type=regressor_type,
+                    hyperparameter_optimization=hyperparameter_optimization,
+                    kernel=kernel,
+                    **kwargs)
+    else:
+        return _run(X, y,
+                    preprocessor=preprocessor,
+                    regressor_type=regressor_type,
+                    hyperparameter_optimization=hyperparameter_optimization,
+                    **kwargs)
 
 
 def _run(X, y,
@@ -274,7 +282,7 @@ def _run(X, y,
                    ("regressor", y_transform_regressor)]
         )
 
-        if hyperparameter_optimization:
+        if hyperparameter_optimization and regressor_type not in ["MLR", "Lasso", "GP"]:
             # Hyperparameter optimization
             best_estimator = _optimize_hyperparams(X, y, cv_outer=cv_outer, seed=seed,
                                                    regressor_type=regressor_type, regressor=regressor)
@@ -319,6 +327,7 @@ def _optimize_hyperparams(X, y,
         # bayes.fit(X_train, y_train)
         bayes.fit(X_train, y_train)
         print(f"Best parameters: {bayes.best_params_}")
+        print(str(bayes.best_params_))
         estimators.append(bayes)
 
     # Extract the best estimator from hyperparameter optimization
@@ -349,25 +358,24 @@ def run_graphs_only(dataset: pd.DataFrame,
                 None.
             """
     # Filter dataset
-    X, y = filter_dataset(dataset,
-                          structure_feats=structural_features,
-                          scalar_feats=[],
-                          target_feats=target_features,
-                          unroll=unroll,
-                          dropna=model_dropna(regressor_type)
-                          )
+    X, y, new_struct_feats = filter_dataset(dataset,
+                                            structure_feats=structural_features,
+                                            scalar_feats=[],
+                                            target_feats=target_features,
+                                            unroll=unroll,
+                                            dropna=model_dropna(regressor_type)
+                                            )
 
     return _run_graphs(X, y,
-                regressor_type=regressor_type,
-                hyperparameter_optimization=hyperparameter_optimization,
-                **kwargs)
-
+                       regressor_type=regressor_type,
+                       hyperparameter_optimization=hyperparameter_optimization,
+                       **kwargs)
 
 
 def _run_graphs(X, y,
-         regressor_type: str,
-         hyperparameter_optimization: bool = False,
-         **kwargs) -> tuple[dict[int, dict[str, float]], pd.DataFrame]:
+                regressor_type: str,
+                hyperparameter_optimization: bool = False,
+                **kwargs) -> tuple[dict[int, dict[str, float]], pd.DataFrame]:
     # Get seeds for initializing random state of splitting and training
     seed_scores: dict[int, dict[str, float]] = {}
     seed_predictions: dict[int, np.ndarray] = {}
@@ -384,15 +392,15 @@ def _run_graphs(X, y,
         )
 
         regressor = Pipeline(
-            steps=[# ("preprocessor", preprocessor),
-                   # ("regressor", regressor_factory[regressor_type](random_state=seed, **kwargs))]
-                   ("regressor", y_transform_regressor)]
+            steps=[  # ("preprocessor", preprocessor),
+                # ("regressor", regressor_factory[regressor_type](random_state=seed, **kwargs))]
+                ("regressor", y_transform_regressor)]
         )
 
         if hyperparameter_optimization:
             # Hyperparameter optimization
-            best_estimator = run_hyperparam_opt(X, y, cv_outer=cv_outer, n_folds=N_FOLDS, seed=seed,
-                                                regressor_type=regressor_type, regressor=regressor)
+            best_estimator = _optimize_hyperparams(X, y, cv_outer=cv_outer, seed=seed,
+                                                   regressor_type=regressor_type, regressor=regressor)
 
             scores, predictions = cross_validate_regressor(best_estimator, X, y, cv_outer)
 
