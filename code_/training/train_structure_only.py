@@ -213,7 +213,7 @@ if __name__ == "__main__":
     #     main_grid(, hyperopt=h_opt)
 
     for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-        main_grid(target_feats=target, hyperopt=False)
+        main_grid(target_feats=[target], hyperopt=True)
 
     # main_ecfp_only("KRR",
     #                target_features=["calculated PCE (%)"],
