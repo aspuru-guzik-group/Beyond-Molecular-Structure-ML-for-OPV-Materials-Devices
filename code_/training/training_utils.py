@@ -11,11 +11,9 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, QuantileTransformer
 from skopt import BayesSearchCV
 
-from code_.pipeline.pipeline_utils import minmax_features, quantile_features
-
 sys.path.append("../pipeline/")
 from filter_data import filter_dataset, get_feature_ids
-from pipeline_utils import representation_scaling_factory
+from pipeline_utils import representation_scaling_factory, minmax_features, quantile_features
 from models import model_dropna, regressor_factory, regressor_search_space
 from scoring import mae_scorer, r_scorer, rmse_scorer
 
