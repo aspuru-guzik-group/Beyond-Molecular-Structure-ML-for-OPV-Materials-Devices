@@ -10,7 +10,7 @@ from sklearn.svm import SVR
 from skopt.space import Categorical, Integer, Real
 from xgboost import XGBRegressor
 
-from pytorch_models import GPRegressor
+from pytorch_models import GNNPredictor, GPRegressor
 
 
 def tanimoto_distance(fp1: np.array, fp2: np.array, **kwargs) -> float:
@@ -165,10 +165,10 @@ regressor_factory: dict[str, type] = {
     "HGB": HistGradientBoostingRegressor,
     "NGB": NGBRegressor,
     "GP":  GPRegressor,
-    # "GNN":   GNNPredictor,
-    # "GP":    GaussianProcessRegressor,  # ATTN: Don't use this one for multi-output?
+    # "GP":    GaussianProcessRegressor,  # ATTN: Don"t use this one for multi-output?
     # "NN":    MLPRegressor,  # ATTN: Not actually this one?
     "NN":  NNRegressor,
+    "GNN": GNNPredictor,
 }
 
 
@@ -186,19 +186,19 @@ regressor_search_space: dict[str, dict] = {
     #           "regressor__regressor__fit_intercept": [True, False],
     #           "regressor__regressor__selection":     Categorical(["cyclic", "random"]),
     #           },
-    "KRR": {"regressor__regressor__alpha":  Real(1e-1, 10, prior="log-uniform"),
+    # "KRR": {"regressor__regressor__alpha":  Real(1e-5, 1, prior="log-uniform"),
             # "regressor__regressor__alpha":  Real(1e-3, 1e3, prior="log-uniform"),
-            "regressor__regressor__kernel": Categorical(["rbf", tanimoto_distance]),
+            # "regressor__regressor__kernel": Categorical([tanimoto_distance]),
             # "regressor__regressor__gamma":  Real(1e-3, 1e3, prior="log-uniform"),
-            },
+            # },
     "KNN": {"regressor__regressor__n_neighbors": Integer(1, 100),
             "regressor__regressor__weights":     Categorical(["uniform", "distance"]),
             "regressor__regressor__algorithm":   Categorical(["ball_tree", "kd_tree", "brute"]),
             "regressor__regressor__leaf_size":   Integer(1, 100),
             # "regressor__regressor__p":           Integer(1, 5),
             },
-    "SVR": {"regressor__regressor__kernel": Categorical(["linear", "rbf", "poly", "sigmoid"]),
-            "regressor__regressor__gamma":  Categorical(["scale", "auto"]),
+    "SVR": {"regressor__regressor__kernel": Categorical(["linear", "rbf"]),
+            # "regressor__regressor__gamma":  Categorical(["scale", "auto"]),
             },
     "RF":  {"regressor__regressor__n_estimators":      Integer(50, 2000, prior="log-uniform"),
             "regressor__regressor__max_depth":         [None],
@@ -208,7 +208,7 @@ regressor_search_space: dict[str, dict] = {
             },
     "XGB": {"regressor__regressor__n_estimators":  Integer(50, 2000, prior="log-uniform"),
             "regressor__regressor__max_depth":     Integer(10, 10000, prior="log-uniform"),
-            "regressor__regressor__grow_policy":   Categorical([0, 1]),
+            "regressor__regressor__grow_policy":   Categorical(["depthwise", "lossguide"]),
             "regressor__regressor__n_jobs":        [-2],
             "regressor__regressor__learning_rate": Real(1e-3, 1e-1, prior="log-uniform"),
             # "regressor__regressor__subsample":         Real(0.5, 1.0),
@@ -217,7 +217,7 @@ regressor_search_space: dict[str, dict] = {
             },
     "HGB": {"regressor__regressor__learning_rate":     Real(1e-3, 1e-1, prior="log-uniform"),
             # "regressor__regressor__max_iter":         Integer(50, 2000),
-            "regressor__regressor_max_leaf_nodes":     [None],
+            "regressor__regressor__max_leaf_nodes":    [None],
             "regressor__regressor__max_depth":         [None],
             "regressor__regressor__min_samples_leaf":  Integer(1, 50),
             "regressor__regressor__l2_regularization": Real(1e-5, 1e-1, prior="log-uniform"),
@@ -244,15 +244,15 @@ regressor_search_space: dict[str, dict] = {
             "regressor__regressor__lr":          Real(1e-4, 1e-2, prior="log-uniform"),
             "regressor__regressor__depth":       Integer(1, 4)
             },
-    "NN":  {"regressor__regressor__n_layers":       Integer(1, 6),
-            "regressor__regressor__n_neurons":      Integer(1, 100),
-            "regressor__regressor__activation":     Categorical(["logistic", "tanh", "relu"]),
+    "NN":  {"regressor__regressor__n_layers":           Integer(1, 6),
+            "regressor__regressor__n_neurons":          Integer(1, 100),
+            "regressor__regressor__activation":         Categorical(["logistic", "tanh", "relu"]),
             #  "regressor__regressor__solver":             Categorical("lbfgs", "sgd", "adam"),
-            "regressor__regressor__alpha":          Real(1e-5, 1e-3, prior="log-uniform"),
-            "regressor__regressor__learning_rate":  Categorical(["constant", "invscaling", "adaptive"]),
-             "regressor__regressor__learning_rate_init": Real(1e-4, 1e-2, prior="log-uniform"),
+            "regressor__regressor__alpha":              Real(1e-5, 1e-3, prior="log-uniform"),
+            "regressor__regressor__learning_rate":      Categorical(["constant", "invscaling", "adaptive"]),
+            "regressor__regressor__learning_rate_init": Real(1e-4, 1e-2, prior="log-uniform"),
             #  "regressor__regressor__max_iter":           Integer(50, 500),
-            "regressor__regressor__early_stopping": [True],
+            "regressor__regressor__early_stopping":     [True],
             #  "regressor__regressor__validation_fraction":Real(0.005, 0.5),
             #  "regressor__regressor__beta_1":             Real(0.005, 0.5),
             #  "regressor__regressor__beta_2":             Real(0.005, 0.5),

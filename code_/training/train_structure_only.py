@@ -211,8 +211,7 @@ def main_processing_only(dataset: pd.DataFrame,
 
 
 def main_representation_model_grid(target_feats: list[str], hyperopt: bool = False) -> None:
-    # for model in regressor_factory:
-    for model in ["KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GNN", "NN"]:
+    for model in regressor_factory:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
         if model == "GNN":

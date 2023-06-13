@@ -20,18 +20,18 @@ from scoring import cross_validate_regressor, process_scores
 
 HERE: Path = Path(__file__).resolve().parent
 
+TEST: bool = True  # ATTN: Testing only
+
 # Seeds for generating random states
 with open("seeds.json", "r") as f:
     SEEDS: list[int] = json.load(f)
-    SEEDS: list[int] = SEEDS[:1]  # ATTN: Testing only
+    SEEDS: list[int] = SEEDS if not TEST else SEEDS[:1]
 
 # Number of folds for cross-validation
-N_FOLDS: int = 5
-N_FOLDS: int = 2  # ATTN: Testing only
+N_FOLDS: int = 5 if not TEST else 2
 
 # Number of iterations for Bayesian optimization
-BO_ITER: int = 36
-BO_ITER: int = 1  # ATTN: Testing only
+BO_ITER: int = 36 if not TEST else 1
 
 
 # def run_structure_only(dataset: pd.DataFrame,
@@ -244,7 +244,7 @@ def _run(X, y,
                    ("regressor", y_transform_regressor)]
         )
 
-        if hyperparameter_optimization and (regressor_type not in ["MLR", "GP"]):
+        if hyperparameter_optimization and (regressor_type not in ["MLR", "KRR", "SVR", "GP"]):
             # Hyperparameter optimization
             best_estimator, regressor_params = _optimize_hyperparams(X, y, cv_outer=cv_outer, seed=seed,
                                                                      regressor_type=regressor_type, regressor=regressor)
@@ -275,8 +275,8 @@ def _optimize_hyperparams(X, y,
 
         # Splitting for inner hyperparameter optimization loop
         cv_inner = KFold(n_splits=N_FOLDS, shuffle=True, random_state=seed)
-
-        print("\n\nOPTIMIZING HYPERPARAMETERS FOR REGRESSOR", regressor_type, "\n\n")
+        print("\n\n")
+        print("OPTIMIZING HYPERPARAMETERS FOR REGRESSOR", regressor_type, "\tSEED:", seed)
         # Bayesian hyperparameter optimization
         bayes = BayesSearchCV(regressor,
                               regressor_search_space[regressor_type],
@@ -290,7 +290,7 @@ def _optimize_hyperparams(X, y,
                               )
         # bayes.fit(X_train, y_train)
         bayes.fit(X_train, y_train)
-        print(f"Best parameters: {bayes.best_params_}")
+        print(f"\n\nBest parameters: {bayes.best_params_}\n\n")
         estimators.append(bayes)
 
     # Extract the best estimator from hyperparameter optimization

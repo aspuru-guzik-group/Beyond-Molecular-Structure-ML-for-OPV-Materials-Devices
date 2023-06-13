@@ -1,0 +1,65 @@
+{
+  "6": {
+    "fit_time": [
+      0.8537583351135254,
+      0.8647470474243164
+    ],
+    "score_time": [
+      0.05976986885070801,
+      0.0589907169342041
+    ],
+    "test_r": [
+      NaN,
+      NaN
+    ],
+    "test_r2": [
+      -0.00027112917555949245,
+      -0.02281169507263625
+    ],
+    "test_rmse": [
+      -3.0905260080677994,
+      -3.132179653539642
+    ],
+    "test_mae": [
+      -2.461340033915026,
+      -2.4825426578314302
+    ],
+    "best_params": {
+      "check_inverse": true,
+      "func": null,
+      "inverse_func": null,
+      "regressor__bootstrap": true,
+      "regressor__ccp_alpha": 0.0,
+      "regressor__criterion": "squared_error",
+      "regressor__max_depth": null,
+      "regressor__max_features": "sqrt",
+      "regressor__max_leaf_nodes": null,
+      "regressor__max_samples": null,
+      "regressor__min_impurity_decrease": 0.0,
+      "regressor__min_samples_leaf": 0.33396315936390586,
+      "regressor__min_samples_split": 0.8436024727918517,
+      "regressor__min_weight_fraction_leaf": 0.0,
+      "regressor__n_estimators": 895,
+      "regressor__n_jobs": null,
+      "regressor__oob_score": false,
+      "regressor__random_state": null,
+      "regressor__verbose": 0,
+      "regressor__warm_start": false,
+      "transformer__copy": true,
+      "transformer__method": "yeo-johnson",
+      "transformer__standardize": true
+    }
+  },
+  "r_avg": NaN,
+  "r_stdev": NaN,
+  "r_stderr": NaN,
+  "r2_avg": -0.011541412124097872,
+  "r2_stdev": 0.01127028294853838,
+  "r2_stderr": 0.004259766555309188,
+  "rmse_avg": 3.1113528308037206,
+  "rmse_stdev": 0.02082682273592118,
+  "rmse_stderr": 0.00787179907983904,
+  "mae_avg": 2.471941345873228,
+  "mae_stdev": 0.01060131195820202,
+  "mae_stderr": 0.004006919287488245
+}
