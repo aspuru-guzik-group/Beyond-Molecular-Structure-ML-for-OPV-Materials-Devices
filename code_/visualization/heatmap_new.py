@@ -72,6 +72,21 @@ def generate_annotations(num: float) -> str:
     return num_txt
 
 
+model_abbrev_to_full: dict[str, str] = {
+    "MLR": "Linear Regression",
+    "KRR": "Kernel Ridge",
+    "KNN": "K-Nearest Neighbors",
+    "SVR": "Support Vector Machine",
+    "RF":  "Random Forest",
+    "XGB": "Gradient Boosted Trees",
+    "HGB": "Histogram Gradient Boosting",
+    "NGB": "Natural Gradient Boosting",
+    "GP":  "Gaussian Process",
+    "NN":  "Neural Network",
+    "GNN": "Graph Neural Network",
+}
+
+
 def _create_heatmap(root_dir: Path,
                     score: str, var: str,
                     x_labels: list[str], y_labels: list[str],
@@ -98,11 +113,11 @@ def _create_heatmap(root_dir: Path,
     std_scores: pd.DataFrame = pd.DataFrame(columns=x_labels, index=y_labels)
     annotations: pd.DataFrame = pd.DataFrame(columns=x_labels, index=y_labels)
 
-    for rep, model in product(y_labels, x_labels):
+    for rep, model in product(x_labels, y_labels):
         p = root_dir / f"features_{rep}"
         avg, std = get_results_from_file(p, model, score, var)
-        avg_scores.at[rep, model] = avg
-        std_scores.at[rep, model] = std
+        avg_scores.at[model, rep] = avg
+        std_scores.at[model, rep] = std
 
     for x, y in product(x_labels, y_labels):
         avg: float = avg_scores.loc[y, x]
@@ -131,8 +146,10 @@ def _create_heatmap(root_dir: Path,
     # Set axis labels and tick labels
     ax.set_xticks(np.arange(len(avg_scores.columns)) + 0.5)
     ax.set_yticks(np.arange(len(avg_scores.index)) + 0.5)
-    ax.set_xticklabels(avg_scores.columns, rotation=45, ha="right")
-    ax.set_yticklabels(avg_scores.index, rotation=0, ha="right")
+    x_tick_labels: list[str] = [col.title() for col in avg_scores.columns]
+    y_tick_labels: list[str] = [model_abbrev_to_full[x] for x in avg_scores.index]
+    ax.set_xticklabels(x_tick_labels, rotation=45, ha="right")
+    ax.set_yticklabels(y_tick_labels, rotation=0, ha="right")
 
     # Set plot and axis titles
     plt.title(fig_title)
@@ -159,20 +176,23 @@ def create_grid_search_heatmap(root_dir: Path, score: str, var: str) -> None:
         var: Variance to plot
     """
     # Collect x-axis labels from directory names
-    y_labels: List[str] = ["fabrication only", "OHE", "material properties", "SMILES", "SELFIES", "ECFP",
-                           "mordred", "GNN"][::-1]
-    x_labels: List[str] = ["MLR", "KRR", "KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GP", "NN", "GNN"]
+    # y_labels: List[str] = ["fabrication only", "OHE", "material properties", "SMILES", "SELFIES", "ECFP",
+    #                        "mordred", "GNN"][::-1]
+    # x_labels: List[str] = ["MLR", "KRR", "KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GP", "NN", "GNN"]
+    x_labels: List[str] = ["fabrication only", "OHE", "material properties", "SMILES", "SELFIES", "ECFP",
+                           "mordred", "GNN"]
+    y_labels: List[str] = ["MLR", "KRR", "KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GP", "NN", "GNN"][::-1]
 
     target: str = ", ".join(root_dir.name.split("_")[1:])
     score_txt: str = "$R^2$" if score == "r2" else score.upper()
 
     _create_heatmap(root_dir,
                     score, var,
-                    x_labels, y_labels,
+                    x_labels=x_labels, y_labels=y_labels,
                     figsize=(12, 8),
                     fig_title=f"Average {score_txt} Scores for Models Predicting {target}",
-                    x_title="Machine Learning Models",
-                    y_title="Structural Representations",
+                    x_title="Structural Representations",
+                    y_title="Machine Learning Regression Models",
                     fname=f"model-representation search heatmap_{score}"
                     )
 

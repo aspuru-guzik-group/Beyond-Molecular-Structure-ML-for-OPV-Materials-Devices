@@ -23,15 +23,15 @@ HERE: Path = Path(__file__).resolve().parent
 # Seeds for generating random states
 with open("seeds.json", "r") as f:
     SEEDS: list[int] = json.load(f)
-    # SEEDS: list[int] = SEEDS[:1]  # ATTN: Testing only
+    SEEDS: list[int] = SEEDS[:1]  # ATTN: Testing only
 
 # Number of folds for cross-validation
 N_FOLDS: int = 5
-# N_FOLDS: int = 2  # ATTN: Testing only
+N_FOLDS: int = 2  # ATTN: Testing only
 
 # Number of iterations for Bayesian optimization
 BO_ITER: int = 36
-# BO_ITER: int = 1  # ATTN: Testing only
+BO_ITER: int = 1  # ATTN: Testing only
 
 
 # def run_structure_only(dataset: pd.DataFrame,
@@ -123,7 +123,7 @@ def train_regressor(dataset: pd.DataFrame,
 
 def get_hgb_features(filter: str, regressor_type: str) -> str:
     # TODO: Test these modifications
-    if regressor_type == "HGB" and filter != "material propertries":
+    if regressor_type == "HGB" and filter != "material properties":
         return filter + " all"
     else:
         return filter
@@ -159,11 +159,11 @@ def _prepare_data(dataset: pd.DataFrame,
     if scalar_filter:
         scalar_filter = get_hgb_features(scalar_filter, regressor_type)
         scalar_features: list[str] = get_feature_ids(scalar_filter)
-        print("n scalar features:", len(scalar_features))
+        print("n numeric features:", len(scalar_features))
         if subspace_filter:
             subspace_filter = get_hgb_features(subspace_filter, regressor_type)
             scalar_features: list[str] = get_feature_ids(subspace_filter)
-            print("n scalar features:", len(scalar_features))
+            print("n numeric features in subspace:", len(scalar_features))
     else:
         scalar_features: list[str] = []
 
@@ -244,7 +244,7 @@ def _run(X, y,
                    ("regressor", y_transform_regressor)]
         )
 
-        if hyperparameter_optimization and regressor_type not in ["MLR", "Lasso", "GP"]:
+        if hyperparameter_optimization and (regressor_type not in ["MLR", "GP"]):
             # Hyperparameter optimization
             best_estimator, regressor_params = _optimize_hyperparams(X, y, cv_outer=cv_outer, seed=seed,
                                                                      regressor_type=regressor_type, regressor=regressor)
@@ -276,6 +276,7 @@ def _optimize_hyperparams(X, y,
         # Splitting for inner hyperparameter optimization loop
         cv_inner = KFold(n_splits=N_FOLDS, shuffle=True, random_state=seed)
 
+        print("\n\nOPTIMIZING HYPERPARAMETERS FOR REGRESSOR", regressor_type, "\n\n")
         # Bayesian hyperparameter optimization
         bayes = BayesSearchCV(regressor,
                               regressor_search_space[regressor_type],

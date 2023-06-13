@@ -120,7 +120,11 @@ def filter_dataset(raw_dataset: pd.DataFrame,
     Returns:
         Input features and targets.
     """
-    dataset: pd.DataFrame = raw_dataset[structure_feats + scalar_feats + target_feats]
+    # Add multiple lists together as long as they are not NoneType
+    all_feats: list[str] = [feat for feat_list in [structure_feats, scalar_feats, target_feats] if feat_list
+                            for feat in feat_list]
+    dataset: pd.DataFrame = raw_dataset[all_feats]
+
     if dropna:
         dataset: pd.DataFrame = dataset.dropna()
 
@@ -141,8 +145,10 @@ def filter_dataset(raw_dataset: pd.DataFrame,
             structure_features: pd.DataFrame = pd.concat(multiple_unrolled_structure_feats, axis=1)
         else:
             raise ValueError(f"Unroll must be a dict or list, not {type(unroll)}")
-    else:
+    elif structure_feats:
         structure_features: pd.DataFrame = dataset[structure_feats]
+    else:
+        structure_features: pd.DataFrame = dataset[[]]
 
     scalar_features: pd.DataFrame = dataset[scalar_feats]
 

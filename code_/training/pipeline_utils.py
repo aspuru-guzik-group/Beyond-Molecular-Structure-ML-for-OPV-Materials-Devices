@@ -5,12 +5,12 @@ from typing import Callable, Union
 import pandas as pd
 from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, PowerTransformer, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, PowerTransformer
 
 HERE: Path = Path(__file__).resolve().parent
 DATASETS: Path = HERE.parent.parent / "datasets"
 
-scaler_factory: dict[str, type] = {"MinMax": MinMaxScaler, "Standard": StandardScaler}
+scaler_factory: dict[str, type] = {"MinMax": MinMaxScaler, "Standard": PowerTransformer}
 
 
 def unroll_lists_to_columns(df: pd.DataFrame, unroll_cols: list[str], new_col_names: list[str]) -> pd.DataFrame:
@@ -126,17 +126,17 @@ unrolling_factory: dict[str, Callable] = {"solvent":             unroll_solvent_
 
 representation_scaling_factory: dict[str, dict[str, Union[Callable, str]]] = {
     "solvent":             {"callable": PowerTransformer,
-                            "type":     "Power"},
+                            "type":     "Standard"},
     "ECFP":                {"callable": MinMaxScaler, "type": "MinMax"},
     "mordred":             {"callable": PowerTransformer,
-                            "type":     "Power"},
+                            "type":     "Standard"},
     "BRICS":               {"callable": MinMaxScaler, "type": "MinMax"},
     "SELFIES":             {"callable": MinMaxScaler, "type": "MinMax"},
     "SMILES":              {"callable": MinMaxScaler, "type": "MinMax"},
     "OHE":                 {"callable": MinMaxScaler, "type": "MinMax"},
-    "material properties": {"callable": PowerTransformer, "type":     "Power"},
+    "material properties": {"callable": PowerTransformer, "type":     "Standard"},
     # "fabrication only":    {"callable": PowerTransformer,
-    #                         "type":     "Power"},
+    #                         "type":     "Standard"},
     # "GNN":     {"callable": MinMaxScaler, "type": "MinMax"},
 }
 
@@ -202,10 +202,10 @@ def get_feature_pipelines(unrolled_features: list[str],
         )
     if solvent_feats:
         transformers.append(
-            ("solvent power transform", generate_feature_pipeline("power", PowerTransformer()), solvent_feats))
+            ("solvent standard scale", generate_feature_pipeline("power", PowerTransformer()), solvent_feats))
     if numeric_features:
         transformers.append(
-            ("processing power transform", PowerTransformer(), numeric_features))
+            ("processing standard scale", PowerTransformer(), numeric_features))
     # if minmax_numeric_feats:
     #     transformers.append(("minmax", MinMaxScaler(), minmax_numeric_feats))
     return transformers

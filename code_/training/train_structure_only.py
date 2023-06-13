@@ -211,7 +211,8 @@ def main_processing_only(dataset: pd.DataFrame,
 
 
 def main_representation_model_grid(target_feats: list[str], hyperopt: bool = False) -> None:
-    for model in regressor_factory:
+    # for model in regressor_factory:
+    for model in ["KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GNN", "NN"]:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
         if model == "GNN":
@@ -261,13 +262,17 @@ def main_representation_model_grid(target_feats: list[str], hyperopt: bool = Fal
 
 
 if __name__ == "__main__":
-    for h_opt in [False, True]:
-        for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-            try:
-                main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
-            except Exception as e:
-                print(e)
-                continue
+    # for h_opt in [False, True]:
+    #     for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+    #         try:
+    #             main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
+    #         except Exception as e:
+    #             print(e)
+    #             continue
+
+    for h_opt in [True]:
+        for target in ["calculated PCE (%)"]:
+            main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
 
     # model = "HGB"
     # main_processing_only(get_appropriate_dataset(model), model,
