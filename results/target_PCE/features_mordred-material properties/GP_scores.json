@@ -1,0 +1,40 @@
+{
+  "6": {
+    "fit_time": [
+      8.53444504737854,
+      8.982862710952759
+    ],
+    "score_time": [
+      0.23311471939086914,
+      0.22228312492370605
+    ],
+    "test_r": [
+      -0.07037481481522785,
+      NaN
+    ],
+    "test_r2": [
+      -1822.0602080549754,
+      NaN
+    ],
+    "test_rmse": [
+      -131.93925930193754,
+      NaN
+    ],
+    "test_mae": [
+      -131.03719959676195,
+      NaN
+    ]
+  },
+  "r_avg": NaN,
+  "r_stdev": NaN,
+  "r_stderr": NaN,
+  "r2_avg": NaN,
+  "r2_stdev": NaN,
+  "r2_stderr": NaN,
+  "rmse_avg": NaN,
+  "rmse_stdev": NaN,
+  "rmse_stderr": NaN,
+  "mae_avg": NaN,
+  "mae_stdev": NaN,
+  "mae_stderr": NaN
+}

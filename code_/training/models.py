@@ -197,9 +197,9 @@ regressor_search_space: dict[str, dict] = {
             "regressor__regressor__leaf_size":   Integer(1, 100),
             # "regressor__regressor__p":           Integer(1, 5),
             },
-    "SVR": {"regressor__regressor__kernel": Categorical(["linear", "rbf"]),
-            # "regressor__regressor__gamma":  Categorical(["scale", "auto"]),
-            },
+    # "SVR": {"regressor__regressor__kernel": Categorical(["linear", "rbf"]),
+    #         # "regressor__regressor__gamma":  Categorical(["scale", "auto"]),
+    #         },
     "RF":  {"regressor__regressor__n_estimators":      Integer(50, 2000, prior="log-uniform"),
             "regressor__regressor__max_depth":         [None],
             "regressor__regressor__min_samples_split": Real(0.05, 1),
@@ -240,10 +240,6 @@ regressor_search_space: dict[str, dict] = {
             #  "regressor__regressor__n_restarts_optimizer": Integer(0, 5),
             #  "regressor__regressor__normalize_y":         [True],
             },
-    "GNN": {"regressor__regressor__hidden_size": Integer(50, 100),
-            "regressor__regressor__lr":          Real(1e-4, 1e-2, prior="log-uniform"),
-            "regressor__regressor__depth":       Integer(1, 4)
-            },
     "NN":  {"regressor__regressor__n_layers":           Integer(1, 6),
             "regressor__regressor__n_neurons":          Integer(1, 100),
             "regressor__regressor__activation":         Categorical(["logistic", "tanh", "relu"]),
@@ -258,4 +254,8 @@ regressor_search_space: dict[str, dict] = {
             #  "regressor__regressor__beta_2":             Real(0.005, 0.5),
             #  "regressor__regressor__epsilon":            Real(1e-9, 1e-7),
             },
+    # "GNN": {"regressor__regressor__hidden_size": Integer(50, 100),
+    #         "regressor__regressor__lr":          Real(1e-4, 1e-2, prior="log-uniform"),
+    #         "regressor__regressor__depth":       Integer(1, 4)
+    #         },
 }
