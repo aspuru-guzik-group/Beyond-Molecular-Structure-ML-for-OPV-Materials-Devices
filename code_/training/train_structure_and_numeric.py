@@ -1,8 +1,10 @@
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 
-from data_handling import save_results, target_abbrev
+from data_handling import save_results
+from filter_data import get_appropriate_dataset
 from models import regressor_factory
 from pipeline_utils import radius_to_bits
 from scoring import process_scores
@@ -13,6 +15,8 @@ DATASETS: Path = HERE.parent.parent / "datasets"
 
 
 def main_graphs_and_numeric(dataset: pd.DataFrame,
+                            scalar_filter: str,
+                            subspace_filter: Optional[str],
                             regressor_type: str,
                             target_features: list[str],
                             hyperparameter_optimization: bool) -> None:
@@ -20,7 +24,7 @@ def main_graphs_and_numeric(dataset: pd.DataFrame,
     Only acceptable for GNNPredictor
     """
     representation: str = "SMILES"
-    structural_features: list[str] = [f"Donor SMILES", "Acceptor SMILES"]
+    structural_features: list[str] = ["Donor SMILES", "Acceptor SMILES"]
     unroll = None
 
     scores, predictions = run_graphs_only(dataset=dataset,
@@ -33,20 +37,19 @@ def main_graphs_and_numeric(dataset: pd.DataFrame,
 
     scores = process_scores(scores)
 
-    targets_dir: str = "-".join([target_abbrev[target] for target in target_features])
-    features_dir: str = "-".join([representation])
-    results_dir: Path = HERE.parent.parent / "results" / f"target_{targets_dir}" / f"features_{features_dir}"
     save_results(scores, predictions,
-                 results_dir=results_dir,
+                 representation=representation,
+                 scalar_filter=scalar_filter,
+                 subspace_filter=subspace_filter,
+                 target_features=target_features,
                  regressor_type=regressor_type,
-                 hyperparameter_optimization=hyperparameter_optimization,
-                 )
+                 hyperparameter_optimization=hyperparameter_optimization)
 
 
 def main_ecfp_and_numeric(dataset: pd.DataFrame,
                           regressor_type: str,
                           scalar_filter: str,
-                          subspace_filter: str,
+                          subspace_filter: Optional[str],
                           target_features: list[str],
                           hyperparameter_optimization: bool,
                           radius: int = 5) -> None:
@@ -67,12 +70,14 @@ def main_ecfp_and_numeric(dataset: pd.DataFrame,
                     subspace_filter=subspace_filter,
                     target_features=target_features,
                     regressor_type=regressor_type,
-                    hyperparameter_optimization=hyperparameter_optimization,
-                    )
+                    hyperparameter_optimization=hyperparameter_optimization)
 
 
 def main_mordred_and_numeric(dataset: pd.DataFrame,
-                             regressor_type: str, target_features: list[str],
+                             regressor_type: str,
+                             scalar_filter: str,
+                             subspace_filter: str,
+                             target_features: list[str],
                              hyperparameter_optimization: bool) -> None:
     representation: str = "mordred"
     structural_features: list[str] = ["Donor", "Acceptor"]
@@ -82,65 +87,64 @@ def main_mordred_and_numeric(dataset: pd.DataFrame,
                     representation=representation,
                     structural_features=structural_features,
                     unroll=unroll_single_feat,
-                    scalar_filter=None,
-                    subspace_filter=None,
+                    scalar_filter=scalar_filter,
+                    subspace_filter=subspace_filter,
                     target_features=target_features,
                     regressor_type=regressor_type,
-                    hyperparameter_optimization=hyperparameter_optimization,
-                    )
+                    hyperparameter_optimization=hyperparameter_optimization)
 
 
-def main_grid(target_feats: list[str], hyperopt: bool = False) -> None:
-    for model in regressor_factory:
+def main_representation_and_fabrication_grid(target_feats: list[str], hyperopt: bool = False) -> None:
+    for model in ["SVR", "RF", "XGB", "HGB", "NGB", "GP"]:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
-        # TODO: How to iterate over all combinations of filters?
-        # TODO: How to save results? Additional datahierarchy?
         filters = ["material properties", "fabrication", "device architecture"]
         for i, filter in enumerate(filters):
-            for subspace in
+            for subspace in [None] + filters[:i]:
 
-        if model == "GNN":
-            # import pdb; pdb.set_trace()
-            main_graphs_and_numeric(dataset=opv_dataset,
-                                    regressor_type=model,
-                                    target_features=target_feats,
-                                    hyperparameter_optimization=hyperopt)
+                if model == "GNN":
+                    pass
+                    # TODO: GNN with fabrication/processing data?
+                    # import pdb; pdb.set_trace()
+                    # main_graphs_and_numeric(dataset=opv_dataset,
+                    #                         regressor_type=model,
+                    #                         target_features=target_feats,
+                    #                         hyperparameter_optimization=hyperopt)
 
-        else:
-            # ECFP
-            main_ecfp_and_numeric(dataset=opv_dataset,
-                                  regressor_type=model,
-                                  target_features=target_feats,
-                                  hyperparameter_optimization=hyperopt)
-            # mordred
-            main_mordred_and_numeric(dataset=opv_dataset,
-                                     regressor_type=model,
-                                     target_features=target_feats,
-                                     hyperparameter_optimization=hyperopt)
-
-
-def get_appropriate_dataset(model: str) -> pd.DataFrame:
-    if model == "HGB":
-        dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"
-    else:
-        dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset.pkl"
-
-    opv_dataset: pd.DataFrame = pd.read_pickle(dataset).reset_index(drop=True)
-    return opv_dataset
+                else:
+                    # ECFP
+                    main_ecfp_and_numeric(dataset=opv_dataset,
+                                          regressor_type=model,
+                                          scalar_filter=filter,
+                                          subspace_filter=subspace,
+                                          target_features=target_feats,
+                                          hyperparameter_optimization=hyperopt)
+                    # mordred
+                    main_mordred_and_numeric(dataset=opv_dataset,
+                                             regressor_type=model,
+                                             scalar_filter=filter,
+                                             subspace_filter=subspace,
+                                             target_features=target_feats,
+                                             hyperparameter_optimization=hyperopt)
 
 
 if __name__ == "__main__":
-    # for h_opt in [False, True]:
-    #     main_grid(, hyperopt=h_opt)
+    for h_opt in [False, True]:
+        for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+            try:
+                main_representation_and_fabrication_grid(target_feats=[target], hyperopt=h_opt)
+            except Exception as e:
+                print(e)
+                continue
 
     # for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-    #     main_grid(target_feats=[target], hyperopt=False)
+    #     main_representation_and_fabrication_grid(target_feats=[target], hyperopt=False)
 
-    main_ecfp_and_numeric(dataset=get_appropriate_dataset("RF"),
-                          regressor_type="RF",
-                          scalar_filter="device architecture",
-                          subspace_filter="material properties",
-                          target_features=["calculated PCE (%)"],
-                          hyperparameter_optimization=False,
-                          radius=5)
+    # main_ecfp_and_numeric(dataset=get_appropriate_dataset("RF"),
+    #                       regressor_type="RF",
+    #                       scalar_filter="device architecture",
+    #                       # subspace_filter="material properties",
+    #                       subspace_filter=None,
+    #                       target_features=["calculated PCE (%)"],
+    #                       hyperparameter_optimization=False,
+    #                       radius=5)

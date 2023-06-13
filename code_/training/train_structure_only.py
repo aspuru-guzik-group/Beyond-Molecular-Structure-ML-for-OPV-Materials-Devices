@@ -1,14 +1,14 @@
-from pathlib import Path
-
 import pandas as pd
 
+from filter_data import get_appropriate_dataset
+from models import regressor_factory
 from data_handling import save_results, target_abbrev
 from pipeline_utils import radius_to_bits
 from scoring import process_scores
 from training_utils import run_graphs_only, train_regressor
 
-HERE: Path = Path(__file__).resolve().parent
-DATASETS: Path = HERE.parent.parent / "datasets"
+# HERE: Path = Path(__file__).resolve().parent
+# DATASETS: Path = HERE.parent.parent / "datasets"
 
 
 # def _structure_only(representation: str,
@@ -72,14 +72,14 @@ def main_graphs_only(dataset: pd.DataFrame,
 
     scores = process_scores(scores)
 
-    targets_dir: str = "-".join([target_abbrev[target] for target in target_features])
-    features_dir: str = "-".join([representation])
-    results_dir: Path = HERE.parent.parent / "results" / f"target_{targets_dir}" / f"features_{features_dir}"
-    save_results(scores, predictions,
-                 results_dir=results_dir,
+    save_results(scores=scores,
+                 predictions=predictions,
+                 representation=representation,
+                 scalar_filter=None,
+                 subspace_filter=None,
                  regressor_type=regressor_type,
-                 hyperparameter_optimization=hyperparameter_optimization,
-                 )
+                 target_features=target_features,
+                 hyperparameter_optimization=hyperparameter_optimization)
 
 
 def main_ecfp_only(dataset: pd.DataFrame,
@@ -210,9 +210,8 @@ def main_processing_only(dataset: pd.DataFrame,
                     )
 
 
-def main_grid(target_feats: list[str], hyperopt: bool = False) -> None:
-    # for model in regressor_factory:
-    for model in ["MLR"]:
+def main_representation_model_grid(target_feats: list[str], hyperopt: bool = False) -> None:
+    for model in regressor_factory:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
         if model == "GNN":
@@ -241,7 +240,7 @@ def main_grid(target_feats: list[str], hyperopt: bool = False) -> None:
                           hyperparameter_optimization=hyperopt)
 
             # tokenized
-            for struct_repr in ["BRICS", "SELFIES", "SMILES"]:
+            for struct_repr in ["SELFIES", "SMILES"]:
                 main_tokenized_only(dataset=opv_dataset,
                                     representation=struct_repr,
                                     regressor_type=model,
@@ -261,32 +260,16 @@ def main_grid(target_feats: list[str], hyperopt: bool = False) -> None:
                                  hyperparameter_optimization=hyperopt)
 
 
-def get_appropriate_dataset(model: str) -> pd.DataFrame:
-    if model == "HGB":
-        dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"
-    else:
-        dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset.pkl"
-
-    opv_dataset: pd.DataFrame = pd.read_pickle(dataset).reset_index(drop=True)
-    return opv_dataset
-
-
 if __name__ == "__main__":
-    # for h_opt in [False, True]:
-    #     main_grid(, hyperopt=h_opt)
+    for h_opt in [False, True]:
+        for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+            try:
+                main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
+            except Exception as e:
+                print(e)
+                continue
 
-    # for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-    #     main_grid(target_feats=[target], hyperopt=False)
-
-    # for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-    #     for model in regressor_factory:
-    #         main_processing_only(model, target_features=[target], hyperparameter_optimization=False)
-
-    model = "RF"
-    main_processing_only(get_appropriate_dataset(model), model,
-                         target_features=["calculated PCE (%)"],
-                         hyperparameter_optimization=True)
-
-    # main_ecfp_only("KRR",
-    #                target_features=["calculated PCE (%)"],
-    #                hyperparameter_optimization=True)
+    # model = "HGB"
+    # main_processing_only(get_appropriate_dataset(model), model,
+    #                      target_features=["calculated PCE (%)"],
+    #                      hyperparameter_optimization=True)

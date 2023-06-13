@@ -88,7 +88,7 @@ def cross_validate_regressor(regressor, X, y, cv) -> tuple[dict[str, float], np.
                                                        "r2":   r2_scorer,
                                                        "rmse": rmse_scorer,
                                                        "mae":  mae_scorer},
-                                              return_estimator=True,
+                                              # return_estimator=True,
                                               n_jobs=-1,
                                               )
 
@@ -97,6 +97,6 @@ def cross_validate_regressor(regressor, X, y, cv) -> tuple[dict[str, float], np.
                                                 n_jobs=-1,
                                                 )
 
-    estimator_params: list[str] = [str(estimator.get_params(deep=True)) for estimator in scores["estimator"]]
-    scores["estimator_params"] = estimator_params
+    # estimator_params: list[str] = [str(estimator.get_params(deep=True)) for estimator in scores["estimator"]]
+    # scores["estimator_params"] = estimator_params
     return scores, predictions

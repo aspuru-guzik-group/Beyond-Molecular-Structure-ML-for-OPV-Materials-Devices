@@ -155,7 +155,7 @@ class NNRegressor(MLPRegressor):
 
 regressor_factory: dict[str, type] = {
     "MLR":   LinearRegression,
-    "Lasso": Lasso,
+    # "Lasso": Lasso,
     "KRR":   KernelRidge,
     # "KRR":   TanimotoKernelRidge,
     "KNN":   KNeighborsRegressor,
@@ -212,9 +212,7 @@ regressor_search_space: dict[str, dict] = {
               "regressor__regressor__colsample_bytree":  Real(0.5, 1.0),
               "regressor__regressor__colsample_bylevel": Real(0.5, 1.0),
               },
-    "HGB":   {"regressor__regressor__loss":             Categorical(
-        ["absolute_error", "squared_error", "quantile", "poisson"]),
-              "regressor__regressor__learning_rate":    Real(0.005, 1),
+    "HGB":   {"regressor__regressor__learning_rate":    Real(0.005, 1, prior="log-uniform"),
               "regressor__regressor__max_depth":        Integer(10, 10000),
               "regressor__regressor__min_samples_leaf": Integer(1, 600),
               "regressor__regressor__max_iter":         Integer(50, 2000),
@@ -224,7 +222,7 @@ regressor_search_space: dict[str, dict] = {
               "regressor__regressor__n_iter_no_change": Integer(1, 10),
               },
     "NGB":   {"regressor__regressor__n_estimators":     Integer(50, 2000),
-              "regressor__regressor__learning_rate":    Real(0.005, 1),
+              "regressor__regressor__learning_rate":    Real(0.005, 1, prior="log-uniform"),
               "regressor__regressor__minibatch_frac":   Real(0.1, 1),
               "regressor__regressor__minibatch_size":   Integer(1, 100),
               #  "regressor__regressor__Base":             Categorical(["DecisionTreeRegressor", "Ridge", "Lasso",
@@ -238,7 +236,7 @@ regressor_search_space: dict[str, dict] = {
               #  "regressor__regressor__normalize_y":         [True],
               },
     "GNN":   {"regressor__regressor__hidden_size": Integer(50, 100),
-              "regressor__regressor__lr":          Real(1e-4, 1e-2),
+              "regressor__regressor__lr":          Real(1e-4, 1e-2, prior="log-uniform"),
               "regressor__regressor__depth":       Integer(1, 4)
               },
     "NN":    {"regressor__regressor__n_layers":       Integer(1, 20),

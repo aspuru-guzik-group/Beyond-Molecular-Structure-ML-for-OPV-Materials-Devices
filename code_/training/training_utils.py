@@ -10,7 +10,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, PowerTransformer, QuantileTransformer
 from skopt import BayesSearchCV
 
-from data_handling import save_results, target_abbrev
+from data_handling import remove_unserializable_keys, save_results
 from filter_data import filter_dataset, get_feature_ids
 from models import model_dropna, regressor_factory, regressor_search_space
 from pipeline_utils import get_feature_pipelines
@@ -32,66 +32,6 @@ N_FOLDS: int = 2  # ATTN: Testing only
 # Number of iterations for Bayesian optimization
 BO_ITER: int = 36
 BO_ITER: int = 1  # ATTN: Testing only
-
-
-# def preprocess_properties_and_processing(scalar_features: list[str],
-#                                          scaler_type: str,
-#                                          ) -> ColumnTransformer:
-#     transformer = Pipeline(steps=[("transformer", scaler_factory[scaler_type]())])
-#     preprocessor: ColumnTransformer = ColumnTransformer(
-#         remainder="passthrough",
-#         transformers=[
-#             ("stdscaler", transformer, scalar_features),
-#         ])
-#     return preprocessor
-
-
-# def iterate_and_remove(obj):
-#     acceptable_types = (str, int, float, np.ndarray, list, dict, tuple)
-#     if isinstance(obj, list):
-#         obj = [iterate_and_remove(element) for element in obj if isinstance(element, acceptable_types)]
-#         # for element in obj:
-#         #     iterate_and_remove(element)
-#     elif isinstance(obj, tuple):
-#         obj = list(obj)
-#         obj = [iterate_and_remove(element) for element in obj if isinstance(element, acceptable_types)]
-#         # for element in obj:
-#         #     iterate_and_remove(element)
-#     elif isinstance(obj, dict):
-#         obj = {key: iterate_and_remove(value) for key, value in obj.items() if isinstance(value, acceptable_types)}
-#         # keys_to_remove = []
-#         # for key, value in obj.items():
-#         #     if not isinstance(value, acceptable_types):
-#         #         keys_to_remove.append(key)
-#         #     else:
-#         #         iterate_and_remove(value)
-#         # for key in keys_to_remove:
-#         #     del obj[key]
-#     # elif isinstance(obj, (list, dict, tuple, np.ndarray)):
-#     #     obj = obj
-#     else:
-#         # If obj is not a list or a dictionary, remove it (optional)
-#         obj = None
-#
-#     return obj
-
-# def convert_estimator_params(estimator_params: Union[list, dict]) -> Union[list, dict]:
-#     if isinstance(estimator_params, list):
-#         for obj in estimator_params:
-#             obj = convert_estimator_params(obj)
-#     elif isinstance(estimator_params, dict):
-#         for key, value in estimator_params.items():
-#             estimator_params[key] = convert_estimator_params(value)
-#     else:
-#
-#
-#
-# if isinstance(value, np.int64):
-#     estimator_params[key] = int(value)
-# elif isinstance(value, np.float64):
-#     estimator_params[key] = float(value)
-# elif isinstance(value, np.ndarray):
-#     estimator_params[key] = value.tolist()
 
 
 # def run_structure_only(dataset: pd.DataFrame,
@@ -154,19 +94,39 @@ def train_regressor(dataset: pd.DataFrame,
                                         subspace_filter=subspace_filter,
                                         target_features=target_features,
                                         regressor_type=regressor_type,
-                                        hyperparameter_optimization=hyperparameter_optimization,
-                                        )
+                                        hyperparameter_optimization=hyperparameter_optimization)
 
     scores = process_scores(scores)
 
-    targets_dir: str = "-".join([target_abbrev[target] for target in target_features])
-    features_dir: str = "-".join([representation])
-    results_dir: Path = HERE.parent.parent / "results" / f"target_{targets_dir}" / f"features_{features_dir}"
     save_results(scores, predictions,
-                 results_dir=results_dir,
+                 representation=representation,
+                 scalar_filter=scalar_filter,
+                 subspace_filter=subspace_filter,
+                 target_features=target_features,
                  regressor_type=regressor_type,
-                 hyperparameter_optimization=hyperparameter_optimization,
-                 )
+                 hyperparameter_optimization=hyperparameter_optimization)
+
+    # targets_dir: str = "-".join([target_abbrev[target] for target in target_features])
+    # features_dir: str = "-".join([representation,
+    #                               scalar_filter if scalar_filter else "",
+    #                               subspace_filter if subspace_filter else ""])
+    # results_dir: Path = HERE.parent.parent / "results" / f"target_{targets_dir}" / f"features_{features_dir}"
+    # if subspace_filter:
+    #     results_dir = results_dir / f"subspace_{subspace_filter}"
+    #
+    # save_results(scores, predictions,
+    #              results_dir=results_dir,
+    #              regressor_type=regressor_type,
+    #              hyperparameter_optimization=hyperparameter_optimization,
+    #              )
+
+
+def get_hgb_features(filter: str, regressor_type: str) -> str:
+    # TODO: Test these modifications
+    if regressor_type == "HGB" and filter != "material propertries":
+        return filter + " all"
+    else:
+        return filter
 
 
 def _prepare_data(dataset: pd.DataFrame,
@@ -197,9 +157,11 @@ def _prepare_data(dataset: pd.DataFrame,
         """
     # Select features to use in the model
     if scalar_filter:
+        scalar_filter = get_hgb_features(scalar_filter, regressor_type)
         scalar_features: list[str] = get_feature_ids(scalar_filter)
         print("n scalar features:", len(scalar_features))
         if subspace_filter:
+            subspace_filter = get_hgb_features(subspace_filter, regressor_type)
             scalar_features: list[str] = get_feature_ids(subspace_filter)
             print("n scalar features:", len(scalar_features))
     else:
@@ -284,10 +246,11 @@ def _run(X, y,
 
         if hyperparameter_optimization and regressor_type not in ["MLR", "Lasso", "GP"]:
             # Hyperparameter optimization
-            best_estimator = _optimize_hyperparams(X, y, cv_outer=cv_outer, seed=seed,
-                                                   regressor_type=regressor_type, regressor=regressor)
+            best_estimator, regressor_params = _optimize_hyperparams(X, y, cv_outer=cv_outer, seed=seed,
+                                                                     regressor_type=regressor_type, regressor=regressor)
 
             scores, predictions = cross_validate_regressor(best_estimator, X, y, cv_outer)
+            scores["best_params"] = regressor_params
 
         else:
             scores, predictions = cross_validate_regressor(regressor, X, y, cv_outer)
@@ -327,13 +290,18 @@ def _optimize_hyperparams(X, y,
         # bayes.fit(X_train, y_train)
         bayes.fit(X_train, y_train)
         print(f"Best parameters: {bayes.best_params_}")
-        print(str(bayes.best_params_))
         estimators.append(bayes)
 
     # Extract the best estimator from hyperparameter optimization
     best_idx: int = np.argmax([est.best_score_ for est in estimators])
     best_estimator: Pipeline = estimators[best_idx].best_estimator_
-    return best_estimator
+    try:
+        regressor_params: dict = best_estimator.named_steps.regressor.get_params()
+        regressor_params = remove_unserializable_keys(regressor_params)
+    except:
+        regressor_params = {"bad params": "couldn't get them"}
+
+    return best_estimator, regressor_params
 
 
 def run_graphs_only(dataset: pd.DataFrame,

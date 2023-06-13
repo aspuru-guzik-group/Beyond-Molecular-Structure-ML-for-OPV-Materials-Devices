@@ -82,12 +82,7 @@ def plot_feature_distributions(dataset: pd.DataFrame,
         y_ticks = list(np.arange(start, end, stepsize))
         y_ticks.append(end)
         axs[y_idx, x_idx].yaxis.set_ticks(y_ticks)
-        try:
-            mean = np.mean(current_val_list)
-            std = np.std(current_val_list)
-            total = "Total: " + str(len(current_val_list)) + "\n" + "Mean: " + str(mean) + "\n" + "Std: " + str(std)
-        except:
-            total = "Total: " + str(len(current_val_list))
+        total = "Total: " + str(len(current_val_list))
         anchored_text = AnchoredText(total, loc="upper right")
         axs[y_idx, x_idx].add_artist(anchored_text)
         if isinstance(current_val_list[0], str):

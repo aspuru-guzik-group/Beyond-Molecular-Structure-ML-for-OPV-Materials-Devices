@@ -159,10 +159,9 @@ def create_grid_search_heatmap(root_dir: Path, score: str, var: str) -> None:
         var: Variance to plot
     """
     # Collect x-axis labels from directory names
-    # TODO: MOre flfexible
-    y_labels: List[str] = ["fabrication only", "OHE", "material properties", "SMILES", "SELFIES", "BRICS", "ECFP",
+    y_labels: List[str] = ["fabrication only", "OHE", "material properties", "SMILES", "SELFIES", "ECFP",
                            "mordred", "GNN"][::-1]
-    x_labels: List[str] = ["MLR", "Lasso", "KRR", "KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GP", "NN", "GNN"]
+    x_labels: List[str] = ["MLR", "KRR", "KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GP", "NN", "GNN"]
 
     target: str = ", ".join(root_dir.name.split("_")[1:])
     score_txt: str = "$R^2$" if score == "r2" else score.upper()
