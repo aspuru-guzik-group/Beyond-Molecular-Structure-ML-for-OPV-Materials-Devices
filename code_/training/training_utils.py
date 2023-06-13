@@ -23,15 +23,15 @@ HERE: Path = Path(__file__).resolve().parent
 # Seeds for generating random states
 with open("seeds.json", "r") as f:
     SEEDS: list[int] = json.load(f)
-    SEEDS: list[int] = SEEDS[:1]  # ATTN: Testing only
+    # SEEDS: list[int] = SEEDS[:1]  # ATTN: Testing only
 
 # Number of folds for cross-validation
 N_FOLDS: int = 5
-N_FOLDS: int = 2  # ATTN: Testing only
+# N_FOLDS: int = 2  # ATTN: Testing only
 
 # Number of iterations for Bayesian optimization
 BO_ITER: int = 36
-BO_ITER: int = 1  # ATTN: Testing only
+# BO_ITER: int = 1  # ATTN: Testing only
 
 
 # def run_structure_only(dataset: pd.DataFrame,
