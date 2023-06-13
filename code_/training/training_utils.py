@@ -20,7 +20,7 @@ from scoring import cross_validate_regressor, process_scores
 
 HERE: Path = Path(__file__).resolve().parent
 
-TEST: bool = True  # ATTN: Testing only
+TEST: bool = False  # ATTN: Testing only
 
 # Seeds for generating random states
 with open("seeds.json", "r") as f:
