@@ -261,12 +261,24 @@ def main_representation_model_grid(target_feats: list[str], hyperopt: bool = Fal
 
 
 if __name__ == "__main__":
-    for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-        for h_opt in [False, True]:
-            main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
-    #
-    # for h_opt in [True]:
-    #     for target in ["calculated PCE (%)"]:
+    # for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+    #     for h_opt in [False, True]:
+    #         main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
+    
+    # main_processing_only(get_appropriate_dataset("GP"), "GP", ["calculated PCE (%)"], False)
+
+    for h_opt in [True]:
+        for target in ["calculated PCE (%)"]:
+            for model in ["RF", "HGB", "NN", "GP"]:
+                main_ecfp_only(dataset=get_appropriate_dataset(model),
+                                 regressor_type=model,
+                                    target_features=[target],
+                                    hyperparameter_optimization=h_opt,)
+                main_mordred_only(dataset=get_appropriate_dataset(model),
+                                    regressor_type=model,
+                                    target_features=[target],
+                                    hyperparameter_optimization=h_opt,)
+
     #         main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
 
     # model = "HGB"
