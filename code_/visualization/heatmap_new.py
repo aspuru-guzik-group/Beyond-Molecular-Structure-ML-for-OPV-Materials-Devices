@@ -73,10 +73,10 @@ def generate_annotations(num: float) -> str:
 
 
 model_abbrev_to_full: dict[str, str] = {
-    "MLR": "Linear Regression",
+    "MLR": "Linear",
     "KRR": "Kernel Ridge",
     "KNN": "K-Nearest Neighbors",
-    "SVR": "Support Vector Machine",
+    "SVR": "Support Vector",
     "RF":  "Random Forest",
     "XGB": "Gradient Boosted Trees",
     "HGB": "Histogram Gradient Boosting",
@@ -192,7 +192,7 @@ def create_grid_search_heatmap(root_dir: Path, score: str, var: str) -> None:
                     figsize=(12, 8),
                     fig_title=f"Average {score_txt} Scores for Models Predicting {target}",
                     x_title="Structural Representations",
-                    y_title="Machine Learning Regression Models",
+                    y_title="Regression Models",
                     fname=f"model-representation search heatmap_{score}"
                     )
 

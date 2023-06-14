@@ -98,7 +98,7 @@ def main_representation_and_fabrication_grid(target_feats: list[str], hyperopt: 
     filters = ["material properties", "fabrication", "device architecture"]
     for i, filter in enumerate(filters):
         for subspace in [None] + filters[:i]:
-            for model in ["SVR", "RF", "XGB", "HGB", "NGB", "GP"]:
+            for model in ["RF", "XGB", "HGB", "NGB", "GP"]:
                 opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
                 if model == "GNN":

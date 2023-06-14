@@ -31,7 +31,7 @@ with open("seeds.json", "r") as f:
 N_FOLDS: int = 5 if not TEST else 2
 
 # Number of iterations for Bayesian optimization
-BO_ITER: int = 36 if not TEST else 1
+BO_ITER: int = 23 if not TEST else 1
 
 
 # def run_structure_only(dataset: pd.DataFrame,
@@ -249,7 +249,12 @@ def _run(X, y,
             best_estimator, regressor_params = _optimize_hyperparams(X, y, cv_outer=cv_outer, seed=seed,
                                                                      regressor_type=regressor_type, regressor=regressor)
 
+            # if y.shape[1] > 1:
+            #     scores, predictions = cross_validate_multioutput_regressor(best_estimator, X, y, cv_outer)
+            # else:
+            #     scores, predictions = cross_validate_regressor(best_estimator, X, y, cv_outer)
             scores, predictions = cross_validate_regressor(best_estimator, X, y, cv_outer)
+
             scores["best_params"] = regressor_params
 
         else:

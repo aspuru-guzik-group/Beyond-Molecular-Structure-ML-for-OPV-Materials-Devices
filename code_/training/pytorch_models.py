@@ -187,7 +187,7 @@ class GPRegressor(BaseEstimator):
             optimizer.zero_grad()
             y_pred = self.model(X_train)
             loss = -mll(y_pred, Y_train.ravel())
-            print(f'LOSS: {loss.item()}')
+            print(f'LOSS: {loss.item()}', end='\r')
             loss.backward()
             optimizer.step()
 

@@ -89,14 +89,33 @@ def cross_validate_regressor(regressor, X, y, cv) -> tuple[dict[str, float], np.
                                                        "rmse": rmse_scorer,
                                                        "mae":  mae_scorer},
                                               # return_estimator=True,
-                                              n_jobs=-1,
-                                              )
+                                              n_jobs=-1, )
 
     predictions: np.ndarray = cross_val_predict(regressor, X, y,
                                                 cv=cv,
-                                                n_jobs=-1,
-                                                )
-
-    # estimator_params: list[str] = [str(estimator.get_params(deep=True)) for estimator in scores["estimator"]]
-    # scores["estimator_params"] = estimator_params
+                                                n_jobs=-1, )
     return scores, predictions
+
+
+# def r_multiscorer(estimator, X, y) -> float:
+#     pass
+#
+# def cross_validate_multioutput_regressor(regressor, X, y, cv) -> tuple[dict[str, float], np.ndarray]:
+#     """
+#     Cross-validate a multi-output regressor. Returns R, R2, RMSE, and MAE scores for each of the following:
+#     - Each output individually (PCE, VOC, JSC, FF)
+#     - PCE calculated from VOC, JSC, FF
+#     - All outputs together (PCE, VOC, JSC, FF)  # ATTN: What would this mean?
+#     """
+#     scores = cross_validate(regressor, X, y,
+#                             cv=cv,
+#                             scoring={"r":    r_multiscorer,
+#                                      "r2":   r2_multiscorer,
+#                                      "rmse": rmse_multiscorer,
+#                                      "mae":  mae_multiscorer},
+#                             n_jobs=-1, )
+#
+#     predictions = cross_val_predict(regressor, X, y,
+#                                     cv=cv,
+#                                     n_jobs=-1, )
+#     return scores, predictions
