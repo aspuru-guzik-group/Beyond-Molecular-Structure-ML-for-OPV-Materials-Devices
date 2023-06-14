@@ -48,6 +48,8 @@ class FeatureProcessor:
 
         # # Add calculated PCE
         self.dataset["calculated PCE (%)"]: pd.Series = self.calculate_correct_pce()
+        # # Convert FF to fraction rather than percentage
+        self.dataset["FF (%)"] = self.dataset["FF (%)"] / 100
 
         # # Convert strings to floats for DA ratio
         self.dataset["D:A ratio (m/m)"] = self.convert_da_ratio(self.dataset["D:A ratio (m/m)"])
@@ -314,11 +316,6 @@ class StructureProcessor:
         for representation in ["SMILES", "SELFIES", "BRICS"]:
             self.tokenize(representation)
 
-        # self.mordred_descriptors: pd.DataFrame = self.generate_mordred_descriptors()
-        # self.mordred_descriptors_used: pd.Series = pd.Series(self.mordred_descriptors.columns.tolist())
-        # for material in ["Donor", "Acceptor"]:
-        #     self.dataset[f"{material} mordred"] = self.assign_mordred(self.dataset[f"{material} Mol"])
-
         return self.dataset
 
     # @staticmethod
@@ -377,15 +374,6 @@ class StructureProcessor:
         mol_series: pd.Series = smiles_series.map(lambda smiles: Chem.MolFromSmiles(smiles))
         print("Done assigning RDKit Mol objects.")
         return mol_series
-
-    # def assign_mordred(self, labels: pd.Series) -> pd.Series:
-    #     """
-    #     Assigns Mordred descriptors to the dataset.
-    #     """
-    #     # BUG: This won't work..?
-    #     mordred_series: pd.Series = labels.map(lambda mol: self.generate_mordred_descriptors(mol))
-    #     print("Done assigning Mordred descriptors.")
-    #     return mordred_series
 
     @staticmethod
     def assign_selfies(smiles_series: pd.Series) -> pd.Series:
@@ -507,7 +495,6 @@ def pre_main(fp_radii: list[int], fp_bits: list[int], solv_props_as_nan: bool):
     # Add structural representations to the dataset
     dataset: pd.DataFrame = StructureProcessor(dataset, donor_structures=donor_structures,
                                                acceptor_structures=acceptor_structures).main(fp_radii, fp_bits)
-    # mordred_used: pd.Series = StructureProcessor.mordred_descriptors_used
 
     # Get datatypes of categorical features
     feature_types_file = min_dir / "feature_types.json"
@@ -518,15 +505,11 @@ def pre_main(fp_radii: list[int], fp_bits: list[int], solv_props_as_nan: bool):
     # Specify paths for saving
     dataset_csv = min_dir / "cleaned_dataset.csv"
     dataset_pkl = min_dir / dataset_fname
-    # mordred_csv = min_dir / "mordred_descriptors.csv"
 
     # Save the dataset
     dataset.to_pickle(dataset_pkl)
     readable: pd.DataFrame = get_readable_only(dataset)
     readable.to_csv(dataset_csv)
-
-    # Save mordred descriptors
-    # mordred_used.to_csv(mordred_csv)
 
 
 if __name__ == "__main__":

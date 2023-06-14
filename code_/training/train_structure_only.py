@@ -1,11 +1,12 @@
 import pandas as pd
 
+from data_handling import save_results
 from filter_data import get_appropriate_dataset
 from models import regressor_factory
-from data_handling import save_results, target_abbrev
 from pipeline_utils import radius_to_bits
 from scoring import process_scores
 from training_utils import run_graphs_only, train_regressor
+
 
 # HERE: Path = Path(__file__).resolve().parent
 # DATASETS: Path = HERE.parent.parent / "datasets"
@@ -19,7 +20,7 @@ from training_utils import run_graphs_only, train_regressor
 #                     hyperparameter_optimization: bool,
 #                     # subdir_ids: list[Union[str, int]]
 #                     ) -> None:
-#     dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"  # TODO: Change to pass dataset?
+#     dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"
 #     opv_dataset: pd.DataFrame = pd.read_pickle(dataset)
 #
 #     if regressor_type == "GNN":
@@ -85,6 +86,7 @@ def main_graphs_only(dataset: pd.DataFrame,
 def main_ecfp_only(dataset: pd.DataFrame,
                    regressor_type: str,
                    target_features: list[str],
+                   transform_type: str,
                    hyperparameter_optimization: bool,
                    radius: int = 5) -> None:
     representation: str = "ECFP"
@@ -104,6 +106,7 @@ def main_ecfp_only(dataset: pd.DataFrame,
                     subspace_filter=None,
                     target_features=target_features,
                     regressor_type=regressor_type,
+                    transform_type=transform_type,
                     hyperparameter_optimization=hyperparameter_optimization,
                     )
 
@@ -112,6 +115,7 @@ def main_tokenized_only(dataset: pd.DataFrame,
                         representation: str,
                         regressor_type: str,
                         target_features: list[str],
+                        transform_type: str,
                         hyperparameter_optimization: bool) -> None:
     structural_features: list[str] = [f"Donor {representation} token",
                                       f"Acceptor {representation} token"]
@@ -125,6 +129,7 @@ def main_tokenized_only(dataset: pd.DataFrame,
                     subspace_filter=None,
                     target_features=target_features,
                     regressor_type=regressor_type,
+                    transform_type=transform_type,
                     hyperparameter_optimization=hyperparameter_optimization,
                     )
 
@@ -132,6 +137,7 @@ def main_tokenized_only(dataset: pd.DataFrame,
 def main_ohe_only(dataset: pd.DataFrame,
                   regressor_type: str,
                   target_features: list[str],
+                  transform_type: str,
                   hyperparameter_optimization: bool
                   ) -> None:
     representation: str = "OHE"
@@ -146,12 +152,15 @@ def main_ohe_only(dataset: pd.DataFrame,
                     subspace_filter=None,
                     target_features=target_features,
                     regressor_type=regressor_type,
+                    transform_type=transform_type,
                     hyperparameter_optimization=hyperparameter_optimization,
                     )
 
 
 def main_mordred_only(dataset: pd.DataFrame,
-                      regressor_type: str, target_features: list[str],
+                      regressor_type: str,
+                      target_features: list[str],
+                      transform_type: str,
                       hyperparameter_optimization: bool) -> None:
     representation: str = "mordred"
     structural_features: list[str] = ["Donor", "Acceptor"]
@@ -165,12 +174,37 @@ def main_mordred_only(dataset: pd.DataFrame,
                     subspace_filter=None,
                     target_features=target_features,
                     regressor_type=regressor_type,
+                    transform_type=transform_type,
+                    hyperparameter_optimization=hyperparameter_optimization,
+                    )
+
+
+def main_graph_embeddings_only(dataset: pd.DataFrame,
+                               regressor_type: str,
+                               target_features: list[str],
+                               transform_type: str,
+                               hyperparameter_optimization: bool) -> None:
+    representation: str = "graph embeddings"
+    structural_features: list[str] = ["Donor", "Acceptor"]
+    unroll_single_feat = {"representation": representation}
+
+    train_regressor(dataset=dataset,
+                    representation=representation,
+                    structural_features=structural_features,
+                    unroll=unroll_single_feat,
+                    scalar_filter=None,
+                    subspace_filter=None,
+                    target_features=target_features,
+                    regressor_type=regressor_type,
+                    transform_type=transform_type,
                     hyperparameter_optimization=hyperparameter_optimization,
                     )
 
 
 def main_properties_only(dataset: pd.DataFrame,
-                         regressor_type: str, target_features: list[str],
+                         regressor_type: str,
+                         target_features: list[str],
+                         transform_type: str,
                          hyperparameter_optimization: bool) -> None:
     representation: str = "material properties"
     # mater_props: list[str] = ["HOMO", "LUMO", "Ehl", "Eg"]
@@ -186,12 +220,15 @@ def main_properties_only(dataset: pd.DataFrame,
                     subspace_filter=None,
                     target_features=target_features,
                     regressor_type=regressor_type,
+                    transform_type=transform_type,
                     hyperparameter_optimization=hyperparameter_optimization,
                     )
 
 
 def main_processing_only(dataset: pd.DataFrame,
-                         regressor_type: str, target_features: list[str],
+                         regressor_type: str,
+                         target_features: list[str],
+                         transform_type: str,
                          hyperparameter_optimization: bool) -> None:
     representation: str = "fabrication only"
     structural_features: list[str] = ["solvent descriptors", "solvent additive descriptors"]
@@ -206,69 +243,85 @@ def main_processing_only(dataset: pd.DataFrame,
                     subspace_filter=None,
                     target_features=target_features,
                     regressor_type=regressor_type,
+                    transform_type=transform_type,
                     hyperparameter_optimization=hyperparameter_optimization,
                     )
 
 
 def main_representation_model_grid(target_feats: list[str], hyperopt: bool = False) -> None:
-    # for model in regressor_factory:
-    model = "GNN"
-    opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
+    transform_type: str = "Standard"
 
-    if model == "GNN":
-        main_graphs_only(dataset=opv_dataset,
-                            regressor_type=model,
-                            target_features=target_feats,
-                            hyperparameter_optimization=hyperopt)
+    for model in regressor_factory:
+        opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
-        # else:
-        #     # ECFP
-        #     main_ecfp_only(dataset=opv_dataset,
-        #                    regressor_type=model,
-        #                    target_features=target_feats,
-        #                    hyperparameter_optimization=hyperopt)
-        #     # mordred
-        #     main_mordred_only(dataset=opv_dataset,
-        #                       regressor_type=model,
-        #                       target_features=target_feats,
-        #                       hyperparameter_optimization=hyperopt)
+        if model == "GNN":
+            # import pdb; pdb.set_trace()
+            main_graphs_only(dataset=opv_dataset,
+                             regressor_type=model,
+                             target_features=target_feats,
+                             hyperparameter_optimization=hyperopt)
 
-        #     # OHE
-        #     main_ohe_only(dataset=opv_dataset,
-        #                   regressor_type=model,
-        #                   target_features=target_feats,
-        #                   hyperparameter_optimization=hyperopt)
+        else:
+            # ECFP
+            main_ecfp_only(dataset=opv_dataset,
+                           regressor_type=model,
+                           target_features=target_feats,
+                           transform_type=transform_type,
+                           hyperparameter_optimization=hyperopt)
+            # mordred
+            # TODO: Maybe only apply uniform quantile for GP?
+            main_mordred_only(dataset=opv_dataset,
+                              regressor_type=model,
+                              target_features=target_feats,
+                              transform_type=transform_type,
+                              hyperparameter_optimization=hyperopt)
 
-        #     # tokenized
-        #     for struct_repr in ["SELFIES", "SMILES"]:
-        #         main_tokenized_only(dataset=opv_dataset,
-        #                             representation=struct_repr,
-        #                             regressor_type=model,
-        #                             target_features=target_feats,
-        #                             hyperparameter_optimization=hyperopt)
+            # graph embeddings
+            main_graph_embeddings_only(dataset=opv_dataset,
+                                       regressor_type=model,
+                                       target_features=target_feats,
+                                       transform_type=transform_type,
+                                       hyperparameter_optimization=hyperopt)
 
-        #     # material properties
-        #     main_properties_only(dataset=opv_dataset,
-        #                          regressor_type=model,
-        #                          target_features=target_feats,
-        #                          hyperparameter_optimization=hyperopt)
+            # OHE
+            main_ohe_only(dataset=opv_dataset,
+                          regressor_type=model,
+                          target_features=target_feats,
+                          transform_type=transform_type,
+                          hyperparameter_optimization=hyperopt)
 
-        #     # processing only
-        #     main_processing_only(dataset=opv_dataset,
-        #                          regressor_type=model,
-        #                          target_features=target_feats,
-        #                          hyperparameter_optimization=hyperopt)
+            # tokenized
+            for struct_repr in ["SELFIES", "SMILES"]:
+                main_tokenized_only(dataset=opv_dataset,
+                                    representation=struct_repr,
+                                    regressor_type=model,
+                                    target_features=target_feats,
+                                    transform_type=transform_type,
+                                    hyperparameter_optimization=hyperopt)
+
+            # material properties
+            main_properties_only(dataset=opv_dataset,
+                                 regressor_type=model,
+                                 target_features=target_feats,
+                                 transform_type=transform_type,
+                                 hyperparameter_optimization=hyperopt)
+
+            # processing only
+            main_processing_only(dataset=opv_dataset,
+                                 regressor_type=model,
+                                 target_features=target_feats,
+                                 transform_type=transform_type,
+                                 hyperparameter_optimization=hyperopt)
 
 
 if __name__ == "__main__":
-    for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-        main_representation_model_grid(target_feats=[target], hyperopt=False)
-
     # for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
     #     for h_opt in [False, True]:
     #         main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
-    
-    # main_processing_only(get_appropriate_dataset("GP"), "GP", ["calculated PCE (%)"], False)
+
+    main_representation_model_grid(target_feats=["calculated PCE (%)"], hyperopt=False)
+
+    # main_graph_embeddings_only(get_appropriate_dataset("RF"), "RF", ["calculated PCE (%)"], "Standard", False)
 
     # for h_opt in [True]:
     #     for target in ["calculated PCE (%)"]:
@@ -282,9 +335,9 @@ if __name__ == "__main__":
     #                                 target_features=[target],
     #                                 hyperparameter_optimization=h_opt,)
 
-    #         main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
-
     # model = "HGB"
-    # main_processing_only(get_appropriate_dataset(model), model,
-    #                      target_features=["calculated PCE (%)"],
-    #                      hyperparameter_optimization=True)
+    # main_ecfp_only(dataset=get_appropriate_dataset(model),
+    #                   regressor_type=model,
+    #                   target_features=["calculated PCE (%)"],
+    #                   transform_type=None,
+    #                   hyperparameter_optimization=False, )

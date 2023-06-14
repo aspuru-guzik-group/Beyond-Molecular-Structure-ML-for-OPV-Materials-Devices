@@ -1,9 +1,10 @@
-from typing import Union
+from itertools import product
+from typing import Callable, Union
 
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr
-from sklearn.metrics import make_scorer, mean_absolute_error, mean_squared_error
+from sklearn.metrics import make_scorer, mean_absolute_error, mean_squared_error, r2_score
 from sklearn.metrics._scorer import r2_scorer
 from sklearn.model_selection import cross_val_predict, cross_validate
 
@@ -57,6 +58,7 @@ mae_scorer = make_scorer(mean_absolute_error, greater_is_better=False)
 
 
 def process_scores(scores: dict[int, dict[str, float]]) -> dict[Union[int, str], dict[str, float]]:
+    # TODO: Handling multi-output
     # sample_size: int = 7 * 5  # N seeds * N folds
     sample_size: int = 7  # N seeds since we're essentially doing a paired t-test
 
@@ -82,40 +84,226 @@ def process_scores(scores: dict[int, dict[str, float]]) -> dict[Union[int, str],
 
 def cross_validate_regressor(regressor, X, y, cv) -> tuple[dict[str, float], np.ndarray]:
     # Training and scoring on each fold
-    scores: dict[str, float] = cross_validate(regressor, X, y,
-                                              cv=cv,
-                                              scoring={"r":    r_scorer,
-                                                       "r2":   r2_scorer,
-                                                       "rmse": rmse_scorer,
-                                                       "mae":  mae_scorer},
-                                              # return_estimator=True,
-                                              n_jobs=-1, )
+    if y.shape[1] > 1:
+        regressor.set_output(transform="pandas")
+        scores, predictions = cross_validate_multioutput_regressor(regressor, X, y, cv)
 
-    predictions: np.ndarray = cross_val_predict(regressor, X, y,
-                                                cv=cv,
-                                                n_jobs=-1, )
+    else:
+        scores: dict[str, float] = cross_validate(regressor, X, y,
+                                                  cv=cv,
+                                                  scoring={"r":    r_scorer,
+                                                           "r2":   r2_scorer,
+                                                           "rmse": rmse_scorer,
+                                                           "mae":  mae_scorer},
+                                                  # return_estimator=True,
+                                                  n_jobs=-1, )
+
+        predictions: np.ndarray = cross_val_predict(regressor, X, y,
+                                                    cv=cv,
+                                                    n_jobs=-1, )
     return scores, predictions
 
 
-# def r_multiscorer(estimator, X, y) -> float:
-#     pass
-#
-# def cross_validate_multioutput_regressor(regressor, X, y, cv) -> tuple[dict[str, float], np.ndarray]:
-#     """
-#     Cross-validate a multi-output regressor. Returns R, R2, RMSE, and MAE scores for each of the following:
-#     - Each output individually (PCE, VOC, JSC, FF)
-#     - PCE calculated from VOC, JSC, FF
-#     - All outputs together (PCE, VOC, JSC, FF)  # ATTN: What would this mean?
-#     """
-#     scores = cross_validate(regressor, X, y,
-#                             cv=cv,
-#                             scoring={"r":    r_multiscorer,
-#                                      "r2":   r2_multiscorer,
-#                                      "rmse": rmse_multiscorer,
-#                                      "mae":  mae_multiscorer},
-#                             n_jobs=-1, )
-#
-#     predictions = cross_val_predict(regressor, X, y,
-#                                     cv=cv,
-#                                     n_jobs=-1, )
-#     return scores, predictions
+pce_column = "calculated PCE (%)"
+voc_column = "Voc (V)"
+jsc_column = "Jsc (mA cm^-2)"
+ff_column = "FF (%)"
+
+
+def r_pce(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    pce_true = y_true[pce_column]
+    pce_pred = y_pred[:, 0]
+    return pearson(pce_true, pce_pred)
+
+
+def r_voc(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    voc_true = y_true[voc_column]
+    voc_pred = y_pred[:, 1]
+    return pearson(voc_true, voc_pred)
+
+
+def r_jsc(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    jsc_true = y_true[jsc_column]
+    jsc_pred = y_pred[:, 2]
+    return pearson(jsc_true, jsc_pred)
+
+
+def r_ff(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    ff_true = y_true[ff_column]
+    ff_pred = y_pred[:, 3]
+    return pearson(ff_true, ff_pred)
+
+
+def r_pce_eqn(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    pce_true = y_true[pce_column]
+    voc_pred, jsc_pred, ff_pred = y_pred[:, 1], y_pred[:, 2], y_pred[:, 3]
+    pce_pred = voc_pred * jsc_pred * ff_pred
+    return pearson(pce_true, pce_pred)
+
+
+def r2_pce(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    pce_true = y_true[pce_column]
+    pce_pred = y_pred[:, 0]
+    return r2_score(pce_true, pce_pred)
+
+
+def r2_voc(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    voc_true = y_true[voc_column]
+    voc_pred = y_pred[:, 1]
+    return r2_score(voc_true, voc_pred)
+
+
+def r2_jsc(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    jsc_true = y_true[jsc_column]
+    jsc_pred = y_pred[:, 2]
+    return r2_score(jsc_true, jsc_pred)
+
+
+def r2_ff(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    ff_true = y_true[ff_column]
+    ff_pred = y_pred[:, 3]
+    return r2_score(ff_true, ff_pred)
+
+
+def r2_pce_eqn(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    pce_true = y_true[pce_column]
+    voc_pred, jsc_pred, ff_pred = y_pred[:, 1], y_pred[:, 2], y_pred[:, 3]
+    pce_pred = voc_pred * jsc_pred * ff_pred
+    return r2_score(pce_true, pce_pred)
+
+
+def rmse_pce(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    pce_true = y_true[pce_column]
+    pce_pred = y_pred[:, 0]
+    return rmse_score(pce_true, pce_pred)
+
+
+def rmse_voc(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    voc_true = y_true[voc_column]
+    voc_pred = y_pred[:, 1]
+    return rmse_score(voc_true, voc_pred)
+
+
+def rmse_jsc(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    jsc_true = y_true[jsc_column]
+    jsc_pred = y_pred[:, 2]
+    return rmse_score(jsc_true, jsc_pred)
+
+
+def rmse_ff(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    ff_true = y_true[ff_column]
+    ff_pred = y_pred[:, 3]
+    return rmse_score(ff_true, ff_pred)
+
+
+def rmse_pce_eqn(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    pce_true = y_true[pce_column]
+    voc_pred, jsc_pred, ff_pred = y_pred[:, 1], y_pred[:, 2], y_pred[:, 3]
+    pce_pred = voc_pred * jsc_pred * ff_pred
+    return rmse_score(pce_true, pce_pred)
+
+
+def mae_pce(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    pce_true = y_true[pce_column]
+    pce_pred = y_pred[:, 0]
+    return mean_absolute_error(pce_true, pce_pred)
+
+
+def mae_voc(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    voc_true = y_true[voc_column]
+    voc_pred = y_pred[:, 1]
+    return mean_absolute_error(voc_true, voc_pred)
+
+
+def mae_jsc(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    jsc_true = y_true[jsc_column]
+    jsc_pred = y_pred[:, 2]
+    return mean_absolute_error(jsc_true, jsc_pred)
+
+
+def mae_ff(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    ff_true = y_true[ff_column]
+    ff_pred = y_pred[:, 3]
+    return mean_absolute_error(ff_true, ff_pred)
+
+
+def mae_pce_eqn(y_true: pd.Series, y_pred: np.ndarray) -> float:
+    pce_true = y_true[pce_column]
+    voc_pred, jsc_pred, ff_pred = y_pred[:, 1], y_pred[:, 2], y_pred[:, 3]
+    pce_pred = voc_pred * jsc_pred * ff_pred
+    return mean_absolute_error(pce_true, pce_pred)
+
+
+score_lookup: dict[str, dict[str, Callable]] = {
+    "r":    {
+        "PCE":     r_pce,
+        "VOC":     r_voc,
+        "JSC":     r_jsc,
+        "FF":      r_ff,
+        "PCE_eqn": r_pce_eqn,
+    },
+    "r2":   {
+        "PCE":     r2_pce,
+        "VOC":     r2_voc,
+        "JSC":     r2_jsc,
+        "FF":      r2_ff,
+        "PCE_eqn": r2_pce_eqn,
+    },
+    "rmse": {
+        "PCE":     rmse_pce,
+        "VOC":     rmse_voc,
+        "JSC":     rmse_jsc,
+        "FF":      rmse_ff,
+        "PCE_eqn": rmse_pce_eqn,
+    },
+    "mae":  {
+        "PCE":     mae_pce,
+        "VOC":     mae_voc,
+        "JSC":     mae_jsc,
+        "FF":      mae_ff,
+        "PCE_eqn": mae_pce_eqn,
+    },
+}
+
+
+def get_score_func(score: str, output: str) -> Callable:
+    """
+    Returns the appropriate scoring function for the given output.
+    """
+    score_func: Callable = score_lookup[score][output]
+    return score_func
+
+
+greater_lookup: dict[str, bool] = {"r": True, "r2": True, "rmse": False, "mae": False}
+
+
+def multi_scorer(score: str, output: str) -> Callable:
+    """
+    Returns the appropriate scorer for the given output.
+    """
+    score_func: Callable = get_score_func(score, output)
+    scorer = make_scorer(score_func=score_func, greater_is_better=greater_lookup[score])
+    return scorer
+
+
+def cross_validate_multioutput_regressor(regressor, X, y, cv) -> tuple[dict[str, float], np.ndarray]:
+    # NOTE: This assumes the order of columns in y is [PCE, VOC, JSC, FF].
+    """
+    Cross-validate a multi-output regressor. Returns R, R2, RMSE, and MAE scores for each of the following:
+    - Each output individually (PCE, VOC, JSC, FF)
+    - PCE calculated from VOC, JSC, FF
+    - All outputs together (PCE, VOC, JSC, FF)  # ATTN: What would this mean?
+    """
+    # Create scoring dictionary
+    scoring: dict[str, Callable] = {f"{score}_{output}": multi_scorer(score, output) for score, output in
+                                    product(["r", "r2", "rmse", "mae"], ["PCE", "VOC", "JSC", "FF", "PCE_eqn"])}
+    scores = cross_validate(regressor, X, y,
+                            cv=cv,
+                            scoring=scoring,
+                            n_jobs=-1)
+
+    predictions = cross_val_predict(regressor, X, y,
+                                    cv=cv,
+                                    n_jobs=-1)
+    print(scores)
+    return scores, predictions

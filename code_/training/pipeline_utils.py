@@ -1,16 +1,15 @@
 import json
 from pathlib import Path
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 import pandas as pd
-from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, PowerTransformer
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, PowerTransformer, QuantileTransformer, StandardScaler
 
 HERE: Path = Path(__file__).resolve().parent
 DATASETS: Path = HERE.parent.parent / "datasets"
 
-scaler_factory: dict[str, type] = {"MinMax": MinMaxScaler, "Standard": PowerTransformer}
+scaler_factory: dict[str, type] = {"MinMax": MinMaxScaler, "Standard": StandardScaler}
 
 
 def unroll_lists_to_columns(df: pd.DataFrame, unroll_cols: list[str], new_col_names: list[str]) -> pd.DataFrame:
@@ -87,6 +86,12 @@ def get_mordred_descriptors(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
     return mordred
 
 
+def get_gnn_embeddings(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
+    with open(DATASETS / "Min_2020_n558" / "cleaned_dataset_gnnembeddings.pkl", "rb") as f:
+        graph_embeddings: pd.DataFrame = pd.read_pickle(f)
+    return graph_embeddings
+
+
 def get_material_properties(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
     return df
 
@@ -100,65 +105,28 @@ unrolling_factory: dict[str, Callable] = {"solvent":             unroll_solvent_
                                           "SMILES":              unroll_tokens,
                                           "OHE":                 get_ohe_structures,
                                           "material properties": get_material_properties,
-                                          # "GNN":     get_gnn_embeddings,  # TODO: Implement GNN embeddings
+                                          "graph embeddings":     get_gnn_embeddings,
                                           }
 
-# class GaussianQuantileTransformer(QuantileTransformer):
-#     def __init__(
-#             self,
-#             *,
-#             n_quantiles=1000,
-#             output_distribution="normal",
-#             ignore_implicit_zeros=False,
-#             subsample=10_000,
-#             random_state=None,
-#             copy=True,
-#     ):
-#         super().__init__(
-#             n_quantiles=n_quantiles,
-#             output_distribution=output_distribution,
-#             ignore_implicit_zeros=ignore_implicit_zeros,
-#             subsample=subsample,
-#             random_state=random_state,
-#             copy=copy,
-#         )
-
-
 representation_scaling_factory: dict[str, dict[str, Union[Callable, str]]] = {
-    "solvent":             {"callable": PowerTransformer,
+    "solvent":             {"callable": StandardScaler,
                             "type":     "Standard"},
     "ECFP":                {"callable": MinMaxScaler, "type": "MinMax"},
-    "mordred":             {"callable": PowerTransformer,
+    "mordred":             {"callable": QuantileTransformer,
                             "type":     "Standard"},
+    "graph embeddings":    {"callable": MinMaxScaler,
+                            "type": "MinMax"},
     "BRICS":               {"callable": MinMaxScaler, "type": "MinMax"},
     "SELFIES":             {"callable": MinMaxScaler, "type": "MinMax"},
     "SMILES":              {"callable": MinMaxScaler, "type": "MinMax"},
     "OHE":                 {"callable": MinMaxScaler, "type": "MinMax"},
-    "material properties": {"callable": PowerTransformer, "type":     "Standard"},
-    # "fabrication only":    {"callable": PowerTransformer,
+    "material properties": {"callable": StandardScaler, "type": "Standard"},
+    # "fabrication only":    {"callable": StandardScaler,
     #                         "type":     "Standard"},
     # "GNN":     {"callable": MinMaxScaler, "type": "MinMax"},
 }
 
 radius_to_bits: dict[int, int] = {3: 512, 4: 1024, 5: 2048, 6: 4096}
-
-# def get_feature_scaling(feature: str) -> TransformerMixin:
-#     if feature in [
-#         "Donor PDI", "Donor Mn (kDa)", "Donor Mw (kDa)",
-#         "HOMO_D (eV)", "LUMO_D (eV)", "Eg_D (eV)", "Ehl_D (eV)",
-#         "HOMO_A (eV)", "LUMO_A (eV)", "Eg_A (eV)", "Ehl_A (eV)",
-#         "active layer thickness (nm)",
-#     ]:
-#         return QuantileTransformer(output_distribution="normal")
-#     elif feature in [
-#         "D:A ratio (m/m)", "total solids conc. (mg/mL)", "solvent additive conc. (% v/v)",
-#         "temperature of thermal annealing", "annealing time (min)",
-#         "HTL energy level (eV)", "ETL energy level (eV)", "HTL thickness (nm)", "ETL thickness (nm)"
-#     ]:
-#         return MinMaxScaler()
-#     else:
-#         raise ValueError(f"Feature {feature} not recognized.")
-
 
 power_features: list[str] = [
     "Donor PDI", "Donor Mn (kDa)", "Donor Mw (kDa)",
@@ -174,19 +142,31 @@ minmax_features: list[str] = [
     "HTL energy level (eV)", "ETL energy level (eV)", "HTL thickness (nm)", "ETL thickness (nm)",
 ]
 
+transforms: dict[str, Callable] = {
+    None:                None,
+    "MinMax":            MinMaxScaler,
+    "Standard":          StandardScaler,
+    "Power":             PowerTransformer,
+    "Uniform Quantile":  QuantileTransformer,
+}
 
-def generate_feature_pipeline(transform_name: str, transform: TransformerMixin) -> Pipeline:
+
+def generate_feature_pipeline(transform_name: str) -> Pipeline:
     """
     Inserts the transformation into a Pipeline
     """
-    # new_pipe: Pipeline = Pipeline(steps=[("minmax", MinMaxScaler()), (transform_name, transform)])
-    new_pipe: Pipeline = Pipeline(steps=[(transform_name, transform), ("minmax", MinMaxScaler()), ])
+    if transform_name:
+        new_pipe: Pipeline = Pipeline(
+            steps=[("MinMax", transforms["MinMax"]()), (transform_name, transforms[transform_name]()), ])
+    else:
+        new_pipe: Pipeline = Pipeline(steps=[("MinMax", transforms["MinMax"]()), ])
     return new_pipe
 
 
 def get_feature_pipelines(unrolled_features: list[str],
                           representation: str,
-                          numeric_features: list[str]
+                          numeric_features: list[str],
+                          transform_type: Optional[str] = None,
                           ) -> list[tuple[str, Pipeline, list[str]]]:
     # Establish preprocessing and training pipeline
     solvent_feats: list[str] = [feat for feat in unrolled_features if feat.startswith("solvent")]
@@ -196,16 +176,18 @@ def get_feature_pipelines(unrolled_features: list[str],
 
     transformers: list[tuple] = []
     if new_struct_feats:
-        transformers.append(  # TODO: Update!!
+        transformers.append(
             (representation_scaling_factory[representation]["type"],
              representation_scaling_factory[representation]["callable"](), new_struct_feats)
         )
+
+    # NOTE: Leaving this for later in case we want to apply different transformations to different features
     if solvent_feats:
         transformers.append(
-            ("solvent standard scale", generate_feature_pipeline("power", PowerTransformer()), solvent_feats))
+            ("solvent scaling", generate_feature_pipeline(transform_type), solvent_feats))
     if numeric_features:
         transformers.append(
-            ("processing standard scale", PowerTransformer(), numeric_features))
+            ("processing scaling", generate_feature_pipeline(transform_type), numeric_features))
     # if minmax_numeric_feats:
     #     transformers.append(("minmax", MinMaxScaler(), minmax_numeric_feats))
     return transformers

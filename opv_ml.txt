@@ -19,4 +19,5 @@ tensorflow
 threadpoolctl>=3.1
 torch
 torch_geometric
+torch-scatter
 xgboost

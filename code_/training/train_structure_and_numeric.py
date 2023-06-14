@@ -5,7 +5,6 @@ import pandas as pd
 
 from data_handling import save_results
 from filter_data import get_appropriate_dataset
-from models import regressor_factory
 from pipeline_utils import radius_to_bits
 from scoring import process_scores
 from training_utils import run_graphs_only, train_regressor
@@ -51,6 +50,7 @@ def main_ecfp_and_numeric(dataset: pd.DataFrame,
                           scalar_filter: str,
                           subspace_filter: Optional[str],
                           target_features: list[str],
+                          transform_type: str,
                           hyperparameter_optimization: bool,
                           radius: int = 5) -> None:
     representation: str = "ECFP"
@@ -70,6 +70,7 @@ def main_ecfp_and_numeric(dataset: pd.DataFrame,
                     subspace_filter=subspace_filter,
                     target_features=target_features,
                     regressor_type=regressor_type,
+                    transform_type=transform_type,
                     hyperparameter_optimization=hyperparameter_optimization)
 
 
@@ -78,6 +79,7 @@ def main_mordred_and_numeric(dataset: pd.DataFrame,
                              scalar_filter: str,
                              subspace_filter: str,
                              target_features: list[str],
+                             transform_type: str,
                              hyperparameter_optimization: bool) -> None:
     representation: str = "mordred"
     structural_features: list[str] = ["Donor", "Acceptor"]
@@ -91,14 +93,17 @@ def main_mordred_and_numeric(dataset: pd.DataFrame,
                     subspace_filter=subspace_filter,
                     target_features=target_features,
                     regressor_type=regressor_type,
+                    transform_type=transform_type,
                     hyperparameter_optimization=hyperparameter_optimization)
 
 
 def main_representation_and_fabrication_grid(target_feats: list[str], hyperopt: bool = False) -> None:
+    transform_type = "Standard"
+
     filters = ["material properties", "fabrication", "device architecture"]
     for i, filter in enumerate(filters):
         for subspace in [None] + filters[:i]:
-            for model in ["SVR", "RF", "XGB", "HGB", "NGB", "GP"]:
+            for model in ["RF", "XGB", "HGB", "NN", "NGB", "GP"]:
                 opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
                 if model == "GNN":
@@ -117,6 +122,7 @@ def main_representation_and_fabrication_grid(target_feats: list[str], hyperopt: 
                                           scalar_filter=filter,
                                           subspace_filter=subspace,
                                           target_features=target_feats,
+                                          transform_type=transform_type,
                                           hyperparameter_optimization=hyperopt)
                     # mordred
                     main_mordred_and_numeric(dataset=opv_dataset,
@@ -124,22 +130,22 @@ def main_representation_and_fabrication_grid(target_feats: list[str], hyperopt: 
                                              scalar_filter=filter,
                                              subspace_filter=subspace,
                                              target_features=target_feats,
+                                             transform_type=transform_type,
                                              hyperparameter_optimization=hyperopt)
 
 
 if __name__ == "__main__":
-    for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-        for h_opt in [False, True]:
-            main_representation_and_fabrication_grid(target_feats=[target], hyperopt=h_opt)
-
     # for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-    #     main_representation_and_fabrication_grid(target_feats=[target], hyperopt=False)
+    #     for h_opt in [False, True]:
+    #         main_representation_and_fabrication_grid(target_feats=[target], hyperopt=h_opt)
 
-    # main_ecfp_and_numeric(dataset=get_appropriate_dataset("RF"),
-    #                       regressor_type="RF",
-    #                       scalar_filter="device architecture",
-    #                       # subspace_filter="material properties",
+    main_representation_and_fabrication_grid(target_feats=["calculated PCE (%)"], hyperopt=False)
+
+    # model = "KNN"
+    # main_ecfp_and_numeric(dataset=get_appropriate_dataset(model),
+    #                       regressor_type=model,
+    #                       scalar_filter="fabrication",
     #                       subspace_filter=None,
     #                       target_features=["calculated PCE (%)"],
-    #                       hyperparameter_optimization=False,
-    #                       radius=5)
+    #                       transform_type="Standard",
+    #                       hyperparameter_optimization=False, )

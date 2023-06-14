@@ -1,26 +1,29 @@
 import json
+import platform
 from pathlib import Path
-from typing import Optional, Union
+from typing import Callable, Optional, Union
 
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler, PowerTransformer, QuantileTransformer
+from sklearn.preprocessing import MinMaxScaler, QuantileTransformer
 from skopt import BayesSearchCV
 
 from data_handling import remove_unserializable_keys, save_results
 from filter_data import filter_dataset, get_feature_ids
-from models import model_dropna, regressor_factory, regressor_search_space
-from pipeline_utils import get_feature_pipelines
-from scoring import cross_validate_regressor, process_scores
+from models import ecfp_only_kernels, get_ecfp_only_kernel, hyperopt_by_default, model_dropna, regressor_factory, \
+    regressor_search_space
+from pipeline_utils import generate_feature_pipeline, get_feature_pipelines
+from scoring import cross_validate_multioutput_regressor, cross_validate_regressor, process_scores
 
 # from pipeline_utils import representation_scaling_factory
 
 HERE: Path = Path(__file__).resolve().parent
 
-TEST: bool = False  # ATTN: Testing only
+os_type: str = platform.system().lower()
+TEST: bool = False if os_type == "linux" else True
 
 # Seeds for generating random states
 with open("seeds.json", "r") as f:
@@ -31,49 +34,7 @@ with open("seeds.json", "r") as f:
 N_FOLDS: int = 5 if not TEST else 2
 
 # Number of iterations for Bayesian optimization
-BO_ITER: int = 23 if not TEST else 1
-
-
-# def run_structure_only(dataset: pd.DataFrame,
-#                        representation: str,
-#                        structural_features: list[str],
-#                        target_features: list[str],
-#                        regressor_type: str,
-#                        hyperparameter_optimization: bool = False,
-#                        unroll: Union[dict, list, None] = None,
-#                        **kwargs) -> tuple[dict[int, dict[str, float]], pd.DataFrame]:
-#     """
-#             Run the model.
-#
-#             Args:
-#                 dataset: Dataset to use.
-#                 structural_features: Structural features to use.
-#                 scaler: Scaler to use.
-#                 regressor: Regressor to use.
-#                 hyperparameter_optimization: Whether to optimize hyperparameters.
-#                 **kwargs: Keyword arguments.
-#
-#             Returns:
-#                 None.
-#             """
-#     # Filter dataset
-#     X, y = filter_dataset(dataset,
-#                           structure_feats=structural_features,
-#                           scalar_feats=[],
-#                           target_feats=target_features,
-#                           unroll=unroll,
-#                           dropna=model_dropna(regressor_type)
-#                           )
-#
-#     # Establish preprocessing and training pipeline
-#     preprocessor: Pipeline = Pipeline(steps=[(representation_scaling_factory[representation]["type"],
-#                                               representation_scaling_factory[representation]["callable"]())])
-#
-#     return _run(X, y,
-#                 preprocessor=preprocessor,
-#                 regressor_type=regressor_type,
-#                 hyperparameter_optimization=hyperparameter_optimization,
-#                 **kwargs)
+BO_ITER: int = 42 if not TEST else 1
 
 
 def train_regressor(dataset: pd.DataFrame,
@@ -84,45 +45,35 @@ def train_regressor(dataset: pd.DataFrame,
                     subspace_filter: Optional[str],
                     regressor_type: str,
                     target_features: list[str],
+                    transform_type: str,
                     hyperparameter_optimization: bool,
                     ) -> None:
-    scores, predictions = _prepare_data(dataset=dataset,
-                                        representation=representation,
-                                        structural_features=structural_features,
-                                        unroll=unroll,
-                                        scalar_filter=scalar_filter,
-                                        subspace_filter=subspace_filter,
-                                        target_features=target_features,
-                                        regressor_type=regressor_type,
-                                        hyperparameter_optimization=hyperparameter_optimization)
 
-    scores = process_scores(scores)
+    try:
+        scores, predictions = _prepare_data(dataset=dataset,
+                                            representation=representation,
+                                            structural_features=structural_features,
+                                            unroll=unroll,
+                                            scalar_filter=scalar_filter,
+                                            subspace_filter=subspace_filter,
+                                            target_features=target_features,
+                                            regressor_type=regressor_type,
+                                            transform_type=transform_type,
+                                            hyperparameter_optimization=hyperparameter_optimization)
+        scores = process_scores(scores)
+        save_results(scores, predictions,
+                     representation=representation,
+                     scalar_filter=scalar_filter,
+                     subspace_filter=subspace_filter,
+                     target_features=target_features,
+                     regressor_type=regressor_type,
+                     hyperparameter_optimization=hyperparameter_optimization)
 
-    save_results(scores, predictions,
-                 representation=representation,
-                 scalar_filter=scalar_filter,
-                 subspace_filter=subspace_filter,
-                 target_features=target_features,
-                 regressor_type=regressor_type,
-                 hyperparameter_optimization=hyperparameter_optimization)
-
-    # targets_dir: str = "-".join([target_abbrev[target] for target in target_features])
-    # features_dir: str = "-".join([representation,
-    #                               scalar_filter if scalar_filter else "",
-    #                               subspace_filter if subspace_filter else ""])
-    # results_dir: Path = HERE.parent.parent / "results" / f"target_{targets_dir}" / f"features_{features_dir}"
-    # if subspace_filter:
-    #     results_dir = results_dir / f"subspace_{subspace_filter}"
-    #
-    # save_results(scores, predictions,
-    #              results_dir=results_dir,
-    #              regressor_type=regressor_type,
-    #              hyperparameter_optimization=hyperparameter_optimization,
-    #              )
+    except Exception as e:
+        print(f"\n\nEXCEPTION ENCOUNTERED. Failed to train {regressor_type} on {representation}...\n\n", e)
 
 
 def get_hgb_features(filter: str, regressor_type: str) -> str:
-    # TODO: Test these modifications
     if regressor_type == "HGB" and filter != "material properties":
         return filter + " all"
     else:
@@ -137,6 +88,7 @@ def _prepare_data(dataset: pd.DataFrame,
                   target_features: list[str],
                   regressor_type: str,
                   unroll: Union[dict, list, None] = None,
+                  transform_type: str = "Standard",
                   hyperparameter_optimization: bool = False,
                   **kwargs
                   ) -> tuple[dict[int, dict[str, float]], pd.DataFrame]:
@@ -178,22 +130,18 @@ def _prepare_data(dataset: pd.DataFrame,
 
     transformers: list[tuple[str, Pipeline, list[str]]] = get_feature_pipelines(unrolled_features=unrolled_feats,
                                                                                 representation=representation,
-                                                                                numeric_features=scalar_features)
+                                                                                numeric_features=scalar_features
+                                                                                )
 
-    preprocessor: ColumnTransformer = ColumnTransformer(
-        # remainder="passthrough",
-        transformers=[*transformers,
-                      # (representation_scaling_factory[representation]["type"],
-                      # representation_scaling_factory[representation]["callable"](), new_struct_feats),
-                      # ()
-                      # ("power", PowerTransformer(), power_numeric_feats),
-                      # ("minmax", MinMaxScaler(), minmax_numeric_feats)
-                      ])
-    if regressor_type == "GP":
-        kernel: str = "tanimoto" if "ECFP" in representation else "rbf"
+    preprocessor: ColumnTransformer = ColumnTransformer(transformers=[*transformers])
+    if regressor_type in ecfp_only_kernels:
+        kernel: Union[str, Callable] = get_ecfp_only_kernel(representation, scalar_filter, regressor_type)
+        print("Using kernel:", kernel)
+        # kernel: str = "tanimoto" if representation == "ECFP" else "rbf"
         return _run(X, y,
                     preprocessor=preprocessor,
                     regressor_type=regressor_type,
+                    transform_type=transform_type,
                     hyperparameter_optimization=hyperparameter_optimization,
                     kernel=kernel,
                     **kwargs)
@@ -201,6 +149,7 @@ def _prepare_data(dataset: pd.DataFrame,
         return _run(X, y,
                     preprocessor=preprocessor,
                     regressor_type=regressor_type,
+                    transform_type=transform_type,
                     hyperparameter_optimization=hyperparameter_optimization,
                     **kwargs)
 
@@ -208,6 +157,7 @@ def _prepare_data(dataset: pd.DataFrame,
 def _run(X, y,
          preprocessor: Union[ColumnTransformer, Pipeline],
          regressor_type: str,
+         transform_type: str,
          hyperparameter_optimization: bool = False,
          **kwargs) -> tuple[dict[int, dict[str, float]], pd.DataFrame]:
     # Get seeds for initializing random state of splitting and training
@@ -221,40 +171,30 @@ def _run(X, y,
         # MinMax scale everything if model is a neural network
         if regressor_type == "NN":
             y_transform = Pipeline(
-                steps=[("power", PowerTransformer()),
-                       ("minmax", MinMaxScaler())])
+                steps=[*[(step[0], step[1]) for step in generate_feature_pipeline(transform_type).steps],
+                       ("MinMax NN", MinMaxScaler())])
             preprocessor = Pipeline(
                 steps=[("preprocessor", preprocessor),
-                       ("minmax", MinMaxScaler())])
+                       ("MinMax NN", MinMaxScaler())])
         else:
-            y_transform = PowerTransformer()
+            y_transform: Pipeline = generate_feature_pipeline(transform_type)
 
         y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
             regressor=regressor_factory[regressor_type](**kwargs),
             transformer=y_transform
         )
 
-        # # Set random state for preprocessing
-        # if isinstance(preprocessor, ColumnTransformer) and "power" in preprocessor.transformers:
-        #     preprocessor.set_params(**{"power": {"random_state": seed}})
-
         regressor = Pipeline(
             steps=[("preprocessor", preprocessor),
-                   # ("regressor", regressor_factory[regressor_type](random_state=seed, **kwargs))]
                    ("regressor", y_transform_regressor)]
         )
 
-        if hyperparameter_optimization and (regressor_type not in ["MLR", "KRR", "SVR", "GP"]):
-            # Hyperparameter optimization
+        # ATTN: Hyperparameter optimization is only automatically implemented for the following regressors KNN, NN.
+        #
+        if hyperparameter_optimization or (regressor_type in hyperopt_by_default):
             best_estimator, regressor_params = _optimize_hyperparams(X, y, cv_outer=cv_outer, seed=seed,
                                                                      regressor_type=regressor_type, regressor=regressor)
-
-            # if y.shape[1] > 1:
-            #     scores, predictions = cross_validate_multioutput_regressor(best_estimator, X, y, cv_outer)
-            # else:
-            #     scores, predictions = cross_validate_regressor(best_estimator, X, y, cv_outer)
             scores, predictions = cross_validate_regressor(best_estimator, X, y, cv_outer)
-
             scores["best_params"] = regressor_params
 
         else:

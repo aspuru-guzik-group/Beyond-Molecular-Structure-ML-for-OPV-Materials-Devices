@@ -1,3 +1,5 @@
+from typing import Callable, Union
+
 import numpy as np
 from ngboost import NGBRegressor
 from scipy.spatial.distance import jaccard
@@ -171,6 +173,23 @@ regressor_factory: dict[str, type] = {
     "GNN": GNNPredictor,
 }
 
+ecfp_only_kernels: dict[str, Union[str, Callable]] = {
+    "KRR": tanimoto_distance,
+    "GP":  "tanimoto"
+}
+
+
+def get_ecfp_only_kernel(representation: str, scalar_filter: str, regressor_type: str) -> Union[str, Callable]:
+    """Returns the kernel to use for the ECFP-only kernel."""
+    if representation == "ECFP" and scalar_filter is None:
+        kernel = ecfp_only_kernels[regressor_type]
+    else:
+        kernel = "rbf"
+    return kernel
+
+
+hyperopt_by_default: list[str] = ["KNN", "NN"]
+
 
 def model_dropna(model_type: str) -> bool:
     """Returns whether the model_type requires dropping NaNs from data."""
@@ -187,11 +206,10 @@ regressor_search_space: dict[str, dict] = {
     #           "regressor__regressor__selection":     Categorical(["cyclic", "random"]),
     #           },
     # "KRR": {"regressor__regressor__alpha":  Real(1e-5, 1, prior="log-uniform"),
-            # "regressor__regressor__alpha":  Real(1e-3, 1e3, prior="log-uniform"),
-            # "regressor__regressor__kernel": Categorical([tanimoto_distance]),
-            # "regressor__regressor__gamma":  Real(1e-3, 1e3, prior="log-uniform"),
-            # },
-    "KNN": {"regressor__regressor__n_neighbors": Integer(1, 100),
+    #         "regressor__regressor__kernel": Categorical(["linear", "rbf"]),
+    #         "regressor__regressor__gamma":  Real(1e-3, 1e3, prior="log-uniform"),
+    #         },
+    "KNN": {"regressor__regressor__n_neighbors": Integer(1, 50),
             "regressor__regressor__weights":     Categorical(["uniform", "distance"]),
             "regressor__regressor__algorithm":   Categorical(["ball_tree", "kd_tree", "brute"]),
             "regressor__regressor__leaf_size":   Integer(1, 100),
@@ -246,7 +264,6 @@ regressor_search_space: dict[str, dict] = {
     "NN":  {"regressor__regressor__n_layers":           Integer(1, 6),
             "regressor__regressor__n_neurons":          Integer(1, 100),
             "regressor__regressor__activation":         Categorical(["logistic", "tanh", "relu"]),
-            #  "regressor__regressor__solver":             Categorical("lbfgs", "sgd", "adam"),
             "regressor__regressor__alpha":              Real(1e-5, 1e-3, prior="log-uniform"),
             "regressor__regressor__learning_rate":      Categorical(["constant", "invscaling", "adaptive"]),
             "regressor__regressor__learning_rate_init": Real(1e-4, 1e-2, prior="log-uniform"),
