@@ -3,10 +3,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from torch_geometric.data import Batch, Data
+from torch_geometric.loader import DataLoader
+
+import copy
+import numpy as np
 
 import gpytorch
 from sklearn.base import BaseEstimator
-from pytorch_mpnn import smiles2data, DMPNNEncoder
+from sklearn.model_selection import train_test_split
+from pytorch_mpnn import smiles2data, DMPNNPredictor, RevIndexedData
 
 
 def batch_tanimoto_sim(
@@ -157,16 +162,11 @@ class GPRegressor(BaseEstimator):
     def __init__(
         self, 
         kernel='rbf',
-        lr = 5e-2,
-
+        lr = 1e-2,
     ):
         self.ll = gpytorch.likelihoods.GaussianLikelihood()
         self.kernel = kernel
         self.lr = lr
-
-    # def set_params(self, **params):
-    #     for key, val in params.items():
-    #         setattr(self, key, val)
 
     def fit(self, X_train, Y_train):
     
@@ -181,6 +181,12 @@ class GPRegressor(BaseEstimator):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.ll, self.model)
 
+        if torch.cuda.is_available():
+            X_train = X_train.cuda()
+            Y_train = Y_train.cuda()
+            self.model = self.model.cuda()
+            mll = mll.cuda()
+
         self.model.train()
         self.ll.train()
         for _ in range(n_epoch):
@@ -194,17 +200,22 @@ class GPRegressor(BaseEstimator):
     def predict(self, X_test):
         X_test = torch.tensor(X_test, dtype=torch.float)
 
+        if torch.cuda.is_available():
+            X_test = X_test.cuda()
+            self.model = self.model.cuda()
+            self.ll = self.ll.cuda()
+
         self.model.eval()
         self.ll.eval()
         with torch.no_grad():
-            y_pred = self.ll(self.model(X_test)).mean.numpy()
+            y_pred = self.ll(self.model(X_test)).mean.cpu().numpy()
 
         return y_pred
 
 ### GNN ###
 
 class PairDataset(torch.utils.data.Dataset):
-    def __init__(self, donor, acceptor, y):
+    def __init__(self, donor, acceptor, y=None):
         self.donor = donor
         self.acceptor = acceptor
         self.y = y
@@ -215,8 +226,10 @@ class PairDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        return self.donor[idx], self.acceptor[idx], self.y[idx]
-
+        if self.y is None:
+            return self.donor[idx], self.acceptor[idx]
+        return self.donor[idx], self.acceptor[idx], self.y[idx] 
+    
 def pair_collate(self, data_list):
     # gather batches with targets for dataloader
     batchA = Batch.from_data_list([data[0] for data in data_list])
@@ -227,46 +240,110 @@ def pair_collate(self, data_list):
 
 class GNNPredictor(BaseEstimator):
     def __init__(self,
-                 hidden_size=100,
+                 hidden_size=55,
                  depth=2,
                  lr=1e-3):
         
         self.hidden_size = hidden_size
         self.depth = depth
         self.lr = lr
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    # def set_params(self, **params):
-    #     for key, val in params.items():
-    #         setattr(self, key, val)
+    def create_data(self, x_train, y_train = None):
+        d_graphs = [RevIndexedData(smiles2data(s)) for s in x_train.iloc[:,0]]
+        a_graphs = [RevIndexedData(smiles2data(s)) for s in x_train.iloc[:,1]]
+        
+        if y_train is not None:
+            if len(y_train.shape) == 1:
+                y_train = y_train.reshape(-1, 1)
+            if type(y_train) is not np.ndarray:
+                y_train = y_train.to_numpy()
+            y_train = torch.tensor(y_train, dtype=torch.float)
+            self.dataset = PairDataset(d_graphs, a_graphs, y_train)
+        else:
+            self.dataset = PairDataset(d_graphs, a_graphs)
 
-    def create_data(self, x_donor, x_acceptor, y_train):
-        d_graphs = [smiles2data(s) for s in x_donor]
-        a_graphs = [smiles2data(s) for s in x_acceptor]
-        y_train = torch.tensor(y_train, dtype=torch.float)
-        
-        dataset = PairDataset(d_graphs, a_graphs, y_train)
-        
         self.num_node_features = d_graphs[0].x.shape[-1]
         self.num_edge_features = d_graphs[0].edge_attr.shape[-1]
-        self.out_dim = y_train.shape[-1]
+        if y_train is not None:
+            self.out_dim = y_train.shape[-1]
 
     def fit(self, x_train, y_train):
-        import pdb; pdb.set_trace()
+        # prepare dataloaders
         self.create_data(x_train, y_train)
-        self.model = nn.Sequential(
-            DMPNNEncoder(
-                self.hidden_size,
-                self.num_node_features,
-                self.num_edge_features,
-                self.depth
-            ),
-            nn.Linear(self.hidden_size,  self.hidden_size),
-            nn.ReLU(),
-            nn.Linear(self.hidden_size, self.out_dim),
-        )
+        train_ind, val_ind = train_test_split(list(range(len(self.dataset))), test_size=0.1)
+        train_loader = DataLoader(torch.utils.data.Subset(self.dataset, train_ind), batch_size=64, shuffle=True)
+        val_loader = DataLoader(torch.utils.data.Subset(self.dataset, val_ind), batch_size=64, shuffle=False)
 
-        return
+        # make the model
+        self.model = DMPNNPredictor(
+            self.hidden_size, 
+            self.num_node_features,
+            self.num_edge_features, 
+            self.depth,
+            self.out_dim
+        ).to(self.device)
+
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        loss_fn = torch.nn.MSELoss()
+
+        # early stopping
+        patience = 6
+        count = 0 
+        best_loss = np.inf
+
+        n_epoch = 100
+        for _ in range(n_epoch):
+            self.model.train()
+            train_loss = 0
+            for dg, ag, y in train_loader:
+                dg, ag, y = dg.to(self.device), ag.to(self.device), y.to(self.device)
+                optimizer.zero_grad()
+                y_pred = self.model(dg, ag)
+                loss = loss_fn(y_pred, y)
+                loss.backward()
+                optimizer.step()
+                train_loss += loss.cpu().item()
+            print(f'Loss: {train_loss / len(train_loader)}')
+
+            self.model.eval()
+            with torch.no_grad():
+                val_loss = 0
+                for dg, ag, y in val_loader:
+                    dg, ag, y = dg.to(self.device), ag.to(self.device), y.to(self.device)
+                    y_pred = self.model(dg, ag)
+                    loss = loss_fn(y_pred, y)
+                    val_loss += loss.cpu().item()
+            val_loss /= len(val_loader)
+            print(f'Val loss: {val_loss}')
+
+            if val_loss < best_loss:
+                best_loss = val_loss
+                best_model = self.model.state_dict()
+                count = 0
+            else:
+                count += 1
+
+            if count >= patience:
+                print(f'Early stopping reached. Best loss: {best_loss}')
+                self.model.load_state_dict(best_model)
+                break
+    
     
     def predict(self, x_test):
-        return
+        self.create_data(x_test)
+        loader = DataLoader(self.dataset, batch_size=64, shuffle=False)
+        y_collect = []
+        self.model.to(self.device)
+        self.model.eval()
+        with torch.no_grad():
+            for dg, ag in loader:
+                dg, ag = dg.to(self.device), ag.to(self.device)
+                y_pred = self.model(dg, ag)
+                y_collect.append(y_pred)
+
+        y_collect = torch.concat(y_collect, axis=0)
+        return y_collect.cpu().numpy().reshape(-1)
+
+
 

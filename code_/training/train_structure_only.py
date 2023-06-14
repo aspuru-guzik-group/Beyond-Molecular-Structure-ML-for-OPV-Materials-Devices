@@ -211,73 +211,76 @@ def main_processing_only(dataset: pd.DataFrame,
 
 
 def main_representation_model_grid(target_feats: list[str], hyperopt: bool = False) -> None:
-    for model in regressor_factory:
-        opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
+    # for model in regressor_factory:
+    model = "GNN"
+    opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
-        if model == "GNN":
-            # import pdb; pdb.set_trace()
-            main_graphs_only(dataset=opv_dataset,
-                             regressor_type=model,
-                             target_features=target_feats,
-                             hyperparameter_optimization=hyperopt)
+    if model == "GNN":
+        main_graphs_only(dataset=opv_dataset,
+                            regressor_type=model,
+                            target_features=target_feats,
+                            hyperparameter_optimization=hyperopt)
 
-        else:
-            # ECFP
-            main_ecfp_only(dataset=opv_dataset,
-                           regressor_type=model,
-                           target_features=target_feats,
-                           hyperparameter_optimization=hyperopt)
-            # mordred
-            main_mordred_only(dataset=opv_dataset,
-                              regressor_type=model,
-                              target_features=target_feats,
-                              hyperparameter_optimization=hyperopt)
+        # else:
+        #     # ECFP
+        #     main_ecfp_only(dataset=opv_dataset,
+        #                    regressor_type=model,
+        #                    target_features=target_feats,
+        #                    hyperparameter_optimization=hyperopt)
+        #     # mordred
+        #     main_mordred_only(dataset=opv_dataset,
+        #                       regressor_type=model,
+        #                       target_features=target_feats,
+        #                       hyperparameter_optimization=hyperopt)
 
-            # OHE
-            main_ohe_only(dataset=opv_dataset,
-                          regressor_type=model,
-                          target_features=target_feats,
-                          hyperparameter_optimization=hyperopt)
+        #     # OHE
+        #     main_ohe_only(dataset=opv_dataset,
+        #                   regressor_type=model,
+        #                   target_features=target_feats,
+        #                   hyperparameter_optimization=hyperopt)
 
-            # tokenized
-            for struct_repr in ["SELFIES", "SMILES"]:
-                main_tokenized_only(dataset=opv_dataset,
-                                    representation=struct_repr,
-                                    regressor_type=model,
-                                    target_features=target_feats,
-                                    hyperparameter_optimization=hyperopt)
+        #     # tokenized
+        #     for struct_repr in ["SELFIES", "SMILES"]:
+        #         main_tokenized_only(dataset=opv_dataset,
+        #                             representation=struct_repr,
+        #                             regressor_type=model,
+        #                             target_features=target_feats,
+        #                             hyperparameter_optimization=hyperopt)
 
-            # material properties
-            main_properties_only(dataset=opv_dataset,
-                                 regressor_type=model,
-                                 target_features=target_feats,
-                                 hyperparameter_optimization=hyperopt)
+        #     # material properties
+        #     main_properties_only(dataset=opv_dataset,
+        #                          regressor_type=model,
+        #                          target_features=target_feats,
+        #                          hyperparameter_optimization=hyperopt)
 
-            # processing only
-            main_processing_only(dataset=opv_dataset,
-                                 regressor_type=model,
-                                 target_features=target_feats,
-                                 hyperparameter_optimization=hyperopt)
+        #     # processing only
+        #     main_processing_only(dataset=opv_dataset,
+        #                          regressor_type=model,
+        #                          target_features=target_feats,
+        #                          hyperparameter_optimization=hyperopt)
 
 
 if __name__ == "__main__":
+    for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+        main_representation_model_grid(target_feats=[target], hyperopt=False)
+
     # for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
     #     for h_opt in [False, True]:
     #         main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
     
     # main_processing_only(get_appropriate_dataset("GP"), "GP", ["calculated PCE (%)"], False)
 
-    for h_opt in [True]:
-        for target in ["calculated PCE (%)"]:
-            for model in ["RF", "HGB", "NN", "GP"]:
-                main_ecfp_only(dataset=get_appropriate_dataset(model),
-                                 regressor_type=model,
-                                    target_features=[target],
-                                    hyperparameter_optimization=h_opt,)
-                main_mordred_only(dataset=get_appropriate_dataset(model),
-                                    regressor_type=model,
-                                    target_features=[target],
-                                    hyperparameter_optimization=h_opt,)
+    # for h_opt in [True]:
+    #     for target in ["calculated PCE (%)"]:
+    #         for model in ["RF", "HGB", "NN", "GP"]:
+    #             main_ecfp_only(dataset=get_appropriate_dataset(model),
+    #                              regressor_type=model,
+    #                                 target_features=[target],
+    #                                 hyperparameter_optimization=h_opt,)
+    #             main_mordred_only(dataset=get_appropriate_dataset(model),
+    #                                 regressor_type=model,
+    #                                 target_features=[target],
+    #                                 hyperparameter_optimization=h_opt,)
 
     #         main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
 
