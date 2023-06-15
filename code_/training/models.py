@@ -1,6 +1,10 @@
 from typing import Callable, Union
 
 import numpy as np
+import torch
+import torch.nn as nn
+
+
 from ngboost import NGBRegressor
 from scipy.spatial.distance import jaccard
 from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
@@ -10,9 +14,10 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.svm import SVR
 from skopt.space import Categorical, Integer, Real
+from skorch import NeuralNetRegressor
 from xgboost import XGBRegressor
 
-from pytorch_models import GNNPredictor, GPRegressor
+from pytorch_models import GNNPredictor, GPRegressor, NNModel
 
 
 def tanimoto_distance(fp1: np.array, fp2: np.array, **kwargs) -> float:
@@ -38,64 +43,20 @@ def tanimoto_distance(fp1: np.array, fp2: np.array, **kwargs) -> float:
 #         super().__init__(kernel=tanimoto_distance)
 
 
-# class OrthoLinear(torch.nn.Linear):
-#     def reset_parameters(self):
-#         torch.nn.init.orthogonal_(self.weight)
-#         if self.bias is not None:
-#             torch.nn.init.zeros_(self.bias)
-#
-#
-# class XavierLinear(torch.nn.Linear):
-#     def reset_parameters(self):
-#         torch.nn.init.xavier_normal_(self.weight)
-#         if self.bias is not None:
-#             torch.nn.init.zeros_(self.bias)
-#
-#
-# class NNModel(nn.Module):
-#     def __init__(self, config):
-#         """Instantiates NN linear model with arguments from
-#
-#         Args:
-#             config (args): Model Configuration parameters.
-#         """
-#         super(NNModel, self).__init__()
-#         self.embeds: nn.Sequential = nn.Sequential(  # ATTN: Defines first two layers: input and embedding
-#             nn.Linear(input_size, embedding_size),
-#             nn.ReLU(),
-#             OrthoLinear(embedding_size, hidden_size),
-#             nn.ReLU(),
-#         )
-#         self.linearlayers: nn.ModuleList = nn.ModuleList(  # NOTE: Add n hidden layers same size as embedding layer
-#             [
-#                 nn.Sequential(
-#                     OrthoLinear(hidden_size, hidden_size), nn.ReLU()
-#                 )
-#                 for _ in range(n_layers)
-#             ]
-#         )
-#
-#         self.output: nn.Linear = nn.Linear(hidden_size, output_size)  # NOTE: Final output layer
-#
-#     def forward(self, x: torch.tensor, **kwargs):
-#         """
-#         Args:
-#             x (torch.tensor): Shape[batch_size, input_size]
-#
-#         Returns:
-#             _type_: _description_
-#         """
-#         embeds: torch.tensor = self.embeds(x)
-#         for i, layer in enumerate(self.linearlayers):
-#             embeds: torch.tensor = layer(embeds)
-#         output: torch.tensor = self.output(embeds)
-#         return output
-#
-#
-# class NNRegressor(NeuralNetRegressor):
-#     def __init__(self, *args, **kwargs):
+# class ANNRegressor(NeuralNetRegressor):
+#     def __init__(self, *args, criterion=nn.CrossEntropyLoss(), **kwargs):
 #         module = NNModel
-#         super().__init__(module, *args, **kwargs)
+#         super().__init__(module, *args, criterion=criterion, **kwargs)
+
+def get_skorch_nn():
+    return NeuralNetRegressor(NNModel,
+                              criterion=nn.CrossEntropyLoss,
+                              optimizer=torch.optim.Adam,
+                              lr=0.01,
+                              max_epochs=100,
+                              # batch_size=128,
+                              device="cuda" if torch.cuda.is_available() else "cpu",
+                              )
 
 
 class NNRegressor(MLPRegressor):
@@ -171,6 +132,7 @@ regressor_factory: dict[str, type] = {
     # "NN":    MLPRegressor,  # ATTN: Not actually this one?
     "NN":  NNRegressor,
     "GNN": GNNPredictor,
+    "ANN": get_skorch_nn,
 }
 
 ecfp_only_kernels: dict[str, Union[str, Callable]] = {

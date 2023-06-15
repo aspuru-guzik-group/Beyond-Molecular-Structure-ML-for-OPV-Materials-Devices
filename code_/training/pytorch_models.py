@@ -1,21 +1,17 @@
+import gpytorch
+import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
-from torch_geometric.data import Batch, Data
-from torch_geometric.loader import DataLoader
-
-import copy
-import numpy as np
-
-import gpytorch
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split
-from pytorch_mpnn import smiles2data, DMPNNPredictor, RevIndexedData
+from torch_geometric.data import Batch
+from torch_geometric.loader import DataLoader
+
+from pytorch_mpnn import DMPNNPredictor, RevIndexedData, smiles2data
 
 
 def batch_tanimoto_sim(
-    x1: torch.Tensor, x2: torch.Tensor, eps: float = 1e-6
+        x1: torch.Tensor, x2: torch.Tensor, eps: float = 1e-6
 ) -> torch.Tensor:
     """
     Tanimoto between two batched tensors, across last 2 dimensions.
@@ -24,11 +20,12 @@ def batch_tanimoto_sim(
     # Tanimoto distance is proportional to (<x, y>) / (||x||^2 + ||y||^2 - <x, y>) where x and y are bit vectors
     assert x1.ndim >= 2 and x2.ndim >= 2
     dot_prod = torch.matmul(x1, torch.transpose(x2, -1, -2))
-    x1_sum = torch.sum(x1**2, dim=-1, keepdims=True)
-    x2_sum = torch.sum(x2**2, dim=-1, keepdims=True)
+    x1_sum = torch.sum(x1 ** 2, dim=-1, keepdims=True)
+    x2_sum = torch.sum(x2 ** 2, dim=-1, keepdims=True)
     return (dot_prod + eps) / (
-        eps + x1_sum + torch.transpose(x2_sum, -1, -2) - dot_prod
+            eps + x1_sum + torch.transpose(x2_sum, -1, -2) - dot_prod
     )
+
 
 class BitDistance(torch.nn.Module):
     r"""
@@ -72,18 +69,19 @@ class TanimotoKernel(gpytorch.kernels.Kernel):
     ''' Tanimoto kernel from FlowMO and GAUCHE
     (https://github.com/leojklarner/gauche/blob/main/gprotorch/kernels/fingerprint_kernels/tanimoto_kernel.py)
     '''
+
     def __init__(self, metric="tanimoto", **kwargs):
         super(TanimotoKernel, self).__init__(**kwargs)
         self.metric = metric
 
     def covar_dist(
-        self,
-        x1,
-        x2,
-        last_dim_is_batch=False,
-        dist_postprocess_func=lambda x: x,
-        postprocess=True,
-        **params,
+            self,
+            x1,
+            x2,
+            last_dim_is_batch=False,
+            dist_postprocess_func=lambda x: x,
+            postprocess=True,
+            **params,
     ):
         r"""
         This is a helper method for computing the bit vector similarity between
@@ -116,8 +114,8 @@ class TanimotoKernel(gpytorch.kernels.Kernel):
 
         # Cache the Distance object or else JIT will recompile every time
         if (
-            not self.distance_module
-            or self.distance_module._postprocess != dist_postprocess_func
+                not self.distance_module
+                or self.distance_module._postprocess != dist_postprocess_func
         ):
             self.distance_module = BitDistance(dist_postprocess_func)
 
@@ -160,16 +158,16 @@ class GP(gpytorch.models.ExactGP):
 class GPRegressor(BaseEstimator):
 
     def __init__(
-        self, 
-        kernel='rbf',
-        lr = 1e-2,
+            self,
+            kernel='rbf',
+            lr=1e-2,
     ):
         self.ll = gpytorch.likelihoods.GaussianLikelihood()
         self.kernel = kernel
         self.lr = lr
 
     def fit(self, X_train, Y_train):
-    
+
         n_epoch = 100
 
         X_train = torch.tensor(X_train, dtype=torch.float)
@@ -212,6 +210,7 @@ class GPRegressor(BaseEstimator):
 
         return y_pred
 
+
 ### GNN ###
 
 class PairDataset(torch.utils.data.Dataset):
@@ -222,14 +221,15 @@ class PairDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.donor)
-    
+
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
         if self.y is None:
             return self.donor[idx], self.acceptor[idx]
-        return self.donor[idx], self.acceptor[idx], self.y[idx] 
-    
+        return self.donor[idx], self.acceptor[idx], self.y[idx]
+
+
 def pair_collate(self, data_list):
     # gather batches with targets for dataloader
     batchA = Batch.from_data_list([data[0] for data in data_list])
@@ -243,16 +243,16 @@ class GNNPredictor(BaseEstimator):
                  hidden_size=55,
                  depth=2,
                  lr=1e-3):
-        
+
         self.hidden_size = hidden_size
         self.depth = depth
         self.lr = lr
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    def create_data(self, x_train, y_train = None):
-        d_graphs = [RevIndexedData(smiles2data(s)) for s in x_train.iloc[:,0]]
-        a_graphs = [RevIndexedData(smiles2data(s)) for s in x_train.iloc[:,1]]
-        
+    def create_data(self, x_train, y_train=None):
+        d_graphs = [RevIndexedData(smiles2data(s)) for s in x_train.iloc[:, 0]]
+        a_graphs = [RevIndexedData(smiles2data(s)) for s in x_train.iloc[:, 1]]
+
         if y_train is not None:
             if len(y_train.shape) == 1:
                 y_train = y_train.reshape(-1, 1)
@@ -277,9 +277,9 @@ class GNNPredictor(BaseEstimator):
 
         # make the model
         self.model = DMPNNPredictor(
-            self.hidden_size, 
+            self.hidden_size,
             self.num_node_features,
-            self.num_edge_features, 
+            self.num_edge_features,
             self.depth,
             self.out_dim
         ).to(self.device)
@@ -289,7 +289,7 @@ class GNNPredictor(BaseEstimator):
 
         # early stopping
         patience = 6
-        count = 0 
+        count = 0
         best_loss = np.inf
 
         n_epoch = 100
@@ -328,8 +328,7 @@ class GNNPredictor(BaseEstimator):
                 print(f'Early stopping reached. Best loss: {best_loss}')
                 self.model.load_state_dict(best_model)
                 break
-    
-    
+
     def predict(self, x_test):
         self.create_data(x_test)
         loader = DataLoader(self.dataset, batch_size=64, shuffle=False)
@@ -346,4 +345,56 @@ class GNNPredictor(BaseEstimator):
         return y_collect.cpu().numpy().reshape(-1)
 
 
+class OrthoLinear(torch.nn.Linear):
+    def reset_parameters(self):
+        torch.nn.init.orthogonal_(self.weight)
+        if self.bias is not None:
+            torch.nn.init.zeros_(self.bias)
 
+
+class XavierLinear(torch.nn.Linear):
+    def reset_parameters(self):
+        torch.nn.init.xavier_normal_(self.weight)
+        if self.bias is not None:
+            torch.nn.init.zeros_(self.bias)
+
+
+class NNModel(nn.Module):
+    def __init__(self,
+                 input_size=128,
+                 embedding_size=200,
+                 hidden_size=2048,
+                 output_size=1,
+                 n_layers=3
+                 ):
+        """Instantiates NN linear model with arguments from
+
+        Args:
+            config (args): Model Configuration parameters.
+        """
+        super(NNModel, self).__init__()
+        self.embeds: nn.Sequential = nn.Sequential(  # Defines first two layers: input and embedding
+            nn.Linear(input_size, embedding_size),
+            nn.ReLU(),
+            OrthoLinear(embedding_size, hidden_size),
+            nn.ReLU(),
+        )
+        self.linearlayers: nn.ModuleList = nn.ModuleList(  # Add n hidden layers same size as embedding layer
+            [nn.Sequential(OrthoLinear(hidden_size, hidden_size), nn.ReLU()) for _ in range(n_layers)]
+        )
+
+        self.output: nn.Linear = nn.Linear(hidden_size, output_size)  # Final output layer
+
+    def forward(self, x: torch.tensor, **kwargs):
+        """
+        Args:
+            x (torch.tensor): Shape[batch_size, input_size]
+
+        Returns:
+            _type_: _description_
+        """
+        embeds: torch.tensor = self.embeds(x)
+        for i, layer in enumerate(self.linearlayers):
+            embeds: torch.tensor = layer(embeds)
+        output: torch.tensor = self.output(embeds)
+        return output

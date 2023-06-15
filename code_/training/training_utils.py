@@ -49,7 +49,7 @@ def train_regressor(dataset: pd.DataFrame,
                     hyperparameter_optimization: bool,
                     ) -> None:
 
-    try:
+    # try:
         scores, predictions = _prepare_data(dataset=dataset,
                                             representation=representation,
                                             structural_features=structural_features,
@@ -69,8 +69,8 @@ def train_regressor(dataset: pd.DataFrame,
                      regressor_type=regressor_type,
                      hyperparameter_optimization=hyperparameter_optimization)
 
-    except Exception as e:
-        print(f"\n\nEXCEPTION ENCOUNTERED. Failed to train {regressor_type} on {representation}...\n\n", e)
+    # except Exception as e:
+    #     print(f"\n\nEXCEPTION ENCOUNTERED. Failed to train {regressor_type} on {representation}...\n\n", e)
 
 
 def get_hgb_features(filter: str, regressor_type: str) -> str:
@@ -180,9 +180,17 @@ def _run(X, y,
             y_transform: Pipeline = generate_feature_pipeline(transform_type)
 
         y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
-            regressor=regressor_factory[regressor_type](**kwargs),
+            # regressor=regressor_factory[regressor_type](**kwargs),
+            regressor=regressor_factory[regressor_type](),
             transformer=y_transform
         )
+
+        if regressor_type == "ANN":
+            y = y.values.reshape(-1, 1)
+            X = X.values
+            print(y.shape)
+            preprocessor = MinMaxScaler()
+            y_transform_regressor = regressor_factory[regressor_type]()
 
         regressor = Pipeline(
             steps=[("preprocessor", preprocessor),

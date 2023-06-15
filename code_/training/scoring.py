@@ -70,10 +70,18 @@ def process_scores(scores: dict[int, dict[str, float]]) -> dict[Union[int, str],
     # stderr_r2 = round(stdev_r2 / np.sqrt(sample_size), 2)
     print("Average scores:\t", f"r: {avg_r}±{stdev_r}\t", f"r2: {avg_r2}±{stdev_r2}")
 
-    score_types: list[str] = ["r", "r2", "rmse", "mae"]
-    avgs: list[float] = [np.mean([seed[f"test_{score}"] for seed in scores.values()]) for score in score_types]
-    stdevs: list[float] = [np.std([seed[f"test_{score}"] for seed in scores.values()]) for score in score_types]
+    first_key = list(scores.keys())[0]
+    score_types: set[str] = set(scores[first_key].keys()) - {"fit_time", "score_time"}
+    # score_types: list[str] = [score.replace("test_", "") for score in score_types]
+    avgs: list[float] = [np.mean([seed[score] for seed in scores.values()]) for score in score_types]
+    stdevs: list[float] = [np.std([seed[score] for seed in scores.values()]) for score in score_types]
     std_errs: list[float] = [stdev / np.sqrt(sample_size) for stdev in stdevs]
+
+    # score_types: list[str] = ["r", "r2", "rmse", "mae"]
+    # avgs: list[float] = [np.mean([seed[f"test_{score}"] for seed in scores.values()]) for score in score_types]
+    # stdevs: list[float] = [np.std([seed[f"test_{score}"] for seed in scores.values()]) for score in score_types]
+    # std_errs: list[float] = [stdev / np.sqrt(sample_size) for stdev in stdevs]
+    score_types: list[str] = [score.replace("test_", "") for score in score_types]
     for score, avg, stdev, stderr in zip(score_types, avgs, stdevs, std_errs):
         scores[f"{score}_avg"] = abs(avg) if score in ["rmse", "mae"] else avg
         scores[f"{score}_stdev"] = stdev
@@ -237,29 +245,29 @@ def mae_pce_eqn(y_true: pd.Series, y_pred: np.ndarray) -> float:
 score_lookup: dict[str, dict[str, Callable]] = {
     "r":    {
         "PCE":     r_pce,
-        "VOC":     r_voc,
-        "JSC":     r_jsc,
+        "Voc":     r_voc,
+        "Jsc":     r_jsc,
         "FF":      r_ff,
         "PCE_eqn": r_pce_eqn,
     },
     "r2":   {
         "PCE":     r2_pce,
-        "VOC":     r2_voc,
-        "JSC":     r2_jsc,
+        "Voc":     r2_voc,
+        "Jsc":     r2_jsc,
         "FF":      r2_ff,
         "PCE_eqn": r2_pce_eqn,
     },
     "rmse": {
         "PCE":     rmse_pce,
-        "VOC":     rmse_voc,
-        "JSC":     rmse_jsc,
+        "Voc":     rmse_voc,
+        "Jsc":     rmse_jsc,
         "FF":      rmse_ff,
         "PCE_eqn": rmse_pce_eqn,
     },
     "mae":  {
         "PCE":     mae_pce,
-        "VOC":     mae_voc,
-        "JSC":     mae_jsc,
+        "Voc":     mae_voc,
+        "Jsc":     mae_jsc,
         "FF":      mae_ff,
         "PCE_eqn": mae_pce_eqn,
     },
@@ -299,7 +307,13 @@ def cross_validate_multioutput_regressor(regressor, X, y, cv) -> tuple[dict[str,
                                     product(["r", "r2", "rmse", "mae"], ["PCE", "VOC", "JSC", "FF", "PCE_eqn"])}
     scores = cross_validate(regressor, X, y,
                             cv=cv,
-                            scoring=scoring,
+                            scoring={
+                                **scoring,
+                                "r":    r_scorer,
+                                "r2":   r2_scorer,
+                                "rmse": rmse_scorer,
+                                "mae":  mae_scorer,
+                            },
                             n_jobs=-1)
 
     predictions = cross_val_predict(regressor, X, y,

@@ -2,7 +2,6 @@ import pandas as pd
 
 from data_handling import save_results
 from filter_data import get_appropriate_dataset
-from models import regressor_factory
 from pipeline_utils import radius_to_bits
 from scoring import process_scores
 from training_utils import run_graphs_only, train_regressor
@@ -251,7 +250,8 @@ def main_processing_only(dataset: pd.DataFrame,
 def main_representation_model_grid(target_feats: list[str], hyperopt: bool = False) -> None:
     transform_type: str = "Standard"
 
-    for model in regressor_factory:
+    # for model in regressor_factory:
+    for model in ["RF"]:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
         if model == "GNN":
@@ -321,7 +321,20 @@ if __name__ == "__main__":
 
     main_representation_model_grid(target_feats=["calculated PCE (%)"], hyperopt=False)
 
-    # main_graph_embeddings_only(get_appropriate_dataset("RF"), "RF", ["calculated PCE (%)"], "Standard", False)
+    # main_properties_only(dataset=get_appropriate_dataset("RF"),
+    #                      regressor_type="RF",
+    #                      target_features=["calculated PCE (%)"],
+    #                      transform_type="Standard",
+    #                      hyperparameter_optimization=False)
+
+    main_graph_embeddings_only(dataset=get_appropriate_dataset("NN"),
+                               regressor_type="NN",
+                               target_features=["calculated PCE (%)"],
+                               transform_type="Standard",
+                               hyperparameter_optimization=False)
+
+    # model = "ANN"
+    # main_graph_embeddings_only(get_appropriate_dataset(model), model, ["calculated PCE (%)"], "Standard", False)
 
     # for h_opt in [True]:
     #     for target in ["calculated PCE (%)"]:

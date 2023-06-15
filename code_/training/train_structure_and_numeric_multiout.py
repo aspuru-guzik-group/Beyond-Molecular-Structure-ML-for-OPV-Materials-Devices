@@ -139,8 +139,9 @@ if __name__ == "__main__":
     #     main_representation_and_fabrication_grid(
     #         target_feats=["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"], hyperopt=h_opt)
 
-    main_mordred_and_numeric(dataset=get_appropriate_dataset("RF"),
-                             regressor_type="RF",
+    model = "NN"
+    main_ecfp_and_numeric(dataset=get_appropriate_dataset(model),
+                             regressor_type=model,
                              scalar_filter="device architecture",
                              subspace_filter=None,
                              target_features=["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"],
