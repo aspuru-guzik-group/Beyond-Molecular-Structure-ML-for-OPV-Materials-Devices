@@ -132,7 +132,7 @@ regressor_factory: dict[str, type] = {
     # "NN":    MLPRegressor,  # ATTN: Not actually this one?
     "NN":  NNRegressor,
     "GNN": GNNPredictor,
-    "ANN": get_skorch_nn,
+    # "ANN": get_skorch_nn,
 }
 
 ecfp_only_kernels: dict[str, Union[str, Callable]] = {

@@ -319,7 +319,7 @@ if __name__ == "__main__":
     #     for h_opt in [False, True]:
     #         main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
 
-    main_representation_model_grid(target_feats=["calculated PCE (%)"], hyperopt=False)
+    # main_representation_model_grid(target_feats=["calculated PCE (%)"], hyperopt=False)
 
     # main_properties_only(dataset=get_appropriate_dataset("RF"),
     #                      regressor_type="RF",

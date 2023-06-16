@@ -71,7 +71,7 @@ def process_scores(scores: dict[int, dict[str, float]]) -> dict[Union[int, str],
     print("Average scores:\t", f"r: {avg_r}±{stdev_r}\t", f"r2: {avg_r2}±{stdev_r2}")
 
     first_key = list(scores.keys())[0]
-    score_types: set[str] = set(scores[first_key].keys()) - {"fit_time", "score_time"}
+    score_types: list[str] = [key for key in scores[first_key].keys() if key.startswith("test_")]
     # score_types: list[str] = [score.replace("test_", "") for score in score_types]
     avgs: list[float] = [np.mean([seed[score] for seed in scores.values()]) for score in score_types]
     stdevs: list[float] = [np.std([seed[score] for seed in scores.values()]) for score in score_types]
