@@ -141,6 +141,15 @@ if __name__ == "__main__":
 
     main_representation_and_fabrication_grid(target_feats=["calculated PCE (%)"], hyperopt=False)
 
+    # model = "NN"
+    # main_mordred_and_numeric(dataset=get_appropriate_dataset(model),
+    #                          regressor_type=model,
+    #                          scalar_filter="fabrication",
+    #                          subspace_filter=None,
+    #                          target_features=["calculated PCE (%)"],
+    #                          transform_type="Standard",
+    #                          hyperparameter_optimization=False, )
+
     # model = "KNN"
     # main_ecfp_and_numeric(dataset=get_appropriate_dataset(model),
     #                       regressor_type=model,
