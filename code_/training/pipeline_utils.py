@@ -3,6 +3,9 @@ from pathlib import Path
 from typing import Callable, Optional, Union
 
 import pandas as pd
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer, KNNImputer, SimpleImputer
+from sklearn.impute._base import _BaseImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, PowerTransformer, QuantileTransformer, StandardScaler
 
@@ -191,3 +194,13 @@ def get_feature_pipelines(unrolled_features: list[str],
     # if minmax_numeric_feats:
     #     transformers.append(("minmax", MinMaxScaler(), minmax_numeric_feats))
     return transformers
+
+
+imputer_factory: dict[str, _BaseImputer] = {
+    "mean": SimpleImputer(strategy="mean"),
+    "median": SimpleImputer(strategy="median"),
+    "most-frequent": SimpleImputer(strategy="most_frequent"),
+    "uniform KNN": KNNImputer(weights="uniform"),
+    "distance KNN": KNNImputer(weights="distance"),
+    "iterative": IterativeImputer(sample_posterior=True),
+}

@@ -1,21 +1,31 @@
 import json
 from math import ceil
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy
+import shap
 import sklearn
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.model_selection import KFold
 
-from code_ import DATASETS
-from code_.pipeline import SUBSETS
+# from code_ import DATASETS
+# from code_.pipeline import SUBSETS
 from code_.training.pipeline_utils import unroll_lists_to_columns, unroll_solvent_descriptors
 
+HERE = Path(__file__).parent
+DATASETS = HERE.parent.parent / "datasets"
 dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"
+solvents = DATASETS / "Min_2020_n558" / "raw" / "solvent properties_nan.csv"
+
+with open("subsets.json", "r") as f:
+    SUBSETS: dict[str, list[str]] = json.load(f)
+
+# dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"
 opv_dataset = pd.read_pickle(dataset)
-solvent_properties = pd.read_csv(DATASETS / "Min_2020_n558" / "raw" / "solvent properties.csv", index_col="Name")
+solvent_properties = pd.read_csv(solvents, index_col="Name")
 with open(DATASETS / "Min_2020_n558" / "selected_properties.json", "r") as f:
     solvent_descriptors: list[str] = json.load(f)["solvent"]
 radius = 6
@@ -23,7 +33,7 @@ n_bits = 4096
 
 subsets: dict[str, list[str]] = SUBSETS
 
-with open("../code_/training/seeds.json", "r") as f:
+with open("seeds.json", "r") as f:
     seeds: list[int] = json.load(f)
 
 # Define columns in subset
@@ -63,9 +73,9 @@ print(len(opv_dataset))
 unroll_fp_cols: list[str] = [f"Donor ECFP{2 * radius}_{n_bits}", f"Acceptor ECFP{2 * radius}_{n_bits}"]
 new_fp_cols: list[str] = [*[f"D EFCP{2 * radius}_bit{i}" for i in range(n_bits)],
                           *[f"A ECFP{2 * radius}_bit{i}" for i in range(n_bits)]]
-opv_fp: pd.DataFrame = unroll_lists_to_columns(opv_dataset, unroll_fp_cols, new_fp_cols)
+opv_fp: pd.DataFrame = unroll_lists_to_columns(opv_dataset[unroll_fp_cols], unroll_fp_cols, new_fp_cols)
 
-opv_solv_desc: pd.DataFrame = unroll_solvent_descriptors(opv_dataset)
+opv_solv_desc: pd.DataFrame = unroll_solvent_descriptors(opv_dataset[["solvent descriptors", "solvent additive descriptors"]])
 
 opv_mp = opv_dataset[subsets["material properties"]]
 
@@ -188,24 +198,24 @@ def run_rf(random_state: int) -> list[float]:
     return outer_r_scores
 
 
-r_scores = []
-for state in seeds:
-    results = run_rf(state)
-    r_scores.extend(results)
-print("overall mean:\t", np.mean(r_scores), "\toverall stdev:\t", np.std(r_scores))
-
+# r_scores = []
 # for state in seeds:
-#     print("Training on the whole dataset now...")
-#     rf_outer = HistGradientBoostingRegressor(random_state=seeds[0])
-#     rf_outer.fit(X, y)
-#     # predicted = rf_outer.predict(X)
-#
-#
-#     explainer = shap.TreeExplainer(rf_outer, X)
-#     shap_values = explainer(X, check_additivity=False)
-#     # shap.plots.bar(shap_values, show=False)
-#     # plt.tight_layout()
-#     # plt.show()
-#     shap.plots.beeswarm(shap_values, max_display=43, show=False)
-#     plt.tight_layout()
-#     plt.show()
+#     results = run_rf(state)
+#     r_scores.extend(results)
+# print("overall mean:\t", np.mean(r_scores), "\toverall stdev:\t", np.std(r_scores))
+
+for state in seeds:
+    print("Training on the whole dataset now...")
+    rf_outer = HistGradientBoostingRegressor(random_state=seeds[0])
+    rf_outer.fit(X, y)
+    # predicted = rf_outer.predict(X)
+
+
+    explainer = shap.TreeExplainer(rf_outer, X)
+    shap_values = explainer(X, check_additivity=False)
+    # shap.plots.bar(shap_values, show=False)
+    # plt.tight_layout()
+    # plt.show()
+    shap.plots.beeswarm(shap_values, max_display=13, show=False)
+    plt.tight_layout()
+    plt.show()

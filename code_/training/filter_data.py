@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 import pandas as pd
 
@@ -16,9 +16,10 @@ with open(HERE / "subsets.json", "r") as f:
     SUBSETS: dict[str, list[str]] = json.load(f)
 
 
-def get_appropriate_dataset(model: str) -> pd.DataFrame:
-    if model == "HGB":
+def get_appropriate_dataset(model: str, imputer: Optional[str] = None) -> pd.DataFrame:
+    if model == "HGB" or imputer:
         dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset_nans.pkl"
+        print("Using dataset with NaNs")
     else:
         dataset = DATASETS / "Min_2020_n558" / "cleaned_dataset.pkl"
 

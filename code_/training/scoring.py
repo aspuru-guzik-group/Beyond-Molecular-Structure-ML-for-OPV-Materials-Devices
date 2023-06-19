@@ -304,7 +304,7 @@ def cross_validate_multioutput_regressor(regressor, X, y, cv) -> tuple[dict[str,
     """
     # Create scoring dictionary
     scoring: dict[str, Callable] = {f"{score}_{output}": multi_scorer(score, output) for score, output in
-                                    product(["r", "r2", "rmse", "mae"], ["PCE", "VOC", "JSC", "FF", "PCE_eqn"])}
+                                    product(["r", "r2", "rmse", "mae"], ["PCE", "Voc", "Jsc", "FF", "PCE_eqn"])}
     scores = cross_validate(regressor, X, y,
                             cv=cv,
                             scoring={

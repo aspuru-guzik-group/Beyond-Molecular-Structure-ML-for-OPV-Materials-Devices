@@ -353,20 +353,20 @@ if __name__ == "__main__":
 
     # Model, representation and processing search heatmaps
     # for target in ["PCE", "Voc", "Jsc", "FF"]:
-    for target in ["PCE"]:
-        results = root / "results" / f"target_{target}"
+    # for target in ["PCE"]:
+    #     results = root / "results" / f"target_{target}"
 
         # Create heatmap
-        for score in ["r", "r2", "rmse", "mae"]:
-            create_grid_search_heatmap(results, score, var="stderr")
+        # for score in ["r", "r2", "rmse", "mae"]:
+        #     create_grid_search_heatmap(results, score, var="stderr")
 
         # for score in ["r", "r2", "rmse", "mae"]:
         #     create_fabrication_grid_heatmap(results, score, var="stderr")
 
     # Subspace search heatmaps
-    # for target in ["PCE", "Voc", "Jsc", "FF"]:
-    #     results = root / "results" / f"target_{target}"
-    #
-    #     # Create heatmap
-    #     for score in ["r", "r2", "rmse", "mae"]:
-    #         create_subspace_grid_heatmap(results, score, var="stderr")
+    for target in ["PCE", "Voc", "Jsc", "FF"]:
+        results = root / "results" / f"target_{target}"
+
+        # Create heatmap
+        for score in ["r", "r2", "rmse", "mae"]:
+            create_subspace_grid_heatmap(results, score, var="stderr")

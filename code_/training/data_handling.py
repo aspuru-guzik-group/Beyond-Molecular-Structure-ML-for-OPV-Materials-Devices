@@ -47,11 +47,16 @@ def _save(scores: Dict[int, Dict[str, float]],
           predictions: pd.DataFrame,
           results_dir: Path,
           regressor_type: str,
+          imputer: Optional[str],
           hyperparameter_optimization: bool,
           ) -> None:
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    fname_root: str = f"{regressor_type}_hyperopt" if hyperparameter_optimization else regressor_type
+    fname_root = f"{regressor_type}_{imputer} imputer" if imputer else regressor_type
+    fname_root = f"{fname_root}_hyperopt" if hyperparameter_optimization else fname_root
+
+    # fname_root: str = f"{regressor_type}_hyperopt" if hyperparameter_optimization else regressor_type
+    print("Filename:", fname_root)
 
     scores_file: Path = results_dir / f"{fname_root}_scores.json"
     with open(scores_file, "w") as f:
@@ -71,6 +76,7 @@ def save_results(scores: dict,
                  subspace_filter: Optional[str],
                  target_features: list,
                  regressor_type: str,
+                 imputer: Optional[str],
                  hyperparameter_optimization: bool,
                  ) -> None:
     targets_dir: str = "-".join([target_abbrev[target] for target in target_features])
@@ -87,5 +93,6 @@ def save_results(scores: dict,
     _save(scores, predictions,
           results_dir=results_dir,
           regressor_type=regressor_type,
+          imputer=imputer,
           hyperparameter_optimization=hyperparameter_optimization,
           )

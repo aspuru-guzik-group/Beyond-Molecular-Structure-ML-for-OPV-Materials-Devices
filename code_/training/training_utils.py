@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
 from sklearn.model_selection import KFold
+from sklearn.multioutput import MultiOutputRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, QuantileTransformer
 from skopt import BayesSearchCV
@@ -15,7 +16,7 @@ from data_handling import remove_unserializable_keys, save_results
 from filter_data import filter_dataset, get_feature_ids
 from models import ecfp_only_kernels, get_ecfp_only_kernel, hyperopt_by_default, model_dropna, regressor_factory, \
     regressor_search_space
-from pipeline_utils import generate_feature_pipeline, get_feature_pipelines
+from pipeline_utils import generate_feature_pipeline, get_feature_pipelines, imputer_factory
 from scoring import cross_validate_multioutput_regressor, cross_validate_regressor, process_scores
 
 # from pipeline_utils import representation_scaling_factory
@@ -46,6 +47,7 @@ def train_regressor(dataset: pd.DataFrame,
                     regressor_type: str,
                     target_features: list[str],
                     transform_type: str,
+                    imputer: str,
                     hyperparameter_optimization: bool,
                     ) -> None:
 
@@ -59,6 +61,7 @@ def train_regressor(dataset: pd.DataFrame,
                                             target_features=target_features,
                                             regressor_type=regressor_type,
                                             transform_type=transform_type,
+                                            imputer=imputer,
                                             hyperparameter_optimization=hyperparameter_optimization)
         scores = process_scores(scores)
         save_results(scores, predictions,
@@ -67,6 +70,7 @@ def train_regressor(dataset: pd.DataFrame,
                      subspace_filter=subspace_filter,
                      target_features=target_features,
                      regressor_type=regressor_type,
+                     imputer=imputer,
                      hyperparameter_optimization=hyperparameter_optimization)
 
     # except Exception as e:
@@ -89,6 +93,7 @@ def _prepare_data(dataset: pd.DataFrame,
                   regressor_type: str,
                   unroll: Union[dict, list, None] = None,
                   transform_type: str = "Standard",
+                  imputer: Optional[str] = None,
                   hyperparameter_optimization: bool = False,
                   **kwargs
                   ) -> tuple[dict[int, dict[str, float]], pd.DataFrame]:
@@ -132,6 +137,10 @@ def _prepare_data(dataset: pd.DataFrame,
                                                                                 representation=representation,
                                                                                 numeric_features=scalar_features
                                                                                 )
+
+    if imputer:
+        transformers.append((f"{imputer} impute", imputer_factory[imputer], scalar_features))
+        print("Using imputer:", imputer)
 
     preprocessor: ColumnTransformer = ColumnTransformer(transformers=[*transformers])
     if regressor_type in ecfp_only_kernels:
@@ -179,11 +188,18 @@ def _run(X, y,
         else:
             y_transform: Pipeline = generate_feature_pipeline(transform_type)
 
-        y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
-            # regressor=regressor_factory[regressor_type](**kwargs),
-            regressor=regressor_factory[regressor_type](),
-            transformer=y_transform
-        )
+        if y.shape[1] > 1 and regressor_type not in ["RF", "ANN"]:
+            y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
+                regressor=MultiOutputRegressor(estimator=regressor_factory[regressor_type]()),
+                # regressor_factory[regressor_type](),
+                transformer=y_transform
+            )
+        else:
+            y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
+                # regressor=regressor_factory[regressor_type](**kwargs),
+                regressor=regressor_factory[regressor_type](),
+                transformer=y_transform
+            )
 
         if regressor_type == "ANN":
             y = y.values.reshape(-1, 1)

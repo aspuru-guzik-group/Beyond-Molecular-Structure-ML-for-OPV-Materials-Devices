@@ -97,56 +97,33 @@ def main_mordred_and_numeric(dataset: pd.DataFrame,
                     hyperparameter_optimization=hyperparameter_optimization)
 
 
-def main_representation_and_fabrication_grid(target_feats: list[str], hyperopt: bool = False) -> None:
+def main_multioutput_grid(target_feats: list[str], hyperopt: bool = False) -> None:
     transform_type = "Standard"
 
-    filters = ["material properties", "fabrication", "device architecture"]
-    for i, filter in enumerate(filters):
-        for subspace in [None] + filters[:i]:
-            for model in ["RF", "XGB", "HGB", "NGB", "GP"]:
-                opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
+    for model in ["RF", "XGB", "HGB", "NGB"]:
+        opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
-                if model == "GNN":
-                    pass
-                    # TODO: GNN with fabrication/processing data?
-                    # import pdb; pdb.set_trace()
-                    # main_graphs_and_numeric(dataset=opv_dataset,
-                    #                         regressor_type=model,
-                    #                         target_features=target_feats,
-                    #                         hyperparameter_optimization=hyperopt)
-
-                else:
-                    # ECFP
-                    main_ecfp_and_numeric(dataset=opv_dataset,
-                                          regressor_type=model,
-                                          scalar_filter=filter,
-                                          subspace_filter=subspace,
-                                          target_features=target_feats,
-                                          transform_type=transform_type,
-                                          hyperparameter_optimization=hyperopt)
-                    # mordred
-                    main_mordred_and_numeric(dataset=opv_dataset,
-                                             regressor_type=model,
-                                             scalar_filter=filter,
-                                             subspace_filter=subspace,
-                                             target_features=target_feats,
-                                             transform_type=transform_type,
-                                             hyperparameter_optimization=hyperopt)
+        main_mordred_and_numeric(dataset=opv_dataset,
+                                 regressor_type=model,
+                                 scalar_filter="device architecture",
+                                 subspace_filter=None,
+                                 target_features=target_feats,
+                                 transform_type=transform_type,
+                                 hyperparameter_optimization=hyperopt)
 
 
 if __name__ == "__main__":
-    # for h_opt in [False, True]:
-    #     main_representation_and_fabrication_grid(
-    #         target_feats=["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"], hyperopt=h_opt)
+    main_multioutput_grid(
+            target_feats=["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"], hyperopt=False)
 
-    model = "NN"
-    main_ecfp_and_numeric(dataset=get_appropriate_dataset(model),
-                             regressor_type=model,
-                             scalar_filter="device architecture",
-                             subspace_filter=None,
-                             target_features=["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"],
-                             transform_type="Standard",
-                             hyperparameter_optimization=False)
+    # model = "HGB"
+    # main_ecfp_and_numeric(dataset=get_appropriate_dataset(model),
+    #                       regressor_type=model,
+    #                       scalar_filter="device architecture",
+    #                       subspace_filter=None,
+    #                       target_features=["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"],
+    #                       transform_type="Standard",
+    #                       hyperparameter_optimization=False)
 
     # for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
     #     main_representation_and_fabrication_grid(target_feats=[target], hyperopt=False)
