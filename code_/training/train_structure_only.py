@@ -1,5 +1,6 @@
 import pandas as pd
 
+from models import regressor_factory
 from data_handling import save_results
 from filter_data import get_appropriate_dataset
 from pipeline_utils import radius_to_bits
@@ -250,8 +251,7 @@ def main_processing_only(dataset: pd.DataFrame,
 def main_representation_model_grid(target_feats: list[str], hyperopt: bool = False) -> None:
     transform_type: str = "Standard"
 
-    # for model in regressor_factory:
-    for model in ["RF"]:
+    for model in regressor_factory:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
         if model == "GNN":
@@ -269,7 +269,6 @@ def main_representation_model_grid(target_feats: list[str], hyperopt: bool = Fal
                            transform_type=transform_type,
                            hyperparameter_optimization=hyperopt)
             # mordred
-            # TODO: Maybe only apply uniform quantile for GP?
             main_mordred_only(dataset=opv_dataset,
                               regressor_type=model,
                               target_features=target_feats,
@@ -319,38 +318,5 @@ if __name__ == "__main__":
     #     for h_opt in [False, True]:
     #         main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
 
-    # main_representation_model_grid(target_feats=["calculated PCE (%)"], hyperopt=False)
-
-    # main_properties_only(dataset=get_appropriate_dataset("RF"),
-    #                      regressor_type="RF",
-    #                      target_features=["calculated PCE (%)"],
-    #                      transform_type="Standard",
-    #                      hyperparameter_optimization=False)
-
-    main_graph_embeddings_only(dataset=get_appropriate_dataset("NN"),
-                               regressor_type="NN",
-                               target_features=["calculated PCE (%)"],
-                               transform_type="Standard",
-                               hyperparameter_optimization=False)
-
-    # model = "ANN"
-    # main_graph_embeddings_only(get_appropriate_dataset(model), model, ["calculated PCE (%)"], "Standard", False)
-
-    # for h_opt in [True]:
-    #     for target in ["calculated PCE (%)"]:
-    #         for model in ["RF", "HGB", "NN", "GP"]:
-    #             main_ecfp_only(dataset=get_appropriate_dataset(model),
-    #                              regressor_type=model,
-    #                                 target_features=[target],
-    #                                 hyperparameter_optimization=h_opt,)
-    #             main_mordred_only(dataset=get_appropriate_dataset(model),
-    #                                 regressor_type=model,
-    #                                 target_features=[target],
-    #                                 hyperparameter_optimization=h_opt,)
-
-    # model = "HGB"
-    # main_ecfp_only(dataset=get_appropriate_dataset(model),
-    #                   regressor_type=model,
-    #                   target_features=["calculated PCE (%)"],
-    #                   transform_type=None,
-    #                   hyperparameter_optimization=False, )
+    for target in ["Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+        main_representation_model_grid(target_feats=[target], hyperopt=False)

@@ -106,32 +106,22 @@ def main_representation_and_fabrication_grid(target_feats: list[str], hyperopt: 
             for model in ["RF", "XGB", "HGB", "NN", "NGB", "GP"]:
                 opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
-                if model == "GNN":
-                    pass
-                    # TODO: GNN with fabrication/processing data?
-                    # import pdb; pdb.set_trace()
-                    # main_graphs_and_numeric(dataset=opv_dataset,
-                    #                         regressor_type=model,
-                    #                         target_features=target_feats,
-                    #                         hyperparameter_optimization=hyperopt)
-
-                else:
-                    # ECFP
-                    main_ecfp_and_numeric(dataset=opv_dataset,
-                                          regressor_type=model,
-                                          scalar_filter=filter,
-                                          subspace_filter=subspace,
-                                          target_features=target_feats,
-                                          transform_type=transform_type,
-                                          hyperparameter_optimization=hyperopt)
-                    # mordred
-                    main_mordred_and_numeric(dataset=opv_dataset,
-                                             regressor_type=model,
-                                             scalar_filter=filter,
-                                             subspace_filter=subspace,
-                                             target_features=target_feats,
-                                             transform_type=transform_type,
-                                             hyperparameter_optimization=hyperopt)
+                # ECFP
+                main_ecfp_and_numeric(dataset=opv_dataset,
+                                      regressor_type=model,
+                                      scalar_filter=filter,
+                                      subspace_filter=subspace,
+                                      target_features=target_feats,
+                                      transform_type=transform_type,
+                                      hyperparameter_optimization=hyperopt)
+                # mordred
+                main_mordred_and_numeric(dataset=opv_dataset,
+                                         regressor_type=model,
+                                         scalar_filter=filter,
+                                         subspace_filter=subspace,
+                                         target_features=target_feats,
+                                         transform_type=transform_type,
+                                         hyperparameter_optimization=hyperopt)
 
 
 if __name__ == "__main__":
@@ -139,22 +129,5 @@ if __name__ == "__main__":
     #     for h_opt in [False, True]:
     #         main_representation_and_fabrication_grid(target_feats=[target], hyperopt=h_opt)
 
-    main_representation_and_fabrication_grid(target_feats=["calculated PCE (%)"], hyperopt=False)
-
-    # model = "NN"
-    # main_mordred_and_numeric(dataset=get_appropriate_dataset(model),
-    #                          regressor_type=model,
-    #                          scalar_filter="fabrication",
-    #                          subspace_filter=None,
-    #                          target_features=["calculated PCE (%)"],
-    #                          transform_type="Standard",
-    #                          hyperparameter_optimization=False, )
-
-    # model = "KNN"
-    # main_ecfp_and_numeric(dataset=get_appropriate_dataset(model),
-    #                       regressor_type=model,
-    #                       scalar_filter="fabrication",
-    #                       subspace_filter=None,
-    #                       target_features=["calculated PCE (%)"],
-    #                       transform_type="Standard",
-    #                       hyperparameter_optimization=False, )
+    for target in ["Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+        main_representation_and_fabrication_grid(target_feats=[target], hyperopt=False)

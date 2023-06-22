@@ -64,6 +64,8 @@ def make_predictions_plot(predictions: Path, r2_avg: float, r2_stderr: float) ->
     #                     # ha='left', va='center',
     #                     # bbox={'boxstyle': 'round', 'fc': 'powderblue', 'ec': 'navy'}
     #                     )
+    # TODO:
+    #  kwargs: linewidth=0.2, edgecolor='white',  mincnt=1
     plt.text(0.95, 0.05, f"$R^2$ = {r2_avg} ± {r2_stderr}",
              horizontalalignment='right',
              verticalalignment='bottom',

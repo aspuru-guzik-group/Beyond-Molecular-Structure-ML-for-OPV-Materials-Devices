@@ -1,0 +1,60 @@
+{
+  "6": {
+    "fit_time": [
+      0.012782096862792969,
+      0.013160228729248047
+    ],
+    "score_time": [
+      0.01209402084350586,
+      0.012123823165893555
+    ],
+    "test_r": [
+      0.44221935412189745,
+      0.42653320093028574
+    ],
+    "test_r2": [
+      0.19496569267524544,
+      0.1803327904943932
+    ],
+    "test_rmse": [
+      -0.09595731446636455,
+      -0.09863264174436939
+    ],
+    "test_mae": [
+      -0.07041263440860214,
+      -0.07590008960573476
+    ],
+    "best_params": {
+      "check_inverse": true,
+      "func": null,
+      "inverse_func": null,
+      "regressor__algorithm": "brute",
+      "regressor__leaf_size": 83,
+      "regressor__metric": "minkowski",
+      "regressor__metric_params": null,
+      "regressor__n_jobs": null,
+      "regressor__n_neighbors": 16,
+      "regressor__p": 2,
+      "regressor__weights": "uniform",
+      "transformer__memory": null,
+      "transformer__verbose": false,
+      "transformer__MinMax__clip": false,
+      "transformer__MinMax__copy": true,
+      "transformer__Standard__copy": true,
+      "transformer__Standard__with_mean": true,
+      "transformer__Standard__with_std": true
+    }
+  },
+  "r_avg": 0.4343762775260916,
+  "r_stdev": 0.007843076595805853,
+  "r_stderr": 0.002964404312304763,
+  "r2_avg": 0.18764924158481933,
+  "r2_stdev": 0.007316451090426113,
+  "r2_stderr": 0.0027653585806906916,
+  "rmse_avg": 0.09729497810536697,
+  "rmse_stdev": 0.0013376636390024232,
+  "rmse_stderr": 0.0005055893323791561,
+  "mae_avg": 0.07315636200716845,
+  "mae_stdev": 0.002743727598566309,
+  "mae_stderr": 0.0010370315558729875
+}

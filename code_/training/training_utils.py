@@ -40,15 +40,15 @@ BO_ITER: int = 42 if not TEST else 1
 
 def train_regressor(dataset: pd.DataFrame,
                     representation: str,
-                    structural_features: list[str],
+                    structural_features: Optional[list[str]],
                     unroll: Union[dict[str, str], list[dict[str, str]], None],
                     scalar_filter: Optional[str],
                     subspace_filter: Optional[str],
                     regressor_type: str,
                     target_features: list[str],
                     transform_type: str,
-                    imputer: str,
                     hyperparameter_optimization: bool,
+                    imputer: Optional[str] = None,
                     ) -> None:
 
     # try:
@@ -93,8 +93,8 @@ def _prepare_data(dataset: pd.DataFrame,
                   regressor_type: str,
                   unroll: Union[dict, list, None] = None,
                   transform_type: str = "Standard",
-                  imputer: Optional[str] = None,
                   hyperparameter_optimization: bool = False,
+                  imputer: Optional[str] = None,
                   **kwargs
                   ) -> tuple[dict[int, dict[str, float]], pd.DataFrame]:
     """
@@ -188,7 +188,7 @@ def _run(X, y,
         else:
             y_transform: Pipeline = generate_feature_pipeline(transform_type)
 
-        if y.shape[1] > 1 and regressor_type not in ["RF", "ANN"]:
+        if y.shape[1] > 1 and regressor_type not in ["RF", "ANN"]:  # TODO: Clean this up if necessary, or remove
             y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
                 regressor=MultiOutputRegressor(estimator=regressor_factory[regressor_type]()),
                 # regressor_factory[regressor_type](),

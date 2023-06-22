@@ -50,7 +50,7 @@ def tanimoto_distance(fp1: np.array, fp2: np.array, **kwargs) -> float:
 
 def get_skorch_nn():
     return NeuralNetRegressor(NNModel,
-                              criterion=nn.CrossEntropyLoss,
+                              criterion=nn.CrossEntropyLoss,  # TODO: Change to MSE
                               optimizer=torch.optim.Adam,
                               lr=0.01,
                               max_epochs=100,
@@ -130,8 +130,8 @@ regressor_factory: dict[str, type] = {
     "GP":  GPRegressor,
     # "GP":    GaussianProcessRegressor,  # ATTN: Don"t use this one for multi-output?
     # "NN":    MLPRegressor,  # ATTN: Not actually this one?
-    "NN":  NNRegressor,
-    "GNN": GNNPredictor,
+    # "NN":  NNRegressor,
+    # "GNN": GNNPredictor,
     # "ANN": get_skorch_nn,
 }
 

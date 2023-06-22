@@ -47,8 +47,8 @@ def _save(scores: Dict[int, Dict[str, float]],
           predictions: pd.DataFrame,
           results_dir: Path,
           regressor_type: str,
-          imputer: Optional[str],
           hyperparameter_optimization: bool,
+          imputer: Optional[str] = None,
           ) -> None:
     results_dir.mkdir(parents=True, exist_ok=True)
 
@@ -76,8 +76,8 @@ def save_results(scores: dict,
                  subspace_filter: Optional[str],
                  target_features: list,
                  regressor_type: str,
-                 imputer: Optional[str],
                  hyperparameter_optimization: bool,
+                 imputer: Optional[str] = None,
                  ) -> None:
     targets_dir: str = "-".join([target_abbrev[target] for target in target_features])
 

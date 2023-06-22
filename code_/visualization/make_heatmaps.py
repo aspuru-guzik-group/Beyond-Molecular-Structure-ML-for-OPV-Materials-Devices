@@ -3,6 +3,7 @@ from itertools import product
 from pathlib import Path
 from typing import List
 
+import cmcrameri.cm as cmc
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -147,8 +148,10 @@ def _create_heatmap(root_dir: Path,
     # Create heatmap
     fig, ax = plt.subplots(figsize=figsize)
     palette: str = "viridis" if score in ["r", "r2"] else "viridis_r"
+    # # palette: str = "cmc.batlow" if score in ["r", "r2"] else "cmc.batlow_r"
+    # palette: str = "cmc.batlow_r" if score in ["r", "r2"] else "cmc.batlow"
     custom_cmap = sns.color_palette(palette, as_cmap=True)
-    custom_cmap.set_bad(color="gray")
+    custom_cmap.set_bad(color="lightgray")
     hmap = sns.heatmap(avg_scores,
                        annot=annotations,
                        fmt="",
@@ -353,20 +356,20 @@ if __name__ == "__main__":
 
     # Model, representation and processing search heatmaps
     # for target in ["PCE", "Voc", "Jsc", "FF"]:
-    # for target in ["PCE"]:
-    #     results = root / "results" / f"target_{target}"
+    for target in ["PCE"]:
+        results = root / "results" / f"target_{target}"
 
         # Create heatmap
-        # for score in ["r", "r2", "rmse", "mae"]:
-        #     create_grid_search_heatmap(results, score, var="stderr")
+        for score in ["r", "r2", "rmse", "mae"]:
+            create_grid_search_heatmap(results, score, var="stderr")
 
         # for score in ["r", "r2", "rmse", "mae"]:
         #     create_fabrication_grid_heatmap(results, score, var="stderr")
 
     # Subspace search heatmaps
-    for target in ["PCE", "Voc", "Jsc", "FF"]:
-        results = root / "results" / f"target_{target}"
-
-        # Create heatmap
-        for score in ["r", "r2", "rmse", "mae"]:
-            create_subspace_grid_heatmap(results, score, var="stderr")
+    # for target in ["PCE", "Voc", "Jsc", "FF"]:
+    #     results = root / "results" / f"target_{target}"
+    #
+    #     # Create heatmap
+    #     for score in ["r", "r2", "rmse", "mae"]:
+    #         create_subspace_grid_heatmap(results, score, var="stderr")
