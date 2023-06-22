@@ -115,7 +115,7 @@ representation_scaling_factory: dict[str, dict[str, Union[Callable, str]]] = {
     "solvent":             {"callable": StandardScaler,
                             "type":     "Standard"},
     "ECFP":                {"callable": MinMaxScaler, "type": "MinMax"},
-    "mordred":             {"callable": QuantileTransformer,
+    "mordred":             {"callable": StandardScaler,
                             "type":     "Standard"},
     "graph embeddings":    {"callable": MinMaxScaler,
                             "type": "MinMax"},
