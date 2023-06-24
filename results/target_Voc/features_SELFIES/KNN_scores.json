@@ -1,41 +1,59 @@
 {
   "6": {
     "fit_time": [
-      0.019457101821899414,
-      0.01838397979736328
+      0.02213311195373535,
+      0.02099895477294922,
+      0.01972675323486328,
+      0.01951742172241211,
+      0.01781606674194336
     ],
     "score_time": [
-      0.014310121536254883,
-      0.015985965728759766
+      0.038130998611450195,
+      0.03782033920288086,
+      0.03830265998840332,
+      0.037903785705566406,
+      0.03510022163391113
     ],
     "test_r": [
-      0.3001166605723782,
-      0.3361705493956573
+      0.3897498828024876,
+      0.5065090017121081,
+      0.5037057432066434,
+      0.6234432037436775,
+      0.5285249825453341
     ],
     "test_r2": [
-      0.0846235462899586,
-      0.11216772930525476
+      0.10111872129094102,
+      0.2439095995215197,
+      0.24845793348464773,
+      0.3761230931946601,
+      0.2782159559208288
     ],
     "test_rmse": [
-      -0.10232240965708908,
-      -0.10265198404078199
+      -0.08876700218723699,
+      -0.10533623700333873,
+      -0.09058987716281698,
+      -0.09002102477071373,
+      -0.08675911125742523
     ],
     "test_mae": [
-      -0.07432594086021506,
-      -0.07591935483870968
+      -0.05821312750332551,
+      -0.07300861346453094,
+      -0.06282798272229655,
+      -0.06166240508160834,
+      -0.06060905415408076
     ],
     "best_params": {
       "check_inverse": true,
       "func": null,
       "inverse_func": null,
-      "regressor__algorithm": "brute",
-      "regressor__leaf_size": 83,
+      "regressor__algorithm": "ball_tree",
+      "regressor__leaf_size": 6,
       "regressor__metric": "minkowski",
       "regressor__metric_params": null,
       "regressor__n_jobs": null,
-      "regressor__n_neighbors": 16,
+      "regressor__n_neighbors": 13,
       "regressor__p": 2,
-      "regressor__weights": "uniform",
+      "regressor__weights": "distance",
       "transformer__memory": null,
       "transformer__verbose": false,
       "transformer__MinMax__clip": false,
@@ -45,16 +63,400 @@
       "transformer__Standard__with_std": true
     }
   },
-  "r_avg": 0.3181436049840177,
-  "r_stdev": 0.018026944411639573,
-  "r_stderr": 0.0068135445445119845,
-  "r2_avg": 0.09839563779760668,
-  "r2_stdev": 0.013772091507648077,
-  "r2_stderr": 0.0052053613089230585,
-  "rmse_avg": 0.10248719684893554,
-  "rmse_stdev": 0.00016478719184645496,
-  "rmse_stderr": 6.228370412491578e-05,
-  "mae_avg": 0.07512264784946238,
-  "mae_stdev": 0.0007967069892473103,
-  "mae_stderr": 0.0003011269373336277
+  "13": {
+    "fit_time": [
+      0.012192964553833008,
+      0.01224970817565918,
+      0.012489795684814453,
+      0.012508869171142578,
+      0.011312246322631836
+    ],
+    "score_time": [
+      0.009156942367553711,
+      0.009003877639770508,
+      0.008976221084594727,
+      0.00882267951965332,
+      0.007897615432739258
+    ],
+    "test_r": [
+      0.4977064489854483,
+      0.5683742310127273,
+      0.571446372114762,
+      0.4734648374981404,
+      0.5419184011015122
+    ],
+    "test_r2": [
+      0.24310140405695058,
+      0.3125218482578931,
+      0.32610720555455364,
+      0.21104093397982115,
+      0.2895174743200105
+    ],
+    "test_rmse": [
+      -0.09523940936091023,
+      -0.09757283372070216,
+      -0.09232545209663133,
+      -0.09286515110881677,
+      -0.07884519730030418
+    ],
+    "test_mae": [
+      -0.06506484484873067,
+      -0.06882854587405156,
+      -0.06487080289545924,
+      -0.06346512269326958,
+      -0.053596610846287564
+    ],
+    "best_params": {
+      "check_inverse": true,
+      "func": null,
+      "inverse_func": null,
+      "regressor__algorithm": "brute",
+      "regressor__leaf_size": 100,
+      "regressor__metric": "minkowski",
+      "regressor__metric_params": null,
+      "regressor__n_jobs": null,
+      "regressor__n_neighbors": 17,
+      "regressor__p": 2,
+      "regressor__weights": "distance",
+      "transformer__memory": null,
+      "transformer__verbose": false,
+      "transformer__MinMax__clip": false,
+      "transformer__MinMax__copy": true,
+      "transformer__Standard__copy": true,
+      "transformer__Standard__with_mean": true,
+      "transformer__Standard__with_std": true
+    }
+  },
+  "42": {
+    "fit_time": [
+      0.023059844970703125,
+      0.022903919219970703,
+      0.04665422439575195,
+      0.03344297409057617,
+      0.0215146541595459
+    ],
+    "score_time": [
+      0.05242800712585449,
+      0.0524134635925293,
+      0.0535128116607666,
+      0.05709266662597656,
+      0.04877519607543945
+    ],
+    "test_r": [
+      0.5780828528758244,
+      0.553996431010598,
+      0.5341229888224778,
+      0.4882330068359594,
+      0.3992637638722566
+    ],
+    "test_r2": [
+      0.33181596936820645,
+      0.305590066177131,
+      0.2800373549567191,
+      0.21667164767681435,
+      0.1540676035751558
+    ],
+    "test_rmse": [
+      -0.08626279504821698,
+      -0.08381234367804886,
+      -0.08815529314055066,
+      -0.09877334728545334,
+      -0.10639952547651563
+    ],
+    "test_mae": [
+      -0.060345162899367075,
+      -0.058928338556342795,
+      -0.06354469467055811,
+      -0.07049559423825,
+      -0.07087657970054638
+    ],
+    "best_params": {
+      "check_inverse": true,
+      "func": null,
+      "inverse_func": null,
+      "regressor__algorithm": "ball_tree",
+      "regressor__leaf_size": 1,
+      "regressor__metric": "minkowski",
+      "regressor__metric_params": null,
+      "regressor__n_jobs": null,
+      "regressor__n_neighbors": 14,
+      "regressor__p": 2,
+      "regressor__weights": "distance",
+      "transformer__memory": null,
+      "transformer__verbose": false,
+      "transformer__MinMax__clip": false,
+      "transformer__MinMax__copy": true,
+      "transformer__Standard__copy": true,
+      "transformer__Standard__with_mean": true,
+      "transformer__Standard__with_std": true
+    }
+  },
+  "69": {
+    "fit_time": [
+      0.10497283935546875,
+      0.10508418083190918,
+      0.10644125938415527,
+      0.09735822677612305,
+      0.02544713020324707
+    ],
+    "score_time": [
+      0.20549702644348145,
+      0.2061767578125,
+      0.208021879196167,
+      0.20096898078918457,
+      0.1869065761566162
+    ],
+    "test_r": [
+      0.6078431675050227,
+      0.6624209591255477,
+      0.3966416276928538,
+      0.37868600955672566,
+      0.5541865536793826
+    ],
+    "test_r2": [
+      0.3622131970885655,
+      0.4314293910411098,
+      0.11661819493148762,
+      0.07326570988381931,
+      0.30301439035039424
+    ],
+    "test_rmse": [
+      -0.07888750270514908,
+      -0.09440418293595783,
+      -0.09826393154575433,
+      -0.09124678856580129,
+      -0.09385741955765331
+    ],
+    "test_mae": [
+      -0.054045752728447485,
+      -0.0656680824807483,
+      -0.06628720331113457,
+      -0.06414325062334571,
+      -0.06561492100713377
+    ],
+    "best_params": {
+      "check_inverse": true,
+      "func": null,
+      "inverse_func": null,
+      "regressor__algorithm": "kd_tree",
+      "regressor__leaf_size": 1,
+      "regressor__metric": "minkowski",
+      "regressor__metric_params": null,
+      "regressor__n_jobs": null,
+      "regressor__n_neighbors": 11,
+      "regressor__p": 2,
+      "regressor__weights": "distance",
+      "transformer__memory": null,
+      "transformer__verbose": false,
+      "transformer__MinMax__clip": false,
+      "transformer__MinMax__copy": true,
+      "transformer__Standard__copy": true,
+      "transformer__Standard__with_mean": true,
+      "transformer__Standard__with_std": true
+    }
+  },
+  "420": {
+    "fit_time": [
+      0.015877962112426758,
+      0.015631675720214844,
+      0.01596212387084961,
+      0.015640735626220703,
+      0.014036178588867188
+    ],
+    "score_time": [
+      0.03327441215515137,
+      0.031180858612060547,
+      0.030923128128051758,
+      0.03129386901855469,
+      0.029020309448242188
+    ],
+    "test_r": [
+      0.47455507931501384,
+      0.6364078509994963,
+      0.3499181969201097,
+      0.6548334768819581,
+      0.5051704603866651
+    ],
+    "test_r2": [
+      0.22456933785837951,
+      0.3572952733380589,
+      0.07662442277211268,
+      0.39594760359680703,
+      0.2470566538290193
+    ],
+    "test_rmse": [
+      -0.09007858177708258,
+      -0.10367995790481095,
+      -0.09092757851915302,
+      -0.08843202603118558,
+      -0.08278605110131956
+    ],
+    "test_mae": [
+      -0.06192586097204682,
+      -0.0693330218616534,
+      -0.06051202878589775,
+      -0.06051056185834086,
+      -0.06120706099445673
+    ],
+    "best_params": {
+      "check_inverse": true,
+      "func": null,
+      "inverse_func": null,
+      "regressor__algorithm": "ball_tree",
+      "regressor__leaf_size": 100,
+      "regressor__metric": "minkowski",
+      "regressor__metric_params": null,
+      "regressor__n_jobs": null,
+      "regressor__n_neighbors": 16,
+      "regressor__p": 2,
+      "regressor__weights": "distance",
+      "transformer__memory": null,
+      "transformer__verbose": false,
+      "transformer__MinMax__clip": false,
+      "transformer__MinMax__copy": true,
+      "transformer__Standard__copy": true,
+      "transformer__Standard__with_mean": true,
+      "transformer__Standard__with_std": true
+    }
+  },
+  "1234567890": {
+    "fit_time": [
+      0.02079486846923828,
+      0.022803783416748047,
+      0.021496057510375977,
+      0.020955562591552734,
+      0.019756078720092773
+    ],
+    "score_time": [
+      0.05443549156188965,
+      0.05511188507080078,
+      0.05430030822753906,
+      0.05420970916748047,
+      0.05213618278503418
+    ],
+    "test_r": [
+      0.6109487563477526,
+      0.6654007296379214,
+      0.5483933171353195,
+      0.5251694018994515,
+      0.3325811451876925
+    ],
+    "test_r2": [
+      0.3659882332040856,
+      0.4351441759125865,
+      0.29509055201298984,
+      0.25428917320090294,
+      0.0767466714683035
+    ],
+    "test_rmse": [
+      -0.0898433098756874,
+      -0.0763008340251413,
+      -0.08835022579818975,
+      -0.09958362913532535,
+      -0.09956903110310601
+    ],
+    "test_mae": [
+      -0.06171881595918183,
+      -0.05513174869116739,
+      -0.06300446108064674,
+      -0.06629219808487255,
+      -0.07002070529871017
+    ],
+    "best_params": {
+      "check_inverse": true,
+      "func": null,
+      "inverse_func": null,
+      "regressor__algorithm": "kd_tree",
+      "regressor__leaf_size": 9,
+      "regressor__metric": "minkowski",
+      "regressor__metric_params": null,
+      "regressor__n_jobs": null,
+      "regressor__n_neighbors": 12,
+      "regressor__p": 2,
+      "regressor__weights": "distance",
+      "transformer__memory": null,
+      "transformer__verbose": false,
+      "transformer__MinMax__clip": false,
+      "transformer__MinMax__copy": true,
+      "transformer__Standard__copy": true,
+      "transformer__Standard__with_mean": true,
+      "transformer__Standard__with_std": true
+    }
+  },
+  "473129": {
+    "fit_time": [
+      0.02218461036682129,
+      0.023679733276367188,
+      0.022176027297973633,
+      0.02178645133972168,
+      0.01974320411682129
+    ],
+    "score_time": [
+      0.05387592315673828,
+      0.05326437950134277,
+      0.0538177490234375,
+      0.05344343185424805,
+      0.0474550724029541
+    ],
+    "test_r": [
+      0.6375586792825287,
+      0.42291234282447776,
+      0.5236604420132496,
+      0.548384416281681,
+      0.544755742140552
+    ],
+    "test_r2": [
+      0.40438924802960485,
+      0.17762169150254548,
+      0.21458862546522384,
+      0.29983735608539586,
+      0.28624007272451146
+    ],
+    "test_rmse": [
+      -0.08702299406841557,
+      -0.10145761768350892,
+      -0.09492143461925381,
+      -0.09282864984220938,
+      -0.07855682910306024
+    ],
+    "test_mae": [
+      -0.05977312828780302,
+      -0.0689083231257072,
+      -0.06470427579043127,
+      -0.06563526764499537,
+      -0.05804664520885972
+    ],
+    "best_params": {
+      "check_inverse": true,
+      "func": null,
+      "inverse_func": null,
+      "regressor__algorithm": "ball_tree",
+      "regressor__leaf_size": 1,
+      "regressor__metric": "minkowski",
+      "regressor__metric_params": null,
+      "regressor__n_jobs": null,
+      "regressor__n_neighbors": 15,
+      "regressor__p": 2,
+      "regressor__weights": "distance",
+      "transformer__memory": null,
+      "transformer__verbose": false,
+      "transformer__MinMax__clip": false,
+      "transformer__MinMax__copy": true,
+      "transformer__Standard__copy": true,
+      "transformer__Standard__with_mean": true,
+      "transformer__Standard__with_std": true
+    }
+  },
+  "r_avg": 0.5239705857986674,
+  "r_stdev": 0.08838686394265045,
+  "r_stderr": 0.03340709445102215,
+  "r2_avg": 0.2661790510180502,
+  "r2_stdev": 0.09832494949348743,
+  "r2_stderr": 0.03716333771896486,
+  "rmse_avg": 0.09150637647129849,
+  "rmse_stdev": 0.007444694287415613,
+  "rmse_stderr": 0.0028138299530578465,
+  "mae_avg": 0.06339487982697958,
+  "mae_stdev": 0.004672667500384541,
+  "mae_stderr": 0.0017661023093301861
 }
