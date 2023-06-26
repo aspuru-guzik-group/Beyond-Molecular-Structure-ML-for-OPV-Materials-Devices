@@ -9,7 +9,17 @@ HERE: Path = Path(__file__).resolve().parent
 DATASETS: Path = HERE.parent.parent / "datasets"
 
 
-def assign_ids(smiles_series: pd.Series) -> pd.Series:
+def int_to_alpha(number):
+    result = ""
+    while number > 0:
+        number -= 1
+        digit = number % 26
+        result = chr(digit + ord('A')) + result
+        number //= 26
+    return result
+
+
+def assign_ids(smiles_series: pd.Series, prefix: str) -> pd.Series:
     """
     Generates a pandas Series of labels, where each unique SMILES string is mapped to its corresponding label.
 
@@ -24,11 +34,11 @@ def assign_ids(smiles_series: pd.Series) -> pd.Series:
     # Create a list of unique SMILES strings
     unique_smiles: set = set(smiles_series)
     # Create a list of labels
-    labels: list[int] = [i for i in range(len(unique_smiles))]
+    unique_labels: list[str] = [f"{prefix} {int_to_alpha(i)}" for i in range(len(unique_smiles))]
     # Create a dictionary of SMILES strings to labels
-    smiles_to_label: dict[str, int] = dict(zip(unique_smiles, labels))
+    smiles_to_label: dict[str, str] = dict(zip(unique_smiles, unique_labels))
     # Create a list of labels, where each unique SMILES string is mapped to its corresponding label
-    labels: list[int] = [smiles_to_label[smiles] for smiles in smiles_series]
+    labels: list[str] = [smiles_to_label[smiles] for smiles in smiles_series]
     return pd.Series(labels)
 
 
@@ -48,8 +58,8 @@ dataset_pkl = DATASETS / "Saeki_2022_n1318" / "Saeki_corrected_pipeline.pkl"
 # Create Molecule and fingerprint objects for pickle file
 saeki["Acceptor SMILES"] = saeki["Acceptor SMILES"].apply(lambda x: Chem.CanonSmiles(x))
 saeki["Donor SMILES"] = saeki["Donor SMILES"].apply(lambda x: Chem.CanonSmiles(x))
-saeki["Acceptor"] = assign_ids(saeki["Acceptor SMILES"])
-saeki["Donor"] = assign_ids(saeki["Donor SMILES"])
+saeki["Acceptor"] = assign_ids(saeki["Acceptor SMILES"], "Acceptor")
+saeki["Donor"] = assign_ids(saeki["Donor SMILES"], "Donor")
 saeki["Acceptor Mol"] = saeki["Acceptor SMILES"].apply(lambda x: Chem.MolFromSmiles(x))
 saeki["Donor Mol"] = saeki["Donor SMILES"].apply(lambda x: Chem.MolFromSmiles(x))
 saeki["Acceptor ECFP10_2048"] = saeki["Acceptor Mol"].apply(lambda x: np.array(AllChem.GetMorganFingerprintAsBitVect(x, 5, nBits=2048)))
