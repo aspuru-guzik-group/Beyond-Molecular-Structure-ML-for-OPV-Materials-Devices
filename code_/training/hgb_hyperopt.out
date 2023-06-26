@@ -1,0 +1,368 @@
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/torch/cuda/__init__.py:107: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 10020). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at ../c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+Using dataset with NaNs
+n numeric features: 19
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 6
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.06998623262166426), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 20), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 6
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 41), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 6
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.05205304224164212), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 22), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 6
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.052225479446792504), ('regressor__regressor__max_bins', 10), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 16), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 6
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.09440853906706251), ('regressor__regressor__learning_rate', 0.05317633197461638), ('regressor__regressor__max_bins', 32), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 13), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 13
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.05687851809221157), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 23), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 13
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 3.4852271554450934e-05), ('regressor__regressor__learning_rate', 0.07066159596886243), ('regressor__regressor__max_bins', 49), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 15), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 13
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 27), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 13
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 155), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 43), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 13
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.06954851431685019), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 19), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 42
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 34), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 42
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.04345368200442485), ('regressor__regressor__max_bins', 10), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 20), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 42
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.0640870763280143), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 17), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 42
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 163), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 23), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 42
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.03897419492230843), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 20), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 69
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.04899068999076418), ('regressor__regressor__max_bins', 196), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 25), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 69
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 23), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 69
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/optimizer/optimizer.py:449: UserWarning: The objective has been evaluated at this point before.
+  warnings.warn("The objective has been evaluated "
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 10), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 21), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 69
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 11), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 69
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.07169789072032869), ('regressor__regressor__max_bins', 10), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 20), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 420
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.05325510806025453), ('regressor__regressor__max_bins', 84), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 16), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 420
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.0025760973849902574), ('regressor__regressor__learning_rate', 0.09484357507854885), ('regressor__regressor__max_bins', 26), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 11), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 420
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 50), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 420
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.06246693531946018), ('regressor__regressor__max_bins', 10), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 12), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 420
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 10), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 21), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 1234567890
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.0444999020522495), ('regressor__regressor__max_bins', 183), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 18), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 1234567890
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 10), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 39), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 1234567890
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.05254743196488643), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 17), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 1234567890
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1.5415911819319597e-05), ('regressor__regressor__learning_rate', 0.03697414572037789), ('regressor__regressor__max_bins', 31), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 18), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 1234567890
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 16), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 473129
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 17), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 473129
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 17), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 473129
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.03911919188432652), ('regressor__regressor__max_bins', 255), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 15), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 473129
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 0.1), ('regressor__regressor__learning_rate', 0.1), ('regressor__regressor__max_bins', 10), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 12), ('regressor__regressor__random_state', 42)])
+
+
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR HGB 	SEED: 473129
+
+
+Best parameters: OrderedDict([('regressor__regressor__early_stopping', True), ('regressor__regressor__l2_regularization', 1e-05), ('regressor__regressor__learning_rate', 0.06082184403435342), ('regressor__regressor__max_bins', 10), ('regressor__regressor__max_depth', None), ('regressor__regressor__max_leaf_nodes', None), ('regressor__regressor__min_samples_leaf', 15), ('regressor__regressor__random_state', 42)])
+
+
+Average scores:	 r: 0.78±0.04	 r2: 0.6±0.06
+Filename: HGB_hyperopt
+Saved results to:
+/home/chefos/projects/ml_for_opvs/results/target_PCE/features_mordred-device architecture/HGB_hyperopt_scores.json
+/home/chefos/projects/ml_for_opvs/results/target_PCE/features_mordred-device architecture/HGB_hyperopt_predictions.csv

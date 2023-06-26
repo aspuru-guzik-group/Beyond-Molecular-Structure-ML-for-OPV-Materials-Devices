@@ -117,26 +117,25 @@ def main_imputer_grid(target_feats: list[str], hyperopt: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    main_imputer_grid(
-            target_feats=["calculated PCE (%)"], hyperopt=False)
+    # main_imputer_grid(
+    #         target_feats=["calculated PCE (%)"], hyperopt=False)
 
     # model = "HGB"
-    # main_ecfp_and_numeric(dataset=get_appropriate_dataset(model),
-    #                       regressor_type=model,
-    #                       scalar_filter="device architecture",
-    #                       subspace_filter=None,
-    #                       target_features=["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"],
-    #                       transform_type="Standard",
-    #                       hyperparameter_optimization=False)
-
-    # for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-    #     main_representation_and_fabrication_grid(target_feats=[target], hyperopt=False)
-
-    # main_ecfp_and_numeric(dataset=get_appropriate_dataset("RF"),
-    #                       regressor_type="RF",
-    #                       scalar_filter="device architecture",
-    #                       # subspace_filter="material properties",
-    #                       subspace_filter=None,
-    #                       target_features=["calculated PCE (%)"],
-    #                       hyperparameter_optimization=False,
-    #                       radius=5)
+    # main_mordred_and_numeric(dataset=get_appropriate_dataset(model),
+    #                             regressor_type=model,
+    #                             scalar_filter="device architecture",
+    #                             subspace_filter=None,
+    #                             target_features=["calculated PCE (%)"],
+    #                             transform_type="Standard",
+    #                             imputer="uniform KNN",
+    #                             hyperparameter_optimization=True)
+    
+    model = "HGB"
+    main_mordred_and_numeric(dataset=get_appropriate_dataset(model),
+                                regressor_type=model,
+                                scalar_filter="device architecture",
+                                subspace_filter=None,
+                                target_features=["calculated PCE (%)"],
+                                transform_type="Standard",
+                                imputer=None,
+                                hyperparameter_optimization=True)
