@@ -22,7 +22,7 @@ score_bounds: dict[str, int] = {"r": 1, "r2": 1, "mae": 25, "rmse": 25}
 var_titles: dict[str, str] = {"stdev": "Standard Deviation", "stderr": "Standard Error"}
 
 
-def get_results_from_file(results_dir: Path, score: str, var: str) -> tuple[float, float]:
+def get_results_from_file(results_dir: Path, score: str, var: str, impute: bool = False) -> tuple[float, float]:
     """
     Args:
         root_dir: Root directory containing all results
@@ -34,15 +34,21 @@ def get_results_from_file(results_dir: Path, score: str, var: str) -> tuple[floa
     Returns:
         Average and variance of score
     """
-    # TODO: Use pathlib rglob, name and parent name?
-    score_files: list[Path] = list(results_dir.rglob(f"*_scores.json"))
+    pattern: str = "*imputer_scores.json" if impute else "*_scores.json"
+    score_files: list[Path] = list(results_dir.rglob(pattern))
 
     for file in score_files:
         if not file.exists():
             features, model = None, None
             avg, std = np.nan, np.nan
         else:
-            features = file.parent.name.split("_")[-1]
+            if impute:
+                imputer_txt: str = file.stem.split("_")[1]
+                features = " ".join(imputer_txt.split(" ")[:-1])
+                pass
+            else:
+                features = file.parent.name.split("_")[-1]
+            # features =  if impute else file.parent.name.split("_")[-1]
             model = file.name.split("_")[0]
 
             with open(file, "r") as f:
@@ -106,6 +112,7 @@ def _create_heatmap(root_dir: Path,
                     fname: str,
                     vmin: float = None,
                     vmax: float = None,
+                    **kwargs
                     ) -> None:
     """
     Args:
@@ -127,7 +134,7 @@ def _create_heatmap(root_dir: Path,
     # for parent, model in product(parent_dir_labels, y_labels):
     for parent in parent_dir_labels:
         p = root_dir / parent
-        for feats, model, avg, std in get_results_from_file(p, score, var):
+        for feats, model, avg, std in get_results_from_file(p, score, var, **kwargs):
             if model is None:
                 continue
             if model not in annotations.index or feats not in annotations.columns:
@@ -351,12 +358,42 @@ def create_subspace_grid_heatmap(root_dir: Path, score: str, var: str) -> None:
                         )
 
 
+def create_impute_grid_heatmap(root_dir: Path, score: str, var: str) -> None:
+    # imputers: list[str] = ["mean", "median", "most-frequent", "uniform KNN", "distance KNN", "iterative"]
+    y_labels: list[str] = ["RF", "XGB", "HGB", "NGB"][::-1]
+
+    representations: list[str] = ["ECFP", "mordred"]
+    # Create the product of representations and x_labels where they're joined as f"{rep}_{x_label}"
+    feature_labels: list[str] = ["mean", "median", "most-frequent", "uniform KNN", "distance KNN", "iterative"]
+
+    target: str = ", ".join(root_dir.name.split("_")[1:])
+    score_txt: str = "$R^2$" if score == "r2" else score.upper()
+
+    for feats in feature_labels:
+        # space = feats.split("-")[1]
+        # subspace_labels: list[str] = [feats, *FILTERS[space][:-1]]
+        parent_dir_labels: list[str] = ["features_mordred-device architecture"]
+        # root_dir = root_dir / f"features_{feats}"
+
+        _create_heatmap(root_dir,
+                        score, var,
+                        x_labels=feature_labels, y_labels=y_labels,
+                        parent_dir_labels=parent_dir_labels,
+                        figsize=(12, 8),
+                        fig_title=f"Average {score_txt} Scores for Models Predicting {target} with Imputing",
+                        x_title="Structural Representations",
+                        y_title="Regression Models",
+                        fname=f"impute search heatmap_{score}",
+                        impute=True
+                        )
+
+
 if __name__ == "__main__":
     root = Path(__file__).resolve().parent.parent.parent
 
     # Model, representation and processing search heatmaps
-    # for target in ["PCE", "Voc", "Jsc", "FF"]:
-    for target in ["PCE"]:
+    for target in ["Voc", "Jsc", "FF"]:
+    # for target in ["PCE"]:
         results = root / "results" / f"target_{target}"
 
         # Create heatmap
@@ -373,3 +410,11 @@ if __name__ == "__main__":
     #     # Create heatmap
     #     for score in ["r", "r2", "rmse", "mae"]:
     #         create_subspace_grid_heatmap(results, score, var="stderr")
+
+    # Impute search heatmaps
+    # for target in ["PCE"]:
+    #     results = root / "results" / f"target_{target}"
+    #
+    #     # Create heatmap
+    #     for score in ["r", "r2", "rmse", "mae"]:
+    #         create_impute_grid_heatmap(results, score, var="stderr")

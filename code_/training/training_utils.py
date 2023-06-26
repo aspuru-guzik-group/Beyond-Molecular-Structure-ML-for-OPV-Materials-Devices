@@ -49,6 +49,7 @@ def train_regressor(dataset: pd.DataFrame,
                     transform_type: str,
                     hyperparameter_optimization: bool,
                     imputer: Optional[str] = None,
+                    output_dir_name: str = "results",
                     ) -> None:
 
     # try:
@@ -71,7 +72,9 @@ def train_regressor(dataset: pd.DataFrame,
                      target_features=target_features,
                      regressor_type=regressor_type,
                      imputer=imputer,
-                     hyperparameter_optimization=hyperparameter_optimization)
+                     hyperparameter_optimization=hyperparameter_optimization,
+                     output_dir_name=output_dir_name,
+                     )
 
     # except Exception as e:
     #     print(f"\n\nEXCEPTION ENCOUNTERED. Failed to train {regressor_type} on {representation}...\n\n", e)

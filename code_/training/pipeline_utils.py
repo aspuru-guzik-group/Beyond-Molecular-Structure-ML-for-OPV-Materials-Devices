@@ -83,9 +83,11 @@ def get_ohe_structures(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
     return new_df
 
 
-def get_mordred_descriptors(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
-    with open(DATASETS / "Min_2020_n558" / "cleaned_dataset_mordred.pkl", "rb") as f:
-        mordred: pd.DataFrame = pd.read_pickle(f)
+def get_mordred_descriptors(*args, data_file: Optional[Path] = None, **kwargs) -> pd.DataFrame:
+    default_mordred: Path = DATASETS / "Min_2020_n558" / "cleaned_dataset_mordred.pkl"
+    mordred_file: Path = data_file if data_file is not None else default_mordred
+    # with open(mordred_file, "rb") as f:
+    mordred: pd.DataFrame = pd.read_pickle(mordred_file)
     return mordred
 
 

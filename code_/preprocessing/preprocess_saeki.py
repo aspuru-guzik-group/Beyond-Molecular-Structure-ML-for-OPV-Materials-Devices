@@ -33,24 +33,39 @@ def assign_ids(smiles_series: pd.Series) -> pd.Series:
 
 
 # Import csv version
-dataset_csv = DATASETS / "Saeki_2022_n1318" / "Saeki_corrected.csv"
+dataset_csv = DATASETS / "Saeki_2022_n1318" / "Saeki_corrected_pipeline.csv"
 saeki = pd.read_csv(dataset_csv)
 
 # # Import pkl version
-dataset_pkl = DATASETS / "Saeki_2022_n1318" / "Saeki_corrected_r5_b512.pkl"
+dataset_pkl = DATASETS / "Saeki_2022_n1318" / "Saeki_corrected_pipeline.pkl"
 # saeki = pd.read_pickle(dataset_pkl)
 
 
-# Assign molecule IDs to unique n and p SMILES
-saeki["n(labels)"] = assign_ids(saeki["n(SMILES)"])
-saeki["p(labels)"] = assign_ids(saeki["p(SMILES)"])
+# # Assign molecule IDs to unique n and p SMILES
+# saeki["n(labels)"] = assign_ids(saeki["n(SMILES)"])
+# saeki["p(labels)"] = assign_ids(saeki["p(SMILES)"])
 
 # Create Molecule and fingerprint objects for pickle file
-saeki["n(mol)"] = saeki["n(SMILES)"].apply(lambda x: Chem.MolFromSmiles(x))
-saeki["p(mol)"] = saeki["p(SMILES)"].apply(lambda x: Chem.MolFromSmiles(x))
-saeki["n(FP)"] = saeki["n(mol)"].apply(lambda x: np.array(AllChem.GetMorganFingerprintAsBitVect(x, 5, nBits=512)))
-saeki["p(FP)"] = saeki["p(mol)"].apply(lambda x: np.array(AllChem.GetMorganFingerprintAsBitVect(x, 5, nBits=512)))
-saeki["n,p(FP)"] = [[*n, *p] for n, p in zip(saeki["n(FP)"], saeki["p(FP)"])]
+saeki["Acceptor SMILES"] = saeki["Acceptor SMILES"].apply(lambda x: Chem.CanonSmiles(x))
+saeki["Donor SMILES"] = saeki["Donor SMILES"].apply(lambda x: Chem.CanonSmiles(x))
+saeki["Acceptor"] = assign_ids(saeki["Acceptor SMILES"])
+saeki["Donor"] = assign_ids(saeki["Donor SMILES"])
+saeki["Acceptor Mol"] = saeki["Acceptor SMILES"].apply(lambda x: Chem.MolFromSmiles(x))
+saeki["Donor Mol"] = saeki["Donor SMILES"].apply(lambda x: Chem.MolFromSmiles(x))
+saeki["Acceptor ECFP10_2048"] = saeki["Acceptor Mol"].apply(lambda x: np.array(AllChem.GetMorganFingerprintAsBitVect(x, 5, nBits=2048)))
+saeki["Donor ECFP10_2048"] = saeki["Donor Mol"].apply(lambda x: np.array(AllChem.GetMorganFingerprintAsBitVect(x, 5, nBits=2048)))
+# saeki["n,p(FP)"] = [[*n, *p] for n, p in zip(saeki["n(FP)"], saeki["p(FP)"])]
 
 # Save to pkl
 saeki.to_pickle(dataset_pkl)
+
+# Get unique donor and acceptor SMILES
+donors = saeki[["Donor SMILES", "Donor"]].drop_duplicates(ignore_index=True)
+acceptors = saeki[["Acceptor SMILES", "Acceptor"]].drop_duplicates(ignore_index=True)
+
+saeki_donors = DATASETS / "Saeki_2022_n1318" / "donors.csv"
+saeki_acceptors = DATASETS / "Saeki_2022_n1318" / "acceptors.csv"
+donors["SMILES"] = donors["Donor SMILES"]
+acceptors["SMILES"] = acceptors["Acceptor SMILES"]
+donors[["Donor", "SMILES"]].to_csv(saeki_donors, index=False)
+acceptors[["Acceptor", "SMILES"]].to_csv(saeki_acceptors, index=False)

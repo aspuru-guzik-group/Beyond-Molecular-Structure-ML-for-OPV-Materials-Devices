@@ -18,6 +18,18 @@
     "Donor Mn (kDa)",
     "Donor Mw (kDa)"
   ],
+  "material properties Saeki": [
+    "HOMO_D (eV)",
+    "LUMO_D (eV)",
+    "Eg_D (eV)",
+    "HOMO_A (eV)",
+    "LUMO_A (eV)",
+    "Eg_A (eV)",
+    "Donor PDI",
+    "Donor Mn (kDa)",
+    "Donor Mw (kDa)",
+    "Acceptor M (g/mol)"
+  ],
   "fabrication labels": [
     "solvent",
     "solvent additive"

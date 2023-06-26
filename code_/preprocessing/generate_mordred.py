@@ -114,6 +114,7 @@ class MordredCalculator:
         print("Generating mordred descriptors...")
         calc: Calculator = Calculator(mordred.descriptors, ignore_3D=True)
         descriptors: pd.Series = self.all_mols.apply(get_mordred_dict)
+        print(descriptors)
         mordred_descriptors: pd.DataFrame = pd.DataFrame.from_records(descriptors, index=self.all_mols.index)
         # Remove any columns with calculation errors
         mordred_descriptors = mordred_descriptors.infer_objects()
@@ -208,25 +209,61 @@ def test():
 
 def main():
     # Load cleaned donor and acceptor structures
-    min_dir: Path = DATASETS / "Min_2020_n558"
-    donor_structures_file = min_dir / "cleaned donors.csv"
+    dataset_dir: Path = DATASETS / "Min_2020_n558"
+    donor_structures_file = dataset_dir / "cleaned donors.csv"
     donor_structures: pd.DataFrame = pd.read_csv(donor_structures_file)
-    acceptor_structures_file = min_dir / "cleaned acceptors.csv"
+    acceptor_structures_file = dataset_dir / "cleaned acceptors.csv"
     acceptor_structures: pd.DataFrame = pd.read_csv(acceptor_structures_file)
 
     # Load dataset
-    dataset_pkl = min_dir / "cleaned_dataset.pkl"
+    dataset_pkl = dataset_dir / "cleaned_dataset.pkl"
     dataset: pd.DataFrame = pd.read_pickle(dataset_pkl)
 
     # Save mordred descriptor IDs
-    mordred_json = min_dir / "mordred_descriptors.json"
+    mordred_json = dataset_dir / "mordred_descriptors.json"
 
     # Save dataset
-    mordred_pkl = min_dir / "cleaned_dataset_mordred.pkl"
+    mordred_pkl = dataset_dir / "cleaned_dataset_mordred.pkl"
+
+    run(donor_structures, acceptor_structures, dataset, mordred_json, mordred_pkl)
+
+
+def main_saeki():
+    # Load cleaned donor and acceptor structures
+    dataset_dir: Path = DATASETS / "Saeki_2022_n1318"
+    donor_structures_file = dataset_dir / "donors.csv"
+    acceptor_structures_file = dataset_dir / "acceptors.csv"
+    dataset_pkl = dataset_dir / "Saeki_corrected_pipeline.pkl"
+    mordred_json = dataset_dir / "Saeki_mordred_descriptors.json"
+    mordred_pkl = dataset_dir / "Saeki_mordred.pkl"
+
+    # Load dataset
+    donor_structures: pd.DataFrame = pd.read_csv(donor_structures_file)
+    acceptor_structures: pd.DataFrame = pd.read_csv(acceptor_structures_file)
+    dataset: pd.DataFrame = pd.read_pickle(dataset_pkl)
+
+    run(donor_structures, acceptor_structures, dataset, mordred_json, mordred_pkl)
+
+
+def main_hutchison():
+    # Load cleaned donor and acceptor structures
+    dataset_dir: Path = DATASETS / "Hutchison_2023_n1001"
+    donor_structures_file = dataset_dir / "donors.csv"
+    acceptor_structures_file = dataset_dir / "acceptors.csv"
+    dataset_pkl = dataset_dir / "Hutchison_filtered_dataset_pipeline.pkl"
+    mordred_json = dataset_dir / "Hutchison_mordred_descriptors.json"
+    mordred_pkl = dataset_dir / "Hutchison_mordred.pkl"
+
+    # Load dataset
+    donor_structures: pd.DataFrame = pd.read_csv(donor_structures_file)
+    acceptor_structures: pd.DataFrame = pd.read_csv(acceptor_structures_file)
+    dataset: pd.DataFrame = pd.read_pickle(dataset_pkl)
 
     run(donor_structures, acceptor_structures, dataset, mordred_json, mordred_pkl)
 
 
 if __name__ == "__main__":
     test()
-    main()
+    # main()
+    main_saeki()
+    # main_hutchison()

@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 HERE: Path = Path(__file__).resolve().parent
+ROOT: Path = HERE.parent.parent
 
 target_abbrev: Dict[str, str] = {
     "calculated PCE (%)": "PCE",
@@ -78,6 +79,7 @@ def save_results(scores: dict,
                  regressor_type: str,
                  hyperparameter_optimization: bool,
                  imputer: Optional[str] = None,
+                 output_dir_name: str = "results",
                  ) -> None:
     targets_dir: str = "-".join([target_abbrev[target] for target in target_features])
 
@@ -86,7 +88,7 @@ def save_results(scores: dict,
     else:
         feature_ids: list = [representation]
     features_dir: str = "-".join(feature_ids)
-    results_dir: Path = HERE.parent.parent / "results" / f"target_{targets_dir}" / f"features_{features_dir}"
+    results_dir: Path = ROOT / output_dir_name / f"target_{targets_dir}" / f"features_{features_dir}"
     if subspace_filter:
         results_dir = results_dir / f"subspace_{subspace_filter}"
 

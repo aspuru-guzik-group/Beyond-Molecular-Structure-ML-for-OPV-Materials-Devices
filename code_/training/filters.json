@@ -9,5 +9,7 @@
   "mobilities": ["material properties", "fabrication", "device architecture", "mobilities"],
   "log mobilities": ["material properties", "fabrication", "device architecture", " log mobilities"],
   "mobilities all": ["material properties", "fabrication", "fabrication missing", "device architecture", "device architecture missing", "mobilities"],
-  "log mobilities all": ["material properties", "fabrication", "fabrication missing", "device architecture", "device architecture missing", "log mobilities"]
+  "log mobilities all": ["material properties", "fabrication", "fabrication missing", "device architecture", "device architecture missing", "log mobilities"],
+  "material properties Saeki": ["material properties Saeki"],
+  "material properties Saeki all": ["material properties Saeki"]
 }
