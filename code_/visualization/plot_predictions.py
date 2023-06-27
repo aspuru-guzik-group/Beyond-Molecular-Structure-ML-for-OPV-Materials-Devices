@@ -2,7 +2,7 @@ import json
 from math import ceil
 from pathlib import Path
 
-import cmcrameri.cm as cmc
+# import cmcrameri.cm as cmc
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt

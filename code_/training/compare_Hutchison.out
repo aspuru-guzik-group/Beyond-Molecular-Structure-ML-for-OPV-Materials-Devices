@@ -5,7 +5,7 @@ Filename: RF
 Saved results to:
 /home/chefos/projects/ml_for_opvs/results_Hutchison/target_PCE/features_ECFP/RF_scores.json
 /home/chefos/projects/ml_for_opvs/results_Hutchison/target_PCE/features_ECFP/RF_predictions.csv
-Average scores:	 r: 0.52±0.08	 r2: 0.25±0.1
+Average scores:	 r: 0.52±0.08	 r2: 0.26±0.1
 Filename: RF
 Saved results to:
 /home/chefos/projects/ml_for_opvs/results_Hutchison/target_PCE/features_mordred/RF_scores.json
