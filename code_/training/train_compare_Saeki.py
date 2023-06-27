@@ -79,22 +79,22 @@ def main_compare_Saeki(target_feats: list[str], hyperopt: bool = False) -> None:
     subspace = None
 
     for model in ["RF", "HGB", ]:
-        # ECFP
-        main_ecfp_and_numeric(dataset=opv_dataset,
-                              regressor_type=model,
-                              scalar_filter=filter,
-                              subspace_filter=subspace,
-                              target_features=target_feats,
-                              transform_type=transform_type,
-                              hyperparameter_optimization=hyperopt)
-        # # mordred
-        # main_mordred_and_numeric(dataset=opv_dataset,
-        #                          regressor_type=model,
-        #                          scalar_filter=filter,
-        #                          subspace_filter=subspace,
-        #                          target_features=target_feats,
-        #                          transform_type=transform_type,
-        #                          hyperparameter_optimization=hyperopt)
+        # # ECFP
+        # main_ecfp_and_numeric(dataset=opv_dataset,
+        #                       regressor_type=model,
+        #                       scalar_filter=filter,
+        #                       subspace_filter=subspace,
+        #                       target_features=target_feats,
+        #                       transform_type=transform_type,
+        #                       hyperparameter_optimization=hyperopt)
+        # mordred
+        main_mordred_and_numeric(dataset=opv_dataset,
+                                 regressor_type=model,
+                                 scalar_filter=filter,
+                                 subspace_filter=subspace,
+                                 target_features=target_feats,
+                                 transform_type=transform_type,
+                                 hyperparameter_optimization=hyperopt)
 
 
 if __name__ == "__main__":
