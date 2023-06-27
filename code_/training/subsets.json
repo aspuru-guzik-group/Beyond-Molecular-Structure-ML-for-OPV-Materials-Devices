@@ -18,20 +18,6 @@
     "Donor Mn (kDa)",
     "Donor Mw (kDa)"
   ],
-  "material properties Saeki": [
-    "HOMO_D (eV)",
-    "LUMO_D (eV)",
-    "Eg_D (eV)",
-    "Ehl_D (eV)",
-    "HOMO_A (eV)",
-    "LUMO_A (eV)",
-    "Eg_A (eV)",
-    "Ehl_A (eV)",
-    "Donor PDI",
-    "Donor Mn (kDa)",
-    "Donor Mw (kDa)",
-    "Acceptor M (g/mol)"
-  ],
   "fabrication labels": [
     "solvent",
     "solvent additive"
@@ -68,5 +54,31 @@
     "log hole mobility blend (cm^2 V^-1 s^-1)",
     "log electron mobility blend (cm^2 V^-1 s^-1)",
     "log hole:electron mobility ratio"
+  ],
+  "material properties Saeki": [
+    "HOMO_D (eV)",
+    "LUMO_D (eV)",
+    "Eg_D (eV)",
+    "Ehl_D (eV)",
+    "HOMO_A (eV)",
+    "LUMO_A (eV)",
+    "Eg_A (eV)",
+    "Ehl_A (eV)",
+    "Donor PDI",
+    "Donor Mn (kDa)",
+    "Donor Mw (kDa)",
+    "Acceptor M (g/mol)"
+  ],
+  "material properties Hutchison": [
+    "HOMO_D (eV)",
+    "LUMO_D (eV)",
+    "Eg_D (eV)",
+    "HOMO_A (eV)",
+    "LUMO_A (eV)",
+    "Eg_A (eV)",
+    "wavelength_film_D (nm)",
+    "wavelength_film_A (nm)",
+    "wavelength_soln_D (nm)",
+    "wavelength_soln_A (nm)"
   ]
 }

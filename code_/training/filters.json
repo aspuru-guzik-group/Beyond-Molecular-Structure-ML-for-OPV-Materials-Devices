@@ -11,5 +11,6 @@
   "mobilities all": ["material properties", "fabrication", "fabrication missing", "device architecture", "device architecture missing", "mobilities"],
   "log mobilities all": ["material properties", "fabrication", "fabrication missing", "device architecture", "device architecture missing", "log mobilities"],
   "material properties Saeki": ["material properties Saeki"],
-  "material properties Saeki all": ["material properties Saeki"]
+  "material properties Saeki all": ["material properties Saeki"],
+  "material properties Hutchison all": ["material properties Hutchison"]
 }

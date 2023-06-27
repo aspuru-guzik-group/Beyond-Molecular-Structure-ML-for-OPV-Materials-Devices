@@ -10,18 +10,22 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent.parent
+DATASETS = ROOT / "datasets"
 
 rc("font", **{"family": "sans-serif", "sans-serif": ["Arial"],
               "size": 12
               })
 
 
-def get_predictions(directory: Path) -> None:
+def get_predictions(directory: Path, ground_truth_file: Path) -> None:
+    true_values: pd.Series = pd.read_csv(ground_truth_file)["calculated PCE (%)"]
     for pred_file in directory.rglob("*_predictions.csv"):
         # print(pred_file)
         model_name: str = pred_file.stem.split("_")[0]
         r2_avg, r2_stderr = get_scores(pred_file.parent, model_name)
-        make_predictions_plot(pred_file, r2_avg, r2_stderr)
+
+        make_predictions_plot(true_values, pred_file, r2_avg, r2_stderr)
 
 
 def get_scores(dir: Path, model_type: str) -> tuple[float, float]:
@@ -33,11 +37,8 @@ def get_scores(dir: Path, model_type: str) -> tuple[float, float]:
     return r2_avg, r2_stderr
 
 
-def make_predictions_plot(predictions: Path, r2_avg: float, r2_stderr: float) -> None:
-    ground_truth: Path = HERE.parent.parent / "datasets" / "Min_2020_n558" / "cleaned_dataset.csv"
-
+def make_predictions_plot(true_values: pd.Series, predictions: Path, r2_avg: float, r2_stderr: float) -> None:
     # Load the data from CSV files
-    true_values: pd.Series = pd.read_csv(ground_truth)["calculated PCE (%)"]
     predicted_values = pd.read_csv(predictions)
     seeds = predicted_values.columns
 
@@ -88,6 +89,11 @@ def make_predictions_plot(predictions: Path, r2_avg: float, r2_stderr: float) ->
 if __name__ == "__main__":
     # predictions = HERE.parent.parent / "results" / "target_PCE" / "features_ECFP" / "RF_predictions.csv"
     # make_predictions_plot(predictions, 0.87, 0.02)
+    dataset_ground_truth_csv = DATASETS / "Min_2020_n558" / "cleaned_dataset.csv"
+    ground_truth_Hutchison_csv = DATASETS / "Hutchison_2023_n1001" / "Hutchison_filtered_dataset_pipeline.csv"
+    ground_truth_Saeki_csv = DATASETS / "Saeki_2022_n1318" / "Saeki_corrected_pipeline.csv"
 
-    pce_results = HERE.parent.parent / "results"
-    get_predictions(pce_results)
+    # for result_dir in ["results", "results_Hutchison", "results_Saeki"]:
+    for result_dir, ground_truth_csv in zip(["results_Hutchison", "results_Saeki"], [ground_truth_Hutchison_csv, ground_truth_Saeki_csv]):
+        pce_results = ROOT / result_dir
+        get_predictions(pce_results, ground_truth_csv)
