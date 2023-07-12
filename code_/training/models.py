@@ -130,7 +130,7 @@ regressor_factory: dict[str, type] = {
     "GP":  GPRegressor,
     # "GP":    GaussianProcessRegressor,  # ATTN: Don"t use this one for multi-output?
     # "NN":    MLPRegressor,  # ATTN: Not actually this one?
-    # "NN":  NNRegressor,
+    "NN":  NNRegressor,
     # "GNN": GNNPredictor,
     # "ANN": get_skorch_nn,
 }

@@ -100,7 +100,7 @@ def main_mordred_and_numeric(dataset: pd.DataFrame,
 def main_multioutput_grid(target_feats: list[str], hyperopt: bool = False) -> None:
     transform_type = "Standard"
 
-    for model in ["RF", "XGB", "HGB", "NGB"]:
+    for model in ["RF", "XGB", "HGB", "NGB", "NN"]:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
         main_mordred_and_numeric(dataset=opv_dataset,

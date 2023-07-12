@@ -1,0 +1,81 @@
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/torch/cuda/__init__.py:107: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 10020). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at ../c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+n numeric features: 13
+
+
+
+OPTIMIZING HYPERPARAMETERS FOR REGRESSOR NN 	SEED: 6
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/torch/cuda/__init__.py:107: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 10020). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at ../c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/torch/cuda/__init__.py:107: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 10020). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at ../c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+joblib.externals.loky.process_executor._RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/joblib/externals/loky/process_executor.py", line 428, in _process_worker
+    r = call_item()
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/joblib/externals/loky/process_executor.py", line 275, in __call__
+    return self.fn(*self.args, **self.kwargs)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/joblib/_parallel_backends.py", line 620, in __call__
+    return self.func(*args, **kwargs)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/joblib/parallel.py", line 288, in __call__
+    return [func(*args, **kwargs)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/joblib/parallel.py", line 288, in <listcomp>
+    return [func(*args, **kwargs)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/utils/parallel.py", line 123, in __call__
+    return self.function(*args, **kwargs)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/model_selection/_validation.py", line 674, in _fit_and_score
+    estimator = estimator.set_params(**cloned_parameters)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/pipeline.py", line 211, in set_params
+    self._set_params("steps", **kwargs)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/utils/metaestimators.py", line 70, in _set_params
+    super().set_params(**params)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/base.py", line 236, in set_params
+    valid_params[key].set_params(**sub_params)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/base.py", line 236, in set_params
+    valid_params[key].set_params(**sub_params)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/base.py", line 205, in set_params
+    raise ValueError(
+ValueError: Invalid parameter 'activation' for estimator MultiOutputRegressor(estimator=NNRegressor()). Valid parameters are: ['estimator', 'n_jobs'].
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/chefos/projects/ml_for_opvs/code_/training/train_structure_and_numeric_multiout.py", line 117, in <module>
+    main_multioutput_grid(
+  File "/home/chefos/projects/ml_for_opvs/code_/training/train_structure_and_numeric_multiout.py", line 107, in main_multioutput_grid
+    main_mordred_and_numeric(dataset=opv_dataset,
+  File "/home/chefos/projects/ml_for_opvs/code_/training/train_structure_and_numeric_multiout.py", line 88, in main_mordred_and_numeric
+    train_regressor(dataset=dataset,
+  File "/home/chefos/projects/ml_for_opvs/code_/training/training_utils.py", line 56, in train_regressor
+    scores, predictions = _prepare_data(dataset=dataset,
+  File "/home/chefos/projects/ml_for_opvs/code_/training/training_utils.py", line 161, in _prepare_data
+    return _run(X, y,
+  File "/home/chefos/projects/ml_for_opvs/code_/training/training_utils.py", line 222, in _run
+    best_estimator, regressor_params = _optimize_hyperparams(X, y, cv_outer=cv_outer, seed=seed,
+  File "/home/chefos/projects/ml_for_opvs/code_/training/training_utils.py", line 264, in _optimize_hyperparams
+    bayes.fit(X_train, y_train)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/searchcv.py", line 466, in fit
+    super().fit(X=X, y=y, groups=groups, **fit_params)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/model_selection/_search.py", line 874, in fit
+    self._run_search(evaluate_candidates)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/searchcv.py", line 512, in _run_search
+    optim_result = self._step(
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/skopt/searchcv.py", line 408, in _step
+    all_results = evaluate_candidates(params_dict)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/model_selection/_search.py", line 821, in evaluate_candidates
+    out = parallel(
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/utils/parallel.py", line 63, in __call__
+    return super().__call__(iterable_with_config)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/joblib/parallel.py", line 1098, in __call__
+    self.retrieve()
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/joblib/parallel.py", line 975, in retrieve
+    self._output.extend(job.get(timeout=self.timeout))
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/joblib/_parallel_backends.py", line 567, in wrap_future_result
+    return future.result(timeout=timeout)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+ValueError: Invalid parameter 'activation' for estimator MultiOutputRegressor(estimator=NNRegressor()). Valid parameters are: ['estimator', 'n_jobs'].
