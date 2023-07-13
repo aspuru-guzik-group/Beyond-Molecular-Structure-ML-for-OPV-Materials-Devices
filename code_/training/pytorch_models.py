@@ -361,8 +361,8 @@ class XavierLinear(torch.nn.Linear):
 
 class NNModel(nn.Module):
     def __init__(self,
-                 input_size=128,
-                 embedding_size=200,
+                 input_size,
+                 embedding_size=1024,
                  hidden_size=2048,
                  output_size=1,
                  n_layers=3
@@ -393,6 +393,7 @@ class NNModel(nn.Module):
         Returns:
             _type_: _description_
         """
+        x = x.type(torch.float32)
         embeds: torch.tensor = self.embeds(x)
         for i, layer in enumerate(self.linearlayers):
             embeds: torch.tensor = layer(embeds)

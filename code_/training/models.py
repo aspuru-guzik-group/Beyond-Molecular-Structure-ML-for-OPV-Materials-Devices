@@ -14,7 +14,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.svm import SVR
 from skopt.space import Categorical, Integer, Real
-from skorch import NeuralNetRegressor
+from skorch.regressor import NeuralNetRegressor
 from xgboost import XGBRegressor
 
 from pytorch_models import GNNPredictor, GPRegressor, NNModel
@@ -48,13 +48,14 @@ def tanimoto_distance(fp1: np.array, fp2: np.array, **kwargs) -> float:
 #         module = NNModel
 #         super().__init__(module, *args, criterion=criterion, **kwargs)
 
-def get_skorch_nn():
+def get_skorch_nn(input_size: int):
     return NeuralNetRegressor(NNModel,
-                              criterion=nn.CrossEntropyLoss,  # TODO: Change to MSE
+                              criterion=nn.MSELoss,  # TODO: Change to MSE
                               optimizer=torch.optim.Adam,
                               lr=0.01,
-                              max_epochs=100,
+                              max_epochs=10,
                               # batch_size=128,
+                              module__input_size=input_size,
                               device="cuda" if torch.cuda.is_available() else "cpu",
                               )
 
@@ -132,7 +133,7 @@ regressor_factory: dict[str, type] = {
     # "NN":    MLPRegressor,  # ATTN: Not actually this one?
     "NN":  NNRegressor,
     # "GNN": GNNPredictor,
-    # "ANN": get_skorch_nn,
+    "ANN": get_skorch_nn,
 }
 
 ecfp_only_kernels: dict[str, Union[str, Callable]] = {
@@ -224,6 +225,19 @@ regressor_search_space: dict[str, dict] = {
                "regressor__regressor__depth":          Integer(1,3)
              },
     "NN":  {"regressor__regressor__n_layers":           Integer(1, 6),
+            "regressor__regressor__n_neurons":          Integer(1, 100),
+            "regressor__regressor__activation":         Categorical(["logistic", "tanh", "relu"]),
+            "regressor__regressor__alpha":              Real(1e-5, 1e-3, prior="log-uniform"),
+            "regressor__regressor__learning_rate":      Categorical(["constant", "invscaling", "adaptive"]),
+            "regressor__regressor__learning_rate_init": Real(1e-4, 1e-2, prior="log-uniform"),
+            #  "regressor__regressor__max_iter":           Integer(50, 500),
+            "regressor__regressor__early_stopping":     [True],
+            #  "regressor__regressor__validation_fraction":Real(0.005, 0.5),
+            #  "regressor__regressor__beta_1":             Real(0.005, 0.5),
+            #  "regressor__regressor__beta_2":             Real(0.005, 0.5),
+            #  "regressor__regressor__epsilon":            Real(1e-9, 1e-7),
+            },
+        "ANN":  {"regressor__regressor__n_layers":           Integer(1, 6),
             "regressor__regressor__n_neurons":          Integer(1, 100),
             "regressor__regressor__activation":         Categorical(["logistic", "tanh", "relu"]),
             "regressor__regressor__alpha":              Real(1e-5, 1e-3, prior="log-uniform"),

@@ -37,14 +37,16 @@ def np_r(y_true: pd.Series, y_pred: np.ndarray) -> float:
     Returns:
         Pearson correlation coefficient.
     """
-    y_true = y_true.to_numpy().flatten()
+    if y_true.type == pd.Series:
+        y_true = y_true.to_numpy().flatten()
     y_pred = y_pred.tolist()
     r = np.corrcoef(y_true, y_pred, rowvar=False)[0, 1]
     return r
 
 
 def pearson(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    y_true = y_true.to_numpy().flatten()
+    if y_true.type == pd.Series:
+        y_true = y_true.to_numpy().flatten()
     y_pred = y_pred.flatten()
     r = pearsonr(y_true, y_pred).statistic
     return r
@@ -97,6 +99,7 @@ def cross_validate_regressor(regressor, X, y, cv) -> tuple[dict[str, float], np.
         scores, predictions = cross_validate_multioutput_regressor(regressor, X, y, cv)
 
     else:
+        print(f"{X.dtype=}", f"{y.dtype=}")
         scores: dict[str, float] = cross_validate(regressor, X, y,
                                                   cv=cv,
                                                   scoring={"r":    r_scorer,

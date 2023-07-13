@@ -11,6 +11,7 @@ from sklearn.multioutput import MultiOutputRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, QuantileTransformer
 from skopt import BayesSearchCV
+import torch
 
 from data_handling import remove_unserializable_keys, save_results
 from filter_data import filter_dataset, get_feature_ids
@@ -27,7 +28,7 @@ os_type: str = platform.system().lower()
 TEST: bool = False if os_type == "linux" else True
 
 # Seeds for generating random states
-with open("seeds.json", "r") as f:
+with open(HERE / "seeds.json", "r") as f:
     SEEDS: list[int] = json.load(f)
     SEEDS: list[int] = SEEDS if not TEST else SEEDS[:1]
 
@@ -181,7 +182,7 @@ def _run(X, y,
         cv_outer = KFold(n_splits=N_FOLDS, shuffle=True, random_state=seed)
 
         # MinMax scale everything if model is a neural network
-        if regressor_type == "NN":
+        if regressor_type == "NN" or regressor_type == "ANN":
             y_transform = Pipeline(
                 steps=[*[(step[0], step[1]) for step in generate_feature_pipeline(transform_type).steps],
                        ("MinMax NN", MinMaxScaler())])
@@ -197,6 +198,16 @@ def _run(X, y,
                 # regressor_factory[regressor_type](),
                 transformer=y_transform
             )
+        elif regressor_type == "ANN":
+            y = y.values.reshape(-1, 1)
+            X = X.values
+            # convert to numpy array with float 32
+            X = X.astype(np.float32)
+            y = y.astype(np.float32)
+            # find out max_input_length
+            input_size: int = X.shape[1]
+            preprocessor = MinMaxScaler()
+            y_transform_regressor = regressor_factory[regressor_type](input_size)
         else:
             y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
                 # regressor=regressor_factory[regressor_type](**kwargs),
@@ -204,12 +215,6 @@ def _run(X, y,
                 transformer=y_transform
             )
 
-        if regressor_type == "ANN":
-            y = y.values.reshape(-1, 1)
-            X = X.values
-            print(y.shape)
-            preprocessor = MinMaxScaler()
-            y_transform_regressor = regressor_factory[regressor_type]()
 
         regressor = Pipeline(
             steps=[("preprocessor", preprocessor),

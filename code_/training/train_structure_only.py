@@ -318,5 +318,11 @@ if __name__ == "__main__":
     #     for h_opt in [False, True]:
     #         main_representation_model_grid(target_feats=[target], hyperopt=h_opt)
 
-    for target in ["Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-        main_representation_model_grid(target_feats=[target], hyperopt=False)
+    # for target in ["Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+    #     main_representation_model_grid(target_feats=[target], hyperopt=False)
+
+    # Run one model
+    transform_type: str = "Standard"
+    model = "ANN"
+    opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
+    main_ecfp_only(dataset=opv_dataset, regressor_type=model, target_features=["calculated PCE (%)"], transform_type=transform_type, hyperparameter_optimization=False)
