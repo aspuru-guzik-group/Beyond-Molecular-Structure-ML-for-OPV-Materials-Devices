@@ -364,6 +364,7 @@ class NNModel(nn.Module):
                  input_size,
                  embedding_size=1024,
                  hidden_size=2048,
+                 activation=nn.ReLU,
                  output_size=1,
                  n_layers=3
                  ):
@@ -375,12 +376,12 @@ class NNModel(nn.Module):
         super(NNModel, self).__init__()
         self.embeds: nn.Sequential = nn.Sequential(  # Defines first two layers: input and embedding
             nn.Linear(input_size, embedding_size),
-            nn.ReLU(),
+            activation(),
             OrthoLinear(embedding_size, hidden_size),
-            nn.ReLU(),
+            activation(),
         )
         self.linearlayers: nn.ModuleList = nn.ModuleList(  # Add n hidden layers same size as embedding layer
-            [nn.Sequential(OrthoLinear(hidden_size, hidden_size), nn.ReLU()) for _ in range(n_layers)]
+            [nn.Sequential(OrthoLinear(hidden_size, hidden_size), activation()) for _ in range(n_layers)]
         )
 
         self.output: nn.Linear = nn.Linear(hidden_size, output_size)  # Final output layer

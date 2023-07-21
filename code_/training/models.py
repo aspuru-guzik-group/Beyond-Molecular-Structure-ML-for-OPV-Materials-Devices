@@ -154,7 +154,7 @@ def get_ecfp_only_kernel(representation: str, scalar_filter: str, regressor_type
 hyperopt_by_default: list[str] = [
     "KNN",
     "NN",
-    # "ANN"
+    "ANN"
 ]
 
 
@@ -241,13 +241,14 @@ regressor_search_space: dict[str, dict] = {
             #  "regressor__regressor__beta_2":             Real(0.005, 0.5),
             #  "regressor__regressor__epsilon":            Real(1e-9, 1e-7),
             },
-        "ANN":  {"regressor__regressor__n_layers":           Integer(1, 6),
-            "regressor__regressor__n_neurons":          Integer(1, 100),
-            "regressor__activation":         Categorical(["logistic", "tanh", "relu"]),
-            "regressor__alpha":              Real(1e-5, 1e-3, prior="log-uniform"),
-            "regressor__regressor__learning_rate":      Categorical(["constant", "invscaling", "adaptive"]),
-            "regressor__regressor__learning_rate_init": Real(1e-4, 1e-2, prior="log-uniform"),
-            #  "regressor__regressor__max_iter":           Integer(50, 500),
-            "regressor__regressor__early_stopping":     [True],
-            },
+    "ANN":  {"regressor__module__n_layers":           Integer(1, 6),
+        "regressor__module__embedding_size":          Integer(1, 1024),
+        "regressor__module__hidden_size":          Integer(1, 100),
+        "regressor__module__activation":         Categorical([nn.Sigmoid, nn.Tanh, nn.ReLU]),
+        # "regressor__alpha":              Real(1e-5, 1e-3, prior="log-uniform"),
+        # "regressor__regressor__learning_rate":      Categorical(["constant", "invscaling", "adaptive"]),
+        "regressor__lr": Real(1e-4, 1e-2, prior="log-uniform"),
+        #  "regressor__regressor__max_iter":           Integer(50, 500),
+        # "regressor__regressor__early_stopping":     [True],
+        },
 }

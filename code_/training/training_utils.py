@@ -199,8 +199,8 @@ def _run(X, y,
                 transformer=y_transform
             )
         elif regressor_type == "ANN":
-            y = y.values.reshape(-1, 1)
-            X = X.values
+            y = _pd_to_np(y).reshape(-1, 1)
+            X = _pd_to_np(X)
             # convert to numpy array with float 32
             X = X.astype(np.float32)
             y = y.astype(np.float32)
@@ -239,6 +239,15 @@ def _run(X, y,
 
     seed_predictions: pd.DataFrame = pd.DataFrame.from_dict(seed_predictions, orient="columns")
     return seed_scores, seed_predictions
+
+
+def _pd_to_np(data):
+    if isinstance(data, pd.DataFrame):
+        return data.values
+    elif isinstance(data, np.ndarray):
+        return data
+    else:
+        raise ValueError("Data must be either a pandas DataFrame or a numpy array.")
 
 
 def _optimize_hyperparams(X, y,
