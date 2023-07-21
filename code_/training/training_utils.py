@@ -9,7 +9,7 @@ from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
 from sklearn.model_selection import KFold
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler, QuantileTransformer
+from sklearn.preprocessing import MinMaxScaler, QuantileTransformer, StandardScaler
 from skopt import BayesSearchCV
 import torch
 
@@ -182,7 +182,7 @@ def _run(X, y,
         cv_outer = KFold(n_splits=N_FOLDS, shuffle=True, random_state=seed)
 
         # MinMax scale everything if model is a neural network
-        if regressor_type == "NN" or regressor_type == "ANN":
+        if regressor_type in ["NN", "ANN"]:
             y_transform = Pipeline(
                 steps=[*[(step[0], step[1]) for step in generate_feature_pipeline(transform_type).steps],
                        ("MinMax NN", MinMaxScaler())])
@@ -206,7 +206,9 @@ def _run(X, y,
             y = y.astype(np.float32)
             # find out max_input_length
             input_size: int = X.shape[1]
-            preprocessor = MinMaxScaler()
+            preprocessor = Pipeline(
+                steps=[("Standard", StandardScaler()),
+                       ("MinMax ANN", MinMaxScaler())])
             y_transform_regressor = regressor_factory[regressor_type](input_size)
         else:
             y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
@@ -247,8 +249,14 @@ def _optimize_hyperparams(X, y,
     # Splitting for outer cross-validation loop
     estimators: list[BayesSearchCV] = []
     for train_index, test_index in cv_outer.split(X, y):
-        X_train = X.iloc[train_index]
-        y_train = y.iloc[train_index]
+        X_train = split_for_training(X, train_index)
+        y_train = split_for_training(y, train_index)
+        # if isinstance([X, y], pd.DataFrame):
+        #     X_train = X.iloc[train_index]
+        #     y_train = y.iloc[train_index]
+        # elif isinstance([X, y], np.ndarray):
+        #     X_train = X[train_index]
+        #     y_train = y[train_index]
 
         # Splitting for inner hyperparameter optimization loop
         cv_inner = KFold(n_splits=N_FOLDS, shuffle=True, random_state=seed)
@@ -280,6 +288,16 @@ def _optimize_hyperparams(X, y,
         regressor_params = {"bad params": "couldn't get them"}
 
     return best_estimator, regressor_params
+
+
+def split_for_training(data: Union[pd.DataFrame, np.ndarray], indices: np.ndarray) -> Union[pd.DataFrame, np.ndarray]:
+    if isinstance(data, pd.DataFrame):
+        split_data = data.iloc[indices]
+    elif isinstance(data, np.ndarray):
+        split_data = data[indices]
+    else:
+        raise ValueError("Data must be either a pandas DataFrame or a numpy array.")
+    return split_data
 
 
 def run_graphs_only(dataset: pd.DataFrame,

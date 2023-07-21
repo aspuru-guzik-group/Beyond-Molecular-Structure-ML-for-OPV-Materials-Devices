@@ -397,19 +397,19 @@ if __name__ == "__main__":
         results = root / "results" / f"target_{target}"
 
         # Create heatmap
-        for score in ["r", "r2", "rmse", "mae"]:
-            create_grid_search_heatmap(results, score, var="stderr")
-
         # for score in ["r", "r2", "rmse", "mae"]:
-        #     create_fabrication_grid_heatmap(results, score, var="stderr")
+        #     create_grid_search_heatmap(results, score, var="stderr")
+
+        for score in ["r", "r2", "rmse", "mae"]:
+            create_fabrication_grid_heatmap(results, score, var="stderr")
 
     # Subspace search heatmaps
-    # for target in ["PCE", "Voc", "Jsc", "FF"]:
-    #     results = root / "results" / f"target_{target}"
-    #
-    #     # Create heatmap
-    #     for score in ["r", "r2", "rmse", "mae"]:
-    #         create_subspace_grid_heatmap(results, score, var="stderr")
+    for target in ["Voc", "Jsc", "FF"]:
+        results = root / "results" / f"target_{target}"
+
+        # Create heatmap
+        for score in ["r", "r2", "rmse", "mae"]:
+            create_subspace_grid_heatmap(results, score, var="stderr")
 
     # Impute search heatmaps
     # for target in ["PCE"]:
