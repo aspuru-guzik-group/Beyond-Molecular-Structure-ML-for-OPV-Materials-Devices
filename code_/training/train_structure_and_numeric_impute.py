@@ -51,6 +51,7 @@ def main_ecfp_and_numeric(dataset: pd.DataFrame,
                           subspace_filter: Optional[str],
                           target_features: list[str],
                           transform_type: str,
+                          imputer: str,
                           hyperparameter_optimization: bool,
                           radius: int = 5) -> None:
     representation: str = "ECFP"
@@ -71,6 +72,7 @@ def main_ecfp_and_numeric(dataset: pd.DataFrame,
                     target_features=target_features,
                     regressor_type=regressor_type,
                     transform_type=transform_type,
+                    imputer=imputer,
                     hyperparameter_optimization=hyperparameter_optimization)
 
 
@@ -102,11 +104,21 @@ def main_mordred_and_numeric(dataset: pd.DataFrame,
 def main_imputer_grid(target_feats: list[str], hyperopt: bool = False) -> None:
     transform_type = "Standard"
 
-    for model in ["RF", "XGB", "HGB", "NGB"]:
+    # for model in ["RF", "XGB", "HGB", "NGB"]:
+    for model in ["ANN"]:
         for imputer in imputer_factory:
             opv_dataset: pd.DataFrame = get_appropriate_dataset(model, imputer=imputer)
 
-            main_mordred_and_numeric(dataset=opv_dataset,
+            # main_mordred_and_numeric(dataset=opv_dataset,
+            #                          regressor_type=model,
+            #                          scalar_filter="device architecture",
+            #                          subspace_filter=None,
+            #                          target_features=target_feats,
+            #                          transform_type=transform_type,
+            #                          imputer=imputer,
+            #                          hyperparameter_optimization=hyperopt)
+            
+            main_ecfp_and_numeric(dataset=opv_dataset,
                                      regressor_type=model,
                                      scalar_filter="device architecture",
                                      subspace_filter=None,
@@ -117,8 +129,8 @@ def main_imputer_grid(target_feats: list[str], hyperopt: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    # main_imputer_grid(
-    #         target_feats=["calculated PCE (%)"], hyperopt=False)
+    main_imputer_grid(
+            target_feats=["calculated PCE (%)"], hyperopt=False)
 
     # model = "HGB"
     # main_mordred_and_numeric(dataset=get_appropriate_dataset(model),
@@ -130,12 +142,12 @@ if __name__ == "__main__":
     #                             imputer="uniform KNN",
     #                             hyperparameter_optimization=True)
     
-    model = "HGB"
-    main_mordred_and_numeric(dataset=get_appropriate_dataset(model),
-                                regressor_type=model,
-                                scalar_filter="device architecture",
-                                subspace_filter=None,
-                                target_features=["calculated PCE (%)"],
-                                transform_type="Standard",
-                                imputer=None,
-                                hyperparameter_optimization=True)
+    # model = "HGB"
+    # main_mordred_and_numeric(dataset=get_appropriate_dataset(model),
+    #                             regressor_type=model,
+    #                             scalar_filter="device architecture",
+    #                             subspace_filter=None,
+    #                             target_features=["calculated PCE (%)"],
+    #                             transform_type="Standard",
+    #                             imputer=None,
+    #                             hyperparameter_optimization=True)

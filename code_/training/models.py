@@ -48,7 +48,7 @@ def tanimoto_distance(fp1: np.array, fp2: np.array, **kwargs) -> float:
 #         module = NNModel
 #         super().__init__(module, *args, criterion=criterion, **kwargs)
 
-def get_skorch_nn(input_size: int):
+def get_skorch_nn(input_size: int, output_size: int):
     return NeuralNetRegressor(NNModel,
                               criterion=nn.MSELoss,  # TODO: Change to MSE
                               optimizer=torch.optim.Adam,
@@ -56,6 +56,7 @@ def get_skorch_nn(input_size: int):
                               max_epochs=10,
                               # batch_size=128,
                               module__input_size=input_size,
+                              module__output_size=output_size,
                               device="cuda" if torch.cuda.is_available() else "cpu",
                               )
 

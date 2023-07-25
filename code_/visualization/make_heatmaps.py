@@ -3,7 +3,7 @@ from itertools import product
 from pathlib import Path
 from typing import List
 
-import cmcrameri.cm as cmc
+# import cmcrameri.cm as cmc
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -97,6 +97,7 @@ model_abbrev_to_full: dict[str, str] = {
     "NGB": "Natural Gradient Boosting",
     "GP":  "Gaussian Process",
     "NN":  "Neural Network",
+    "ANN": "Artificial Neural Network",
     "GNN": "Graph Neural Network",
 }
 
@@ -205,7 +206,7 @@ def create_grid_search_heatmap(root_dir: Path, score: str, var: str) -> None:
     """
     x_labels: List[str] = ["fabrication only", "OHE", "material properties", "SMILES", "SELFIES", "ECFP",
                            "mordred", "graph embeddings", "GNN"]
-    y_labels: List[str] = ["MLR", "KRR", "KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GP", "NN", "GNN"][::-1]
+    y_labels: List[str] = ["MLR", "KRR", "KNN", "SVR", "RF", "XGB", "HGB", "NGB", "GP", "NN", "ANN", "GNN"][::-1]
     parent_dir_labels: list[str] = [f"features_{x}" for x in x_labels]
 
     target: str = ", ".join(root_dir.name.split("_")[1:])
@@ -231,7 +232,7 @@ def create_fabrication_grid_heatmap(root_dir: Path, score: str, var: str) -> Non
         var: Variance to plot
     """
     x_labels: list[str] = ["material properties", "fabrication", "device architecture"]
-    y_labels: list[str] = ["SVR", "RF", "XGB", "HGB", "NGB", "NN"][::-1]
+    y_labels: list[str] = ["SVR", "RF", "XGB", "HGB", "NGB", "NN", "ANN"][::-1]
 
     representations: list[str] = ["ECFP", "mordred"]
     # Create the product of representations and x_labels where they're joined as f"{rep}_{x_label}"
@@ -392,8 +393,8 @@ if __name__ == "__main__":
     root = Path(__file__).resolve().parent.parent.parent
 
     # Model, representation and processing search heatmaps
-    for target in ["Voc", "Jsc", "FF"]:
-    # for target in ["PCE"]:
+    # for target in ["Voc", "Jsc", "FF"]:
+    for target in ["PCE"]:
         results = root / "results" / f"target_{target}"
 
         # Create heatmap
@@ -403,13 +404,13 @@ if __name__ == "__main__":
         for score in ["r", "r2", "rmse", "mae"]:
             create_fabrication_grid_heatmap(results, score, var="stderr")
 
-    # Subspace search heatmaps
-    for target in ["Voc", "Jsc", "FF"]:
-        results = root / "results" / f"target_{target}"
+    # # Subspace search heatmaps
+    # for target in ["Voc", "Jsc", "FF"]:
+    #     results = root / "results" / f"target_{target}"
 
-        # Create heatmap
-        for score in ["r", "r2", "rmse", "mae"]:
-            create_subspace_grid_heatmap(results, score, var="stderr")
+    #     # Create heatmap
+    #     for score in ["r", "r2", "rmse", "mae"]:
+    #         create_subspace_grid_heatmap(results, score, var="stderr")
 
     # Impute search heatmaps
     # for target in ["PCE"]:

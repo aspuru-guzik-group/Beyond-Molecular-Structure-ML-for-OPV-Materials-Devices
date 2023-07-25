@@ -103,7 +103,8 @@ def main_representation_and_fabrication_grid(target_feats: list[str], hyperopt: 
     filters = ["material properties", "fabrication", "device architecture"]
     for i, filter in enumerate(filters):
         for subspace in [None] + filters[:i]:
-            for model in ["SVR", "RF", "XGB", "HGB", "NN", "NGB"]:
+            # for model in ["SVR", "RF", "XGB", "HGB", "NN", "NGB"]:
+            for model in ["ANN"]:
                 opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
                 # ECFP
@@ -129,7 +130,8 @@ if __name__ == "__main__":
     #     for h_opt in [False, True]:
     #         main_representation_and_fabrication_grid(target_feats=[target], hyperopt=h_opt)
 
-    for target in ["Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+    # for target in ["Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
+    for target in ["calculated PCE (%)"]:
         main_representation_and_fabrication_grid(target_feats=[target], hyperopt=False)
 
     # target = ["calculated PCE (%)"]

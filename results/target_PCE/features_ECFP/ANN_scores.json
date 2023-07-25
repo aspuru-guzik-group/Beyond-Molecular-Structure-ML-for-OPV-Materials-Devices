@@ -1,31 +1,49 @@
 {
   "6": {
     "fit_time": [
-      0.6758959293365479,
-      0.6740610599517822
+      2.4315733909606934,
+      2.334623098373413,
+      2.4234023094177246,
+      2.363428831100464,
+      1.647674322128296
     ],
     "score_time": [
-      2.036241054534912,
-      2.036679983139038
+      0.016730546951293945,
+      0.020104169845581055,
+      0.01648998260498047,
+      0.022223711013793945,
+      0.014055252075195312
     ],
     "test_r": [
-      0.5869312602610616,
-      0.6729223467962027
+      0.7266502203542664,
+      0.6863764859921513,
+      0.7386948718228453,
+      0.7695581714377968,
+      0.6522713337691659
     ],
     "test_r2": [
-      -0.2199568038196018,
-      -0.14663997905661397
+      0.516766523811574,
+      0.46872010679974463,
+      0.5286606805841785,
+      0.4252771457425305,
+      0.3577469605944539
     ],
     "test_rmse": [
-      -3.413074493408203,
-      -3.3163652420043945
+      -2.0601842403411865,
+      -2.3622405529022217,
+      -2.072901487350464,
+      -2.3884570598602295,
+      -2.4736568927764893
     ],
     "test_mae": [
-      -2.93819260597229,
-      -2.808640956878662
+      -1.599609375,
+      -1.8770065307617188,
+      -1.6310642957687378,
+      -1.9441393613815308,
+      -1.9765490293502808
     ],
     "best_params": {
-      "lr": 0.0011826780571453624,
+      "lr": 0.003281725280715032,
       "max_epochs": 10,
       "batch_size": 128,
       "callbacks": null,
@@ -35,9 +53,9 @@
       "device": "cpu",
       "compile": false,
       "module__input_size": 4096,
-      "module__embedding_size": 307,
-      "module__hidden_size": 84,
-      "module__n_layers": 5,
+      "module__embedding_size": 1024,
+      "module__hidden_size": 71,
+      "module__n_layers": 2,
       "callbacks__train_loss__name": "train_loss",
       "callbacks__train_loss__lower_is_better": true,
       "callbacks__train_loss__on_train": true,
@@ -50,16 +68,430 @@
       "callbacks__print_log__stralign": "right"
     }
   },
-  "r_avg": 0.6299268035286321,
-  "r_stdev": 0.042995543267570546,
-  "r_stderr": 0.01625078785287273,
-  "r2_avg": -0.1832983914381079,
-  "r2_stdev": 0.03665841238149392,
-  "r2_stderr": 0.01385557751712628,
-  "rmse_avg": 3.364719867706299,
-  "rmse_stdev": 0.0483546257019043,
-  "rmse_stderr": 0.018276330620978692,
-  "mae_avg": 2.873416781425476,
-  "mae_stdev": 0.06477582454681396,
-  "mae_stderr": 0.024482960388574705
+  "13": {
+    "fit_time": [
+      2.252094268798828,
+      2.1399245262145996,
+      2.1869308948516846,
+      2.2454488277435303,
+      1.5615200996398926
+    ],
+    "score_time": [
+      0.015729188919067383,
+      0.018561124801635742,
+      0.017688274383544922,
+      0.015906095504760742,
+      0.012924909591674805
+    ],
+    "test_r": [
+      0.6746475399834548,
+      0.7510355976297269,
+      0.7198302498143372,
+      0.7436811801326177,
+      0.7195457241091724
+    ],
+    "test_r2": [
+      0.4503314313877125,
+      0.4906083049054387,
+      0.504584954008183,
+      0.49196775801594594,
+      0.4031101577358639
+    ],
+    "test_rmse": [
+      -2.293774127960205,
+      -2.215024471282959,
+      -2.0588817596435547,
+      -2.2467660903930664,
+      -2.394577741622925
+    ],
+    "test_mae": [
+      -1.7635698318481445,
+      -1.8379619121551514,
+      -1.6387614011764526,
+      -1.7770555019378662,
+      -1.710445523262024
+    ],
+    "best_params": {
+      "lr": 0.004215387218451772,
+      "max_epochs": 10,
+      "batch_size": 128,
+      "callbacks": null,
+      "predict_nonlinearity": "auto",
+      "warm_start": false,
+      "verbose": 1,
+      "device": "cpu",
+      "compile": false,
+      "module__input_size": 4096,
+      "module__embedding_size": 892,
+      "module__hidden_size": 38,
+      "module__n_layers": 3,
+      "callbacks__train_loss__name": "train_loss",
+      "callbacks__train_loss__lower_is_better": true,
+      "callbacks__train_loss__on_train": true,
+      "callbacks__valid_loss__name": "valid_loss",
+      "callbacks__valid_loss__lower_is_better": true,
+      "callbacks__valid_loss__on_train": false,
+      "callbacks__print_log__keys_ignored": null,
+      "callbacks__print_log__tablefmt": "simple",
+      "callbacks__print_log__floatfmt": ".4f",
+      "callbacks__print_log__stralign": "right"
+    }
+  },
+  "42": {
+    "fit_time": [
+      0.1983628273010254,
+      0.19808650016784668,
+      0.19965910911560059,
+      0.19488739967346191,
+      0.13097381591796875
+    ],
+    "score_time": [
+      0.006946086883544922,
+      0.006874561309814453,
+      0.006754875183105469,
+      0.00667119026184082,
+      0.0045909881591796875
+    ],
+    "test_r": [
+      0.7295399729377661,
+      0.7776756033211701,
+      0.7171140871247019,
+      0.6667396106413487,
+      0.7073124420541008
+    ],
+    "test_r2": [
+      0.531293657786645,
+      0.5346538407053119,
+      0.5124087616221848,
+      0.3599493429030065,
+      0.33863779990830123
+    ],
+    "test_rmse": [
+      -2.148728847503662,
+      -1.7587193250656128,
+      -2.4269232749938965,
+      -2.3872764110565186,
+      -2.5888047218322754
+    ],
+    "test_mae": [
+      -1.6845266819000244,
+      -1.4065825939178467,
+      -1.8108080625534058,
+      -1.8259612321853638,
+      -1.9139827489852905
+    ],
+    "best_params": {
+      "lr": 0.008060905952753133,
+      "max_epochs": 10,
+      "batch_size": 128,
+      "callbacks": null,
+      "predict_nonlinearity": "auto",
+      "warm_start": false,
+      "verbose": 1,
+      "device": "cpu",
+      "compile": false,
+      "module__input_size": 4096,
+      "module__embedding_size": 23,
+      "module__hidden_size": 88,
+      "module__n_layers": 1,
+      "callbacks__train_loss__name": "train_loss",
+      "callbacks__train_loss__lower_is_better": true,
+      "callbacks__train_loss__on_train": true,
+      "callbacks__valid_loss__name": "valid_loss",
+      "callbacks__valid_loss__lower_is_better": true,
+      "callbacks__valid_loss__on_train": false,
+      "callbacks__print_log__keys_ignored": null,
+      "callbacks__print_log__tablefmt": "simple",
+      "callbacks__print_log__floatfmt": ".4f",
+      "callbacks__print_log__stralign": "right"
+    }
+  },
+  "69": {
+    "fit_time": [
+      1.1834125518798828,
+      1.1973507404327393,
+      1.166893720626831,
+      1.1817829608917236,
+      0.7512316703796387
+    ],
+    "score_time": [
+      0.013178586959838867,
+      0.010444879531860352,
+      0.01523733139038086,
+      0.013316869735717773,
+      0.009301424026489258
+    ],
+    "test_r": [
+      0.7648476907503385,
+      0.7855686084727642,
+      0.6993225067105548,
+      0.7512213579507679,
+      0.6654718726945553
+    ],
+    "test_r2": [
+      0.5565386750256588,
+      0.5389238471870244,
+      0.4877557284429169,
+      0.5642467246944185,
+      0.43065910938181673
+    ],
+    "test_rmse": [
+      -1.9819462299346924,
+      -2.152864694595337,
+      -2.114417791366577,
+      -2.1459057331085205,
+      -2.331357002258301
+    ],
+    "test_mae": [
+      -1.5280295610427856,
+      -1.8198986053466797,
+      -1.5672810077667236,
+      -1.6421332359313965,
+      -1.8094643354415894
+    ],
+    "best_params": {
+      "lr": 0.002978791799218366,
+      "max_epochs": 10,
+      "batch_size": 128,
+      "callbacks": null,
+      "predict_nonlinearity": "auto",
+      "warm_start": false,
+      "verbose": 1,
+      "device": "cpu",
+      "compile": false,
+      "module__input_size": 4096,
+      "module__embedding_size": 487,
+      "module__hidden_size": 24,
+      "module__n_layers": 1,
+      "callbacks__train_loss__name": "train_loss",
+      "callbacks__train_loss__lower_is_better": true,
+      "callbacks__train_loss__on_train": true,
+      "callbacks__valid_loss__name": "valid_loss",
+      "callbacks__valid_loss__lower_is_better": true,
+      "callbacks__valid_loss__on_train": false,
+      "callbacks__print_log__keys_ignored": null,
+      "callbacks__print_log__tablefmt": "simple",
+      "callbacks__print_log__floatfmt": ".4f",
+      "callbacks__print_log__stralign": "right"
+    }
+  },
+  "420": {
+    "fit_time": [
+      2.472507953643799,
+      2.434337854385376,
+      2.5027925968170166,
+      2.502732992172241,
+      1.7143971920013428
+    ],
+    "score_time": [
+      0.01855921745300293,
+      0.022089481353759766,
+      0.015565872192382812,
+      0.015256881713867188,
+      0.014133691787719727
+    ],
+    "test_r": [
+      0.7942574968142811,
+      0.6066357870028698,
+      0.7908361009548734,
+      0.7781934105246593,
+      0.6969946713739077
+    ],
+    "test_r2": [
+      0.612318424102632,
+      0.3397519654710921,
+      0.440875735524101,
+      0.4800491215301478,
+      0.4827772774167507
+    ],
+    "test_rmse": [
+      -1.9215244054794312,
+      -2.3242616653442383,
+      -2.163939952850342,
+      -2.3793764114379883,
+      -2.3658502101898193
+    ],
+    "test_mae": [
+      -1.4796229600906372,
+      -1.7699010372161865,
+      -1.822312355041504,
+      -1.951172113418579,
+      -1.6799839735031128
+    ],
+    "best_params": {
+      "lr": 0.00641550453411436,
+      "max_epochs": 10,
+      "batch_size": 128,
+      "callbacks": null,
+      "predict_nonlinearity": "auto",
+      "warm_start": false,
+      "verbose": 1,
+      "device": "cpu",
+      "compile": false,
+      "module__input_size": 4096,
+      "module__embedding_size": 1024,
+      "module__hidden_size": 100,
+      "module__n_layers": 1,
+      "callbacks__train_loss__name": "train_loss",
+      "callbacks__train_loss__lower_is_better": true,
+      "callbacks__train_loss__on_train": true,
+      "callbacks__valid_loss__name": "valid_loss",
+      "callbacks__valid_loss__lower_is_better": true,
+      "callbacks__valid_loss__on_train": false,
+      "callbacks__print_log__keys_ignored": null,
+      "callbacks__print_log__tablefmt": "simple",
+      "callbacks__print_log__floatfmt": ".4f",
+      "callbacks__print_log__stralign": "right"
+    }
+  },
+  "1234567890": {
+    "fit_time": [
+      2.360067367553711,
+      2.385495662689209,
+      2.5083391666412354,
+      2.5337624549865723,
+      1.6816668510437012
+    ],
+    "score_time": [
+      0.02120685577392578,
+      0.02154397964477539,
+      0.017838478088378906,
+      0.015787363052368164,
+      0.01398324966430664
+    ],
+    "test_r": [
+      0.7564484789153023,
+      0.7891568297197837,
+      0.6208308440868042,
+      0.7259593189096839,
+      0.8010596767007496
+    ],
+    "test_r2": [
+      0.439265923167107,
+      0.5037212871084016,
+      0.37865703325723654,
+      0.2470509510957476,
+      0.6293497472566969
+    ],
+    "test_rmse": [
+      -2.302049398422241,
+      -2.3062946796417236,
+      -2.6407058238983154,
+      -2.4736318588256836,
+      -1.7366862297058105
+    ],
+    "test_mae": [
+      -1.8876169919967651,
+      -1.9065091609954834,
+      -2.020010232925415,
+      -2.0381550788879395,
+      -1.3295215368270874
+    ],
+    "best_params": {
+      "lr": 0.0034822469454341897,
+      "max_epochs": 10,
+      "batch_size": 128,
+      "callbacks": null,
+      "predict_nonlinearity": "auto",
+      "warm_start": false,
+      "verbose": 1,
+      "device": "cpu",
+      "compile": false,
+      "module__input_size": 4096,
+      "module__embedding_size": 1024,
+      "module__hidden_size": 62,
+      "module__n_layers": 3,
+      "callbacks__train_loss__name": "train_loss",
+      "callbacks__train_loss__lower_is_better": true,
+      "callbacks__train_loss__on_train": true,
+      "callbacks__valid_loss__name": "valid_loss",
+      "callbacks__valid_loss__lower_is_better": true,
+      "callbacks__valid_loss__on_train": false,
+      "callbacks__print_log__keys_ignored": null,
+      "callbacks__print_log__tablefmt": "simple",
+      "callbacks__print_log__floatfmt": ".4f",
+      "callbacks__print_log__stralign": "right"
+    }
+  },
+  "473129": {
+    "fit_time": [
+      1.0850262641906738,
+      1.1317341327667236,
+      1.1105594635009766,
+      1.1255829334259033,
+      0.7097420692443848
+    ],
+    "score_time": [
+      0.01357269287109375,
+      0.01017308235168457,
+      0.013202428817749023,
+      0.010319232940673828,
+      0.008765459060668945
+    ],
+    "test_r": [
+      0.7369217641032637,
+      0.7446801122571542,
+      0.7182858837414732,
+      0.731006310231633,
+      0.7979523614146168
+    ],
+    "test_r2": [
+      0.5373092840083408,
+      0.534127752232453,
+      0.43783551953010535,
+      0.4849804017639391,
+      0.6030425352902642
+    ],
+    "test_rmse": [
+      -2.0885977745056152,
+      -2.0639710426330566,
+      -2.3824267387390137,
+      -2.3122212886810303,
+      -1.7839771509170532
+    ],
+    "test_mae": [
+      -1.6307251453399658,
+      -1.6034774780273438,
+      -1.7282096147537231,
+      -1.6728119850158691,
+      -1.381178379058838
+    ],
+    "best_params": {
+      "lr": 0.01,
+      "max_epochs": 10,
+      "batch_size": 128,
+      "callbacks": null,
+      "predict_nonlinearity": "auto",
+      "warm_start": false,
+      "verbose": 1,
+      "device": "cpu",
+      "compile": false,
+      "module__input_size": 4096,
+      "module__embedding_size": 455,
+      "module__hidden_size": 8,
+      "module__n_layers": 1,
+      "callbacks__train_loss__name": "train_loss",
+      "callbacks__train_loss__lower_is_better": true,
+      "callbacks__train_loss__on_train": true,
+      "callbacks__valid_loss__name": "valid_loss",
+      "callbacks__valid_loss__lower_is_better": true,
+      "callbacks__valid_loss__on_train": false,
+      "callbacks__print_log__keys_ignored": null,
+      "callbacks__print_log__tablefmt": "simple",
+      "callbacks__print_log__floatfmt": ".4f",
+      "callbacks__print_log__stralign": "right"
+    }
+  },
+  "r_avg": 0.729609262127276,
+  "r_stdev": 0.04868952136982168,
+  "r_stderr": 0.018402909285616158,
+  "r2_avg": 0.47554155628565503,
+  "r2_stdev": 0.08275015248025001,
+  "r2_stderr": 0.031276617773630895,
+  "rmse_avg": 2.224254945346287,
+  "rmse_stdev": 0.21662935203038824,
+  "rmse_stderr": 0.08187819887849605,
+  "mae_avg": 1.733315396308899,
+  "mae_stdev": 0.17683608758659913,
+  "mae_stderr": 0.06683775865368248
 }

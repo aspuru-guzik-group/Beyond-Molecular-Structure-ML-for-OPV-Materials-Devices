@@ -192,24 +192,30 @@ def _run(X, y,
         else:
             y_transform: Pipeline = generate_feature_pipeline(transform_type)
 
-        if y.shape[1] > 1 and regressor_type not in ["RF", "ANN"]:  # TODO: Clean this up if necessary, or remove
+        if y.shape[1] > 1 and regressor_type not in ["RF", "ANN"]:
             y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
                 regressor=MultiOutputRegressor(estimator=regressor_factory[regressor_type]()),
                 # regressor_factory[regressor_type](),
                 transformer=y_transform
             )
         elif regressor_type == "ANN":
-            y = _pd_to_np(y).reshape(-1, 1)
+            y_dims = y.shape[1]
+            y = _pd_to_np(y)
+            y = y.reshape(-1, y_dims)
             X = _pd_to_np(X)
             # convert to numpy array with float 32
             X = X.astype(np.float32)
             y = y.astype(np.float32)
             # find out max_input_length
             input_size: int = X.shape[1]
+
+            # print()
+            # print("input size", input_size)
+
             preprocessor = Pipeline(
                 steps=[("Standard", StandardScaler()),
                        ("MinMax ANN", MinMaxScaler())])
-            y_transform_regressor = regressor_factory[regressor_type](input_size)
+            y_transform_regressor = regressor_factory[regressor_type](input_size, output_size=y_dims)
         else:
             y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
                 # regressor=regressor_factory[regressor_type](**kwargs),

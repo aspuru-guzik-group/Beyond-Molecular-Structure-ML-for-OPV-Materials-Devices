@@ -100,16 +100,25 @@ def main_mordred_and_numeric(dataset: pd.DataFrame,
 def main_multioutput_grid(target_feats: list[str], hyperopt: bool = False) -> None:
     transform_type = "Standard"
 
-    for model in ["RF", "XGB", "HGB", "NGB", "NN"]:
+    # for model in ["RF", "XGB", "HGB", "NGB", "NN"]:
+    for model in ["ANN"]:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
-        main_mordred_and_numeric(dataset=opv_dataset,
+        main_ecfp_and_numeric(dataset=opv_dataset,
                                  regressor_type=model,
                                  scalar_filter="device architecture",
                                  subspace_filter=None,
                                  target_features=target_feats,
                                  transform_type=transform_type,
                                  hyperparameter_optimization=hyperopt)
+
+        # main_mordred_and_numeric(dataset=opv_dataset,
+        #                          regressor_type=model,
+        #                          scalar_filter="device architecture",
+        #                          subspace_filter=None,
+        #                          target_features=target_feats,
+        #                          transform_type=transform_type,
+        #                          hyperparameter_optimization=hyperopt)
 
 
 if __name__ == "__main__":
