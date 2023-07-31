@@ -192,6 +192,7 @@ def _run(X, y,
         else:
             y_transform: Pipeline = generate_feature_pipeline(transform_type)
 
+        # Handling non-native multi-output regressors and the skorch-based ANN
         if y.shape[1] > 1 and regressor_type not in ["RF", "ANN"]:
             y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
                 regressor=MultiOutputRegressor(estimator=regressor_factory[regressor_type]()),
@@ -230,7 +231,6 @@ def _run(X, y,
         )
 
         # ATTN: Hyperparameter optimization is only automatically implemented for the following regressors KNN, NN.
-        #
         if hyperparameter_optimization or (regressor_type in hyperopt_by_default):
             best_estimator, regressor_params = _optimize_hyperparams(X, y, cv_outer=cv_outer, seed=seed,
                                                                      regressor_type=regressor_type, regressor=regressor)

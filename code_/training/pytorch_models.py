@@ -362,10 +362,11 @@ class XavierLinear(torch.nn.Linear):
 class NNModel(nn.Module):
     def __init__(self,
                  input_size,
+                 output_size,
                  embedding_size=1024,
                  hidden_size=2048,
                  activation=nn.ReLU,
-                 output_size=1,
+                 # output_size=1,
                  n_layers=3
                  ):
         """Instantiates NN linear model with arguments from
@@ -394,6 +395,8 @@ class NNModel(nn.Module):
         Returns:
             _type_: _description_
         """
+        if not isinstance(x, torch.Tensor):
+            x = torch.tensor(x)  # Convert to a PyTorch tensor if it's a NumPy array
         x = x.type(torch.float32)
         embeds: torch.tensor = self.embeds(x)
         for i, layer in enumerate(self.linearlayers):
