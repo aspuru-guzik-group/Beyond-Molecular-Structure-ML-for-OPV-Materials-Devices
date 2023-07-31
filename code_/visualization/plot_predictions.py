@@ -93,7 +93,8 @@ if __name__ == "__main__":
     ground_truth_Hutchison_csv = DATASETS / "Hutchison_2023_n1001" / "Hutchison_filtered_dataset_pipeline.csv"
     ground_truth_Saeki_csv = DATASETS / "Saeki_2022_n1318" / "Saeki_corrected_pipeline.csv"
 
-    # for result_dir in ["results", "results_Hutchison", "results_Saeki"]:
-    for result_dir, ground_truth_csv in zip(["results_Hutchison", "results_Saeki"], [ground_truth_Hutchison_csv, ground_truth_Saeki_csv]):
-        pce_results = ROOT / result_dir
-        get_predictions(pce_results, ground_truth_csv)
+    get_predictions(ROOT / "results" / "target_PCE", dataset_ground_truth_csv)
+
+    # for result_dir, ground_truth_csv in zip(["results_Hutchison", "results_Saeki"], [ground_truth_Hutchison_csv, ground_truth_Saeki_csv]):
+    #     pce_results = ROOT / result_dir
+    #     get_predictions(pce_results, ground_truth_csv)

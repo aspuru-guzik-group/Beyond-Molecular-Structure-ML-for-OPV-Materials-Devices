@@ -325,7 +325,7 @@ def create_fabrication_grid_heatmap(root_dir: Path, score: str, var: str) -> Non
 
 def create_subspace_grid_heatmap(root_dir: Path, score: str, var: str) -> None:
     spaces: list[str] = ["fabrication", "device architecture"]
-    y_labels: list[str] = ["SVR", "RF", "XGB", "HGB", "NGB", "NN"][::-1]
+    y_labels: list[str] = ["SVR", "RF", "XGB", "HGB", "NGB", "NN", "ANN"][::-1]
 
     representations: list[str] = ["ECFP", "mordred"]
     # Create the product of representations and x_labels where they're joined as f"{rep}_{x_label}"
@@ -361,7 +361,7 @@ def create_subspace_grid_heatmap(root_dir: Path, score: str, var: str) -> None:
 
 def create_impute_grid_heatmap(root_dir: Path, score: str, var: str) -> None:
     # imputers: list[str] = ["mean", "median", "most-frequent", "uniform KNN", "distance KNN", "iterative"]
-    y_labels: list[str] = ["RF", "XGB", "HGB", "NGB"][::-1]
+    y_labels: list[str] = ["RF", "XGB", "HGB", "NGB", "ANN"][::-1]
 
     representations: list[str] = ["ECFP", "mordred"]
     # Create the product of representations and x_labels where they're joined as f"{rep}_{x_label}"
@@ -398,24 +398,25 @@ if __name__ == "__main__":
         results = root / "results" / f"target_{target}"
 
         # Create heatmap
-        # for score in ["r", "r2", "rmse", "mae"]:
-        #     create_grid_search_heatmap(results, score, var="stderr")
+        for score in ["r", "r2", "rmse", "mae"]:
+            create_grid_search_heatmap(results, score, var="stderr")
 
         for score in ["r", "r2", "rmse", "mae"]:
             create_fabrication_grid_heatmap(results, score, var="stderr")
 
-    # # Subspace search heatmaps
+    # Subspace search heatmaps
     # for target in ["Voc", "Jsc", "FF"]:
-    #     results = root / "results" / f"target_{target}"
+    for target in ["PCE"]:
+        results = root / "results" / f"target_{target}"
 
-    #     # Create heatmap
-    #     for score in ["r", "r2", "rmse", "mae"]:
-    #         create_subspace_grid_heatmap(results, score, var="stderr")
+        # Create heatmap
+        for score in ["r", "r2", "rmse", "mae"]:
+            create_subspace_grid_heatmap(results, score, var="stderr")
 
     # Impute search heatmaps
-    # for target in ["PCE"]:
-    #     results = root / "results" / f"target_{target}"
-    #
-    #     # Create heatmap
-    #     for score in ["r", "r2", "rmse", "mae"]:
-    #         create_impute_grid_heatmap(results, score, var="stderr")
+    for target in ["PCE"]:
+        results = root / "results" / f"target_{target}"
+
+        # Create heatmap
+        for score in ["r", "r2", "rmse", "mae"]:
+            create_impute_grid_heatmap(results, score, var="stderr")
