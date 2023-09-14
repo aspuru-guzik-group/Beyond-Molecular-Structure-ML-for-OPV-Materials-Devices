@@ -7,9 +7,8 @@ import numpy as np
 class PolymerDataset(Dataset):
     def __init__(
         self,
-        data_array: np.ndarray,
-        target_array: np.ndarray,
-        random_state: int,
+        data_array: torch.tensor,
+        target_array: torch.tensor,
     ):
         """_summary_
 
@@ -17,11 +16,9 @@ class PolymerDataset(Dataset):
             data_path (str): _description_
             feature_names (str): _description_
             target_names (str): _description_
-            random_state (int): _description_
         """
-        self.data: torch.tensor = torch.from_numpy(data_array)
-        self.target: torch.tensor = torch.from_numpy(target_array)
-        self.random_state: int = random_state
+        self.data: torch.tensor = data_array
+        self.target: torch.tensor = target_array
 
     def __len__(self):
         """
