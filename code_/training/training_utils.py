@@ -2,6 +2,7 @@ import json
 import platform
 from pathlib import Path
 from typing import Callable, Optional, Union
+from itertools import product
 
 import numpy as np
 import pandas as pd
@@ -42,7 +43,10 @@ from scoring import (
     cross_validate_multioutput_regressor,
     cross_validate_regressor,
     process_scores,
+    multi_scorer,
+    score_lookup,
 )
+from scipy.stats import pearsonr
 
 from sklearn.metrics import (
     mean_absolute_error,
@@ -310,10 +314,7 @@ def _run(
         else:
             scores, predictions = cross_validate_regressor(regressor, X, y, cv_outer)
         seed_scores[seed] = scores
-        if regressor_type == "ANN":
-            seed_predictions[seed] = predictions
-        else:
-            seed_predictions[seed] = predictions.flatten()
+        seed_predictions[seed] = predictions.flatten()
         print(f"{scores=}", f"{predictions=}")
 
     seed_predictions: pd.DataFrame = pd.DataFrame.from_dict(
@@ -504,20 +505,37 @@ def run_pytorch(X, y, cv_outer, config):
     input_size: int = X.shape[1]
     y_dims: int = y.shape[1]
     # Perform cross-validation and train on each fold
-    scores: dict = {
-        "fit_time": [],
-        "score_time": [],
-        "test_r": [],
-        "test_r2": [],
-        "test_rmse": [],
-        "test_mae": [],
-    }
-    predictions: list = []
+    # TODO: handle multioutput
+    # NOTE: This assumes the order of columns in y is [PCE, VOC, JSC, FF].
+    if y_dims > 1:
+        scores: dict[str, list] = {
+            f"test_{score}_{output}": []
+            for score, output in product(
+                ["r", "r2", "rmse", "mae"], ["PCE", "Voc", "Jsc", "FF", "PCE_eqn"]
+            )
+        }
+        scores["fit_time"] = []
+        scores["score_time"] = []
+        scores["test_r"] = []
+        scores["test_r2"] = []
+        scores["test_rmse"] = []
+        scores["test_mae"] = []
+    else:
+        scores: dict = {
+            "fit_time": [],
+            "score_time": [],
+            "test_r": [],
+            "test_r2": [],
+            "test_rmse": [],
+            "test_mae": [],
+        }
+    cv_i: int = 0
     for i, (train_index, test_index) in enumerate(cv_outer.split(X, y)):
         train_x = X[train_index]
         train_y = y[train_index]
         test_x = X[test_index]
         test_y = y[test_index]
+        print(len(train_x), len(test_x))
         # Scale X and Y data (standard and then min max)
         standard_x = StandardScaler()
         standard_y = StandardScaler()
@@ -642,13 +660,12 @@ def run_pytorch(X, y, cv_outer, config):
         print("Training time: {}".format(end_time - start_time))
         # test model
         # Inference
-        # TODO: Perform on test set
         # start time
         start_score_time = time.time()
         prediction = []
         ground_truth = []
         n_test_examples = 0
-        for i, test_data in enumerate(test_dataloader):
+        for i_test, test_data in enumerate(test_dataloader):
             test_inputs, test_targets = test_data
             test_inputs, test_targets = test_inputs.to(device="cuda"), test_targets.to(
                 device="cuda"
@@ -671,11 +688,19 @@ def run_pytorch(X, y, cv_outer, config):
 
         # reverse min-max scaling
         prediction: np.ndarray = min_max_y.inverse_transform(prediction)
-        prediction: np.ndarray = standard_y.inverse_transform(prediction).flatten()
+        prediction: np.ndarray = standard_y.inverse_transform(prediction)
         ground_truth: np.ndarray = min_max_y.inverse_transform(ground_truth)
-        ground_truth: np.ndarray = standard_y.inverse_transform(ground_truth).flatten()
+        ground_truth: np.ndarray = standard_y.inverse_transform(ground_truth)
         # compute scores
         # TODO: check how the multioutput models are being trained, tested, and how the scores are getting combined/computed!
+        if y_dims > 1:
+            # compute scoring metrics for each column, and then the pce_eqn
+            targets: list = ["PCE", "Voc", "Jsc", "FF", "PCE_eqn"]
+            for target in targets:
+                for score in ["r", "r2", "rmse", "mae"]:
+                    scores[f"test_{score}_{target}"].append(
+                        score_lookup[score][target](prediction, ground_truth)
+                    )
         scores["fit_time"].append(train_time)
         scores["score_time"].append(score_time)
         scores["test_r"].append(np.corrcoef(prediction, ground_truth)[0, 1])
@@ -684,9 +709,15 @@ def run_pytorch(X, y, cv_outer, config):
             np.sqrt(mean_squared_error(prediction, ground_truth))
         )
         scores["test_mae"].append(mean_absolute_error(prediction, ground_truth))
-        # print scores
-        print(f"{scores=}")
         # add predictions
-        predictions.append(prediction)
+        prediction = prediction.flatten()
+        if cv_i == 0:
+            predictions = prediction
+        else:
+            print(f"{prediction.shape=}")
+            print(f"{predictions.shape=}")
+            predictions = np.dstack((predictions, prediction))
+        cv_i += 1
+    print(f"{predictions=}")
 
     return scores, predictions

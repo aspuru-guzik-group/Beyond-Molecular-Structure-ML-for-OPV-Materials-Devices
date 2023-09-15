@@ -148,124 +148,184 @@ ff_column = "FF (%)"
 
 
 def r_pce(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    pce_true = y_true[pce_column]
+    try:  # handles both pd.Series and np.ndarray
+        pce_true = y_true[pce_column]
+    except:
+        pce_true = y_true[:, 0]
     pce_pred = y_pred[:, 0]
     return pearson(pce_true, pce_pred)
 
 
 def r_voc(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    voc_true = y_true[voc_column]
+    try:  # handles both pd.Series and np.ndarray
+        voc_true = y_true[voc_column]
+    except:
+        voc_true = y_true[:, 1]
     voc_pred = y_pred[:, 1]
     return pearson(voc_true, voc_pred)
 
 
 def r_jsc(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    jsc_true = y_true[jsc_column]
+    try:  # handles both pd.Series and np.ndarray
+        jsc_true = y_true[jsc_column]
+    except:
+        jsc_true = y_true[:, 2]
     jsc_pred = y_pred[:, 2]
     return pearson(jsc_true, jsc_pred)
 
 
 def r_ff(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    ff_true = y_true[ff_column]
+    try:  # handles both pd.Series and np.ndarray
+        ff_true = y_true[ff_column]
+    except:
+        ff_true = y_true[:, 3]
     ff_pred = y_pred[:, 3]
     return pearson(ff_true, ff_pred)
 
 
 def r_pce_eqn(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    pce_true = y_true[pce_column]
+    try:  # handles both pd.Series and np.ndarray
+        pce_true = y_true[pce_column]
+    except:
+        pce_true = y_true[:, 0]
     voc_pred, jsc_pred, ff_pred = y_pred[:, 1], y_pred[:, 2], y_pred[:, 3]
     pce_pred = voc_pred * jsc_pred * ff_pred
     return pearson(pce_true, pce_pred)
 
 
 def r2_pce(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    pce_true = y_true[pce_column]
+    try:  # handles both pd.Series and np.ndarray
+        pce_true = y_true[pce_column]
+    except:
+        pce_true = y_true[:, 0]
     pce_pred = y_pred[:, 0]
     return r2_score(pce_true, pce_pred)
 
 
 def r2_voc(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    voc_true = y_true[voc_column]
+    try:  # handles both pd.Series and np.ndarray
+        voc_true = y_true[voc_column]
+    except:
+        voc_true = y_true[:, 1]
     voc_pred = y_pred[:, 1]
     return r2_score(voc_true, voc_pred)
 
 
 def r2_jsc(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    jsc_true = y_true[jsc_column]
+    try:  # handles both pd.Series and np.ndarray
+        jsc_true = y_true[jsc_column]
+    except:
+        jsc_true = y_true[:, 2]
     jsc_pred = y_pred[:, 2]
     return r2_score(jsc_true, jsc_pred)
 
 
 def r2_ff(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    ff_true = y_true[ff_column]
+    try:  # handles both pd.Series and np.ndarray
+        ff_true = y_true[ff_column]
+    except:
+        ff_true = y_true[:, 3]
     ff_pred = y_pred[:, 3]
     return r2_score(ff_true, ff_pred)
 
 
 def r2_pce_eqn(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    pce_true = y_true[pce_column]
+    try:  # handles both pd.Series and np.ndarray
+        pce_true = y_true[pce_column]
+    except:
+        pce_true = y_true[:, 0]
     voc_pred, jsc_pred, ff_pred = y_pred[:, 1], y_pred[:, 2], y_pred[:, 3]
     pce_pred = voc_pred * jsc_pred * ff_pred
     return r2_score(pce_true, pce_pred)
 
 
 def rmse_pce(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    pce_true = y_true[pce_column]
+    try:  # handles both pd.Series and np.ndarray
+        pce_true = y_true[pce_column]
+    except:
+        pce_true = y_true[:, 0]
     pce_pred = y_pred[:, 0]
     return rmse_score(pce_true, pce_pred)
 
 
 def rmse_voc(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    voc_true = y_true[voc_column]
+    try:  # handles both pd.Series and np.ndarray
+        voc_true = y_true[voc_column]
+    except:
+        voc_true = y_true[:, 1]
     voc_pred = y_pred[:, 1]
     return rmse_score(voc_true, voc_pred)
 
 
 def rmse_jsc(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    jsc_true = y_true[jsc_column]
+    try:  # handles both pd.Series and np.ndarray
+        jsc_true = y_true[jsc_column]
+    except:
+        jsc_true = y_true[:, 2]
     jsc_pred = y_pred[:, 2]
     return rmse_score(jsc_true, jsc_pred)
 
 
 def rmse_ff(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    ff_true = y_true[ff_column]
+    try:  # handles both pd.Series and np.ndarray
+        ff_true = y_true[ff_column]
+    except:
+        ff_true = y_true[:, 3]
     ff_pred = y_pred[:, 3]
     return rmse_score(ff_true, ff_pred)
 
 
 def rmse_pce_eqn(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    pce_true = y_true[pce_column]
+    try:  # handles both pd.Series and np.ndarray
+        pce_true = y_true[pce_column]
+    except:
+        pce_true = y_true[:, 0]
     voc_pred, jsc_pred, ff_pred = y_pred[:, 1], y_pred[:, 2], y_pred[:, 3]
     pce_pred = voc_pred * jsc_pred * ff_pred
     return rmse_score(pce_true, pce_pred)
 
 
 def mae_pce(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    pce_true = y_true[pce_column]
+    try:  # handles both pd.Series and np.ndarray
+        pce_true = y_true[pce_column]
+    except:
+        pce_true = y_true[:, 0]
     pce_pred = y_pred[:, 0]
     return mean_absolute_error(pce_true, pce_pred)
 
 
 def mae_voc(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    voc_true = y_true[voc_column]
+    try:  # handles both pd.Series and np.ndarray
+        voc_true = y_true[voc_column]
+    except:
+        voc_true = y_true[:, 1]
     voc_pred = y_pred[:, 1]
     return mean_absolute_error(voc_true, voc_pred)
 
 
 def mae_jsc(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    jsc_true = y_true[jsc_column]
+    try:  # handles both pd.Series and np.ndarray
+        jsc_true = y_true[jsc_column]
+    except:
+        jsc_true = y_true[:, 2]
     jsc_pred = y_pred[:, 2]
     return mean_absolute_error(jsc_true, jsc_pred)
 
 
 def mae_ff(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    ff_true = y_true[ff_column]
+    try:  # handles both pd.Series and np.ndarray
+        ff_true = y_true[ff_column]
+    except:
+        ff_true = y_true[:, 3]
     ff_pred = y_pred[:, 3]
     return mean_absolute_error(ff_true, ff_pred)
 
 
 def mae_pce_eqn(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    pce_true = y_true[pce_column]
+    try:  # handles both pd.Series and np.ndarray
+        pce_true = y_true[pce_column]
+    except:
+        pce_true = y_true[:, 0]
     voc_pred, jsc_pred, ff_pred = y_pred[:, 1], y_pred[:, 2], y_pred[:, 3]
     pce_pred = voc_pred * jsc_pred * ff_pred
     return mean_absolute_error(pce_true, pce_pred)
@@ -356,5 +416,4 @@ def cross_validate_multioutput_regressor(
     )
 
     predictions = cross_val_predict(regressor, X, y, cv=cv, n_jobs=-1)
-    print(scores)
     return scores, predictions

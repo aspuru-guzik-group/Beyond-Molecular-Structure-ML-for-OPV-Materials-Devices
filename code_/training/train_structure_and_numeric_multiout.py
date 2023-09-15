@@ -145,9 +145,7 @@ if __name__ == "__main__":
     # main_multioutput_grid(
     #         target_feats=["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"], hyperopt=False)
     targets_to_try = [
-        ["Voc (V)"],
-        ["Jsc (mA cm^-2)"],
-        ["Voc (V)", "Jsc (mA cm^-2)", "FF (%)"],
+        ["calculated PCE (%)"],
     ]
     for target in targets_to_try:
         model = "ANN"
