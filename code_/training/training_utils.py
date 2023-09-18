@@ -75,6 +75,9 @@ BO_ITER: int = 42 if not TEST else 1
 # Path to config for Pytorch model
 CONFIG_PATH: Path = HERE / "ANN_config.json"
 
+# Set seed for PyTorch model
+torch.manual_seed(0)
+
 
 def train_regressor(
     dataset: pd.DataFrame,
@@ -529,7 +532,7 @@ def run_pytorch(X, y, cv_outer, config):
             "test_rmse": [],
             "test_mae": [],
         }
-    cv_i: int = 0
+    predictions = []
     for i, (train_index, test_index) in enumerate(cv_outer.split(X, y)):
         train_x = X[train_index]
         train_y = y[train_index]
@@ -662,7 +665,7 @@ def run_pytorch(X, y, cv_outer, config):
         # Inference
         # start time
         start_score_time = time.time()
-        prediction = []
+        test_prediction = []
         ground_truth = []
         n_test_examples = 0
         for i_test, test_data in enumerate(test_dataloader):
@@ -680,15 +683,15 @@ def run_pytorch(X, y, cv_outer, config):
             # gather number of examples in test set
             n_test_examples += len(test_inputs)
             # gather predictions and ground truth for result summary
-            prediction.extend(test_outputs.tolist())
+            test_prediction.extend(test_outputs.tolist())
             ground_truth.extend(test_targets.tolist())
         # end time
         end_score_time = time.time()
         score_time = end_score_time - start_score_time
 
         # reverse min-max scaling
-        prediction: np.ndarray = min_max_y.inverse_transform(prediction)
-        prediction: np.ndarray = standard_y.inverse_transform(prediction)
+        test_prediction: np.ndarray = min_max_y.inverse_transform(test_prediction)
+        test_prediction: np.ndarray = standard_y.inverse_transform(test_prediction)
         ground_truth: np.ndarray = min_max_y.inverse_transform(ground_truth)
         ground_truth: np.ndarray = standard_y.inverse_transform(ground_truth)
         # compute scores
@@ -699,25 +702,21 @@ def run_pytorch(X, y, cv_outer, config):
             for target in targets:
                 for score in ["r", "r2", "rmse", "mae"]:
                     scores[f"test_{score}_{target}"].append(
-                        score_lookup[score][target](prediction, ground_truth)
+                        score_lookup[score][target](test_prediction, ground_truth)
                     )
         scores["fit_time"].append(train_time)
         scores["score_time"].append(score_time)
-        scores["test_r"].append(np.corrcoef(prediction, ground_truth)[0, 1])
-        scores["test_r2"].append(r2_score(prediction, ground_truth))
-        scores["test_rmse"].append(
-            np.sqrt(mean_squared_error(prediction, ground_truth))
+        scores["test_r"].append(
+            np.corrcoef(test_prediction.flatten(), ground_truth.flatten())[0, 1]
         )
-        scores["test_mae"].append(mean_absolute_error(prediction, ground_truth))
+        scores["test_r2"].append(r2_score(test_prediction, ground_truth))
+        scores["test_rmse"].append(
+            np.sqrt(mean_squared_error(test_prediction, ground_truth))
+        )
+        scores["test_mae"].append(mean_absolute_error(test_prediction, ground_truth))
         # add predictions
-        prediction = prediction.flatten()
-        if cv_i == 0:
-            predictions = prediction
-        else:
-            print(f"{prediction.shape=}")
-            print(f"{predictions.shape=}")
-            predictions = np.dstack((predictions, prediction))
-        cv_i += 1
-    print(f"{predictions=}")
+        test_prediction: list = test_prediction.tolist()
+        predictions.extend(test_prediction)
+    predictions: np.ndarray = np.array(predictions)
 
     return scores, predictions
