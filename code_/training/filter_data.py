@@ -76,11 +76,9 @@ def get_feature_ids(feat_filter: str) -> list[str]:
 #     return subset_df
 
 
-def sanitize_dataset(training_features: pd.DataFrame,
-                     targets: pd.DataFrame,
-                     dropna: bool,
-                     **kwargs
-                     ) -> tuple[pd.DataFrame, pd.DataFrame]:
+def sanitize_dataset(
+    training_features: pd.DataFrame, targets: pd.DataFrame, dropna: bool, **kwargs
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Sanitize the training features and targets in case the unrolled training features contain NaN values.
 
@@ -101,14 +99,15 @@ def sanitize_dataset(training_features: pd.DataFrame,
         return training_features, targets
 
 
-def filter_dataset(raw_dataset: pd.DataFrame,
-                   structure_feats: list[str],
-                   scalar_feats: list[str],
-                   target_feats: list[str],
-                   dropna: bool = True,
-                   unroll: Union[dict, list, None] = None,
-                   **kwargs
-                   ) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
+def filter_dataset(
+    raw_dataset: pd.DataFrame,
+    structure_feats: list[str],
+    scalar_feats: list[str],
+    target_feats: list[str],
+    dropna: bool = True,
+    unroll: Union[dict, list, None] = None,
+    **kwargs,
+) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
     """
     Filter the dataset.
 
@@ -122,8 +121,12 @@ def filter_dataset(raw_dataset: pd.DataFrame,
         Input features and targets.
     """
     # Add multiple lists together as long as they are not NoneType
-    all_feats: list[str] = [feat for feat_list in [structure_feats, scalar_feats, target_feats] if feat_list
-                            for feat in feat_list]
+    all_feats: list[str] = [
+        feat
+        for feat_list in [structure_feats, scalar_feats, target_feats]
+        if feat_list
+        for feat in feat_list
+    ]
     dataset: pd.DataFrame = raw_dataset[all_feats]
 
     if dropna:
@@ -131,19 +134,24 @@ def filter_dataset(raw_dataset: pd.DataFrame,
 
     if unroll:
         if isinstance(unroll, dict):
-            structure_features: pd.DataFrame = unrolling_factory[unroll["representation"]](dataset[structure_feats],
-                                                                                           **unroll)
+            structure_features: pd.DataFrame = unrolling_factory[
+                unroll["representation"]
+            ](dataset[structure_feats], **unroll)
         elif isinstance(unroll, list):
             multiple_unrolled_structure_feats: list[pd.DataFrame] = []
             for unroll_dict in unroll:
-                single_structure_feat: pd.DataFrame = filter_dataset(dataset,
-                                                                     structure_feats=unroll_dict["columns"],
-                                                                     scalar_feats=[],
-                                                                     target_feats=[],
-                                                                     dropna=dropna,
-                                                                     unroll=unroll_dict)[0]
+                single_structure_feat: pd.DataFrame = filter_dataset(
+                    dataset,
+                    structure_feats=unroll_dict["columns"],
+                    scalar_feats=[],
+                    target_feats=[],
+                    dropna=dropna,
+                    unroll=unroll_dict,
+                )[0]
                 multiple_unrolled_structure_feats.append(single_structure_feat)
-            structure_features: pd.DataFrame = pd.concat(multiple_unrolled_structure_feats, axis=1)
+            structure_features: pd.DataFrame = pd.concat(
+                multiple_unrolled_structure_feats, axis=1
+            )
         else:
             raise ValueError(f"Unroll must be a dict or list, not {type(unroll)}")
     elif structure_feats:
@@ -162,11 +170,15 @@ def filter_dataset(raw_dataset: pd.DataFrame,
     #     # scalar_features: pd.DataFrame = scalar_features.reset_index(drop=True)
     #     training_features: pd.DataFrame = pd.concat([structure_features, scalar_features], axis=1)
     # print(structure_features.loc[[369, 370, 371, 372, 379, 380, 381], :])
-    training_features: pd.DataFrame = pd.concat([structure_features, scalar_features], axis=1)
+    training_features: pd.DataFrame = pd.concat(
+        [structure_features, scalar_features], axis=1
+    )
 
     targets: pd.DataFrame = dataset[target_feats]
 
-    training_features, targets = sanitize_dataset(training_features, targets, dropna=dropna, **kwargs)
+    training_features, targets = sanitize_dataset(
+        training_features, targets, dropna=dropna, **kwargs
+    )
 
     # if not (scalars_available and struct_available):
     new_struct_feats: list[str] = structure_features.columns.tolist()

@@ -12,6 +12,8 @@ from typing import Callable, Optional
 from code_ import DATASETS, FIGURES
 from code_.training import unroll_lists_to_columns
 
+plt.rc("font", **{"family": "sans-serif", "sans-serif": ["Arial"], "size": 12})
+
 
 def calculate_pearson(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate Pearson correlation matrix for a given dataframe."""
@@ -45,21 +47,25 @@ def calculate_mae(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(corr_matrix, columns=df.columns, index=df.columns)
 
 
-calculation_factory: dict[str, Callable] = {"pearson": calculate_pearson,
-                                            "r2":      calculate_r2,
-                                            "rmse":    calculate_rmse,
-                                            "mae":     calculate_mae,
-                                            }
+calculation_factory: dict[str, Callable] = {
+    "pearson": calculate_pearson,
+    "r2": calculate_r2,
+    "rmse": calculate_rmse,
+    "mae": calculate_mae,
+}
 
-correlation_labels: dict[str, str] = {"pearson": "Pearson Correlation (R)",
-                                      "r2":      "R2 Correlation",
-                                      "rmse":    "RMSE Correlation",
-                                      "mae":     "MAE Correlation",
-                                      }
+correlation_labels: dict[str, str] = {
+    "pearson": "Pearson Correlation (R)",
+    "r2": "R2 Correlation",
+    "rmse": "RMSE Correlation",
+    "mae": "MAE Correlation",
+}
 
 
 class HeatmapGenerator:
-    def __init__(self, full_df: pd.DataFrame, properties: Optional[list[str]], plot_name: str) -> None:
+    def __init__(
+        self, full_df: pd.DataFrame, properties: Optional[list[str]], plot_name: str
+    ) -> None:
         if properties:
             self.df: pd.DataFrame = full_df[properties]
         else:
@@ -113,10 +119,19 @@ class HeatmapGenerator:
         sns.set(style="white")
         cmap = sns.color_palette("icefire", as_cmap=True)
         self.f, self.ax = plt.subplots(figsize=(12, 9))
-        sns.heatmap(corr, cmap=cmap, vmin=-self.get_colorbar_range(corr), vmax=self.get_colorbar_range(corr), center=0,
-                    square=True, linewidths=.5, annot=True, fmt=".2f",
-                    cbar_kws={"shrink": .5, "label": correlation_labels[method]},
-                    annot_kws={"fontsize": 10})
+        sns.heatmap(
+            corr,
+            cmap=cmap,
+            vmin=-self.get_colorbar_range(corr),
+            vmax=self.get_colorbar_range(corr),
+            center=0,
+            square=True,
+            linewidths=0.5,
+            annot=True,
+            fmt=".2f",
+            cbar_kws={"shrink": 0.5, "label": correlation_labels[method]},
+            annot_kws={"fontsize": 10},
+        )
         self.ax.set_title(f"Heatmap of {self.plot_name.title()} using {method.title()}")
         plt.tight_layout()
 
@@ -134,11 +149,15 @@ class HeatmapGenerator:
                 Options are "pearson", "r2", "rmse", and "mae".
         """
         figure_dir: Path = FIGURES / "Min"
-        self.f.savefig(figure_dir / f"correlation_{self.plot_name.lower()}_{method.lower()}.png")
+        self.f.savefig(
+            figure_dir / f"correlation_{self.plot_name.lower()}_{method.lower()}.png"
+        )
         plt.close()
 
 
-def plot_all_methods(df: pd.DataFrame, properties: Optional[list[str]], plot_name: str) -> None:
+def plot_all_methods(
+    df: pd.DataFrame, properties: Optional[list[str]], plot_name: str
+) -> None:
     """
     Plot the correlation matrix for all methods.
 
@@ -165,26 +184,57 @@ def plot_solvent_correlations(df: pd.DataFrame) -> None:
         new_cols: list[str] = [f"solvent {d}" for d in solvent_descriptors]
         solvents: pd.DataFrame = unroll_lists_to_columns(df, [descriptors], new_cols)
         solvent_correlations: pd.DataFrame = pd.concat(
-            [solvents, df[["Voc (V)", "Jsc (mA cm^-2)", "FF (%)", "calculated PCE (%)"]]], axis=1)
+            [
+                solvents,
+                df[["Voc (V)", "Jsc (mA cm^-2)", "FF (%)", "calculated PCE (%)"]],
+            ],
+            axis=1,
+        )
         plot_all_methods(solvent_correlations, None, descriptors)
 
 
 def plot_processing_correlations(df: pd.DataFrame) -> None:
-    device_feats: list[str] = ["D:A ratio (m/m)", "Active layer spin coating speed (rpm)",
-                               "total solids conc. (mg/mL)", "solvent additive conc. (% v/v)",
-                               "active layer thickness (nm)", "temperature of thermal annealing",
-                               "annealing time (min)", "HTL energy level (eV)", "HTL thickness (nm)",
-                               "ETL energy level (eV)", "ETL thickness (nm)", "hole mobility blend (cm^2 V^-1 s^-1)",
-                               "electron mobility blend (cm^2 V^-1 s^-1)", "hole:electron mobility ratio",
-                               "Voc (V)", "Jsc (mA cm^-2)", "FF (%)", "calculated PCE (%)"]
+    device_feats: list[str] = [
+        "D:A ratio (m/m)",
+        "Active layer spin coating speed (rpm)",
+        "total solids conc. (mg/mL)",
+        "solvent additive conc. (% v/v)",
+        "active layer thickness (nm)",
+        "temperature of thermal annealing",
+        "annealing time (min)",
+        "HTL energy level (eV)",
+        "HTL thickness (nm)",
+        "ETL energy level (eV)",
+        "ETL thickness (nm)",
+        "hole mobility blend (cm^2 V^-1 s^-1)",
+        "electron mobility blend (cm^2 V^-1 s^-1)",
+        "hole:electron mobility ratio",
+        "Voc (V)",
+        "Jsc (mA cm^-2)",
+        "FF (%)",
+        "calculated PCE (%)",
+    ]
     plot_all_methods(df, device_feats, "device fabrication")
 
 
 def plot_material_correlations(df: pd.DataFrame) -> None:
-    material_props: list[str] = ["Donor PDI", "Donor Mn (kDa)", "Donor Mw (kDa)",
-                                 "HOMO_D (eV)", "LUMO_D (eV)", "Ehl_D (eV)", "Eg_D (eV)",
-                                 "HOMO_A (eV)", "LUMO_A (eV)", "Ehl_A (eV)", "Eg_A (eV)",
-                                 "Voc (V)", "Jsc (mA cm^-2)", "FF (%)", "calculated PCE (%)"]
+    material_props: list[str] = [
+        "Donor PDI",
+        "Donor Mn (kDa)",
+        "Donor Mw (kDa)",
+        "HOMO_D (eV)",
+        "LUMO_D (eV)",
+        "Ehl_D (eV)",
+        "Eg_D (eV)",
+        "HOMO_A (eV)",
+        "LUMO_A (eV)",
+        "Ehl_A (eV)",
+        "Eg_A (eV)",
+        "Voc (V)",
+        "Jsc (mA cm^-2)",
+        "FF (%)",
+        "calculated PCE (%)",
+    ]
     plot_all_methods(df, material_props, "material properties")
 
 

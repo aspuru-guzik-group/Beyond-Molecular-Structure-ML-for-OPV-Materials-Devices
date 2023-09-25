@@ -650,12 +650,12 @@ def run_pytorch(X, y, cv_outer, config):
                 # # Log LR per-epoch
                 lr = optimizer.param_groups[0]["lr"]
                 # train_writer.add_scalar("lr", lr, n_examples)
-                # # print progress report
-                print(
-                    "EPOCH: {}, N_EXAMPLES: {}, LOSS: {}, LR: {}".format(
-                        epoch, n_examples, loss, lr
-                    )
-                )
+            # # print progress report
+            # print(
+            #     "EPOCH: {}, N_EXAMPLES: {}, LOSS: {}, LR: {}".format(
+            #         epoch, n_examples, loss, lr
+            #     )
+            # )
         # end time
         end_time = time.time()
         # print training time

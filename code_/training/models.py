@@ -170,15 +170,17 @@ def model_dropna(model_type: str) -> bool:
 
 
 regressor_search_space: dict[str, dict] = {
-    # "MLR":   {"regressor__regressor__fit_intercept": [True, False]},
-    # "Lasso": {"regressor__regressor__alpha":         Real(1e-3, 1e3, prior="log-uniform"),
-    #           "regressor__regressor__fit_intercept": [True, False],
-    #           "regressor__regressor__selection":     Categorical(["cyclic", "random"]),
-    #           },
-    # "KRR": {"regressor__regressor__alpha":  Real(1e-5, 1, prior="log-uniform"),
-    #         "regressor__regressor__kernel": Categorical(["linear", "rbf"]),
-    #         "regressor__regressor__gamma":  Real(1e-3, 1e3, prior="log-uniform"),
-    #         },
+    "MLR": {"regressor__regressor__fit_intercept": [True, False]},
+    "Lasso": {
+        "regressor__regressor__alpha": Real(1e-3, 1e3, prior="log-uniform"),
+        "regressor__regressor__fit_intercept": [True, False],
+        "regressor__regressor__selection": Categorical(["cyclic", "random"]),
+    },
+    "KRR": {
+        "regressor__regressor__alpha": Real(1e-5, 1, prior="log-uniform"),
+        "regressor__regressor__kernel": Categorical(["linear", "rbf"]),
+        "regressor__regressor__gamma": Real(1e-3, 1e3, prior="log-uniform"),
+    },
     "KNN": {
         "regressor__regressor__n_neighbors": Integer(1, 50),
         "regressor__regressor__weights": Categorical(["uniform", "distance"]),
@@ -188,15 +190,16 @@ regressor_search_space: dict[str, dict] = {
         "regressor__regressor__leaf_size": Integer(1, 100),
         # "regressor__regressor__p":           Integer(1, 5),
     },
-    # "SVR": {"regressor__regressor__kernel": Categorical(["linear", "rbf"]),
-    #         # "regressor__regressor__gamma":  Categorical(["scale", "auto"]),
-    #         },
+    "SVR": {
+        "regressor__regressor__kernel": Categorical(["linear", "rbf"]),
+        # "regressor__regressor__gamma":  Categorical(["scale", "auto"]),
+    },
     "RF": {
         "regressor__regressor__n_estimators": Integer(50, 2000, prior="log-uniform"),
         "regressor__regressor__max_depth": [None],
         "regressor__regressor__min_samples_split": Real(0.05, 0.99),
         "regressor__regressor__min_samples_leaf": Real(0.05, 0.99),
-        "regressor__regressor__max_features": Categorical(["auto", "sqrt", "log2"]),
+        "regressor__regressor__max_features": Categorical(["sqrt", "log2"]),
     },
     "XGB": {
         "regressor__regressor__n_estimators": Integer(50, 2000, prior="log-uniform"),

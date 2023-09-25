@@ -115,54 +115,73 @@ def main_mordred_and_numeric(
     )
 
 
-def main_multioutput_grid(target_feats: list[str], hyperopt: bool = False) -> None:
+def main_multioutput_grid(
+    target_feats: list[str], scalar_filter: list[str], hyperopt: bool = False
+) -> None:
     transform_type = "Standard"
 
-    # for model in ["RF", "XGB", "HGB", "NGB", "NN"]:
-    for model in ["ANN"]:
+    for model in [
+        "RF",
+        "XGB",
+        "HGB",
+        "NGB",
+        "NN",
+        "MLR",
+        "Lasso",
+        "KRR",
+        "SVR",
+        "KNN",
+        "GP",
+    ]:
+        # for model in ["ANN"]:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
+        for scalar in scalar_filter:
+            main_ecfp_and_numeric(
+                dataset=opv_dataset,
+                regressor_type=model,
+                scalar_filter=scalar,
+                subspace_filter=None,
+                target_features=target_feats,
+                transform_type=transform_type,
+                hyperparameter_optimization=hyperopt,
+            )
 
-        main_ecfp_and_numeric(
-            dataset=opv_dataset,
-            regressor_type=model,
-            scalar_filter="device architecture",
-            subspace_filter=None,
-            target_features=target_feats,
-            transform_type=transform_type,
-            hyperparameter_optimization=hyperopt,
-        )
-
-        # main_mordred_and_numeric(dataset=opv_dataset,
-        #                          regressor_type=model,
-        #                          scalar_filter="device architecture",
-        #                          subspace_filter=None,
-        #                          target_features=target_feats,
-        #                          transform_type=transform_type,
-        #                          hyperparameter_optimization=hyperopt)
+            main_mordred_and_numeric(
+                dataset=opv_dataset,
+                regressor_type=model,
+                scalar_filter=scalar,
+                subspace_filter=None,
+                target_features=target_feats,
+                transform_type=transform_type,
+                hyperparameter_optimization=hyperopt,
+            )
 
 
 if __name__ == "__main__":
-    # main_multioutput_grid(
-    #         target_feats=["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"], hyperopt=False)
-    targets_to_try = [
-        # ["calculated PCE (%)"],
-        # ["Voc (V)"],
-        # ["Jsc (mA cm^-2)"],
-        # ["FF (%)"]
-        # ["Voc (V)", "Jsc (mA cm^-2)", "FF (%)"],
-        ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"],
-    ]
-    for target in targets_to_try:
-        model = "ANN"
-        main_ecfp_and_numeric(
-            dataset=get_appropriate_dataset(model),
-            regressor_type=model,
-            scalar_filter="device architecture",
-            subspace_filter=None,
-            target_features=target,
-            transform_type="Standard",
-            hyperparameter_optimization=False,
-        )
+    main_multioutput_grid(
+        target_feats=["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"],
+        scalar_filter=[None],
+        hyperopt=False,
+    )
+    # targets_to_try = [
+    #     # ["calculated PCE (%)"],
+    #     # ["Voc (V)"],
+    #     # ["Jsc (mA cm^-2)"],
+    #     # ["FF (%)"]
+    #     # ["Voc (V)", "Jsc (mA cm^-2)", "FF (%)"],
+    #     ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"],
+    # ]
+    # for target in targets_to_try:
+    #     model = "ANN"
+    #     main_ecfp_and_numeric(
+    #         dataset=get_appropriate_dataset(model),
+    #         regressor_type=model,
+    #         scalar_filter="device architecture",
+    #         subspace_filter=None,
+    #         target_features=target,
+    #         transform_type="Standard",
+    #         hyperparameter_optimization=False,
+    #     )
 
     # for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
     #     main_representation_and_fabrication_grid(target_feats=[target], hyperopt=False)
