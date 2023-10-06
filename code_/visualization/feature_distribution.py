@@ -169,8 +169,14 @@ def plot_individual_feature_distributions(
         anchored_text = AnchoredText(total, loc="upper right")
         ax.add_artist(anchored_text)
         if isinstance(current_val_list[0], str):
-            ax.tick_params(axis="x", labelrotation=90)
-            ax.tick_params(axis="x", labelsize=10)
+            # get unique values from current_val_list and order them by frequency
+            xaxis_labels: list = df[current_column].value_counts().index.tolist()
+            if "_" in xaxis_labels:
+                _index = xaxis_labels.index("_")
+                xaxis_labels[_index] = "None"
+            # ax.tick_params(axis="x", labelrotation=60)
+            # ax.tick_params(axis="x", labelsize=10)
+            ax.set_xticklabels(xaxis_labels, rotation=45, ha="right", fontsize=10)
 
         if current_column in [
             # "solvent additive conc. (% v/v)",

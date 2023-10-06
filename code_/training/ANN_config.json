@@ -10,5 +10,5 @@
     "loss": "MSE",
     "optimizer": "Adam",
     "warmup_epochs": 10,
-    "num_of_epochs": 50
+    "num_of_epochs": 20
 }

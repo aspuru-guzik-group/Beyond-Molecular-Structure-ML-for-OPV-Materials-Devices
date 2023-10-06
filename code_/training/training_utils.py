@@ -54,6 +54,9 @@ from sklearn.metrics import (
     r2_score,
 )
 
+# PyTorch TensorBoard support
+from torch.utils.tensorboard import SummaryWriter
+
 # from pipeline_utils import representation_scaling_factory
 
 HERE: Path = Path(__file__).resolve().parent
@@ -609,6 +612,28 @@ def run_pytorch(X, y, cv_outer, config):
         # patience = 10
         # trigger_times = 0
         # early_stop = False
+
+        # TODO: Setup logger and writer with Tensorflow!
+        # NOTE: paths are hard-coded because it's not backward compatible ...
+        # train_log: Path = (
+        #     HERE.parent.parent
+        #     / "results"
+        #     / "target_PCE"
+        #     / "features_ECFP"
+        #     / "ANN_log"
+        #     / "train"
+        # )
+        # train_writer: SummaryWriter = SummaryWriter(log_dir=train_log)
+        # valid_log: Path = (
+        #     HERE.parent.parent
+        #     / "results"
+        #     / "target_PCE"
+        #     / "features_ECFP"
+        #     / "ANN_log"
+        #     / "valid"
+        # )
+        # valid_writer: SummaryWriter = SummaryWriter(log_dir=valid_log)
+
         # NOTE: Start training (boilerplate)
         # start time
         start_time = time.time()
@@ -640,22 +665,34 @@ def run_pytorch(X, y, cv_outer, config):
                 # Gather number of iterations (batches) trained
                 n_iter += 1
                 # Stop training after max iterations
-                # if (n_iter * config["train_batch_size"]) % config[
-                #     "report_iter_frequency"
-                # ] == 0:
-                #     train_writer.add_scalar("loss_batch", loss, n_examples)
-                #     train_writer.add_scalar(
-                #         "loss_avg", running_loss / n_iter, n_examples
-                #     )
-                # # Log LR per-epoch
-                lr = optimizer.param_groups[0]["lr"]
-                # train_writer.add_scalar("lr", lr, n_examples)
-            # # print progress report
-            # print(
-            #     "EPOCH: {}, N_EXAMPLES: {}, LOSS: {}, LR: {}".format(
-            #         epoch, n_examples, loss, lr
-            #     )
-            # )
+            # train_writer.add_scalar("loss_batch", loss, n_examples)
+            # train_writer.add_scalar("loss_avg", running_loss / n_iter, n_examples)
+            # print progress report
+            print("EPOCH: {}, N_EXAMPLES: {}, LOSS: {}".format(epoch, n_examples, loss))
+            # VALIDATION LOOP
+            model.train(False)
+            n_valid_examples = 0
+            valid_loss_batch = 0
+            for i_test, valid_data in enumerate(test_dataloader):
+                valid_inputs, valid_targets = valid_data
+                valid_inputs, valid_targets = valid_inputs.to(
+                    device="cuda"
+                ), valid_targets.to(device="cuda")
+                # convert to float
+                valid_inputs, valid_targets = (
+                    valid_inputs.float(),
+                    valid_targets.float(),
+                )
+                # Make predictions for this batch
+                valid_outputs = model(valid_inputs)
+                # gather number of examples in test set
+                n_valid_examples += len(valid_inputs)
+                # Compute the loss
+                valid_loss = loss_fn(valid_outputs, valid_targets)
+                valid_loss_batch += valid_loss
+                # Log test loss
+            # valid_writer.add_scalar("loss_batch", valid_loss, n_examples)
+
         # end time
         end_time = time.time()
         # print training time
@@ -668,6 +705,8 @@ def run_pytorch(X, y, cv_outer, config):
         test_prediction = []
         ground_truth = []
         n_test_examples = 0
+        model.train(False)
+        test_loss_batch = 0
         for i_test, test_data in enumerate(test_dataloader):
             test_inputs, test_targets = test_data
             test_inputs, test_targets = test_inputs.to(device="cuda"), test_targets.to(
@@ -682,13 +721,18 @@ def run_pytorch(X, y, cv_outer, config):
             test_outputs = model(test_inputs)
             # gather number of examples in test set
             n_test_examples += len(test_inputs)
+            # Compute the loss
+            test_loss = loss_fn(test_outputs, test_targets)
+            test_loss_batch += test_loss
             # gather predictions and ground truth for result summary
             test_prediction.extend(test_outputs.tolist())
             ground_truth.extend(test_targets.tolist())
         # end time
         end_score_time = time.time()
         score_time = end_score_time - start_score_time
-
+        # close SummaryWriter
+        # train_writer.close()
+        # valid_writer.close()
         # reverse min-max scaling
         test_prediction: np.ndarray = min_max_y.inverse_transform(test_prediction)
         test_prediction: np.ndarray = standard_y.inverse_transform(test_prediction)

@@ -289,8 +289,8 @@ def main_representation_model_grid(
 ) -> None:
     transform_type: str = "Standard"
 
-    for model in regressor_factory:
-        # for model in ["ANN"]:
+    # for model in regressor_factory:
+    for model in ["ANN"]:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
         if model == "GNN":
