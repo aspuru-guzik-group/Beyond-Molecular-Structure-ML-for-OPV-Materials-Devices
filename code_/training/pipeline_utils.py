@@ -39,10 +39,10 @@ def unroll_solvent_descriptors(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         solvent_descriptors: list[str] = json.load(f)["solvent"]
 
     solvent_cols: list[str] = ["solvent descriptors", "solvent additive descriptors"]
-    solent_descriptor_cols: list[str] = [*[f"solvent {d}" for d in solvent_descriptors],
+    solvent_descriptor_cols: list[str] = [*[f"solvent {d}" for d in solvent_descriptors],
                                          *[f"solvent additive {d}" for d in solvent_descriptors]
                                          ]
-    new_df: pd.DataFrame = unroll_lists_to_columns(df, solvent_cols, solent_descriptor_cols)
+    new_df: pd.DataFrame = unroll_lists_to_columns(df, solvent_cols, solvent_descriptor_cols)
     return new_df
 
 

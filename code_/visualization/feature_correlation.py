@@ -9,10 +9,17 @@ from pathlib import Path
 from sklearn.metrics import r2_score
 from typing import Callable, Optional
 
-from code_ import DATASETS, FIGURES
-from code_.training import unroll_lists_to_columns
+# from code_ import DATASETS, FIGURES
+# from code_.training import unroll_lists_to_columns
+# import sys
+# sys.path.append("../training")
+# # from code_.training import pipeline_utils
+# from code_.training.pipeline_utils import unroll_lists_to_columns
 
-plt.rc("font", **{"family": "sans-serif", "sans-serif": ["Arial"], "size": 12})
+DATASETS = Path(__file__).resolve().parents[2] / "datasets"
+FIGURES = Path(__file__).resolve().parents[2] / "figures"
+
+plt.rc("font", **{"family": "sans-serif", "sans-serif": ["Arial"], "size": 16})
 
 
 def calculate_pearson(df: pd.DataFrame) -> pd.DataFrame:
@@ -60,6 +67,36 @@ correlation_labels: dict[str, str] = {
     "rmse": "RMSE Correlation",
     "mae": "MAE Correlation",
 }
+
+
+def annotate_heatmap(data, cmap, **kwargs):
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            if i == j:  # Check if it's the diagonal element (self-correlation)
+                color = 'lightgrey'
+                text = ''
+            else:
+                color = cmap(data.iloc[i, j])
+                text = f"{data.iloc[i, j]:.1f}"
+            plt.text(j + 0.5, i + 0.5, text, **kwargs, ha="center", va="center", color=color)
+
+
+def unroll_lists_to_cols_old(df: pd.DataFrame, unroll_cols: list[str], new_col_names: list[str]) -> pd.DataFrame:
+    """
+    Unroll a list of lists into columns of a DataFrame.
+
+    Args:
+        df: DataFrame to unroll.
+        unroll_cols: List of columns containing list to unroll.
+        new_col_names: List of new column names.
+
+    Returns:
+        DataFrame with unrolled columns.
+    """
+    rolled_cols: pd.DataFrame = df[unroll_cols]
+    unrolled_df: pd.DataFrame = pd.concat([rolled_cols[col].apply(pd.Series) for col in rolled_cols.columns], axis=1)
+    unrolled_df.columns = new_col_names
+    return unrolled_df
 
 
 class HeatmapGenerator:
@@ -119,7 +156,7 @@ class HeatmapGenerator:
         sns.set(style="white")
         cmap = sns.color_palette("icefire", as_cmap=True)
         self.f, self.ax = plt.subplots(figsize=(12, 9))
-        sns.heatmap(
+        heatmap = sns.heatmap(
             corr,
             cmap=cmap,
             vmin=-self.get_colorbar_range(corr),
@@ -130,9 +167,28 @@ class HeatmapGenerator:
             annot=True,
             fmt=".2f",
             cbar_kws={"shrink": 0.5, "label": correlation_labels[method]},
-            annot_kws={"fontsize": 10},
+            annot_kws={"fontsize": 12},
         )
+        # sns.heatmap(
+        #     corr,
+        #     cmap=cmap,
+        #     vmin=-self.get_colorbar_range(corr),
+        #     vmax=self.get_colorbar_range(corr),
+        #     center=0,
+        #     square=True,
+        #     linewidths=0.5,
+        #     cbar_kws={"shrink": 0.5, "label": correlation_labels[method]},
+        #     annot=False,  # Turn off default annotation
+        # )
+        # annotate_heatmap(corr, cmap, fontsize=10)  # Call the custom annotation function
+
         self.ax.set_title(f"Heatmap of {self.plot_name.title()} using {method.title()}")
+
+        # Rotate x-axis labels by 45 degrees
+        heatmap.set_xticklabels(
+            heatmap.get_xticklabels(), rotation=45, horizontalalignment='right'
+        )
+
         plt.tight_layout()
 
         if show:
@@ -150,7 +206,8 @@ class HeatmapGenerator:
         """
         figure_dir: Path = FIGURES / "Min"
         self.f.savefig(
-            figure_dir / f"correlation_{self.plot_name.lower()}_{method.lower()}.png"
+            figure_dir / f"correlation_{self.plot_name.lower()}_{method.lower()}.png",
+            dpi=300
         )
         plt.close()
 
@@ -182,7 +239,7 @@ def plot_solvent_correlations(df: pd.DataFrame) -> None:
         solvent_descriptors: list[str] = json.load(f)["solvent"]
     for descriptors in ["solvent descriptors", "solvent additive descriptors"]:
         new_cols: list[str] = [f"solvent {d}" for d in solvent_descriptors]
-        solvents: pd.DataFrame = unroll_lists_to_columns(df, [descriptors], new_cols)
+        solvents: pd.DataFrame = unroll_lists_to_cols_old(df, [descriptors], new_cols)
         solvent_correlations: pd.DataFrame = pd.concat(
             [
                 solvents,
@@ -194,7 +251,7 @@ def plot_solvent_correlations(df: pd.DataFrame) -> None:
 
 
 def plot_processing_correlations(df: pd.DataFrame) -> None:
-    device_feats: list[str] = [
+    process_feats: list[str] = [
         "D:A ratio (m/m)",
         "Active layer spin coating speed (rpm)",
         "total solids conc. (mg/mL)",
@@ -202,19 +259,42 @@ def plot_processing_correlations(df: pd.DataFrame) -> None:
         "active layer thickness (nm)",
         "temperature of thermal annealing",
         "annealing time (min)",
-        "HTL energy level (eV)",
-        "HTL thickness (nm)",
-        "ETL energy level (eV)",
-        "ETL thickness (nm)",
-        "hole mobility blend (cm^2 V^-1 s^-1)",
-        "electron mobility blend (cm^2 V^-1 s^-1)",
-        "hole:electron mobility ratio",
         "Voc (V)",
         "Jsc (mA cm^-2)",
         "FF (%)",
         "calculated PCE (%)",
     ]
-    plot_all_methods(df, device_feats, "device fabrication")
+    plot_all_methods(df, process_feats, "processing")
+
+
+def plot_device_correlations(df: pd.DataFrame) -> None:
+    device_feats: list[str] = [
+        "HTL energy level (eV)",
+        "HTL thickness (nm)",
+        "ETL energy level (eV)",
+        "ETL thickness (nm)",
+        "Voc (V)",
+        "Jsc (mA cm^-2)",
+        "FF (%)",
+        "calculated PCE (%)",
+    ]
+    plot_all_methods(df, device_feats, "device architecture")
+
+
+def plot_electrical_correlations(df: pd.DataFrame) -> None:
+    electrical_feats: list[str] = [
+        "hole mobility blend (cm^2 V^-1 s^-1)",
+        "electron mobility blend (cm^2 V^-1 s^-1)",
+        "hole:electron mobility ratio",
+        "log hole mobility blend (cm^2 V^-1 s^-1)",
+        "log electron mobility blend (cm^2 V^-1 s^-1)",
+        "log hole:electron mobility ratio",
+        "Voc (V)",
+        "Jsc (mA cm^-2)",
+        "FF (%)",
+        "calculated PCE (%)",
+    ]
+    plot_all_methods(df, electrical_feats, "electrical characteristics")
 
 
 def plot_material_correlations(df: pd.DataFrame) -> None:
@@ -242,6 +322,9 @@ if __name__ == "__main__":
     df_path: Path = DATASETS / "Min_2020_n558" / "cleaned_dataset.pkl"
     opv_dataset: pd.DataFrame = pd.read_pickle(df_path)
 
-    # plot_solvent_correlations(opv_dataset)
+    # plot_material_correlations(opv_dataset)
     # plot_processing_correlations(opv_dataset)
-    plot_material_correlations(opv_dataset)
+    # plot_device_correlations(opv_dataset)
+    # plot_electrical_correlations(opv_dataset)
+    plot_solvent_correlations(opv_dataset)
+

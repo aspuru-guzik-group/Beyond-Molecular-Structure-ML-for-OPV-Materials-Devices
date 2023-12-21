@@ -17,7 +17,7 @@ with open(filters, "r") as f:
 
 rc("font", **{"family": "sans-serif", "sans-serif": ["Arial"], "size": 16})
 
-score_bounds: dict[str, int] = {"r": 1, "r2": 1, "mae": 25, "rmse": 25}
+score_bounds: dict[str, int] = {"r": 1, "r2": 1, "mae": 7.5, "rmse": 7.5}
 
 var_titles: dict[str, str] = {"stdev": "Standard Deviation", "stderr": "Standard Error"}
 
@@ -109,18 +109,18 @@ def generate_annotations(num: float) -> str:
 
 
 model_abbrev_to_full: dict[str, str] = {
-    "MLR": "Linear",
-    "KRR": "Kernel Ridge",
-    "KNN": "K-Nearest Neighbors",
-    "SVR": "Support Vector",
-    "RF": "Random Forest",
-    "XGB": "Gradient Boosted Trees",
-    "HGB": "Histogram Gradient Boosting",
-    "NGB": "Natural Gradient Boosting",
-    "GP": "Gaussian Process",
-    "NN": "Neural Network",
-    "ANN": "Artificial Neural Network",
-    "GNN": "Graph Neural Network",
+    "MLR": "MLR",
+    "KRR": "KRR",
+    "KNN": "kNN",
+    "SVR": "SVR",
+    "RF": "RF",
+    "XGB": "XGB",
+    "HGB": "HGB",
+    "NGB": "NGB",
+    "GP": "GP",
+    "NN": "MLP",
+    "ANN": "ANN",
+    "GNN": "GNN",
 }
 
 target_abbrev_to_full: dict[str, str] = {
@@ -257,16 +257,16 @@ def create_grid_search_heatmap(root_dir: Path, score: str, var: str) -> None:
     ]
     y_labels: List[str] = [
         "MLR",
-        "KRR",
         "KNN",
         "SVR",
-        "RF",
-        "XGB",
-        "HGB",
-        "NGB",
+        "KRR",
         "GP",
+        "RF",
+        "HGB",
+        "XGB",
+        "NGB",
         "NN",
-        "ANN",
+        # "ANN",
         "GNN",
     ][::-1]
     parent_dir_labels: list[str] = [f"features_{x}" for x in x_labels]
@@ -297,7 +297,7 @@ def create_fabrication_grid_heatmap(root_dir: Path, score: str, var: str) -> Non
         var: Variance to plot
     """
     x_labels: list[str] = ["material properties", "fabrication", "device architecture"]
-    y_labels: list[str] = ["SVR", "RF", "XGB", "HGB", "NGB", "NN", "ANN"][::-1]
+    y_labels: list[str] = ["SVR", "RF", "HGB", "XGB", "NGB", "NN"][::-1]
 
     representations: list[str] = ["ECFP", "mordred"]
     # Create the product of representations and x_labels where they're joined as f"{rep}_{x_label}"
@@ -507,12 +507,12 @@ if __name__ == "__main__":
     # for target in ["PCE"]:
     #     results = root / "results" / f"target_{target}"
 
-    #     # Create heatmap
-    #     for score in ["r", "r2", "rmse", "mae"]:
-    #         create_grid_search_heatmap(results, score, var="stderr")
+        # Create heatmap
+        # for score in ["r", "r2", "rmse", "mae"]:
+        #     create_grid_search_heatmap(results, score, var="stderr")
 
-    #     for score in ["r", "r2", "rmse", "mae"]:
-    #         create_fabrication_grid_heatmap(results, score, var="stderr")
+        # for score in ["r", "r2", "rmse", "mae"]:
+        #     create_fabrication_grid_heatmap(results, score, var="stderr")
 
     # # Subspace search heatmaps
     # # for target in ["Voc", "Jsc", "FF"]:
@@ -523,17 +523,17 @@ if __name__ == "__main__":
     #     for score in ["r", "r2", "rmse", "mae"]:
     #         create_subspace_grid_heatmap(results, score, var="stderr")
 
-    # # Impute search heatmaps
-    # for target in ["PCE"]:
-    #     results = root / "results" / f"target_{target}"
-
-    #     # Create heatmap
-    #     for score in ["r", "r2", "rmse", "mae"]:
-    #         create_impute_grid_heatmap(results, score, var="stderr")
-
-    # Model, target search heatmap
-    for target in ["PCE-Voc-Jsc-FF"]:
+    # Impute search heatmaps
+    for target in ["PCE"]:
         results = root / "results" / f"target_{target}"
+
         # Create heatmap
         for score in ["r", "r2", "rmse", "mae"]:
-            create_multioutput_grid_heatmap(results, score, var="stderr")
+            create_impute_grid_heatmap(results, score, var="stderr")
+
+    # # Model, target search heatmap
+    # for target in ["PCE-Voc-Jsc-FF"]:
+    #     results = root / "results" / f"target_{target}"
+    #     # Create heatmap
+    #     for score in ["r", "r2", "rmse", "mae"]:
+    #         create_multioutput_grid_heatmap(results, score, var="stderr")

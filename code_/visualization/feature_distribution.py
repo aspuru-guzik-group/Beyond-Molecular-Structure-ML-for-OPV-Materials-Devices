@@ -24,10 +24,10 @@ FILTER_DATA: Path = HERE.parent.parent / "training" / "filter_data.py"
 #     "data/preprocess/OPV_Min/master_ml_for_opvs_from_min_for_plotting.csv",
 # )
 
-MASTER_ML_DATA = pkg_resources.resource_filename(
-    "_ml_for_opvs",
-    "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv",
-)
+# MASTER_ML_DATA = pkg_resources.resource_filename(
+#     "_ml_for_opvs",
+#     "data/preprocess/OPV_Min/master_ml_for_opvs_from_min.csv",
+# )
 plt.rc("font", **{"family": "sans-serif", "sans-serif": ["Arial"], "size": 18})
 
 
@@ -52,16 +52,20 @@ def plot_feature_distributions(
     df_columns = len(df.columns)  # get the number of columns in the dataset
     # find the number of rows and columns of the figure
     num_columns = df_columns
-    x_columns = round(np.sqrt(num_columns))
-    if x_columns == np.floor(np.sqrt(num_columns)):
-        # if the number of columns is a perfect square, then the number of rows is one more than the number of columns
-        y_rows = x_columns + 1
-    elif x_columns == np.ceil(np.sqrt(num_columns)):
-        y_rows = x_columns
+    # x_columns = round(np.sqrt(num_columns))
+    # if x_columns == np.floor(np.sqrt(num_columns)):
+    #     # if the number of columns is a perfect square, then the number of rows is one more than the number of columns
+    #     y_rows = x_columns + 1
+    # elif x_columns == np.ceil(np.sqrt(num_columns)):
+    #     y_rows = x_columns
+    x_columns = 3
+    # Divide df_columns by x_columns to get the number of rows
+    y_rows = int(np.ceil(df_columns / x_columns))
 
     # fig, axs = plt.subplots(y_rows, x_columns, figsize=(y_rows * 6, x_columns * 2))  # prepare the figure
     fig, axs = plt.subplots(
-        y_rows, x_columns, figsize=(y_rows * 3, x_columns * 2)
+        y_rows, x_columns,
+        figsize=(y_rows * 3, x_columns * 5)
     )  # prepare the figure
     column_range: list = list(range(0, df_columns))  # get the range of columns to plot
     x_idx = 0  # index of the current column
@@ -332,7 +336,30 @@ if __name__ == "__main__":
         for p in itertools.product(["Donor", "Acceptor"], ["SMILES", "SELFIES"])
     ]
 
-    # plot_feature_distributions(
+    plot_feature_distributions(
+        opv_dataset.drop(
+            columns=[
+                "ref",
+                "DOI",
+                "Donor",
+                "Acceptor",
+                "hole mobility blend (cm^2 V^-1 s^-1)",
+                "electron mobility blend (cm^2 V^-1 s^-1)",
+                "hole:electron mobility ratio",
+                "Voc (V)",
+                "Jsc (mA cm^-2)",
+                "FF (%)",
+                "PCE (%)",
+                "calculated PCE (%)",
+                *structs,
+                # *[f"solvent {prop}" for prop in solvent_properties],
+                # *[f"solvent additive {prop}" for prop in
+                #   solvent_properties],
+            ]
+        ),
+        figures,
+    )
+    # plot_individual_feature_distributions(
     #     opv_dataset.drop(
     #         columns=[
     #             "ref",
@@ -345,23 +372,8 @@ if __name__ == "__main__":
     #             #   solvent_properties],
     #         ]
     #     ),
-    #     figures,
+    #     figures / "distributions",
     # )
-    plot_individual_feature_distributions(
-        opv_dataset.drop(
-            columns=[
-                "ref",
-                "DOI",
-                "Donor",
-                "Acceptor",
-                *structs,
-                # *[f"solvent {prop}" for prop in solvent_properties],
-                # *[f"solvent additive {prop}" for prop in
-                #   solvent_properties],
-            ]
-        ),
-        figures / "distributions",
-    )
 
     # for solv_type in ["solvent descriptors", "solvent additive descriptors"]:
     #     get_solvent_distributions(solv_type)
