@@ -18,7 +18,7 @@ import torch
 import torch.nn as nn
 from pytorch_models import GNNPredictor, GPRegressor, NNModel
 from torch.utils.data import DataLoader
-from _ml_for_opvs.ML_models.pytorch.data.data_utils import PolymerDataset
+# from _ml_for_opvs.ML_models.pytorch.data.data_utils import PolymerDataset
 from torch import optim
 from torch.optim.lr_scheduler import SequentialLR, LinearLR, ExponentialLR
 import time
@@ -270,20 +270,20 @@ def _run(
                 # regressor_factory[regressor_type](),
                 transformer=y_transform,
             )
-        elif regressor_type == "ANN":
-            y_dims = y.shape[1]
-            y = _pd_to_np(y)
-            y = y.reshape(-1, y_dims)
-            X = _pd_to_np(X)
-            # convert to numpy array with float 32
-            X = X.astype(np.float32)
-            y = y.astype(np.float32)
+        # elif regressor_type == "ANN":
+        #     y_dims = y.shape[1]
+        #     y = _pd_to_np(y)
+        #     y = y.reshape(-1, y_dims)
+        #     X = _pd_to_np(X)
+        #     # convert to numpy array with float 32
+        #     X = X.astype(np.float32)
+        #     y = y.astype(np.float32)
+        #
+        #     # load NNModel parameters from config file
+        #     with open(CONFIG_PATH, "r") as f:
+        #         config = json.load(f)
 
-            # load NNModel parameters from config file
-            with open(CONFIG_PATH, "r") as f:
-                config = json.load(f)
-
-            scores, predictions = run_pytorch(X, y, cv_outer, config)
+            # scores, predictions = run_pytorch(X, y, cv_outer, config)
 
         else:
             y_transform_regressor: TransformedTargetRegressor = TransformedTargetRegressor(
@@ -495,272 +495,272 @@ def _run_graphs(
     return seed_scores, seed_predictions
 
 
-def run_pytorch(X, y, cv_outer, config):
-    """Runs the pytorch model given a fold of the data.
-
-    Args:
-        X (torch.tensor): One fold of the input data from cross-validation
-        y (torch.tensor): One fold of the output data from cross-validation
-        model (nn.Model): NNModel with specific configurations
-        config (dict): configuration for the training and test parameters
-
-    Returns:
-        dict: dictionary of scores from the cross-validation
-    """
-    # Get input size and y_dims
-    input_size: int = X.shape[1]
-    y_dims: int = y.shape[1]
-    # Perform cross-validation and train on each fold
-    # TODO: handle multioutput
-    # NOTE: This assumes the order of columns in y is [PCE, VOC, JSC, FF].
-    if y_dims > 1:
-        scores: dict[str, list] = {
-            f"test_{score}_{output}": []
-            for score, output in product(
-                ["r", "r2", "rmse", "mae"], ["PCE", "Voc", "Jsc", "FF", "PCE_eqn"]
-            )
-        }
-        scores["fit_time"] = []
-        scores["score_time"] = []
-        scores["test_r"] = []
-        scores["test_r2"] = []
-        scores["test_rmse"] = []
-        scores["test_mae"] = []
-    else:
-        scores: dict = {
-            "fit_time": [],
-            "score_time": [],
-            "test_r": [],
-            "test_r2": [],
-            "test_rmse": [],
-            "test_mae": [],
-        }
-    predictions = []
-    for i, (train_index, test_index) in enumerate(cv_outer.split(X, y)):
-        train_x = X[train_index]
-        train_y = y[train_index]
-        test_x = X[test_index]
-        test_y = y[test_index]
-        print(len(train_x), len(test_x))
-        # Scale X and Y data (standard and then min max)
-        standard_x = StandardScaler()
-        standard_y = StandardScaler()
-        min_max_x = MinMaxScaler()
-        min_max_y = MinMaxScaler()
-        train_x = standard_x.fit_transform(train_x)
-        train_x = min_max_x.fit_transform(train_x)
-        train_y = standard_y.fit_transform(train_y)
-        train_y = min_max_y.fit_transform(train_y)
-        test_x = standard_x.transform(test_x)
-        test_x = min_max_x.transform(test_x)
-        test_y = standard_y.transform(test_y)
-        test_y = min_max_y.transform(test_y)
-        # convert to torch tensors
-        train_x = torch.from_numpy(train_x)
-        train_y = torch.from_numpy(train_y)
-        test_x = torch.from_numpy(test_x)
-        test_y = torch.from_numpy(test_y)
-        # Initiate model
-        model = NNModel(
-            input_size=input_size,
-            output_size=y_dims,
-            embedding_size=config["embedding_size"],
-            hidden_size=config["hidden_size"],
-            n_layers=config["n_layers"],
-        )
-        train_set = PolymerDataset(train_x, train_y)
-        test_set = PolymerDataset(test_x, test_y)
-        # ATTN: DataLoader defines batch size and whether to shuffle data
-        train_dataloader = DataLoader(
-            train_set, batch_size=config["train_batch_size"], shuffle=True
-        )
-        test_dataloader = DataLoader(
-            test_set, batch_size=config["test_batch_size"], shuffle=False
-        )
-        # NOTE: Setting loss and optimizer
-        # Choose Loss Function
-        if config["loss"] == "MSE":
-            loss_fn = nn.MSELoss()
-        elif config["loss"] == "CrossEntropy":
-            loss_fn = nn.CrossEntropyLoss()
-
-        # Choose PyTorch Optimizer
-        if config["optimizer"] == "Adam":
-            optimizer = optim.Adam(
-                model.parameters(),
-                lr=config["init_lr"],
-            )
-
-        # train model
-        device: torch.device = torch.device("cuda:0")
-        model.to(device)
-        running_loss = 0
-        n_examples = 0
-        n_iter = 0
-        running_valid_loss = 0
-        n_valid_iter = 0
-        # print training configs
-        print(config)
-        # print model summary
-        print(model)
-        pytorch_total_params = sum(
-            p.numel() for p in model.parameters() if p.requires_grad
-        )
-        print("MODEL_PARAMETERS: {}".format(pytorch_total_params))
-        # Early stopping
-        # last_loss = 100
-        # patience = 10
-        # trigger_times = 0
-        # early_stop = False
-
-        # TODO: Setup logger and writer with Tensorflow!
-        # NOTE: paths are hard-coded because it's not backward compatible ...
-        # train_log: Path = (
-        #     HERE.parent.parent
-        #     / "results"
-        #     / "target_PCE"
-        #     / "features_ECFP"
-        #     / "ANN_log"
-        #     / "train"
-        # )
-        # train_writer: SummaryWriter = SummaryWriter(log_dir=train_log)
-        # valid_log: Path = (
-        #     HERE.parent.parent
-        #     / "results"
-        #     / "target_PCE"
-        #     / "features_ECFP"
-        #     / "ANN_log"
-        #     / "valid"
-        # )
-        # valid_writer: SummaryWriter = SummaryWriter(log_dir=valid_log)
-
-        # NOTE: Start training (boilerplate)
-        # start time
-        start_time = time.time()
-        for epoch in range(config["num_of_epochs"]):
-            ## TRAINING LOOP
-            ## Make sure gradient tracking is on
-            model.train(True)
-            ## LOOP for 1 EPOCH
-            for i, data in enumerate(train_dataloader):
-                inputs, targets = data  # [batch_size, input_size]
-                # convert to cuda
-                inputs, targets = inputs.to(device="cuda"), targets.to(device="cuda")
-                # convert to float
-                inputs, targets = inputs.float(), targets.float()
-                # Zero your gradients for every batch!
-                optimizer.zero_grad()
-                # Make predictions for this batch
-                outputs = model(inputs)
-                # Compute the loss and its gradients
-                loss = loss_fn(outputs, targets)
-                # backpropagation
-                loss.backward()
-                # Adjust learning weights
-                optimizer.step()
-                # Gather data and report
-                running_loss += float(loss.item())
-                # Gather number of examples trained
-                n_examples += len(inputs)
-                # Gather number of iterations (batches) trained
-                n_iter += 1
-                # Stop training after max iterations
-            # train_writer.add_scalar("loss_batch", loss, n_examples)
-            # train_writer.add_scalar("loss_avg", running_loss / n_iter, n_examples)
-            # print progress report
-            print("EPOCH: {}, N_EXAMPLES: {}, LOSS: {}".format(epoch, n_examples, loss))
-            # VALIDATION LOOP
-            model.train(False)
-            n_valid_examples = 0
-            valid_loss_batch = 0
-            for i_test, valid_data in enumerate(test_dataloader):
-                valid_inputs, valid_targets = valid_data
-                valid_inputs, valid_targets = valid_inputs.to(
-                    device="cuda"
-                ), valid_targets.to(device="cuda")
-                # convert to float
-                valid_inputs, valid_targets = (
-                    valid_inputs.float(),
-                    valid_targets.float(),
-                )
-                # Make predictions for this batch
-                valid_outputs = model(valid_inputs)
-                # gather number of examples in test set
-                n_valid_examples += len(valid_inputs)
-                # Compute the loss
-                valid_loss = loss_fn(valid_outputs, valid_targets)
-                valid_loss_batch += valid_loss
-                # Log test loss
-            # valid_writer.add_scalar("loss_batch", valid_loss, n_examples)
-
-        # end time
-        end_time = time.time()
-        # print training time
-        train_time = end_time - start_time
-        print("Training time: {}".format(end_time - start_time))
-        # test model
-        # Inference
-        # start time
-        start_score_time = time.time()
-        test_prediction = []
-        ground_truth = []
-        n_test_examples = 0
-        model.train(False)
-        test_loss_batch = 0
-        for i_test, test_data in enumerate(test_dataloader):
-            test_inputs, test_targets = test_data
-            test_inputs, test_targets = test_inputs.to(device="cuda"), test_targets.to(
-                device="cuda"
-            )
-            # convert to float
-            test_inputs, test_targets = (
-                test_inputs.float(),
-                test_targets.float(),
-            )
-            # Make predictions for this batch
-            test_outputs = model(test_inputs)
-            # gather number of examples in test set
-            n_test_examples += len(test_inputs)
-            # Compute the loss
-            test_loss = loss_fn(test_outputs, test_targets)
-            test_loss_batch += test_loss
-            # gather predictions and ground truth for result summary
-            test_prediction.extend(test_outputs.tolist())
-            ground_truth.extend(test_targets.tolist())
-        # end time
-        end_score_time = time.time()
-        score_time = end_score_time - start_score_time
-        # close SummaryWriter
-        # train_writer.close()
-        # valid_writer.close()
-        # reverse min-max scaling
-        test_prediction: np.ndarray = min_max_y.inverse_transform(test_prediction)
-        test_prediction: np.ndarray = standard_y.inverse_transform(test_prediction)
-        ground_truth: np.ndarray = min_max_y.inverse_transform(ground_truth)
-        ground_truth: np.ndarray = standard_y.inverse_transform(ground_truth)
-        # compute scores
-        # TODO: check how the multioutput models are being trained, tested, and how the scores are getting combined/computed!
-        if y_dims > 1:
-            # compute scoring metrics for each column, and then the pce_eqn
-            targets: list = ["PCE", "Voc", "Jsc", "FF", "PCE_eqn"]
-            for target in targets:
-                for score in ["r", "r2", "rmse", "mae"]:
-                    scores[f"test_{score}_{target}"].append(
-                        score_lookup[score][target](test_prediction, ground_truth)
-                    )
-        scores["fit_time"].append(train_time)
-        scores["score_time"].append(score_time)
-        scores["test_r"].append(
-            np.corrcoef(test_prediction.flatten(), ground_truth.flatten())[0, 1]
-        )
-        scores["test_r2"].append(r2_score(test_prediction, ground_truth))
-        scores["test_rmse"].append(
-            np.sqrt(mean_squared_error(test_prediction, ground_truth))
-        )
-        scores["test_mae"].append(mean_absolute_error(test_prediction, ground_truth))
-        # add predictions
-        test_prediction: list = test_prediction.tolist()
-        predictions.extend(test_prediction)
-    predictions: np.ndarray = np.array(predictions)
-
-    return scores, predictions
+# def run_pytorch(X, y, cv_outer, config):
+#     """Runs the pytorch model given a fold of the data.
+#
+#     Args:
+#         X (torch.tensor): One fold of the input data from cross-validation
+#         y (torch.tensor): One fold of the output data from cross-validation
+#         model (nn.Model): NNModel with specific configurations
+#         config (dict): configuration for the training and test parameters
+#
+#     Returns:
+#         dict: dictionary of scores from the cross-validation
+#     """
+#     # Get input size and y_dims
+#     input_size: int = X.shape[1]
+#     y_dims: int = y.shape[1]
+#     # Perform cross-validation and train on each fold
+#     # TODO: handle multioutput
+#     # NOTE: This assumes the order of columns in y is [PCE, VOC, JSC, FF].
+#     if y_dims > 1:
+#         scores: dict[str, list] = {
+#             f"test_{score}_{output}": []
+#             for score, output in product(
+#                 ["r", "r2", "rmse", "mae"], ["PCE", "Voc", "Jsc", "FF", "PCE_eqn"]
+#             )
+#         }
+#         scores["fit_time"] = []
+#         scores["score_time"] = []
+#         scores["test_r"] = []
+#         scores["test_r2"] = []
+#         scores["test_rmse"] = []
+#         scores["test_mae"] = []
+#     else:
+#         scores: dict = {
+#             "fit_time": [],
+#             "score_time": [],
+#             "test_r": [],
+#             "test_r2": [],
+#             "test_rmse": [],
+#             "test_mae": [],
+#         }
+#     predictions = []
+#     for i, (train_index, test_index) in enumerate(cv_outer.split(X, y)):
+#         train_x = X[train_index]
+#         train_y = y[train_index]
+#         test_x = X[test_index]
+#         test_y = y[test_index]
+#         print(len(train_x), len(test_x))
+#         # Scale X and Y data (standard and then min max)
+#         standard_x = StandardScaler()
+#         standard_y = StandardScaler()
+#         min_max_x = MinMaxScaler()
+#         min_max_y = MinMaxScaler()
+#         train_x = standard_x.fit_transform(train_x)
+#         train_x = min_max_x.fit_transform(train_x)
+#         train_y = standard_y.fit_transform(train_y)
+#         train_y = min_max_y.fit_transform(train_y)
+#         test_x = standard_x.transform(test_x)
+#         test_x = min_max_x.transform(test_x)
+#         test_y = standard_y.transform(test_y)
+#         test_y = min_max_y.transform(test_y)
+#         # convert to torch tensors
+#         train_x = torch.from_numpy(train_x)
+#         train_y = torch.from_numpy(train_y)
+#         test_x = torch.from_numpy(test_x)
+#         test_y = torch.from_numpy(test_y)
+#         # Initiate model
+#         model = NNModel(
+#             input_size=input_size,
+#             output_size=y_dims,
+#             embedding_size=config["embedding_size"],
+#             hidden_size=config["hidden_size"],
+#             n_layers=config["n_layers"],
+#         )
+#         train_set = PolymerDataset(train_x, train_y)
+#         test_set = PolymerDataset(test_x, test_y)
+#         # ATTN: DataLoader defines batch size and whether to shuffle data
+#         train_dataloader = DataLoader(
+#             train_set, batch_size=config["train_batch_size"], shuffle=True
+#         )
+#         test_dataloader = DataLoader(
+#             test_set, batch_size=config["test_batch_size"], shuffle=False
+#         )
+#         # NOTE: Setting loss and optimizer
+#         # Choose Loss Function
+#         if config["loss"] == "MSE":
+#             loss_fn = nn.MSELoss()
+#         elif config["loss"] == "CrossEntropy":
+#             loss_fn = nn.CrossEntropyLoss()
+#
+#         # Choose PyTorch Optimizer
+#         if config["optimizer"] == "Adam":
+#             optimizer = optim.Adam(
+#                 model.parameters(),
+#                 lr=config["init_lr"],
+#             )
+#
+#         # train model
+#         device: torch.device = torch.device("cuda:0")
+#         model.to(device)
+#         running_loss = 0
+#         n_examples = 0
+#         n_iter = 0
+#         running_valid_loss = 0
+#         n_valid_iter = 0
+#         # print training configs
+#         print(config)
+#         # print model summary
+#         print(model)
+#         pytorch_total_params = sum(
+#             p.numel() for p in model.parameters() if p.requires_grad
+#         )
+#         print("MODEL_PARAMETERS: {}".format(pytorch_total_params))
+#         # Early stopping
+#         # last_loss = 100
+#         # patience = 10
+#         # trigger_times = 0
+#         # early_stop = False
+#
+#         # TODO: Setup logger and writer with Tensorflow!
+#         # NOTE: paths are hard-coded because it's not backward compatible ...
+#         # train_log: Path = (
+#         #     HERE.parent.parent
+#         #     / "results"
+#         #     / "target_PCE"
+#         #     / "features_ECFP"
+#         #     / "ANN_log"
+#         #     / "train"
+#         # )
+#         # train_writer: SummaryWriter = SummaryWriter(log_dir=train_log)
+#         # valid_log: Path = (
+#         #     HERE.parent.parent
+#         #     / "results"
+#         #     / "target_PCE"
+#         #     / "features_ECFP"
+#         #     / "ANN_log"
+#         #     / "valid"
+#         # )
+#         # valid_writer: SummaryWriter = SummaryWriter(log_dir=valid_log)
+#
+#         # NOTE: Start training (boilerplate)
+#         # start time
+#         start_time = time.time()
+#         for epoch in range(config["num_of_epochs"]):
+#             ## TRAINING LOOP
+#             ## Make sure gradient tracking is on
+#             model.train(True)
+#             ## LOOP for 1 EPOCH
+#             for i, data in enumerate(train_dataloader):
+#                 inputs, targets = data  # [batch_size, input_size]
+#                 # convert to cuda
+#                 inputs, targets = inputs.to(device="cuda"), targets.to(device="cuda")
+#                 # convert to float
+#                 inputs, targets = inputs.float(), targets.float()
+#                 # Zero your gradients for every batch!
+#                 optimizer.zero_grad()
+#                 # Make predictions for this batch
+#                 outputs = model(inputs)
+#                 # Compute the loss and its gradients
+#                 loss = loss_fn(outputs, targets)
+#                 # backpropagation
+#                 loss.backward()
+#                 # Adjust learning weights
+#                 optimizer.step()
+#                 # Gather data and report
+#                 running_loss += float(loss.item())
+#                 # Gather number of examples trained
+#                 n_examples += len(inputs)
+#                 # Gather number of iterations (batches) trained
+#                 n_iter += 1
+#                 # Stop training after max iterations
+#             # train_writer.add_scalar("loss_batch", loss, n_examples)
+#             # train_writer.add_scalar("loss_avg", running_loss / n_iter, n_examples)
+#             # print progress report
+#             print("EPOCH: {}, N_EXAMPLES: {}, LOSS: {}".format(epoch, n_examples, loss))
+#             # VALIDATION LOOP
+#             model.train(False)
+#             n_valid_examples = 0
+#             valid_loss_batch = 0
+#             for i_test, valid_data in enumerate(test_dataloader):
+#                 valid_inputs, valid_targets = valid_data
+#                 valid_inputs, valid_targets = valid_inputs.to(
+#                     device="cuda"
+#                 ), valid_targets.to(device="cuda")
+#                 # convert to float
+#                 valid_inputs, valid_targets = (
+#                     valid_inputs.float(),
+#                     valid_targets.float(),
+#                 )
+#                 # Make predictions for this batch
+#                 valid_outputs = model(valid_inputs)
+#                 # gather number of examples in test set
+#                 n_valid_examples += len(valid_inputs)
+#                 # Compute the loss
+#                 valid_loss = loss_fn(valid_outputs, valid_targets)
+#                 valid_loss_batch += valid_loss
+#                 # Log test loss
+#             # valid_writer.add_scalar("loss_batch", valid_loss, n_examples)
+#
+#         # end time
+#         end_time = time.time()
+#         # print training time
+#         train_time = end_time - start_time
+#         print("Training time: {}".format(end_time - start_time))
+#         # test model
+#         # Inference
+#         # start time
+#         start_score_time = time.time()
+#         test_prediction = []
+#         ground_truth = []
+#         n_test_examples = 0
+#         model.train(False)
+#         test_loss_batch = 0
+#         for i_test, test_data in enumerate(test_dataloader):
+#             test_inputs, test_targets = test_data
+#             test_inputs, test_targets = test_inputs.to(device="cuda"), test_targets.to(
+#                 device="cuda"
+#             )
+#             # convert to float
+#             test_inputs, test_targets = (
+#                 test_inputs.float(),
+#                 test_targets.float(),
+#             )
+#             # Make predictions for this batch
+#             test_outputs = model(test_inputs)
+#             # gather number of examples in test set
+#             n_test_examples += len(test_inputs)
+#             # Compute the loss
+#             test_loss = loss_fn(test_outputs, test_targets)
+#             test_loss_batch += test_loss
+#             # gather predictions and ground truth for result summary
+#             test_prediction.extend(test_outputs.tolist())
+#             ground_truth.extend(test_targets.tolist())
+#         # end time
+#         end_score_time = time.time()
+#         score_time = end_score_time - start_score_time
+#         # close SummaryWriter
+#         # train_writer.close()
+#         # valid_writer.close()
+#         # reverse min-max scaling
+#         test_prediction: np.ndarray = min_max_y.inverse_transform(test_prediction)
+#         test_prediction: np.ndarray = standard_y.inverse_transform(test_prediction)
+#         ground_truth: np.ndarray = min_max_y.inverse_transform(ground_truth)
+#         ground_truth: np.ndarray = standard_y.inverse_transform(ground_truth)
+#         # compute scores
+#         # TODO: check how the multioutput models are being trained, tested, and how the scores are getting combined/computed!
+#         if y_dims > 1:
+#             # compute scoring metrics for each column, and then the pce_eqn
+#             targets: list = ["PCE", "Voc", "Jsc", "FF", "PCE_eqn"]
+#             for target in targets:
+#                 for score in ["r", "r2", "rmse", "mae"]:
+#                     scores[f"test_{score}_{target}"].append(
+#                         score_lookup[score][target](test_prediction, ground_truth)
+#                     )
+#         scores["fit_time"].append(train_time)
+#         scores["score_time"].append(score_time)
+#         scores["test_r"].append(
+#             np.corrcoef(test_prediction.flatten(), ground_truth.flatten())[0, 1]
+#         )
+#         scores["test_r2"].append(r2_score(test_prediction, ground_truth))
+#         scores["test_rmse"].append(
+#             np.sqrt(mean_squared_error(test_prediction, ground_truth))
+#         )
+#         scores["test_mae"].append(mean_absolute_error(test_prediction, ground_truth))
+#         # add predictions
+#         test_prediction: list = test_prediction.tolist()
+#         predictions.extend(test_prediction)
+#     predictions: np.ndarray = np.array(predictions)
+#
+#     return scores, predictions

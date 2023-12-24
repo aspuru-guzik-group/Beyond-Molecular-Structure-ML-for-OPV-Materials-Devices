@@ -124,21 +124,21 @@ class NNRegressor(MLPRegressor):
 
 regressor_factory: dict[str, type] = {
     "MLR": LinearRegression,
+    "KNN": KNeighborsRegressor,
     # "Lasso": Lasso,
+    "SVR": SVR,
     "KRR": KernelRidge,
     # "KRR":   TanimotoKernelRidge,
-    "KNN": KNeighborsRegressor,
-    "SVR": SVR,
+    "GP": GPRegressor,
     "RF": RandomForestRegressor,
     "XGB": XGBRegressor,
     "HGB": HistGradientBoostingRegressor,
     "NGB": NGBRegressor,
-    "GP": GPRegressor,
     # "GP":    GaussianProcessRegressor,  # ATTN: Don"t use this one for multi-output?
     # "NN":    MLPRegressor,  # ATTN: Not actually this one?
     "NN": NNRegressor,
     # "GNN": GNNPredictor,
-    "ANN": get_skorch_nn,
+    # "ANN": get_skorch_nn,
 }
 
 ecfp_only_kernels: dict[str, Union[str, Callable]] = {

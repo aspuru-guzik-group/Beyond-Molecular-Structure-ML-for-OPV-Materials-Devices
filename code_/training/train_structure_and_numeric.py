@@ -63,22 +63,39 @@ def main_ecfp_and_numeric(
 ) -> None:
     representation: str = "ECFP"
     n_bits = radius_to_bits[radius]
-    structural_features: list[str] = [
+    ecfp_columns: list[str] = [
         f"Donor ECFP{2 * radius}_{n_bits}",
         f"Acceptor ECFP{2 * radius}_{n_bits}",
     ]
-    unroll_single_feat = {
-        "representation": representation,
-        "radius": radius,
-        "n_bits": n_bits,
-        "col_names": structural_features,
-    }
+
+    if "material properties" in scalar_filter:
+        structural_features: list[str] = ecfp_columns
+        unroll_feats = {
+            "representation": representation,
+            "radius":         radius,
+            "n_bits":         n_bits,
+            "col_names":      structural_features,
+        }
+    else:
+        structural_features: list[str] = [
+            *ecfp_columns,
+            "solvent descriptors",
+            "solvent additive descriptors",
+        ]
+        unroll_feats = [
+            {"representation": representation,
+             "radius":         radius,
+             "n_bits":         n_bits,
+             "col_names":      ecfp_columns,},
+            {"representation": "solvent",
+             "col_names": ["solvent descriptors", "solvent additive descriptors"]}
+        ]
 
     train_regressor(
         dataset=dataset,
         representation=representation,
         structural_features=structural_features,
-        unroll=unroll_single_feat,
+        unroll=unroll_feats,
         scalar_filter=scalar_filter,
         subspace_filter=subspace_filter,
         target_features=target_features,
@@ -98,8 +115,23 @@ def main_mordred_and_numeric(
     hyperparameter_optimization: bool,
 ) -> None:
     representation: str = "mordred"
-    structural_features: list[str] = ["Donor", "Acceptor"]
-    unroll_single_feat = {"representation": representation}
+
+    if "material properties" in scalar_filter:
+        structural_features: list[str] = ["Donor", "Acceptor"]
+        unroll_single_feat = {"representation": representation}
+    else:
+        structural_features: list[str] = [
+            "Donor",
+            "Acceptor",
+            "solvent descriptors",
+            "solvent additive descriptors",
+        ]
+        unroll_single_feat = [
+            {"representation": representation,
+             "col_names": ["Donor", "Acceptor"]},
+            {"representation": "solvent",
+             "col_names": ["solvent descriptors", "solvent additive descriptors"]}
+        ]
 
     train_regressor(
         dataset=dataset,
@@ -115,17 +147,56 @@ def main_mordred_and_numeric(
     )
 
 
+def main_material_properties_and_numeric(
+    dataset: pd.DataFrame,
+    regressor_type: str,
+    scalar_filter: str,
+    subspace_filter: str,
+    target_features: list[str],
+    transform_type: str,
+    hyperparameter_optimization: bool,
+) -> None:
+    representation: str = "material properties"
+
+    # structural_features: list[str] = ["Donor", "Acceptor"]
+    # unroll_single_feat = {"representation": representation}
+
+    train_regressor(
+        dataset=dataset,
+        representation=representation,
+        structural_features=None,
+        unroll=None,
+        scalar_filter=scalar_filter,
+        subspace_filter=subspace_filter,
+        target_features=target_features,
+        regressor_type=regressor_type,
+        transform_type=transform_type,
+        hyperparameter_optimization=hyperparameter_optimization,
+    )
+
+
 def main_representation_and_fabrication_grid(
     target_feats: list[str], hyperopt: bool = False
 ) -> None:
     transform_type = "Standard"
 
     filters = ["material properties", "fabrication", "device architecture"]
+    # filters = ["device architecture"]
     for i, filter in enumerate(filters):
         for subspace in [None] + filters[:i]:
-            # for model in ["SVR", "RF", "XGB", "HGB", "NN", "NGB"]:
-            for model in ["ANN"]:
+            for model in ["SVR", "RF", "XGB", "HGB", "NN", "NGB"]:
                 opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
+
+                # material properties
+                main_material_properties_and_numeric(
+                    dataset=opv_dataset,
+                    regressor_type=model,
+                    scalar_filter=filter,
+                    subspace_filter=subspace,
+                    target_features=target_feats,
+                    transform_type=transform_type,
+                    hyperparameter_optimization=hyperopt,
+                )
 
                 # ECFP
                 main_ecfp_and_numeric(

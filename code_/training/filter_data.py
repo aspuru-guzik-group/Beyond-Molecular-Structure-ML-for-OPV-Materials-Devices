@@ -142,10 +142,12 @@ def filter_dataset(
             for unroll_dict in unroll:
                 single_structure_feat: pd.DataFrame = filter_dataset(
                     dataset,
-                    structure_feats=unroll_dict["columns"],
+                    # structure_feats=unroll_dict["columns"],
+                    structure_feats=unroll_dict["col_names"],
                     scalar_feats=[],
                     target_feats=[],
-                    dropna=dropna,
+                    # dropna=dropna,
+                    dropna=False,
                     unroll=unroll_dict,
                 )[0]
                 multiple_unrolled_structure_feats.append(single_structure_feat)
