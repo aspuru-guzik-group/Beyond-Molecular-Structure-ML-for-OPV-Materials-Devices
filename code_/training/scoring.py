@@ -50,7 +50,7 @@ def np_r(y_true: pd.Series, y_pred: np.ndarray) -> float:
 
 
 def pearson(y_true: pd.Series, y_pred: np.ndarray) -> float:
-    if isinstance(y_true, pd.Series):
+    if isinstance(y_true, pd.Series) or isinstance(y_true, pd.DataFrame):
         y_true = y_true.to_numpy()
     y_true = y_true.flatten()
     y_pred = y_pred.flatten()
