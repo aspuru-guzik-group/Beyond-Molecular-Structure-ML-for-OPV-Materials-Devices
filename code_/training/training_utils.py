@@ -321,7 +321,7 @@ def _run(
             scores, predictions = cross_validate_regressor(regressor, X, y, cv_outer)
         seed_scores[seed] = scores
         seed_predictions[seed] = predictions.flatten()
-        print(f"{scores=}", f"{predictions=}")
+        # print(f"{scores=}", f"{predictions=}")
 
     seed_predictions: pd.DataFrame = pd.DataFrame.from_dict(
         seed_predictions, orient="columns"

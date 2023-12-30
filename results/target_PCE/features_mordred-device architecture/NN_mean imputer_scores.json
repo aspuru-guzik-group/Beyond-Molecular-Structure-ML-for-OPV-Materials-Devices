@@ -1,0 +1,78 @@
+{
+  "6": {
+    "fit_time": [
+      0.20888829231262207,
+      0.41898393630981445
+    ],
+    "score_time": [
+      0.06854391098022461,
+      0.07367396354675293
+    ],
+    "test_r": [
+      0.167415478866364,
+      0.581113111820847
+    ],
+    "test_r2": [
+      -1.1148579616832244,
+      0.28977375979966646
+    ],
+    "test_rmse": [
+      -4.229984166400324,
+      -2.5232536601912035
+    ],
+    "test_mae": [
+      -3.0227279335985258,
+      -1.929968742499289
+    ],
+    "best_params": {
+      "check_inverse": true,
+      "func": null,
+      "inverse_func": null,
+      "regressor__activation": "relu",
+      "regressor__alpha": 0.0004510910337688182,
+      "regressor__batch_size": "auto",
+      "regressor__beta_1": 0.9,
+      "regressor__beta_2": 0.999,
+      "regressor__early_stopping": true,
+      "regressor__epsilon": 1e-08,
+      "regressor__learning_rate": "invscaling",
+      "regressor__learning_rate_init": 0.0036652815093629817,
+      "regressor__max_fun": 15000,
+      "regressor__max_iter": 200,
+      "regressor__momentum": 0.9,
+      "regressor__n_iter_no_change": 10,
+      "regressor__n_layers": 3,
+      "regressor__n_neurons": 57,
+      "regressor__nesterovs_momentum": true,
+      "regressor__power_t": 0.5,
+      "regressor__random_state": null,
+      "regressor__shuffle": true,
+      "regressor__solver": "adam",
+      "regressor__tol": 0.0001,
+      "regressor__validation_fraction": 0.1,
+      "regressor__verbose": false,
+      "regressor__warm_start": false,
+      "transformer__memory": null,
+      "transformer__verbose": false,
+      "transformer__MinMax__clip": false,
+      "transformer__MinMax__copy": true,
+      "transformer__Standard__copy": true,
+      "transformer__Standard__with_mean": true,
+      "transformer__Standard__with_std": true,
+      "transformer__MinMax NN__clip": false,
+      "transformer__MinMax NN__copy": true
+    }
+  },
+  "r_avg": 0.3742642953436055,
+  "r_stdev": 0.20684881647724151,
+  "r_stderr": 0.07818150391240294,
+  "r2_avg": -0.41254210094177896,
+  "r2_stdev": 0.7023158607414455,
+  "r2_stderr": 0.26545044419116226,
+  "rmse_avg": 3.3766189132957636,
+  "rmse_stdev": 0.8533652531045601,
+  "rmse_stderr": 0.32254174817405085,
+  "mae_avg": 2.4763483380489073,
+  "mae_stdev": 0.5463795955496183,
+  "mae_stderr": 0.2065120758949062
+}
