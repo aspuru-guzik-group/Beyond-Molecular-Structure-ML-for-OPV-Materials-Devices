@@ -1,0 +1,14 @@
+2024-01-01 14:12:47.489141: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+Using dataset with NaNs
+n numeric features: 22
+Average scores:	 r: 0.82±0.03	 r2: 0.68±0.06
+Filename: HGB
+Saved results to:
+/home/chefos/projects/ml_for_opvs/results/target_PCE/features_mordred-log mobilities/HGB_scores.json
+/home/chefos/projects/ml_for_opvs/results/target_PCE/features_mordred-log mobilities/HGB_predictions.csv
+n numeric features: 22
+Average scores:	 r: 0.81±0.04	 r2: 0.65±0.06
+Filename: HGB
+Saved results to:
+/home/chefos/projects/ml_for_opvs/results/target_PCE/features_ECFP-log mobilities/HGB_scores.json
+/home/chefos/projects/ml_for_opvs/results/target_PCE/features_ECFP-log mobilities/HGB_predictions.csv
