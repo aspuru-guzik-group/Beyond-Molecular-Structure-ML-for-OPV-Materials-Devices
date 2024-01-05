@@ -1,12 +1,10 @@
 import json
 
-import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 from pathlib import Path
-from sklearn.metrics import r2_score
 from typing import Callable, Optional
 
 # from code_ import DATASETS, FIGURES
@@ -27,45 +25,19 @@ def calculate_pearson(df: pd.DataFrame) -> pd.DataFrame:
     return df.corr(method="pearson")
 
 
-def calculate_r2(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate R2 correlation matrix for a given dataframe."""
-    corr_matrix: np.ndarray = np.zeros((len(df.columns), len(df.columns)))
-    for i, col_i in enumerate(df.columns):
-        for j, col_j in enumerate(df.columns):
-            corr_matrix[i, j] = r2_score(df[col_i], df[col_j])
-    return pd.DataFrame(corr_matrix, columns=df.columns, index=df.columns)
-
-
-def calculate_rmse(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate RMSE correlation matrix for a given dataframe."""
-    corr_matrix: np.ndarray = np.zeros((len(df.columns), len(df.columns)))
-    for i, col_i in enumerate(df.columns):
-        for j, col_j in enumerate(df.columns):
-            corr_matrix[i, j] = np.sqrt(np.mean((df[col_i] - df[col_j]) ** 2))
-    return pd.DataFrame(corr_matrix, columns=df.columns, index=df.columns)
-
-
-def calculate_mae(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate MAE correlation matrix for a given dataframe."""
-    corr_matrix: np.ndarray = np.zeros((len(df.columns), len(df.columns)))
-    for i, col_i in enumerate(df.columns):
-        for j, col_j in enumerate(df.columns):
-            corr_matrix[i, j] = np.mean(np.abs(df[col_i] - df[col_j]))
-    return pd.DataFrame(corr_matrix, columns=df.columns, index=df.columns)
+def calculate_spearman(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculate Spearman correlation matrix for a given dataframe."""
+    return df.corr(method="spearman")
 
 
 calculation_factory: dict[str, Callable] = {
     "pearson": calculate_pearson,
-    "r2": calculate_r2,
-    "rmse": calculate_rmse,
-    "mae": calculate_mae,
+    "spearman": calculate_spearman,
 }
 
 correlation_labels: dict[str, str] = {
     "pearson": "Pearson Correlation (R)",
-    "r2": "R2 Correlation",
-    "rmse": "RMSE Correlation",
-    "mae": "MAE Correlation",
+    "spearman": r"Spearman Correlation ($\rho$)",
 }
 
 
@@ -165,22 +137,10 @@ class HeatmapGenerator:
             square=True,
             linewidths=0.5,
             annot=True,
-            fmt=".2f",
+            fmt=".1f",
             cbar_kws={"shrink": 0.5, "label": correlation_labels[method]},
             annot_kws={"fontsize": 12},
         )
-        # sns.heatmap(
-        #     corr,
-        #     cmap=cmap,
-        #     vmin=-self.get_colorbar_range(corr),
-        #     vmax=self.get_colorbar_range(corr),
-        #     center=0,
-        #     square=True,
-        #     linewidths=0.5,
-        #     cbar_kws={"shrink": 0.5, "label": correlation_labels[method]},
-        #     annot=False,  # Turn off default annotation
-        # )
-        # annotate_heatmap(corr, cmap, fontsize=10)  # Call the custom annotation function
 
         self.ax.set_title(f"Heatmap of {self.plot_name.title()} using {method.title()}")
 
@@ -322,9 +282,9 @@ if __name__ == "__main__":
     df_path: Path = DATASETS / "Min_2020_n558" / "cleaned_dataset.pkl"
     opv_dataset: pd.DataFrame = pd.read_pickle(df_path)
 
-    # plot_material_correlations(opv_dataset)
-    # plot_processing_correlations(opv_dataset)
-    # plot_device_correlations(opv_dataset)
-    # plot_electrical_correlations(opv_dataset)
+    plot_material_correlations(opv_dataset)
+    plot_processing_correlations(opv_dataset)
+    plot_device_correlations(opv_dataset)
+    plot_electrical_correlations(opv_dataset)
     plot_solvent_correlations(opv_dataset)
 

@@ -107,12 +107,12 @@ for rad, bit in zip([6, 5, 4, 3], [4096, 2048, 1024, 512]):
                                                "Donor SMILES", "Donor SELFIES", "Acceptor SMILES", "Acceptor SELFIES"])
 
     # Rejoin columns with unrolled features
-    # X = opv_fp  # FPs
+    X = opv_fp  # FPs
     # X = pd.concat((opv_fp, opv_mp), axis=1)  # FPs + MPs
     # X = pd.concat((opv_fp, opv_mp, opv_fab, opv_solv_token), axis=1)  # FPs + MPs + processing tokens
     # X = pd.concat((opv_fp, opv_mp, opv_fab, opv_solv_desc), axis=1)  # FPs + MPs + processing descriptors
     # X = pd.concat((opv_fab, opv_solv_desc), axis=1)  # processing descriptors only
-    X = pd.concat((opv_fp, opv_mp, opv_fab, opv_solv_desc, opv_dev), axis=1)  # FPs + MPs + processing descriptors + interlayers
+    # X = pd.concat((opv_fp, opv_mp, opv_fab, opv_solv_desc, opv_dev), axis=1)  # FPs + MPs + processing descriptors + interlayers
     # X = pd.concat((opv_fp, opv_mp, opv_fab, opv_solv_desc, opv_dev, opv_fab_b), axis=1)
     # X = pd.concat((opv_fp, opv_solv_desc, opv_mp, opv_mp_b, opv_fab, opv_fab_b, opv_dev, opv_dev_b, opv_mob), axis=1)  # Kitchen sink
     # X = pd.concat((opv_fp, opv_solv_desc, opv_mp, opv_mp_b, opv_fab, opv_fab_b, opv_dev, opv_dev_b, opv_mob_log), axis=1)  # Log sink
@@ -139,12 +139,12 @@ for rad, bit in zip([6, 5, 4, 3], [4096, 2048, 1024, 512]):
         plt.show()
 
 
-    def run_rf(random_state: int) -> list[float]:
+    def run_hgb(random_state: int) -> dict[str, list[float]]:
         kf_outer = KFold(n_splits=5, shuffle=True, random_state=random_state)
 
         # Define hyperparameter search space
 
-        outer_r_scores = []
+        outer_scores = {"r2": [], "rmse": [], "mae": []}
         for train_index, test_index in kf_outer.split(X, y):
             X_train_outer, X_test_outer = X.iloc[train_index], X.iloc[test_index]
             y_train_outer, y_test_outer = y.iloc[train_index], y.iloc[test_index]
@@ -181,6 +181,8 @@ for rad, bit in zip([6, 5, 4, 3], [4096, 2048, 1024, 512]):
             predicted = hgbr.predict(X_test_outer)
             # r_score = scipy.stats.pearsonr(y_test_outer, predicted)[0]
             r2_score = sklearn.metrics.r2_score(y_test_outer, predicted)
+            rmse_score = sklearn.metrics.mean_squared_error(y_test_outer, predicted, squared=False)
+            mae_score = sklearn.metrics.mean_absolute_error(y_test_outer, predicted)
 
             # plot_predictions(y_test_outer, predicted, f"R = {round(r_score, 2)} R2 = {round(r2_score, 2)}")
 
@@ -194,20 +196,26 @@ for rad, bit in zip([6, 5, 4, 3], [4096, 2048, 1024, 512]):
             # plt.show()
 
             # Append the r score to the list of outer r scores
-            outer_r_scores.append(r2_score)
+            outer_scores["r2"].append(r2_score)
+            outer_scores["rmse"].append(rmse_score)
+            outer_scores["mae"].append(mae_score)
 
         # Print the average r score and standard deviation
         # print(outer_r_scores)
-        print("mean:\t", np.mean(outer_r_scores), "\tstdev:\t", np.std(outer_r_scores))
+        # print("mean:\t", np.mean(outer_r_scores), "\tstdev:\t", np.std(outer_r_scores))
 
-        return outer_r_scores
+        return outer_scores
 
 
-    r_scores = []
+    scores = {"r2": [], "rmse": [], "mae": []}
     for state in seeds:
-        results = run_rf(state)
-        r_scores.extend(results)
-    print("overall mean:\t", np.mean(r_scores), "\toverall stderr:\t", np.std(r_scores)/np.sqrt(len(seeds)))
+        results = run_hgb(state)
+        scores["r2"].extend(results["r2"])
+        scores["rmse"].extend(results["rmse"])
+        scores["mae"].extend(results["mae"])
+    print("R2 mean:\t", np.mean(scores["r2"]), "\tR2 stderr:\t", np.std(scores["r2"])/np.sqrt(len(seeds)))
+    print("RMSE mean:\t", np.mean(scores["rmse"]), "\tRMSE stderr:\t", np.std(scores["rmse"])/np.sqrt(len(seeds)))
+    print("MAE mean:\t", np.mean(scores["mae"]), "\tMAE stderr:\t", np.std(scores["mae"])/np.sqrt(len(seeds)))
 
 # for state in seeds:
 #     print("Training on the whole dataset now...")

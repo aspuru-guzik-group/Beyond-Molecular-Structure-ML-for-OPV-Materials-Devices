@@ -90,8 +90,8 @@ if __name__ == "__main__":
     # predictions = HERE.parent.parent / "results" / "target_PCE" / "features_ECFP" / "RF_predictions.csv"
     # make_predictions_plot(predictions, 0.87, 0.02)
     dataset_ground_truth_csv = DATASETS / "Min_2020_n558" / "cleaned_dataset.csv"
-    ground_truth_Hutchison_csv = DATASETS / "Hutchison_2023_n1001" / "Hutchison_filtered_dataset_pipeline.csv"
-    ground_truth_Saeki_csv = DATASETS / "Saeki_2022_n1318" / "Saeki_corrected_pipeline.csv"
+    # ground_truth_Hutchison_csv = DATASETS / "Hutchison_2023_n1001" / "Hutchison_filtered_dataset_pipeline.csv"
+    # ground_truth_Saeki_csv = DATASETS / "Saeki_2022_n1318" / "Saeki_corrected_pipeline.csv"
 
     get_predictions(ROOT / "results" / "target_PCE", dataset_ground_truth_csv)
 

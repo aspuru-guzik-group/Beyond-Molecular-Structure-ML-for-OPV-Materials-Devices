@@ -125,7 +125,6 @@ class NNRegressor(MLPRegressor):
 regressor_factory: dict[str, type] = {
     "MLR": LinearRegression,
     "KNN": KNeighborsRegressor,
-    # "Lasso": Lasso,
     "SVR": SVR,
     "KRR": KernelRidge,
     # "KRR":   TanimotoKernelRidge,
