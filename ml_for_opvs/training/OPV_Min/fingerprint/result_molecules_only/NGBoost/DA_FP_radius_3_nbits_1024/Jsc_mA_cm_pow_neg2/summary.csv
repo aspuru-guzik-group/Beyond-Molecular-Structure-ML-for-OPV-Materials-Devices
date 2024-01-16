@@ -1,2 +1,0 @@
-Dataset,num_of_folds,Features,Targets,Model,num_of_data,r_mean,r_std,r2_mean,r2_std
-OPV_Min,5,fp,Jsc_mA_cm_pow_neg2,ngboost,5,0.769597297126045,0.038140379048886446,0.5718513367941496,0.0631320404188054

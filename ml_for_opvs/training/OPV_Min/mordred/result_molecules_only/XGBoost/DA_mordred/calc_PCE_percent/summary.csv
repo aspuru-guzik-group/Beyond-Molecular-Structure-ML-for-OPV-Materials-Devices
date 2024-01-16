@@ -1,2 +1,0 @@
-Dataset,num_of_folds,Features,Targets,Model,r_mean,r_std,r2_mean,r2_std,rmse_mean,rmse_std,mae_mean,mae_std,num_of_data
-OPV_Min,5,DA_mordred,calc_PCE_percent,XGBoost,0.7409549143795344,0.029871309425178308,0.536908534101777,0.04286605962574518,2.075234340948027,0.12288690781063712,1.59190326204496,0.07076953035276924,553

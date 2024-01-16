@@ -1,0 +1,16 @@
+{
+  "material properties": ["material properties"],
+  "fabrication": ["material properties", "fabrication"],
+  "fabrication all": ["material properties", "fabrication", "fabrication missing"],
+  "device architecture": ["material properties", "fabrication", "device architecture"],
+  "device architecture all": ["material properties", "fabrication", "fabrication missing", "device architecture", "device architecture missing"],
+  "fabrication only": ["fabrication", "device architecture"],
+  "fabrication only all": ["fabrication", "fabrication missing", "device architecture", "device architecture missing"],
+  "mobilities": ["material properties", "fabrication", "device architecture", "mobilities"],
+  "log mobilities": ["material properties", "fabrication", "device architecture", "log mobilities"],
+  "mobilities all": ["material properties", "fabrication", "fabrication missing", "device architecture", "device architecture missing", "mobilities"],
+  "log mobilities all": ["material properties", "fabrication", "fabrication missing", "device architecture", "device architecture missing", "log mobilities"],
+  "material properties Saeki": ["material properties Saeki"],
+  "material properties Saeki all": ["material properties Saeki"],
+  "material properties Hutchison all": ["material properties Hutchison"]
+}

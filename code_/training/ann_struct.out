@@ -1,0 +1,200 @@
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/torch/cuda/__init__.py:107: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 10020). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at ../c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+X.dtype=dtype('float32') y.dtype=dtype('float32')
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/torch/cuda/__init__.py:107: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 10020). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at ../c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/torch/cuda/__init__.py:107: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 10020). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at ../c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/torch/cuda/__init__.py:107: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 10020). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at ../c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/torch/cuda/__init__.py:107: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 10020). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at ../c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+  epoch       train_loss    valid_loss     dur
+-------  ---------------  ------------  ------
+      1  [36m2620771642.2979[0m       [32m84.3291[0m  1.1203
+  epoch       train_loss    valid_loss     dur
+-------  ---------------  ------------  ------
+      1  [36m4682627191.1372[0m       [32m92.0069[0m  1.0995
+  epoch       train_loss    valid_loss     dur
+-------  ---------------  ------------  ------
+      1  [36m3124488065.3252[0m       [32m91.2163[0m  1.1304
+  epoch       train_loss    valid_loss     dur
+-------  ---------------  ------------  ------
+      1  [36m4741190881.4584[0m       [32m89.1695[0m  1.1432
+      2       [36m78.6177[0m      135.0837  1.0527
+      2       [36m77.0668[0m      124.7122  1.0582
+      2       [36m77.3271[0m      209.0836  1.0700
+      2       [36m77.7381[0m       91.4653  1.0334
+      3      670.4984       [32m69.7786[0m  1.0568
+      3      518.5688       [32m86.3469[0m  1.0663
+      3      405.7686       [32m86.8879[0m  1.0831
+      3      309.0642       [32m78.0414[0m  1.0661
+      4       [36m50.0509[0m       [32m54.6121[0m  1.0729
+      4       [36m74.8101[0m       [32m81.6067[0m  1.0673
+      4       86.8078       [32m84.5475[0m  1.0864
+      4       [36m73.4657[0m       [32m56.9503[0m  1.0585
+      5       56.0836       [32m46.4197[0m  1.0587
+      5       [36m65.7994[0m       [32m70.1665[0m  1.0729
+      5       [36m44.9306[0m       [32m12.3091[0m  1.0540
+      5       [36m66.4465[0m       [32m44.1146[0m  1.0731
+      6       72.4356       58.8447  1.0754
+      6       [36m39.8030[0m        [32m7.1085[0m  1.0575
+      6       [36m15.1807[0m       [32m10.0879[0m  1.0859
+      6       [36m63.9773[0m       [32m16.1729[0m  1.0919
+      7       [36m47.5056[0m       [32m35.9168[0m  1.0540
+      7       [36m18.4310[0m        [32m6.4290[0m  1.0607
+      7       [36m12.8644[0m        [32m6.2488[0m  1.0701
+      7       [36m24.2348[0m        [32m7.1020[0m  1.0512
+      8       [36m19.9858[0m       39.4901  1.0502
+      8       [36m12.6782[0m       13.4595  1.0745
+      8        [36m9.9351[0m        [32m4.6059[0m  1.0685
+      8        [36m9.8312[0m       46.0524  1.0753
+      9       24.8102       [32m11.4085[0m  1.0078
+      9       [36m10.9811[0m        7.0359  1.0658
+      9        [36m6.5730[0m       10.4707  1.0525
+      9       22.0020        8.1250  1.0561
+     10        [36m9.9625[0m        [32m9.4476[0m  1.0210
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/model_selection/_validation.py:794: UserWarning: Scoring failed. The score on this train-test partition for these parameters will be set to nan. Details: 
+Traceback (most recent call last):
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/metrics/_scorer.py", line 115, in __call__
+    score = scorer._score(cached_call, estimator, *args, **kwargs)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/metrics/_scorer.py", line 282, in _score
+    return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+  File "/home/chefos/projects/ml_for_opvs/code_/training/scoring.py", line 48, in pearson
+    if y_true.type == pd.Series:
+AttributeError: 'numpy.ndarray' object has no attribute 'type'
+
+  warnings.warn(
+     10        7.2403        7.0726  1.0328
+     10       12.1024        6.3999  1.0466
+     10       11.3798       10.2872  1.0852
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/model_selection/_validation.py:794: UserWarning: Scoring failed. The score on this train-test partition for these parameters will be set to nan. Details: 
+Traceback (most recent call last):
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/metrics/_scorer.py", line 115, in __call__
+    score = scorer._score(cached_call, estimator, *args, **kwargs)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/metrics/_scorer.py", line 282, in _score
+    return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+  File "/home/chefos/projects/ml_for_opvs/code_/training/scoring.py", line 48, in pearson
+    if y_true.type == pd.Series:
+AttributeError: 'numpy.ndarray' object has no attribute 'type'
+
+  warnings.warn(
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/model_selection/_validation.py:794: UserWarning: Scoring failed. The score on this train-test partition for these parameters will be set to nan. Details: 
+Traceback (most recent call last):
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/metrics/_scorer.py", line 115, in __call__
+    score = scorer._score(cached_call, estimator, *args, **kwargs)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/metrics/_scorer.py", line 282, in _score
+    return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+  File "/home/chefos/projects/ml_for_opvs/code_/training/scoring.py", line 48, in pearson
+    if y_true.type == pd.Series:
+AttributeError: 'numpy.ndarray' object has no attribute 'type'
+
+  warnings.warn(
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/model_selection/_validation.py:794: UserWarning: Scoring failed. The score on this train-test partition for these parameters will be set to nan. Details: 
+Traceback (most recent call last):
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/metrics/_scorer.py", line 115, in __call__
+    score = scorer._score(cached_call, estimator, *args, **kwargs)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/metrics/_scorer.py", line 282, in _score
+    return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+  File "/home/chefos/projects/ml_for_opvs/code_/training/scoring.py", line 48, in pearson
+    if y_true.type == pd.Series:
+AttributeError: 'numpy.ndarray' object has no attribute 'type'
+
+  warnings.warn(
+  epoch       train_loss    valid_loss     dur
+-------  ---------------  ------------  ------
+      1  [36m4051775874.2483[0m       [32m75.6672[0m  0.7222
+      2       [36m33.4299[0m      297.8448  0.6884
+      3      280.0881       [32m55.3981[0m  0.6895
+      4       40.4359       [32m23.8425[0m  0.6989
+      5       [36m14.7366[0m       [32m17.2639[0m  0.6858
+      6       15.3807       18.0384  0.6914
+      7       17.8132       17.2721  0.7071
+      8       [36m11.0357[0m       [32m13.1098[0m  0.6879
+      9       13.8837        [32m8.3129[0m  0.6873
+     10       12.9615        [32m5.1920[0m  0.6893
+/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/model_selection/_validation.py:794: UserWarning: Scoring failed. The score on this train-test partition for these parameters will be set to nan. Details: 
+Traceback (most recent call last):
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/metrics/_scorer.py", line 115, in __call__
+    score = scorer._score(cached_call, estimator, *args, **kwargs)
+  File "/home/chefos/anaconda3/envs/opv_ml/lib/python3.10/site-packages/sklearn/metrics/_scorer.py", line 282, in _score
+    return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+  File "/home/chefos/projects/ml_for_opvs/code_/training/scoring.py", line 48, in pearson
+    if y_true.type == pd.Series:
+AttributeError: 'numpy.ndarray' object has no attribute 'type'
+
+  warnings.warn(
+  epoch       train_loss    valid_loss     dur
+-------  ---------------  ------------  ------
+      1  [36m3687567151.3363[0m       [32m76.3807[0m  1.0872
+  epoch       train_loss    valid_loss     dur
+-------  ---------------  ------------  ------
+      1  [36m3336326486.0338[0m       [32m85.8865[0m  1.0812
+  epoch       train_loss    valid_loss     dur
+-------  ---------------  ------------  ------
+      1  [36m4796589437.2216[0m       [32m92.3955[0m  1.1041
+  epoch       train_loss    valid_loss     dur
+-------  ---------------  ------------  ------
+      1  [36m4455374817.2399[0m       [32m89.6400[0m  1.1309
+      2       [36m33.8970[0m      107.7074  1.0400
+      2       [36m49.4326[0m       [32m54.3748[0m  1.0731
+      2       [36m77.0530[0m      512.9102  1.0489
+      2       [36m77.3088[0m     1071.4022  1.0659
+      3     1013.9119       [32m21.1029[0m  1.0430
+      3      998.9050       [32m88.3829[0m  1.0663
+      3      248.4611       [32m33.0249[0m  1.0796
+      3     1200.2231       [32m74.7859[0m  1.0561
+      4       [36m13.2612[0m       [32m20.3406[0m  1.0361
+      4       58.3047       81.2299  1.0679
+      4       [36m73.3816[0m       [32m77.9147[0m  1.0806
+      4       94.8123       87.8960  1.0950
+      5       21.5086       21.3916  0.9899
+      5      168.0666       82.7426  1.0279
+      5       66.6423      126.7063  1.1027
+      5       [36m76.6676[0m       86.6957  1.0706
+      6       24.6183       [32m10.2601[0m  0.9962
+      6       [36m68.8572[0m       [32m65.4729[0m  0.9977
+      6       [36m38.1461[0m       62.3749  1.0507
+      6       [36m74.6674[0m       83.1867  1.0706
+      7       24.9705       42.3323  1.0279
+      7       [36m32.0305[0m        [32m6.5547[0m  0.9910
+      7       41.9710       [32m31.0835[0m  1.0367
+      7       [36m72.5175[0m       78.4963  1.0737
+      8       35.3972       11.6791  1.0373
+      8       [36m14.2694[0m        9.5284  1.0268
+      8       [36m24.3206[0m        [32m6.9563[0m  1.0194
+      8       [36m64.1020[0m       [32m61.8989[0m  1.0762
+      9       15.9388       10.2782  1.0323
+      9       15.0202        7.4489  1.0138
+      9       [36m16.3338[0m       13.5129  1.0104
+      9       [36m43.5944[0m       [32m19.1265[0m  1.1436
+     10       [36m13.5058[0m       11.2261  1.0433
+     10       [36m11.6242[0m        [32m8.8051[0m  1.1188
+     10       [36m14.0757[0m        [32m5.7105[0m  1.0094
+     10       [36m27.9850[0m        [32m6.2526[0m  0.9919
+  epoch       train_loss    valid_loss     dur
+-------  ---------------  ------------  ------
+      1  [36m4463098375.2721[0m       [32m83.6544[0m  0.7167
+      2       [36m79.1903[0m      338.4506  0.7036
+      3      642.2940       [32m77.9375[0m  0.6916
+      4       [36m73.0315[0m       [32m74.6966[0m  0.7112
+      5       [36m69.8475[0m       [32m54.9067[0m  0.7009
+      6       [36m41.5992[0m       [32m10.5225[0m  0.7044
+      7       [36m18.4821[0m       19.0907  0.6696
+      8       [36m16.3962[0m       11.3372  0.6868
+      9       [36m15.9891[0m       16.2627  0.7011
+     10       [36m14.8574[0m        [32m7.5336[0m  0.6857
+Traceback (most recent call last):
+  File "/home/chefos/projects/ml_for_opvs/code_/training/train_structure_only.py", line 319, in <module>
+    main_representation_model_grid(target_feats=[target], hyperopt=False)
+  File "/home/chefos/projects/ml_for_opvs/code_/training/train_structure_only.py", line 267, in main_representation_model_grid
+    main_ecfp_only(dataset=opv_dataset,
+  File "/home/chefos/projects/ml_for_opvs/code_/training/train_structure_only.py", line 101, in main_ecfp_only
+    train_regressor(dataset=dataset,
+  File "/home/chefos/projects/ml_for_opvs/code_/training/training_utils.py", line 57, in train_regressor
+    scores, predictions = _prepare_data(dataset=dataset,
+  File "/home/chefos/projects/ml_for_opvs/code_/training/training_utils.py", line 162, in _prepare_data
+    return _run(X, y,
+  File "/home/chefos/projects/ml_for_opvs/code_/training/training_utils.py", line 202, in _run
+    y = y.values.reshape(-1, 1)
+AttributeError: 'numpy.ndarray' object has no attribute 'values'

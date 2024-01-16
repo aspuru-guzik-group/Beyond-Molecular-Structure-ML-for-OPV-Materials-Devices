@@ -1,0 +1,225 @@
+from pathlib import Path
+from typing import Optional
+
+import pandas as pd
+
+from data_handling import save_results
+from filter_data import get_appropriate_dataset
+from pipeline_utils import imputer_factory, radius_to_bits
+from scoring import process_scores
+from training_utils import run_graphs_only, train_regressor
+
+HERE: Path = Path(__file__).resolve().parent
+DATASETS: Path = HERE.parent.parent / "datasets"
+
+
+def main_graphs_and_numeric(dataset: pd.DataFrame,
+                            scalar_filter: str,
+                            subspace_filter: Optional[str],
+                            regressor_type: str,
+                            target_features: list[str],
+                            hyperparameter_optimization: bool) -> None:
+    """
+    Only acceptable for GNNPredictor
+    """
+    representation: str = "SMILES"
+    structural_features: list[str] = ["Donor SMILES", "Acceptor SMILES"]
+    unroll = None
+
+    scores, predictions = run_graphs_only(dataset=dataset,
+                                          structural_features=structural_features,
+                                          target_features=target_features,
+                                          regressor_type=regressor_type,
+                                          unroll=unroll,
+                                          hyperparameter_optimization=hyperparameter_optimization,
+                                          )
+
+    scores = process_scores(scores)
+
+    save_results(scores, predictions,
+                 representation=representation,
+                 scalar_filter=scalar_filter,
+                 subspace_filter=subspace_filter,
+                 target_features=target_features,
+                 regressor_type=regressor_type,
+                 hyperparameter_optimization=hyperparameter_optimization)
+
+
+def main_ecfp_and_numeric(dataset: pd.DataFrame,
+                          regressor_type: str,
+                          scalar_filter: str,
+                          subspace_filter: Optional[str],
+                          target_features: list[str],
+                          transform_type: str,
+                          imputer: str,
+                          hyperparameter_optimization: bool,
+                          radius: int = 5) -> None:
+    representation: str = "ECFP"
+    n_bits = radius_to_bits[radius]
+    ecfp_columns: list[str] = [
+        f"Donor ECFP{2 * radius}_{n_bits}",
+        f"Acceptor ECFP{2 * radius}_{n_bits}",
+    ]
+
+    if "material properties" in scalar_filter:
+        structural_features: list[str] = ecfp_columns
+        unroll_feats = {
+            "representation": representation,
+            "radius":         radius,
+            "n_bits":         n_bits,
+            "col_names":      structural_features,
+        }
+    else:
+        structural_features: list[str] = [
+            *ecfp_columns,
+            "solvent descriptors",
+            "solvent additive descriptors",
+        ]
+        unroll_feats = [
+            {"representation": representation,
+             "radius":         radius,
+             "n_bits":         n_bits,
+             "col_names":      ecfp_columns, },
+            {"representation": "solvent",
+             "col_names":      ["solvent descriptors", "solvent additive descriptors"]}
+        ]
+
+    train_regressor(dataset=dataset,
+                    representation=representation,
+                    structural_features=structural_features,
+                    unroll=unroll_feats,
+                    scalar_filter=scalar_filter,
+                    subspace_filter=subspace_filter,
+                    target_features=target_features,
+                    regressor_type=regressor_type,
+                    transform_type=transform_type,
+                    imputer=imputer,
+                    hyperparameter_optimization=hyperparameter_optimization)
+
+
+def main_mordred_and_numeric(dataset: pd.DataFrame,
+                             regressor_type: str,
+                             scalar_filter: str,
+                             subspace_filter: str,
+                             target_features: list[str],
+                             transform_type: str,
+                             imputer: str,
+                             hyperparameter_optimization: bool) -> None:
+    representation: str = "mordred"
+
+    if "material properties" in scalar_filter:
+        structural_features: list[str] = ["Donor", "Acceptor"]
+        unroll_single_feat = {"representation": representation}
+    else:
+        structural_features: list[str] = [
+            "Donor",
+            "Acceptor",
+            "solvent descriptors",
+            "solvent additive descriptors",
+        ]
+        unroll_single_feat = [
+            {"representation": representation,
+             "col_names": ["Donor", "Acceptor"]},
+            {"representation": "solvent",
+             "col_names": ["solvent descriptors", "solvent additive descriptors"]}
+        ]
+
+    train_regressor(dataset=dataset,
+                    representation=representation,
+                    structural_features=structural_features,
+                    unroll=unroll_single_feat,
+                    scalar_filter=scalar_filter,
+                    subspace_filter=subspace_filter,
+                    target_features=target_features,
+                    regressor_type=regressor_type,
+                    transform_type=transform_type,
+                    imputer=imputer,
+                    hyperparameter_optimization=hyperparameter_optimization)
+
+
+def main_material_properties_and_numeric(dataset: pd.DataFrame,
+                                            regressor_type: str,
+                                            scalar_filter: str,
+                                            subspace_filter: str,
+                                            target_features: list[str],
+                                            transform_type: str,
+                                            imputer: str,
+                                            hyperparameter_optimization: bool) -> None:
+    representation: str = "material properties"
+
+    train_regressor(
+        dataset=dataset,
+        representation=representation,
+        structural_features=None,
+        unroll=None,
+        scalar_filter=scalar_filter,
+        subspace_filter=subspace_filter,
+        target_features=target_features,
+        regressor_type=regressor_type,
+        transform_type=transform_type,
+        imputer=imputer,
+        hyperparameter_optimization=hyperparameter_optimization,
+    )
+
+
+def main_imputer_grid(target_feats: list[str], hyperopt: bool = False) -> None:
+    transform_type = "Standard"
+
+    for model in ["SVR", "RF", "XGB", "HGB", "NGB", "NN"]:
+        for imputer in imputer_factory:
+            opv_dataset: pd.DataFrame = get_appropriate_dataset(model, imputer=imputer)
+
+            # material properties
+            main_material_properties_and_numeric(dataset=opv_dataset,
+                                                 regressor_type=model,
+                                                 scalar_filter="device architecture",
+                                                 subspace_filter=None,
+                                                 target_features=target_feats,
+                                                 transform_type=transform_type,
+                                                 imputer=imputer,
+                                                 hyperparameter_optimization=hyperopt)
+
+            # mordred
+            main_mordred_and_numeric(dataset=opv_dataset,
+                                     regressor_type=model,
+                                     scalar_filter="device architecture",
+                                     subspace_filter=None,
+                                     target_features=target_feats,
+                                     transform_type=transform_type,
+                                     imputer=imputer,
+                                     hyperparameter_optimization=hyperopt)
+            
+            # ECFP
+            main_ecfp_and_numeric(dataset=opv_dataset,
+                                     regressor_type=model,
+                                     scalar_filter="device architecture",
+                                     subspace_filter=None,
+                                     target_features=target_feats,
+                                     transform_type=transform_type,
+                                     imputer=imputer,
+                                     hyperparameter_optimization=hyperopt)
+
+
+if __name__ == "__main__":
+    main_imputer_grid(
+            target_feats=["calculated PCE (%)"], hyperopt=False)
+
+    # model = "HGB"
+    # main_mordred_and_numeric(dataset=get_appropriate_dataset(model),
+    #                             regressor_type=model,
+    #                             scalar_filter="device architecture",
+    #                             subspace_filter=None,
+    #                             target_features=["calculated PCE (%)"],
+    #                             transform_type="Standard",
+    #                             imputer="uniform KNN",
+    #                             hyperparameter_optimization=True)
+    
+    # model = "HGB"
+    # main_mordred_and_numeric(dataset=get_appropriate_dataset(model),
+    #                             regressor_type=model,
+    #                             scalar_filter="device architecture",
+    #                             subspace_filter=None,
+    #                             target_features=["calculated PCE (%)"],
+    #                             transform_type="Standard",
+    #                             imputer=None,
+    #                             hyperparameter_optimization=True)

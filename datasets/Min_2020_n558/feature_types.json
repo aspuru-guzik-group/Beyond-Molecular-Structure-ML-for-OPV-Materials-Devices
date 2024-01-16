@@ -1,0 +1,8 @@
+{
+  "Donor": "category",
+  "Acceptor": "category",
+  "solvent": "category",
+  "solvent additive": "category",
+  "HTL":  "category",
+  "ETL": "category"
+}
