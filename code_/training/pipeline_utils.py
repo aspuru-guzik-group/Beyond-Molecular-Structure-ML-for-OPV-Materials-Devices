@@ -6,8 +6,9 @@ import pandas as pd
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer, KNNImputer, SimpleImputer
 from sklearn.impute._base import _BaseImputer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, PowerTransformer, QuantileTransformer, StandardScaler
+from sklearn.pipeline import Pipeline, make_pipeline
+from sklearn.preprocessing import FunctionTransformer, MinMaxScaler, OneHotEncoder, PowerTransformer, \
+    QuantileTransformer, RobustScaler, StandardScaler, normalize
 
 HERE: Path = Path(__file__).resolve().parent
 DATASETS: Path = HERE.parent.parent / "datasets"
@@ -116,7 +117,8 @@ unrolling_factory: dict[str, Callable] = {"solvent":             unroll_solvent_
 representation_scaling_factory: dict[str, dict[str, Union[Callable, str]]] = {
     "solvent":             {"callable": StandardScaler,
                             "type":     "Standard"},
-    "ECFP":                {"callable": MinMaxScaler, "type": "MinMax"},
+    # "ECFP":                {"callable": MinMaxScaler, "type": "MinMax"},
+    "ECFP":                {"callable": FunctionTransformer, "type": "identity"},
     "mordred":             {"callable": StandardScaler,
                             "type":     "Standard"},
     "graph embeddings":    {"callable": MinMaxScaler,
@@ -124,12 +126,27 @@ representation_scaling_factory: dict[str, dict[str, Union[Callable, str]]] = {
     "BRICS":               {"callable": MinMaxScaler, "type": "MinMax"},
     "SELFIES":             {"callable": MinMaxScaler, "type": "MinMax"},
     "SMILES":              {"callable": MinMaxScaler, "type": "MinMax"},
-    "OHE":                 {"callable": MinMaxScaler, "type": "MinMax"},
+    # "OHE":                 {"callable": MinMaxScaler, "type": "MinMax"},
+    "OHE":                 {"callable": FunctionTransformer, "type": "identity"},
     "material properties": {"callable": StandardScaler, "type": "Standard"},
-    # "fabrication only":    {"callable": StandardScaler,
-    #                         "type":     "Standard"},
+    "fabrication only":    {"callable": StandardScaler,
+                            "type":     "Standard"},
     # "GNN":     {"callable": MinMaxScaler, "type": "MinMax"},
 }
+
+# representation_scaling_factory: dict[str, Callable] = {
+#     "solvent":             StandardScaler,
+#     "ECFP":                MinMaxScaler,
+#     "mordred":             StandardScaler,
+#     "graph embeddings":    MinMaxScaler,
+#     "BRICS":               MinMaxScaler,
+#     "SELFIES":             MinMaxScaler,
+#     "SMILES":              MinMaxScaler,
+#     "OHE":                 MinMaxScaler,
+#     "material properties": StandardScaler,
+#     # "fabrication only":  StandardScaler,
+#     # "GNN":               MinMaxScaler,
+# }
 
 radius_to_bits: dict[int, int] = {3: 512, 4: 1024, 5: 2048, 6: 4096}
 
@@ -147,31 +164,50 @@ minmax_features: list[str] = [
     "HTL energy level (eV)", "ETL energy level (eV)", "HTL thickness (nm)", "ETL thickness (nm)",
 ]
 
+
+class MaxNormScaler(FunctionTransformer):
+    def __init__(self):
+        super().__init__(func=normalize, kw_args={"norm": "max", "axis": 0})
+
+
 transforms: dict[str, Callable] = {
-    None:                None,
-    "MinMax":            MinMaxScaler,
+    None:                FunctionTransformer,
+    # "MinMax":            MinMaxScaler,
+    "MinMax":            MaxNormScaler,
     "Standard":          StandardScaler,
+    "Robust":            RobustScaler,
     "Power":             PowerTransformer,
     "Uniform Quantile":  QuantileTransformer,
 }
 
+
+# def generate_feature_pipeline(transform_name: str) -> Pipeline:
+#     """
+#     Inserts the transformation into a Pipeline
+#     """
+#     if transform_name:
+#         new_pipe: Pipeline = Pipeline(
+#             steps=[("MinMax", transforms["MinMax"]()), (transform_name, transforms[transform_name]()), ])
+#     else:
+#         new_pipe: Pipeline = Pipeline(steps=[("MinMax", transforms["MinMax"]()), ])
+#     return new_pipe
 
 def generate_feature_pipeline(transform_name: str) -> Pipeline:
     """
     Inserts the transformation into a Pipeline
     """
     if transform_name:
-        new_pipe: Pipeline = Pipeline(
-            steps=[("MinMax", transforms["MinMax"]()), (transform_name, transforms[transform_name]()), ])
+        new_pipe: Pipeline = make_pipeline(transforms[transform_name]())
     else:
-        new_pipe: Pipeline = Pipeline(steps=[("MinMax", transforms["MinMax"]()), ])
+        new_pipe: Pipeline = make_pipeline([])
     return new_pipe
 
 
 def get_feature_pipelines(unrolled_features: list[str],
                           representation: str,
                           numeric_features: list[str],
-                          transform_type: Optional[str] = None,
+                          # transform_type: Optional[str] = None,
+                          transform_type: str,
                           ) -> list[tuple[str, Pipeline, list[str]]]:
     # Establish preprocessing and training pipeline
     solvent_feats: list[str] = [feat for feat in unrolled_features if feat.startswith("solvent")]

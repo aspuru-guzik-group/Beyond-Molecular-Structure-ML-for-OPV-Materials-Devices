@@ -1,148 +1,48 @@
 {
   "6": {
     "fit_time": [
-      0.1634082794189453,
-      0.13516736030578613,
-      0.11100149154663086,
-      0.09649181365966797,
-      0.11043286323547363
+      0.15677309036254883,
+      0.14017724990844727
     ],
     "score_time": [
-      0.005570888519287109,
-      0.0059130191802978516,
-      0.006237506866455078,
-      0.00663304328918457,
-      0.005286455154418945
+      0.02548980712890625,
+      1.991894006729126
     ],
     "test_r": [
-      0.5296727796087255,
-      0.595873231591154,
-      0.7175249420364558,
-      0.5428605617806885,
-      0.5315919631820972
+      0.612762755021716,
+      0.5700543755912371
     ],
     "test_r2": [
-      0.2596226272738352,
-      0.3519917876388168,
-      0.46388415710271214,
-      0.24006224589799863,
-      0.24929666432271214
+      0.20985813660446373,
+      0.2259176800197923
     ],
     "test_rmse": [
-      -2.5500819443525455,
-      -2.6088715014740207,
-      -2.210757830821293,
-      -2.746485172668776,
-      -2.674364402011983
+      -2.746793884890229,
+      -2.7248487187440915
     ],
     "test_mae": [
-      -1.993039649389555,
-      -2.008591463280901,
-      -1.7514358725166745,
-      -2.0926852940266873,
-      -2.098647082987386
+      -2.197940957138104,
+      -2.2069140718231077
     ],
     "best_params": {
       "check_inverse": true,
       "func": null,
       "inverse_func": null,
       "regressor__activation": "relu",
-      "regressor__alpha": 0.00011967001012920986,
+      "regressor__alpha": 0.0004510910337688182,
       "regressor__batch_size": "auto",
       "regressor__beta_1": 0.9,
       "regressor__beta_2": 0.999,
       "regressor__early_stopping": true,
       "regressor__epsilon": 1e-08,
       "regressor__learning_rate": "invscaling",
-      "regressor__learning_rate_init": 0.0031833965423194027,
-      "regressor__max_fun": 15000,
-      "regressor__max_iter": 200,
-      "regressor__momentum": 0.9,
-      "regressor__n_iter_no_change": 10,
-      "regressor__n_layers": 4,
-      "regressor__n_neurons": 54,
-      "regressor__nesterovs_momentum": true,
-      "regressor__power_t": 0.5,
-      "regressor__random_state": null,
-      "regressor__shuffle": true,
-      "regressor__solver": "adam",
-      "regressor__tol": 0.0001,
-      "regressor__validation_fraction": 0.1,
-      "regressor__verbose": false,
-      "regressor__warm_start": false,
-      "transformer__memory": null,
-      "transformer__verbose": false,
-      "transformer__MinMax__clip": false,
-      "transformer__MinMax__copy": true,
-      "transformer__Standard__copy": true,
-      "transformer__Standard__with_mean": true,
-      "transformer__Standard__with_std": true,
-      "transformer__MinMax NN__clip": false,
-      "transformer__MinMax NN__copy": true
-    }
-  },
-  "13": {
-    "fit_time": [
-      0.2266683578491211,
-      0.07183718681335449,
-      0.15947651863098145,
-      0.10133624076843262,
-      0.09913086891174316
-    ],
-    "score_time": [
-      0.005422830581665039,
-      0.005944490432739258,
-      0.005666017532348633,
-      0.0060787200927734375,
-      0.005335807800292969
-    ],
-    "test_r": [
-      0.5806706872130458,
-      0.5828002767367422,
-      0.5114730415176052,
-      0.5247692714727306,
-      0.5235084895628834
-    ],
-    "test_r2": [
-      0.3056692390658752,
-      0.31921664676986816,
-      -0.014492774649599527,
-      0.24579021187883088,
-      0.26523029155505506
-    ],
-    "test_rmse": [
-      -2.578002873144763,
-      -2.560690272405983,
-      -2.9462615560690066,
-      -2.7375262006413363,
-      -2.656791565053715
-    ],
-    "test_mae": [
-      -1.941482456925799,
-      -1.981105068555149,
-      -2.5094768331237374,
-      -2.179176275343739,
-      -2.0517607498215695
-    ],
-    "best_params": {
-      "check_inverse": true,
-      "func": null,
-      "inverse_func": null,
-      "regressor__activation": "relu",
-      "regressor__alpha": 0.00024070874979002853,
-      "regressor__batch_size": "auto",
-      "regressor__beta_1": 0.9,
-      "regressor__beta_2": 0.999,
-      "regressor__early_stopping": true,
-      "regressor__epsilon": 1e-08,
-      "regressor__learning_rate": "constant",
-      "regressor__learning_rate_init": 0.00046702700565661863,
+      "regressor__learning_rate_init": 0.0036652815093629817,
       "regressor__max_fun": 15000,
       "regressor__max_iter": 200,
       "regressor__momentum": 0.9,
       "regressor__n_iter_no_change": 10,
       "regressor__n_layers": 3,
-      "regressor__n_neurons": 32,
+      "regressor__n_neurons": 57,
       "regressor__nesterovs_momentum": true,
       "regressor__power_t": 0.5,
       "regressor__random_state": null,
@@ -154,435 +54,21 @@
       "regressor__warm_start": false,
       "transformer__memory": null,
       "transformer__verbose": false,
-      "transformer__MinMax__clip": false,
-      "transformer__MinMax__copy": true,
-      "transformer__Standard__copy": true,
-      "transformer__Standard__with_mean": true,
-      "transformer__Standard__with_std": true,
-      "transformer__MinMax NN__clip": false,
-      "transformer__MinMax NN__copy": true
+      "transformer__standardscaler__copy": true,
+      "transformer__standardscaler__with_mean": true,
+      "transformer__standardscaler__with_std": true
     }
   },
-  "42": {
-    "fit_time": [
-      0.5290791988372803,
-      0.4644277095794678,
-      0.3619720935821533,
-      0.9009556770324707,
-      0.36235690116882324
-    ],
-    "score_time": [
-      0.006165742874145508,
-      0.0068988800048828125,
-      0.006989955902099609,
-      0.00562286376953125,
-      0.005855083465576172
-    ],
-    "test_r": [
-      0.5702966531505691,
-      0.5685781520778903,
-      0.6175674294513533,
-      0.5218508914188166,
-      0.5062249178192082
-    ],
-    "test_r2": [
-      0.26213129712562266,
-      0.22527341402713819,
-      0.2859190066084535,
-      0.20477095787369315,
-      0.24789821497211229
-    ],
-    "test_rmse": [
-      -2.6960055131911367,
-      -2.269251890722991,
-      -2.936985868919146,
-      -2.6609805071654224,
-      -2.760691795917605
-    ],
-    "test_mae": [
-      -2.236955303776289,
-      -1.9275357580746173,
-      -2.2326681086839906,
-      -1.9349272546936078,
-      -2.174154436029596
-    ],
-    "best_params": {
-      "check_inverse": true,
-      "func": null,
-      "inverse_func": null,
-      "regressor__activation": "relu",
-      "regressor__alpha": 0.001,
-      "regressor__batch_size": "auto",
-      "regressor__beta_1": 0.9,
-      "regressor__beta_2": 0.999,
-      "regressor__early_stopping": true,
-      "regressor__epsilon": 1e-08,
-      "regressor__learning_rate": "adaptive",
-      "regressor__learning_rate_init": 0.0001,
-      "regressor__max_fun": 15000,
-      "regressor__max_iter": 200,
-      "regressor__momentum": 0.9,
-      "regressor__n_iter_no_change": 10,
-      "regressor__n_layers": 6,
-      "regressor__n_neurons": 89,
-      "regressor__nesterovs_momentum": true,
-      "regressor__power_t": 0.5,
-      "regressor__random_state": null,
-      "regressor__shuffle": true,
-      "regressor__solver": "adam",
-      "regressor__tol": 0.0001,
-      "regressor__validation_fraction": 0.1,
-      "regressor__verbose": false,
-      "regressor__warm_start": false,
-      "transformer__memory": null,
-      "transformer__verbose": false,
-      "transformer__MinMax__clip": false,
-      "transformer__MinMax__copy": true,
-      "transformer__Standard__copy": true,
-      "transformer__Standard__with_mean": true,
-      "transformer__Standard__with_std": true,
-      "transformer__MinMax NN__clip": false,
-      "transformer__MinMax NN__copy": true
-    }
-  },
-  "69": {
-    "fit_time": [
-      0.4346964359283447,
-      0.23184967041015625,
-      0.2284560203552246,
-      0.2807469367980957,
-      0.46593451499938965
-    ],
-    "score_time": [
-      0.005936145782470703,
-      0.006766557693481445,
-      0.006583452224731445,
-      0.00639653205871582,
-      0.005615234375
-    ],
-    "test_r": [
-      0.5116410980297819,
-      0.5799959074792523,
-      0.45950925575293866,
-      0.6368842405725799,
-      0.5372132238069325
-    ],
-    "test_r2": [
-      0.16655549173332607,
-      0.3201273319664798,
-      0.10170274836694404,
-      0.3014500172270155,
-      0.20097005644838528
-    ],
-    "test_rmse": [
-      -2.7170795585898744,
-      -2.614232405478419,
-      -2.8000274695719636,
-      -2.716996475602008,
-      -2.7618751331706815
-    ],
-    "test_mae": [
-      -2.2012855940370275,
-      -2.0748148980311396,
-      -2.169342324120453,
-      -2.0801850705815865,
-      -2.1213707269437005
-    ],
-    "best_params": {
-      "check_inverse": true,
-      "func": null,
-      "inverse_func": null,
-      "regressor__activation": "relu",
-      "regressor__alpha": 4.4484983516475526e-05,
-      "regressor__batch_size": "auto",
-      "regressor__beta_1": 0.9,
-      "regressor__beta_2": 0.999,
-      "regressor__early_stopping": true,
-      "regressor__epsilon": 1e-08,
-      "regressor__learning_rate": "constant",
-      "regressor__learning_rate_init": 0.00011221066481277998,
-      "regressor__max_fun": 15000,
-      "regressor__max_iter": 200,
-      "regressor__momentum": 0.9,
-      "regressor__n_iter_no_change": 10,
-      "regressor__n_layers": 6,
-      "regressor__n_neurons": 80,
-      "regressor__nesterovs_momentum": true,
-      "regressor__power_t": 0.5,
-      "regressor__random_state": null,
-      "regressor__shuffle": true,
-      "regressor__solver": "adam",
-      "regressor__tol": 0.0001,
-      "regressor__validation_fraction": 0.1,
-      "regressor__verbose": false,
-      "regressor__warm_start": false,
-      "transformer__memory": null,
-      "transformer__verbose": false,
-      "transformer__MinMax__clip": false,
-      "transformer__MinMax__copy": true,
-      "transformer__Standard__copy": true,
-      "transformer__Standard__with_mean": true,
-      "transformer__Standard__with_std": true,
-      "transformer__MinMax NN__clip": false,
-      "transformer__MinMax NN__copy": true
-    }
-  },
-  "420": {
-    "fit_time": [
-      0.26436853408813477,
-      0.3086519241333008,
-      0.35054612159729004,
-      0.24826860427856445,
-      0.33478713035583496
-    ],
-    "score_time": [
-      0.006834745407104492,
-      0.006219148635864258,
-      0.00594639778137207,
-      0.006592273712158203,
-      0.005672931671142578
-    ],
-    "test_r": [
-      0.5345232984675954,
-      0.4584991287245813,
-      0.5763117090954609,
-      0.6865476775627637,
-      0.5778677548932886
-    ],
-    "test_r2": [
-      0.2721202720820727,
-      0.18753929774880818,
-      0.3183143368709742,
-      0.4224104653199624,
-      0.3171769648078916
-    ],
-    "test_rmse": [
-      -2.6329229425777996,
-      -2.5782953702690046,
-      -2.389368434375402,
-      -2.507792747672906,
-      -2.718332018722673
-    ],
-    "test_mae": [
-      -2.08196233047271,
-      -2.0466065534679934,
-      -1.9729938877676456,
-      -2.077163787907037,
-      -2.0316962855662273
-    ],
-    "best_params": {
-      "check_inverse": true,
-      "func": null,
-      "inverse_func": null,
-      "regressor__activation": "relu",
-      "regressor__alpha": 0.000329274286258864,
-      "regressor__batch_size": "auto",
-      "regressor__beta_1": 0.9,
-      "regressor__beta_2": 0.999,
-      "regressor__early_stopping": true,
-      "regressor__epsilon": 1e-08,
-      "regressor__learning_rate": "invscaling",
-      "regressor__learning_rate_init": 0.0004019331642071531,
-      "regressor__max_fun": 15000,
-      "regressor__max_iter": 200,
-      "regressor__momentum": 0.9,
-      "regressor__n_iter_no_change": 10,
-      "regressor__n_layers": 5,
-      "regressor__n_neurons": 79,
-      "regressor__nesterovs_momentum": true,
-      "regressor__power_t": 0.5,
-      "regressor__random_state": null,
-      "regressor__shuffle": true,
-      "regressor__solver": "adam",
-      "regressor__tol": 0.0001,
-      "regressor__validation_fraction": 0.1,
-      "regressor__verbose": false,
-      "regressor__warm_start": false,
-      "transformer__memory": null,
-      "transformer__verbose": false,
-      "transformer__MinMax__clip": false,
-      "transformer__MinMax__copy": true,
-      "transformer__Standard__copy": true,
-      "transformer__Standard__with_mean": true,
-      "transformer__Standard__with_std": true,
-      "transformer__MinMax NN__clip": false,
-      "transformer__MinMax NN__copy": true
-    }
-  },
-  "1234567890": {
-    "fit_time": [
-      0.7354166507720947,
-      0.4080519676208496,
-      0.48270392417907715,
-      0.4583170413970947,
-      0.5575518608093262
-    ],
-    "score_time": [
-      0.00610661506652832,
-      0.007066249847412109,
-      0.006491422653198242,
-      0.006951808929443359,
-      0.005848407745361328
-    ],
-    "test_r": [
-      0.5843747083631694,
-      0.6349746762794203,
-      0.521918149944963,
-      0.6302633384167105,
-      0.5756629490166055
-    ],
-    "test_r2": [
-      0.30877877091062855,
-      0.36768661687480053,
-      0.271572543447406,
-      0.37030465012190383,
-      0.32980292578309955
-    ],
-    "test_rmse": [
-      -2.5559051808365734,
-      -2.6032635651023166,
-      -2.859219257769102,
-      -2.2621297187176808,
-      -2.335288148215569
-    ],
-    "test_mae": [
-      -2.061569079808282,
-      -2.05110683003277,
-      -2.281115945738034,
-      -1.7775937815953322,
-      -1.911764843738191
-    ],
-    "best_params": {
-      "check_inverse": true,
-      "func": null,
-      "inverse_func": null,
-      "regressor__activation": "relu",
-      "regressor__alpha": 2.9362051236439453e-05,
-      "regressor__batch_size": "auto",
-      "regressor__beta_1": 0.9,
-      "regressor__beta_2": 0.999,
-      "regressor__early_stopping": true,
-      "regressor__epsilon": 1e-08,
-      "regressor__learning_rate": "invscaling",
-      "regressor__learning_rate_init": 0.00011658241465819487,
-      "regressor__max_fun": 15000,
-      "regressor__max_iter": 200,
-      "regressor__momentum": 0.9,
-      "regressor__n_iter_no_change": 10,
-      "regressor__n_layers": 6,
-      "regressor__n_neurons": 91,
-      "regressor__nesterovs_momentum": true,
-      "regressor__power_t": 0.5,
-      "regressor__random_state": null,
-      "regressor__shuffle": true,
-      "regressor__solver": "adam",
-      "regressor__tol": 0.0001,
-      "regressor__validation_fraction": 0.1,
-      "regressor__verbose": false,
-      "regressor__warm_start": false,
-      "transformer__memory": null,
-      "transformer__verbose": false,
-      "transformer__MinMax__clip": false,
-      "transformer__MinMax__copy": true,
-      "transformer__Standard__copy": true,
-      "transformer__Standard__with_mean": true,
-      "transformer__Standard__with_std": true,
-      "transformer__MinMax NN__clip": false,
-      "transformer__MinMax NN__copy": true
-    }
-  },
-  "473129": {
-    "fit_time": [
-      0.12241411209106445,
-      0.22922253608703613,
-      0.18584084510803223,
-      0.14307880401611328,
-      0.17717385292053223
-    ],
-    "score_time": [
-      0.006966829299926758,
-      0.006069183349609375,
-      0.00661778450012207,
-      0.0068776607513427734,
-      0.005805253982543945
-    ],
-    "test_r": [
-      0.6250346635864936,
-      0.5120603441522691,
-      0.5779279072044246,
-      0.5647917807624839,
-      0.4598684634924157
-    ],
-    "test_r2": [
-      0.3629610110230358,
-      0.21049086205180167,
-      0.2985489337871168,
-      0.3110786151462618,
-      0.12196920617435025
-    ],
-    "test_rmse": [
-      -2.450712825676579,
-      -2.6868830506538868,
-      -2.6612554866130353,
-      -2.6742521461872593,
-      -2.6532132824169907
-    ],
-    "test_mae": [
-      -1.891062932375878,
-      -2.158531989829002,
-      -2.150548702616056,
-      -2.0845850903525105,
-      -2.1950497432260954
-    ],
-    "best_params": {
-      "check_inverse": true,
-      "func": null,
-      "inverse_func": null,
-      "regressor__activation": "tanh",
-      "regressor__alpha": 0.00011630894327017475,
-      "regressor__batch_size": "auto",
-      "regressor__beta_1": 0.9,
-      "regressor__beta_2": 0.999,
-      "regressor__early_stopping": true,
-      "regressor__epsilon": 1e-08,
-      "regressor__learning_rate": "adaptive",
-      "regressor__learning_rate_init": 0.0003632773305357233,
-      "regressor__max_fun": 15000,
-      "regressor__max_iter": 200,
-      "regressor__momentum": 0.9,
-      "regressor__n_iter_no_change": 10,
-      "regressor__n_layers": 5,
-      "regressor__n_neurons": 61,
-      "regressor__nesterovs_momentum": true,
-      "regressor__power_t": 0.5,
-      "regressor__random_state": null,
-      "regressor__shuffle": true,
-      "regressor__solver": "adam",
-      "regressor__tol": 0.0001,
-      "regressor__validation_fraction": 0.1,
-      "regressor__verbose": false,
-      "regressor__warm_start": false,
-      "transformer__memory": null,
-      "transformer__verbose": false,
-      "transformer__MinMax__clip": false,
-      "transformer__MinMax__copy": true,
-      "transformer__Standard__copy": true,
-      "transformer__Standard__with_mean": true,
-      "transformer__Standard__with_std": true,
-      "transformer__MinMax NN__clip": false,
-      "transformer__MinMax NN__copy": true
-    }
-  },
-  "r_avg": 0.56203238754926,
-  "r_stdev": 0.05812722518608793,
-  "r_stderr": 0.021970026034948402,
-  "r2_avg": 0.27068071729586823,
-  "r2_stdev": 0.08963397033074316,
-  "r2_stderr": 0.033878456359784044,
-  "rmse_avg": 2.6220798317936986,
-  "rmse_stdev": 0.17132510222872138,
-  "rmse_stderr": 0.06475480197713065,
-  "mae_avg": 2.0723997715839126,
-  "mae_stdev": 0.141932351478789,
-  "mae_stderr": 0.05364538642964089
+  "r_avg": 0.5914085653064765,
+  "r_stdev": 0.021354189715239447,
+  "r_stderr": 0.008071125062259536,
+  "r2_avg": 0.217887908312128,
+  "r2_stdev": 0.00802977170766428,
+  "r2_stderr": 0.003034968431871732,
+  "rmse_avg": 2.73582130181716,
+  "rmse_stdev": 0.010972583073068698,
+  "rmse_stderr": 0.004147246578762377,
+  "mae_avg": 2.202427514480606,
+  "mae_stdev": 0.004486557342501918,
+  "mae_stderr": 0.0016957592815844162
 }

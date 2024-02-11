@@ -289,7 +289,9 @@ def main_representation_model_grid(
 ) -> None:
     transform_type: str = "Standard"
 
-    for model in ["MLR", "KNN", "SVR", "KRR", "GP", "RF", "XGB", "HGB", "NGB", "NN"]:
+    # for model in ["MLR", "KNN", "SVR", "KRR", "GP", "RF", "XGB", "HGB", "NGB", "NN"]:
+    # for model in ["GP", "XGB"]:  # TODO: fix GP and XGB?
+    for model in ["MLR", "KNN", "SVR", "KRR", "RF", "HGB", "NGB", "NN"]:
         opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
 
         if model == "GNN":

@@ -96,12 +96,17 @@ def assign_mordred(labels: pd.Series, mordred_descriptors: pd.DataFrame) -> pd.S
 
 
 class MordredCalculator:
-    def __init__(self, donor_structures: pd.DataFrame, acceptor_structures: pd.DataFrame,) -> None:
-        donor_structures.set_index("Donor", inplace=True)
-        acceptor_structures.set_index("Acceptor", inplace=True)
-        donor_mols: pd.Series = donor_structures["SMILES"].map(lambda smiles: Chem.MolFromSmiles(smiles))
-        acceptor_mols: pd.Series = acceptor_structures["SMILES"].map(lambda smiles: Chem.MolFromSmiles(smiles))
-        self.all_mols: pd.Series = pd.concat([donor_mols, acceptor_mols])
+    # def __init__(self, donor_structures: pd.DataFrame, acceptor_structures: pd.DataFrame,) -> None:
+    #     donor_structures.set_index("Donor", inplace=True)
+    #     acceptor_structures.set_index("Acceptor", inplace=True)
+    #     donor_mols: pd.Series = donor_structures["SMILES"].map(lambda smiles: Chem.MolFromSmiles(smiles))
+    #     acceptor_mols: pd.Series = acceptor_structures["SMILES"].map(lambda smiles: Chem.MolFromSmiles(smiles))
+    #     self.all_mols: pd.Series = pd.concat([donor_mols, acceptor_mols])
+    #     self.mordred_descriptors_unique: pd.DataFrame = self.generate_mordred_descriptors()
+
+    def __init__(self, structures: pd.DataFrame, index_col: str) -> None:
+        structures.set_index(index_col, inplace=True)
+        self.all_mols: pd.Series = structures["SMILES"].map(lambda smiles: Chem.MolFromSmiles(smiles))
         self.mordred_descriptors_unique: pd.DataFrame = self.generate_mordred_descriptors()
 
     @property
@@ -171,25 +176,35 @@ def run(donor_structures: pd.DataFrame,
         mordred_names: Union[Path, str],
         mordred_pkl: Union[Path, str]
         ) -> None:
-    # Generate mordred descriptors and remove 0 variance and nan columns
-    mordred_calc: MordredCalculator = MordredCalculator(donor_structures, acceptor_structures)
-    mordred_descriptors_used: list[str] = mordred_calc.descriptors_used
+    mordred_descriptors: list[pd.DataFrame] = []
+    for structs, name in zip([donor_structures, acceptor_structures], ["Donor", "Acceptor"]):
+        # Generate mordred descriptors and remove 0 variance and nan columns
+        mordred_calc: MordredCalculator = MordredCalculator(structs, name)
+        structs_mordred: pd.DataFrame = mordred_calc.assign_descriptors(dataset[name])
+        structs_mordred.columns = [f"{name} mordred {col}" for col in structs_mordred.columns]
+        mordred_descriptors.append(structs_mordred)
 
-    # Save mordred descriptor IDs
-    with mordred_names.open("w") as f:
-        json.dump(mordred_descriptors_used, f)
+    dataset_mordred: pd.DataFrame = mordred_descriptors[0].join(mordred_descriptors[1])
 
-    donors_mordred: pd.DataFrame = mordred_calc.assign_descriptors(dataset["Donor"])
-    acceptors_mordred: pd.DataFrame = mordred_calc.assign_descriptors(dataset["Acceptor"])
+    # mordred_calc: MordredCalculator = MordredCalculator(donor_structures, acceptor_structures)
+    # mordred_descriptors_used: list[str] = mordred_calc.descriptors_used
 
-    donors_mordred.columns = [f"Donor mordred {col}" for col in donors_mordred.columns]
-    acceptors_mordred.columns = [f"Acceptor mordred {col}" for col in acceptors_mordred.columns]
+    # # Save mordred descriptor IDs
+    # with mordred_names.open("w") as f:
+    #     json.dump(mordred_descriptors_used, f)
+
+    # donors_mordred: pd.DataFrame = mordred_calc.assign_descriptors(dataset["Donor"])
+    # acceptors_mordred: pd.DataFrame = mordred_calc.assign_descriptors(dataset["Acceptor"])
+
+    # donors_mordred.columns = [f"Donor mordred {col}" for col in donors_mordred.columns]
+    # acceptors_mordred.columns = [f"Acceptor mordred {col}" for col in acceptors_mordred.columns]
 
     # dataset_mordred: pd.DataFrame = pd.concat([donors_mordred, acceptors_mordred], axis=1)
-    dataset_mordred: pd.DataFrame = donors_mordred.join(acceptors_mordred)
+    # dataset_mordred: pd.DataFrame = donors_mordred.join(acceptors_mordred)
 
     # Save dataset with mordred descriptors
     dataset_mordred.to_pickle(mordred_pkl)
+
 
 def test():
     # Load cleaned donor and acceptor structures
@@ -266,4 +281,4 @@ if __name__ == "__main__":
     test()
     # main()
     # main_saeki()
-    main_hutchison()
+    # main_hutchison()

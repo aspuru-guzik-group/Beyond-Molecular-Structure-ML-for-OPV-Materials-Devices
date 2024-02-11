@@ -221,31 +221,25 @@ def main_representation_and_fabrication_grid(
 
 
 if __name__ == "__main__":
-    # for target in ["calculated PCE (%)", "Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-    #     for h_opt in [False, True]:
-    #         main_representation_and_fabrication_grid(target_feats=[target], hyperopt=h_opt)
+    main_representation_and_fabrication_grid(target_feats=["calculated PCE (%)"], hyperopt=False)
 
-    # for target in ["Voc (V)", "Jsc (mA cm^-2)", "FF (%)"]:
-    # for target in ["calculated PCE (%)"]:
-    #     main_representation_and_fabrication_grid(target_feats=[target], hyperopt=False)
-
-    target = ["calculated PCE (%)"]
-    model = "HGB"
-    scalar_filter = "log mobilities"
-    opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
-    main_mordred_and_numeric(dataset=opv_dataset,
-                                regressor_type=model,
-                                scalar_filter=scalar_filter,
-                                subspace_filter=None,
-                                target_features=target,
-                                transform_type="Standard",
-                                hyperparameter_optimization=False,
-    )
-    main_ecfp_and_numeric(dataset=opv_dataset,
-                            regressor_type=model,
-                            scalar_filter=scalar_filter,
-                            subspace_filter=None,
-                            target_features=target,
-                            transform_type="Standard",
-                            hyperparameter_optimization=False,
-    )
+    # target = ["calculated PCE (%)"]
+    # model = "HGB"
+    # scalar_filter = "log mobilities"
+    # opv_dataset: pd.DataFrame = get_appropriate_dataset(model)
+    # main_mordred_and_numeric(dataset=opv_dataset,
+    #                             regressor_type=model,
+    #                             scalar_filter=scalar_filter,
+    #                             subspace_filter=None,
+    #                             target_features=target,
+    #                             transform_type="Standard",
+    #                             hyperparameter_optimization=False,
+    # )
+    # main_ecfp_and_numeric(dataset=opv_dataset,
+    #                         regressor_type=model,
+    #                         scalar_filter=scalar_filter,
+    #                         subspace_filter=None,
+    #                         target_features=target,
+    #                         transform_type="Standard",
+    #                         hyperparameter_optimization=False,
+    # )

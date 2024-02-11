@@ -35,7 +35,7 @@ from models import (
     get_skorch_nn,
 )
 from pipeline_utils import (
-    generate_feature_pipeline,
+    MaxNormScaler, generate_feature_pipeline,
     get_feature_pipelines,
     imputer_factory,
 )
@@ -191,6 +191,7 @@ def _prepare_data(
         unrolled_features=unrolled_feats,
         representation=representation,
         numeric_features=scalar_features,
+        transform_type=transform_type,
     )
 
     if imputer:
@@ -252,11 +253,11 @@ def _run(
                         (step[0], step[1])
                         for step in generate_feature_pipeline(transform_type).steps
                     ],
-                    ("MinMax NN", MinMaxScaler()),
+                    ("MaxNorm NN", MaxNormScaler()),
                 ]
             )
             preprocessor = Pipeline(
-                steps=[("preprocessor", preprocessor), ("MinMax NN", MinMaxScaler())]
+                steps=[("preprocessor", preprocessor), ("MaxNorm NN", MaxNormScaler())]
             )
         else:
             y_transform: Pipeline = generate_feature_pipeline(transform_type)

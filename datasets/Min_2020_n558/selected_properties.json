@@ -1,5 +1,7 @@
 {
-  "solvent": ["dipole", "dD", "dP", "dH", "dHDon", "dHAcc", "MW", "Density", "BPt", "MPt",
-        "logKow", "RI", "Trouton", "RER", "ParachorGA", "RD", "DCp", "log n", "SurfTen"],
+  // "solvent": ["dipole", "dD", "dP", "dH", "dHDon", "dHAcc", "MW", "Density", "BPt", "MPt",
+  //       "logKow", "RI", "Trouton", "RER", "ParachorGA", "RD", "DCp", "log n", "SurfTen"],
+  "solvent": ["dD", "dP", "dH", "dHDon", "dHAcc", "Density", "MPt",
+        "logKow", "Trouton", "RER", "ParachorGA", "DCp", "log n", "SurfTen"],
   "interlayer": ["Energy Level"]
 }

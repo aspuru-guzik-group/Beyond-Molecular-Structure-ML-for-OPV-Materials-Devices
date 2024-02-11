@@ -191,6 +191,7 @@ regressor_search_space: dict[str, dict] = {
     },
     "SVR": {
         "regressor__regressor__kernel": Categorical(["linear", "rbf"]),
+        "regressor__regressor__C": Real(1, 1e3, prior="log-uniform"),
         # "regressor__regressor__gamma":  Categorical(["scale", "auto"]),
     },
     "RF": {
@@ -248,7 +249,7 @@ regressor_search_space: dict[str, dict] = {
         "regressor__regressor__n_layers": Integer(1, 6),
         "regressor__regressor__n_neurons": Integer(1, 100),
         "regressor__regressor__activation": Categorical(["logistic", "tanh", "relu"]),
-        "regressor__regressor__alpha": Real(1e-5, 1e-3, prior="log-uniform"),
+        "regressor__regressor__alpha": Real(1e-5, 1, prior="log-uniform"),
         "regressor__regressor__learning_rate": Categorical(
             ["constant", "invscaling", "adaptive"]
         ),
