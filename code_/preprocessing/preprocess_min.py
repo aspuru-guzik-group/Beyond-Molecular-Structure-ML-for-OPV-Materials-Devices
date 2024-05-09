@@ -307,6 +307,7 @@ class StructureProcessor:
         for material in ["Donor", "Acceptor"]:
             self.dataset[f"{material} SMILES"] = self.assign_smiles(material, self.material_smiles[material])
             self.dataset[f"{material} SELFIES"] = self.assign_selfies(self.dataset[f"{material} SMILES"])
+            self.dataset[f"{material} PUFp"] = self.assign_pufp(material)
             # self.dataset[f"{material} BigSMILES"] = self.assign_bigsmiles(material, self.dataset[f"{material} SMILES"])
             self.dataset[f"{material} Mol"] = self.assign_mol(self.dataset[f"{material} SMILES"])
             for r, b in zip(fp_radii, fp_bits):
@@ -359,6 +360,18 @@ class StructureProcessor:
         self.dataset[f"{material} ECFP{2 * radius}_{nbits}"] = self.dataset[f"{material} Mol"].map(
             lambda mol: generate_fingerprint(mol, radius, nbits))
         print(f"Done assigning {material} ECFP{2 * radius} fingerprints with {nbits} bits.")
+
+    def assign_pufp(self, material: str) -> pd.Series:
+        """
+        Assigns Polymer Unit Fingerprints to the dataset. Uses fingerprints generated in
+        https://doi.org/10.1021/acsami.3c03298
+        """
+        source_pufp: pd.DataFrame = pd.read_csv(f"{material}_PUFps.csv", index_col="Name")
+        pufp_map: pd.Series = source_pufp.apply(lambda row: row.tolist(), axis=1).to_dict()
+
+        pufp_col: pd.Series = self.dataset[material].map(pufp_map)
+        print(f"Done assigning PUFp for {material}s.")
+        return pufp_col
 
     @staticmethod
     def assign_mol(smiles_series: pd.Series) -> pd.Series:
@@ -437,7 +450,7 @@ def get_readable_only(dataset: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame of readable columns
     """
-    remove: list[str] = ["descriptors", "Mol", "ECFP", "BRICS", "token"]
+    remove: list[str] = ["descriptors", "Mol", "ECFP", "BRICS", "token", "PUFp"]
     df = dataset.loc[:, ~dataset.columns.str.contains('|'.join(remove))]
     print(df.dtypes)
     return df

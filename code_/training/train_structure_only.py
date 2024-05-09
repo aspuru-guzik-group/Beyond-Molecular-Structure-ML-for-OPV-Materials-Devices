@@ -284,6 +284,38 @@ def main_processing_only(
     )
 
 
+def main_pufp_only(
+    dataset: pd.DataFrame,
+    regressor_type: str,
+    target_features: list[str],
+    transform_type: str,
+    hyperparameter_optimization: bool,
+    radius: int = 5,
+) -> None:
+    representation: str = "PUFp"
+    structural_features: list[str] = [
+        f"Donor PUFp",
+        f"Acceptor PUFp",
+    ]
+    unroll_single_feat = {
+        "representation": representation,
+        # "col_names": structural_features,
+    }
+
+    train_regressor(
+        dataset=dataset,
+        representation=representation,
+        structural_features=structural_features,
+        unroll=unroll_single_feat,
+        scalar_filter=None,
+        subspace_filter=None,
+        target_features=target_features,
+        regressor_type=regressor_type,
+        transform_type=transform_type,
+        hyperparameter_optimization=hyperparameter_optimization,
+    )
+
+
 def main_representation_model_grid(
     target_feats: list[str], hyperopt: bool = False
 ) -> None:
@@ -302,63 +334,73 @@ def main_representation_model_grid(
             )
 
         else:
-            # ECFP
-            main_ecfp_only(
-                dataset=opv_dataset,
-                regressor_type=model,
-                target_features=target_feats,
-                transform_type=transform_type,
-                hyperparameter_optimization=hyperopt,
-            )
-            # mordred
-            main_mordred_only(
-                dataset=opv_dataset,
-                regressor_type=model,
-                target_features=target_feats,
-                transform_type=transform_type,
-                hyperparameter_optimization=hyperopt,
-            )
-
-            # graph embeddings
-            main_graph_embeddings_only(
-                dataset=opv_dataset,
-                regressor_type=model,
-                target_features=target_feats,
-                transform_type=transform_type,
-                hyperparameter_optimization=hyperopt,
-            )
-
-            # OHE
-            main_ohe_only(
-                dataset=opv_dataset,
-                regressor_type=model,
-                target_features=target_feats,
-                transform_type=transform_type,
-                hyperparameter_optimization=hyperopt,
-            )
-
-            # tokenized
-            for struct_repr in ["SELFIES", "SMILES"]:
-                main_tokenized_only(
-                    dataset=opv_dataset,
-                    representation=struct_repr,
-                    regressor_type=model,
-                    target_features=target_feats,
-                    transform_type=transform_type,
-                    hyperparameter_optimization=hyperopt,
-                )
-
-            # material properties
-            main_properties_only(
-                dataset=opv_dataset,
-                regressor_type=model,
-                target_features=target_feats,
-                transform_type=transform_type,
-                hyperparameter_optimization=hyperopt,
-            )
-
-            # processing only
-            main_processing_only(
+            # # ECFP
+            # main_ecfp_only(
+            #     dataset=opv_dataset,
+            #     regressor_type=model,
+            #     target_features=target_feats,
+            #     transform_type=transform_type,
+            #     hyperparameter_optimization=hyperopt,
+            # )
+            #
+            # # mordred
+            # main_mordred_only(
+            #     dataset=opv_dataset,
+            #     regressor_type=model,
+            #     target_features=target_feats,
+            #     transform_type=transform_type,
+            #     hyperparameter_optimization=hyperopt,
+            # )
+            #
+            # # graph embeddings
+            # main_graph_embeddings_only(
+            #     dataset=opv_dataset,
+            #     regressor_type=model,
+            #     target_features=target_feats,
+            #     transform_type=transform_type,
+            #     hyperparameter_optimization=hyperopt,
+            # )
+            #
+            # # OHE
+            # main_ohe_only(
+            #     dataset=opv_dataset,
+            #     regressor_type=model,
+            #     target_features=target_feats,
+            #     transform_type=transform_type,
+            #     hyperparameter_optimization=hyperopt,
+            # )
+            #
+            # # tokenized
+            # for struct_repr in ["SELFIES", "SMILES"]:
+            #     main_tokenized_only(
+            #         dataset=opv_dataset,
+            #         representation=struct_repr,
+            #         regressor_type=model,
+            #         target_features=target_feats,
+            #         transform_type=transform_type,
+            #         hyperparameter_optimization=hyperopt,
+            #     )
+            #
+            # # material properties
+            # main_properties_only(
+            #     dataset=opv_dataset,
+            #     regressor_type=model,
+            #     target_features=target_feats,
+            #     transform_type=transform_type,
+            #     hyperparameter_optimization=hyperopt,
+            # )
+            #
+            # # processing only
+            # main_processing_only(
+            #     dataset=opv_dataset,
+            #     regressor_type=model,
+            #     target_features=target_feats,
+            #     transform_type=transform_type,
+            #     hyperparameter_optimization=hyperopt,
+            # )
+            #
+            #PUFp
+            main_pufp_only(
                 dataset=opv_dataset,
                 regressor_type=model,
                 target_features=target_feats,

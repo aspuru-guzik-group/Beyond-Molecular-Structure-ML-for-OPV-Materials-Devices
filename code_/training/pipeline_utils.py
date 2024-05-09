@@ -54,6 +54,13 @@ def unroll_fingerprints(df: pd.DataFrame, col_names: list[str] = [], radius: int
     return new_df
 
 
+def unroll_pufp(df: pd.DataFrame, col_names: list[str] = [], **kwargs) -> pd.DataFrame:
+    new_pufp_col_names: list[str] = [*[f"D PUFp_bit{i}" for i in range(147)],  # 148 is the number of bits in the donor PUFp fingerprint
+                                     *[f"A PUFp_bit{i}" for i in range(195)]]  # 145 is the number of bits in the PUFp fingerprint
+    new_df: pd.DataFrame = unroll_lists_to_columns(df, col_names, new_pufp_col_names)
+    return new_df
+
+
 def get_token_len(df: pd.DataFrame) -> list[int]:
     token_lens: list[int] = []
     for col in df.columns:
@@ -110,13 +117,15 @@ unrolling_factory: dict[str, Callable] = {"solvent":             unroll_solvent_
                                           "SMILES":              unroll_tokens,
                                           "OHE":                 get_ohe_structures,
                                           "material properties": get_material_properties,
-                                          "graph embeddings":     get_gnn_embeddings,
+                                          "graph embeddings":    get_gnn_embeddings,
+                                          "PUFp":                unroll_pufp,
                                           }
 
 representation_scaling_factory: dict[str, dict[str, Union[Callable, str]]] = {
     "solvent":             {"callable": StandardScaler,
                             "type":     "Standard"},
     "ECFP":                {"callable": MinMaxScaler, "type": "MinMax"},
+    "PUFp":                {"callable": MinMaxScaler, "type": "MinMax"},
     "mordred":             {"callable": StandardScaler,
                             "type":     "Standard"},
     "graph embeddings":    {"callable": MinMaxScaler,

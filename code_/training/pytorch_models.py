@@ -1,5 +1,6 @@
 import gpytorch
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 from sklearn.base import BaseEstimator
@@ -170,6 +171,9 @@ class GPRegressor(BaseEstimator):
 
         n_epoch = 100
 
+        if isinstance(X_train, pd.DataFrame):
+            X_train = X_train.to_numpy()
+
         X_train = torch.tensor(X_train, dtype=torch.float)
         Y_train = torch.tensor(Y_train.ravel(), dtype=torch.float)
 
@@ -196,6 +200,9 @@ class GPRegressor(BaseEstimator):
             optimizer.step()
 
     def predict(self, X_test):
+        if isinstance(X_test, pd.DataFrame):
+            X_test = X_test.to_numpy()
+
         X_test = torch.tensor(X_test, dtype=torch.float)
 
         if torch.cuda.is_available():
